@@ -107,3 +107,11 @@
   #platforms .c-wide { max-width: 220px; }
 }
 
+
+.acct-legend { grid-column: 1 / -1; margin: 0; padding: 0 0 4px; font-size: 11px; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: flex; gap: 8px;
+  align-items: baseline; flex-wrap: wrap; }
+.acct-legend .muted { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.acct-field { grid-template-columns: minmax(140px, 200px) minmax(0, 1fr) auto; }
+.acct-field .acct-help { grid-column: 1 / -1; margin: 2px 0 0; }
+

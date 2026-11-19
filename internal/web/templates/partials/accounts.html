@@ -43,12 +43,12 @@
   {{if .SignIn}}<div class="acct-signin signins">{{range .SignIn}}{{template "signin" .}}{{end}}</div>{{end}}
   <form method="post" action="/settings/accounts" class="acct-form" autocomplete="off">
     <input type="hidden" name="group" value="{{.Key}}">
-    <fieldset class="acct-sec"><legend>{{T "API"}}</legend>
+    <div class="acct-sec"><h3 class="acct-legend">{{T "API"}}</h3>
       {{range .Fields}}{{if eq (acctSection .Name) "api"}}{{template "acct-field" .}}{{end}}{{end}}
-    </fieldset>
-    <fieldset class="acct-sec"><legend>{{T "Website login"}} <span class="muted small">{{T "optional: statistics and invitations the API does not share"}}</span></legend>
+    </div>
+    <div class="acct-sec"><h3 class="acct-legend">{{T "Website login"}} <span class="muted small">{{T "optional: statistics and invitations the API does not share"}}</span></h3>
       {{range .Fields}}{{if eq (acctSection .Name) "web"}}{{template "acct-field" .}}{{end}}{{end}}
-    </fieldset>
+    </div>
     <details class="acct-sec acct-more"><summary>{{T "Rate limits and other tuning"}}</summary>
       {{range .Fields}}{{if eq (acctSection .Name) "advanced"}}{{template "acct-field" .}}{{end}}{{end}}
     </details>
