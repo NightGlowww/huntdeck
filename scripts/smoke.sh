@@ -95,9 +95,17 @@ for path in "/api/v1/status" "/api/v1/programs?limit=1" "/api/v1/targets?kind=do
   got=$(curl -s -m 20 -b "$jar" -o /dev/null -w '%{http_code}' "$url$path" || true)
   [ "$got" = 200 ] && ok "GET $path" "200" || bad "GET $path" "answered $got"
 done
-status=$(curl -s -m 20 -b "$jar" "$url/api/v1/status" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(len(d.get("platforms") or []))' 2>/dev/null || echo "")
+# The key has to be there; an empty list is a fresh install with nothing
+# configured yet, which the README's own post-install check runs into.
+status=$(curl -s -m 20 -b "$jar" "$url/api/v1/status" | python3 -c 'import json,sys
+d = json.load(sys.stdin)
+if "platforms" not in d or not isinstance(d.get("platforms"), list):
+    print("missing")
+else:
+    print(len(d["platforms"]))' 2>/dev/null || echo "")
 case "$status" in
-  ''|0) bad "status payload" "no platforms" ;;
+  ''|missing) bad "status payload" "no platforms key in the answer" ;;
+  0) ok "status payload" "0 platforms (none configured yet)" ;;
   *) ok "status payload" "$status platforms" ;;
 esac
 
