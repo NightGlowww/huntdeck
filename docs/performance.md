@@ -270,3 +270,35 @@ Each of these was measured before and after; the numbers are the evidence.
   is the price of drawing them unless the page is pre-rendered.
 - `BestTargets` (the board's fresh surface) costs about 20 ms warm on 2,650
   scored targets; nothing measured so far waits on it.
+
+## What a visitor actually waits for (measured 2026-11-19)
+
+Two numbers decide whether a loading indicator is worth building: how long the
+server takes, and how long the answer takes to arrive over the public address.
+
+**First hit after a restart** (`scripts/bench.sh --cold`, every route):
+
+| Route | first hit |
+|---|---|
+| `/queue` | 14.9 ms |
+| `/changes` | 13.7 ms |
+| `/programs/<p>/<h>` | 18.6 ms |
+| `/api/v1/queue?limit=20` | 4.2 ms |
+
+**Over TLS, through the reverse proxy, from another machine**
+(`curl -w '%{time_starttransfer} %{time_total}'`):
+
+| Route | TTFB | total | gzip bytes |
+|---|---|---|---|
+| `/` | 68 ms | 86 ms | 14 KB |
+| `/queue` | 43 ms | 57 ms | 7 KB |
+| `/programs` | 57 ms | 77 ms | 31 KB |
+| `/targets` | 36 ms | 54 ms | 12 KB |
+| `/settings` | 44 ms | 44 ms | 8 KB |
+
+**Decision: no skeletons and no per-page spinners.** A blank moment of 54-86 ms
+is shorter than any indicator takes to appear and animate; adding one would
+flash on every navigation and read as jank. What exists is the top bar's
+progress line, which appears on the click itself and costs nothing when the
+answer beats it. Revisit only with a measurement showing a page over about
+300 ms from outside.
