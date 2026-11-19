@@ -1555,6 +1555,12 @@
     "for this browser": "仅当前浏览器",
     "Rate limits and other tuning": "速率限制与其他调整",
     "Website login": "网站登录",
-    "optional: statistics and invitations the API does not share": "可选：API 不提供的统计与邀请"
+    "optional: statistics and invitations the API does not share": "可选：API 不提供的统计与邀请",
+    "This instance asks for its access password. Sign in once in a browser and that session cookie is the credential (30 days); scripts send the same cookie. There are no API tokens to create or revoke — the password is the only key.": "本实例要求输入访问密码。在浏览器登录一次后，会话 cookie 就是凭据（30 天）；脚本发送同一个 cookie 即可。这里没有可创建或吊销的 API 令牌——密码是唯一的钥匙。",
+    "MCP server": "MCP 服务",
+    "for an AI agent, over stdio": "供 AI 智能体使用，走 stdio",
+    "An agent can use everything above as tools instead of HTTP: huntdeck-mcp speaks the Model Context Protocol on stdin and stdout and covers the same data — programs, targets, the scope check, changes, disclosed reports and the hunt queue.": "上面的数据也可以不作为 HTTP、而是作为工具交给智能体：huntdeck-mcp 通过 stdin/stdout 讲 Model Context Protocol，覆盖同一批数据——项目、目标、范围检查、变更、已披露报告与狩猎队列。",
+    "Those two variables are all it takes: the same address and password this page uses. docs/mcp.md in the repository lists the sixteen tools, their arguments, and what each answers; the queue tool takes explain for the factor breakdown.": "只需要两个变量：本页用的同一个地址和密码。仓库里的 docs/mcp.md 列出十六个工具、参数与各自的返回；队列工具传 explain 可拿到因子分解。",
+    "Where each number comes from, which ones are estimates, and how HuntScore is scored.": "每个数字的来源、哪些是估算，以及 HuntScore 如何评分。"
   }
 }

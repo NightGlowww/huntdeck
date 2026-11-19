@@ -21,6 +21,9 @@ type apiDocsData struct {
 	Description string
 	Groups      []apiDocGroup
 	ReadOnly    bool // a read-only copy: no write endpoints, and a note on scripted use
+	// Password says this instance asks for its access password, so the login
+	// paragraph must not claim scripts need no credential.
+	Password bool
 }
 
 type apiDocGroup struct {
@@ -73,7 +76,7 @@ func (s *server) apiDocs(w http.ResponseWriter, r *http.Request) {
 	if zh && openapiZh.Info != "" {
 		description = openapiZh.Info
 	}
-	d := apiDocsData{Base: baseURL(r), Version: o.spec.Info.Version, Description: description}
+	d := apiDocsData{Base: baseURL(r), Version: o.spec.Info.Version, Description: description, Password: s.auth != nil}
 	// Path examples use a real program, so a GET sent from the page finds one.
 	platform, handle := "hackerone", "acme"
 	if progs, _, err := s.Store.Programs(r.Context(), store.ProgramFilter{State: "open", Sort: "huntscore", Limit: 1}); err == nil && len(progs) > 0 {

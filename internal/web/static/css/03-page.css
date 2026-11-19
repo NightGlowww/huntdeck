@@ -35,7 +35,11 @@ a.stat:hover { background: var(--surface-2); color: inherit; }
 .panel-head .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 .panel-head .aside + .actions { margin-left: 0; }
 /* A document page's opening line (Methodology). */
-.lead { max-width: 920px; margin: 0 2px 16px; color: var(--muted); }
+/* A one-sentence introduction. It was capped at 920px, which broke a sentence
+   that fits — leaving two words alone on the second line — so the cap is the
+   column's own width, and `pretty` keeps any remaining wrap from ending short. */
+.lead { max-width: min(1400px, 100%); margin: 0 2px 16px; color: var(--muted); text-wrap: pretty; }
+.md p, .panel-foot, .acct-help, .empty-state { text-wrap: pretty; }
 .count { display: inline-grid; place-items: center; min-width: 22px; height: 18px; padding: 0 6px; border-radius: 9px; background: var(--surface-3);
   color: var(--muted); font: 600 11px/1 var(--mono); letter-spacing: 0; text-transform: none; }
 .panel-body { padding: 14px 16px; }

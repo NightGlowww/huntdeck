@@ -17,12 +17,21 @@
     <dl class="apifacts">
       <div><dt>{{T "Address"}}</dt><dd><code>{{.Base}}</code></dd></div>
       {{if .ReadOnly}}<div><dt>Login</dt><dd>{{T "None, and no token."}} {{T "HuntDeck Public's API sits behind bot protection, so the curl examples get a challenge from a terminal or script: use"}} <b>{{T "Send"}}</b> {{T "on this page, or open an address in your browser. On a HuntDeck you run yourself, scripts work without any token."}}</dd></div>
+      {{else if .Password}}<div><dt>{{T "Login"}}</dt><dd>{{T "This instance asks for its access password. Sign in once in a browser and that session cookie is the credential (30 days); scripts send the same cookie. There are no API tokens to create or revoke — the password is the only key."}}</dd></div>
       {{else}}<div><dt>{{T "Login"}}</dt><dd>{{T "None, and no token. Keep HuntDeck on your own machine or private network."}}</dd></div>{{end}}
       <div><dt>{{T "Format"}}</dt><dd>{{T "JSON; target lists as plain text, one per line. Errors:"}} <code>{"error": "…"}</code>.</dd></div>
       <div><dt>{{T "Pages"}}</dt><dd><code>limit</code> {{T "and"}} <code>offset</code>{{T ";"}} {{T "each list gives its"}} <code>total</code>.</dd></div>
     </dl>
   </div>
   <p class="panel-foot">{{T "Import"}} <a class="link" href="/api/v1/openapi.json">openapi.json</a> {{T "into Postman, Insomnia or Bruno, or give it to a client generator. Send runs a GET here, against this HuntDeck."}}</p>
+</section>
+<section class="panel" id="mcp">
+  <div class="panel-head"><h2>{{T "MCP server"}}</h2><span class="aside">{{T "for an AI agent, over stdio"}}</span></div>
+  <div class="panel-body">
+    <p>{{T "An agent can use everything above as tools instead of HTTP: huntdeck-mcp speaks the Model Context Protocol on stdin and stdout and covers the same data — programs, targets, the scope check, changes, disclosed reports and the hunt queue."}}</p>
+    <pre class="code"><code>HUNTDECK_URL={{.Base}} HUNTDECK_PASSWORD=… huntdeck-mcp</code></pre>
+    <p class="muted small">{{T "Those two variables are all it takes: the same address and password this page uses. docs/mcp.md in the repository lists the sixteen tools, their arguments, and what each answers; the queue tool takes explain for the factor breakdown."}}</p>
+  </div>
 </section>
 
 {{range .Groups}}{{if .Ops}}

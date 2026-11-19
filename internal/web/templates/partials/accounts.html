@@ -13,7 +13,7 @@
       placeholder="{{if .Unreadable}}{{T "enter it again"}}{{else if .Set}}{{T "set · type to replace"}}{{else}}{{T "not set"}}{{end}}">
       {{if or .Set .Unreadable}}<label class="acct-clear" title="{{T "Clear what is saved here, so this field falls back to your environment"}}">
         <input type="checkbox" name="clear_{{.Name}}" value="1">
-        <span class="acct-clear-face"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg>{{T "Clear"}}</span>
+        <span class="acct-clear-face">{{T "Clear"}}</span>
       </label>{{end}}
     {{else}}<input type="text" id="acct-{{.Name}}" name="{{.Name}}" value="{{.Value}}" spellcheck="false" maxlength="512"{{if eq .Kind "number"}} inputmode="decimal"{{end}}
       placeholder="{{if .Default}}{{.Default}} {{T "(default)"}}{{else}}{{T "not set"}}{{end}}">{{end}}
