@@ -26,6 +26,10 @@ func Run(ctx context.Context, st *store.Store, client *scopesentry.Client, manua
 	if cfg.TemplateID == "" || cfg.NodeName == "" {
 		return 0, fmt.Errorf("pick a template and a node first")
 	}
+	// The scanner's host has to have room for what we are about to ask of it.
+	if err := CheckHeadroom(ctx, client); err != nil {
+		return 0, err
+	}
 	perTask := cfg.PerTask
 	if perTask <= 0 {
 		perTask = 50
