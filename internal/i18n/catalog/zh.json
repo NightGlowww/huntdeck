@@ -1734,6 +1734,7 @@
     "HuntDeck can hand the targets it finds to a ScopeSentry instance, which scans them: one scan task per batch of new in-scope targets, each target recorded so a re-poll does not queue it again.": "HuntDeck 可以把发现的目标交给一台 ScopeSentry 实例去扫描：每批新的在范围内目标生成一个扫描任务，并逐个记录，重新轮询不会重复排队。",
     "To connect one, set its endpoint and an ssk_ key in Settings > Accounts > Scan handoff. The key needs task:write, task:read, node:read and template:read, and nothing wider.": "接入方式：在「设置 › 账户 › 扫描派发」填它的端点与 ssk_ 密钥。密钥只需 task:write、task:read、node:read、template:read 四项权限，不要更宽。",
     "Open the scanner settings": "打开扫描器设置",
-    "Connect a scanner": "接入扫描器"
+    "Connect a scanner": "接入扫描器",
+    "Give the scanner its own host: a scan is the heaviest thing either side runs. Stopping a task in the scanner records the stop but does not kill the node's run, so a scan started on a shared host outlives its task.": "给扫描器独立的主机：扫描是两边最重的负载。在扫描器里停止任务只记录停止，并不会杀掉节点上正在跑的进程——所以共享主机上启动的扫描会比它的任务活得更久。"
   }
 }
