@@ -5,6 +5,8 @@
 <p class="lead">{{T "Targets HuntDeck finds, scanned by ScopeSentry: each new in-scope target is handed over once, as a scan task, and recorded so a re-poll does not queue it again."}}</p>
 
 {{if .Error}}<p class="flash warn">{{TF "The scanner answered with an error: %s" .Error}}</p>{{end}}
+{{if .BelowFloor}}<p class="flash warn">{{TF "The scanner host has %.0f%% memory free; a handoff is refused below %.0f%%. A scan task is heavy: a full-template run has taken a host down before." .ScannerFree 25.0}}</p>{{end}}
+{{if and .ScannerFreeKnown (not .BelowFloor)}}<p class="muted small">{{TF "Scanner host: %.0f%% memory free, which is above the %.0f%% floor." .ScannerFree 25.0}}</p>{{end}}
 
 <section class="panel">
   <div class="panel-head"><h2>{{T "Handoff"}}</h2><span class="aside">{{T "off unless you turn it on"}}</span></div>

@@ -44,6 +44,13 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 		if nodes, err := client.Nodes(ctx); err == nil {
 			d.Nodes = nodes
 		}
+		// The same number the handoff checks before creating anything: shown
+		// so a refusal is expected rather than a surprise.
+		if pct, ok, err := client.MemAvailablePercent(ctx); err == nil && ok {
+			d.ScannerFree = pct
+			d.ScannerFreeKnown = true
+			d.BelowFloor = pct < scanhandoff.MinFreePercent
+		}
 	}
 	d.Waiting, _ = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 200)
 	d.HandedOff, d.LastHandoff, _ = s.Store.ScanHandoffCount(r.Context())
@@ -108,5 +115,10 @@ type scanPageData struct {
 	HandedOff   int
 	LastHandoff time.Time
 	Off         bool
-	Error       string
+	// ScannerFree is the scanner host's free memory, and BelowFloor
+	// says the handoff would be refused right now.
+	ScannerFree      float64
+	ScannerFreeKnown bool
+	BelowFloor       bool
+	Error            string
 }
