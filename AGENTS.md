@@ -242,9 +242,11 @@ the config reads is missing from `docs/configuration.md` or `.env.example`, and
   such as `KeepAliver`, `StatsFetcher`, `CredentialReporter`) and **never**
   touch the database: they return plain structs, and `internal/syncer`
   persists and diffs.
-- API: every route is listed once in `apiRoutes` (`internal/web/server.go`)
+- API: every route is declared once in `apiRoutes` (`internal/web/server.go`)
   and described in `internal/web/openapi.json`; responses are named types in
-  `internal/web/apitypes.go`. The tests say what's missing.
+  `internal/web/apitypes.go`. Registering a route on the mux instead makes it
+  invisible to the API page, the spec and every guard —
+  `TestAPIRoutesAreDeclaredOnce` fails on it. The tests say what's missing.
 - Database: SQL only in `internal/store`. Migrations are append-only: never
   edit one that has shipped. A new table or column is also listed in
   `internal/store/seedspec.go` as copied into seeds (public platform data
