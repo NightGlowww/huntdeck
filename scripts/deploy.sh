@@ -76,17 +76,29 @@ echo "==> tests"
 run go vet ./...
 run go test ./...
 
+# One name for this deploy, whichever mode builds it.
+ver="${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)}"
+
 if [ "$mode" = "full" ]; then
   echo "==> source"
   run rsync -az --exclude '.env' --exclude '.git' --exclude 'bin' --exclude 'data' ./ "$host:$dir/"
   echo "==> image (the host builds it)"
-  remote "cd $dir && sudo docker compose build && sudo docker compose up -d --pull never"
+  # A network that cannot reach proxy.golang.org can name a mirror: the
+# Dockerfile takes GOPROXY as a build arg and defaults to the public one.
+build_args=""
+[ -n "${GOPROXY:-}" ] && build_args="--build-arg GOPROXY=$GOPROXY"
+# The Dockerfile stamps the version in, and defaults to dev: without this the
+# image answers dev and the check below refuses it.
+build_args="$build_args --build-arg VERSION=$ver"
+# noVNC comes from github.com; a host that cannot reach it skips it, and the
+# login browser still works without the in-page viewer.
+[ -n "${WITH_NOVNC:-}" ] && build_args="$build_args --build-arg WITH_NOVNC=$WITH_NOVNC"
+remote "cd $dir && sudo docker compose build $build_args && sudo docker compose up -d --pull never"
 else
   echo "==> binary (linux/amd64)"
   # One name for this deploy: it goes into the binaries and is asserted
   # against the running process afterwards, so a deploy that ships nothing
   # cannot pass.
-  ver="${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)}"
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' EXIT
   run env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
