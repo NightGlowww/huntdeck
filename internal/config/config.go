@@ -59,9 +59,23 @@ type Config struct {
 	// HUNTDECK_TIMEZONE: the IANA time zone dates and times are shown in,
 	// until one is chosen in Settings. Data is always stored in UTC.
 	Timezone string
+	// HUNTDECK_LANGUAGE: the interface language when a visitor hasn't picked
+	// one: "auto" (the browser's, the default) or a language with a catalog,
+	// such as "zh".
+	Language string
+	// HUNTDECK_PASSWORD: when set, HuntDeck asks for it before showing
+	// anything: one password for the whole install, still no user accounts.
+	// Changing it signs every browser out.
+	Password Secret
 	// HUNTDECK_FEEDBACK_EMAIL: where the UI's "Send feedback" links mail
 	// to (a plain mailto:, nothing is sent by HuntDeck); none if empty.
 	FeedbackEmail string
+	// HUNTDECK_AI_BASE_URL, HUNTDECK_AI_MODEL, HUNTDECK_AI_KEY: an
+	// OpenAI-compatible endpoint for optional features. Unset means no AI:
+	// every page works without it (docs/design/ai-layer.md).
+	AIBaseURL string
+	AIModel   string
+	AIKey     Secret
 	// HUNTDECK_CLIENT_IP_HEADER: the header a proxy in front puts the
 	// visitor's address in (CF-Connecting-IP behind Cloudflare), for a
 	// read-only copy's per-visitor limits. Set it only when every request
@@ -221,6 +235,21 @@ func Load(src Source) (Config, error) {
 	if cfg.ClientIPHeader = r.get("HUNTDECK_CLIENT_IP_HEADER", ""); cfg.ClientIPHeader != "" && !validHeaderName(cfg.ClientIPHeader) {
 		r.errs = append(r.errs, fmt.Errorf("HUNTDECK_CLIENT_IP_HEADER %q: not a header name like CF-Connecting-IP", cfg.ClientIPHeader))
 	}
+	cfg.Language = strings.ToLower(strings.TrimSpace(r.get("HUNTDECK_LANGUAGE", "auto")))
+	if cfg.Language != "auto" && (len(cfg.Language) < 2 || len(cfg.Language) > 8) {
+		r.errs = append(r.errs, fmt.Errorf("HUNTDECK_LANGUAGE %q: want auto, en or a language like zh", cfg.Language))
+	}
+	cfg.AIBaseURL = strings.TrimSpace(r.get("HUNTDECK_AI_BASE_URL", ""))
+	cfg.AIModel = strings.TrimSpace(r.get("HUNTDECK_AI_MODEL", ""))
+	cfg.AIKey = Secret(strings.TrimSpace(r.get("HUNTDECK_AI_KEY", "")))
+	if (cfg.AIBaseURL == "") != (cfg.AIModel == "") {
+		r.errs = append(r.errs, fmt.Errorf("HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL go together: set both, or neither"))
+	}
+	cfg.Password = Secret(r.get("HUNTDECK_PASSWORD", ""))
+	if p := cfg.Password.Reveal(); p != "" && len(p) < 8 {
+		r.errs = append(r.errs, errors.New("HUNTDECK_PASSWORD: use at least 8 characters"))
+	}
+
 	if cfg.FeedbackEmail = r.get("HUNTDECK_FEEDBACK_EMAIL", ""); cfg.FeedbackEmail != "" {
 		if a, err := mail.ParseAddress(cfg.FeedbackEmail); err != nil || a.Name != "" || a.Address != cfg.FeedbackEmail {
 			r.errs = append(r.errs, fmt.Errorf("HUNTDECK_FEEDBACK_EMAIL %q: not a plain email address like hello@example.com", cfg.FeedbackEmail))

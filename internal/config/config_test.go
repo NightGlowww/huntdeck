@@ -49,6 +49,8 @@ func TestLoadValues(t *testing.T) {
 		"HUNTDECK_PUBLIC_URL":       "https://demo.example.com/",
 		"HUNTDECK_X_ACCOUNT":        "@huntdeck",
 		"HUNTDECK_REPO_URL":         "https://github.com/example/huntdeck/",
+		"HUNTDECK_LANGUAGE":         "ZH",
+		"HUNTDECK_PASSWORD":         "a long enough password",
 	}, nil))
 	if err != nil {
 		t.Fatalf("Load: %v", err)
@@ -56,7 +58,7 @@ func TestLoadValues(t *testing.T) {
 	if cfg.Listen != "127.0.0.1:9000" || cfg.DataDir != "/tmp/hd" || cfg.LogLevel != slog.LevelDebug || cfg.LogFormat != "json" ||
 		cfg.Timezone != "Australia/Brisbane" || cfg.ChromeTimezone != "Australia/Brisbane" || cfg.FeedbackEmail != "hello@example.com" ||
 		cfg.ClientIPHeader != "CF-Connecting-IP" || cfg.PublicURL != "https://demo.example.com" || cfg.XAccount != "huntdeck" ||
-		cfg.RepoURL != "https://github.com/example/huntdeck" {
+		cfg.RepoURL != "https://github.com/example/huntdeck" || cfg.Language != "zh" || cfg.Password.Reveal() != "a long enough password" {
 		t.Errorf("unexpected config: %+v", cfg)
 	}
 }
@@ -112,6 +114,8 @@ func TestLoadErrors(t *testing.T) {
 		{"bad time zone", map[string]string{"HUNTDECK_TIMEZONE": "Brisbane"}, []string{"HUNTDECK_TIMEZONE"}},
 		{"local time zone", map[string]string{"HUNTDECK_TIMEZONE": "Local"}, []string{"HUNTDECK_TIMEZONE"}},
 		{"bad browser time zone", map[string]string{"HUNTDECK_CHROME_TIMEZONE": "New York"}, []string{"HUNTDECK_CHROME_TIMEZONE"}},
+		{"short password", map[string]string{"HUNTDECK_PASSWORD": "short"}, []string{"at least 8 characters"}},
+		{"language too long", map[string]string{"HUNTDECK_LANGUAGE": "chinese-simplified"}, []string{"HUNTDECK_LANGUAGE"}},
 		{"reports all problems", map[string]string{"HUNTDECK_LOG_FORMAT": "xml", "HUNTDECK_LOG_LEVEL": "loud"}, []string{"HUNTDECK_LOG_FORMAT", "HUNTDECK_LOG_LEVEL"}},
 	}
 	for _, tt := range tests {
