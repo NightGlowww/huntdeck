@@ -1,0 +1,27 @@
+/* ---------- MCP server page ---------- */
+/* The tool list is seventeen items long, so it needs a shape the eye can hold:
+   one card per tool, the name on its own line, the arguments as a quiet table
+   that stops being a wall of text. */
+
+.mcp-index { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; }
+.mcp-index a { display: inline-block; padding: 3px 9px; border: 1px solid var(--border-input); border-radius: 999px;
+  color: var(--text-2); font: 11.5px var(--mono); text-decoration: none; }
+.mcp-index a:hover { border-color: var(--accent); color: var(--accent); }
+
+.mcp-tool { margin: 0 0 12px; padding: 12px 14px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); }
+.mcp-tool:last-child { margin-bottom: 0; }
+.mcp-tool h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 6px;
+  font-size: calc(13.5px * var(--fs, 1)); font-weight: 650; }
+.mcp-tool h3 code { padding: 0; background: none; color: var(--accent); font-size: calc(13px * var(--fs, 1)); }
+.mcp-tool > p { margin: 0 0 10px; color: var(--text-2); line-height: 1.5; }
+.mcp-tool > p.muted { margin-bottom: 4px; }
+
+.mcp-args { width: 100%; border-collapse: collapse; margin: 0; }
+.mcp-args th { padding: 4px 10px 4px 0; border-bottom: 1px solid var(--border); color: var(--muted);
+  font-size: calc(10.5px * var(--fs, 1)); font-weight: 650; letter-spacing: .06em; text-transform: uppercase; text-align: left; }
+.mcp-args td { padding: 6px 10px 6px 0; border-bottom: 1px solid var(--border-weak, var(--border)); vertical-align: top; }
+.mcp-args tr:last-child td { border-bottom: 0; }
+.mcp-args td:first-child code { color: var(--text); font-size: calc(12px * var(--fs, 1)); }
+.mcp-args td:nth-child(2) { width: 1%; white-space: nowrap; color: var(--muted); font: 11.5px var(--mono); }
+.mcp-args td:nth-child(3) { color: var(--text-2); line-height: 1.45; }
