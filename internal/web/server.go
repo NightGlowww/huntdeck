@@ -227,6 +227,8 @@ func NewHandler(d Deps) (http.Handler, error) {
 	s.routeVNC(mux)
 	mux.HandleFunc("GET /api", s.apiDocs)
 	mux.HandleFunc("GET /mcp", s.mcpPage)
+	mux.HandleFunc("GET /pojia", s.pojiaPage)
+	mux.HandleFunc("GET /pojia/report", s.pojiaReport)
 
 	mux.HandleFunc("GET /login", s.loginPage)
 	mux.HandleFunc("POST /login", s.loginSubmit)

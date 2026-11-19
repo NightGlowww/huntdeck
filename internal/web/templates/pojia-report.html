@@ -1,0 +1,6 @@
+{{define "content"}}{{with .Data}}
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Disclosed report"}}</h2><span class="aside"><a class="link" href="/pojia">{{T "back to search"}}</a></span></div>
+  <div class="panel-body"><pre class="pojia-answer pojia-report">{{.Report}}</pre></div>
+</section>
+{{end}}{{end}}

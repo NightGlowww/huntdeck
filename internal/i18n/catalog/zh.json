@@ -1662,6 +1662,20 @@
     "from POJIA's disclosed reports": "来自 POJIA 收录的披露报告",
     "cached: POJIA could not be reached": "缓存：POJIA 暂时无法访问",
     "POJIA does not index this program.": "POJIA 未收录该厂商。",
-    "POJIA reports": "POJIA 报告库"
+    "POJIA reports": "POJIA 报告库",
+    "POJIA": "POJIA",
+    "POJIA indexes disclosed bug bounty reports. Set its API key under Settings > Accounts to search them here.": "POJIA 收录公开披露的赏金报告。在「设置 › 账户」填入它的 API 密钥，即可在此检索。",
+    "Search how bugs were actually found: disclosed reports with their discovery paths, payloads and fixes, from POJIA's index.": "检索漏洞实际是如何被发现的：披露报告的发现路径、载荷与修复，来自 POJIA 的索引。",
+    "Search reports": "搜索报告",
+    "keywords, a CVE id, or #report id": "关键词、CVE 编号或 #报告编号",
+    "class, e.g. xss, sqli, ssrf": "漏洞类别，如 xss、sqli、ssrf",
+    "program handle": "项目 handle",
+    "Search": "搜索",
+    "Payloads for this class": "该类别的测试载荷",
+    "CVE": "CVE",
+    "Vulnerability classes": "漏洞类别",
+    "click one to search it": "点击任一类别即按它检索",
+    "Disclosed report": "披露报告",
+    "back to search": "返回搜索"
   }
 }

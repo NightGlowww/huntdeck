@@ -25,3 +25,10 @@
 .mcp-args td:first-child code { color: var(--text); font-size: calc(12px * var(--fs, 1)); }
 .mcp-args td:nth-child(2) { width: 1%; white-space: nowrap; color: var(--muted); font: 11.5px var(--mono); }
 .mcp-args td:nth-child(3) { color: var(--text-2); line-height: 1.45; }
+
+/* POJIA answers are text blocks: keep them readable and not page-wide. */
+.pojia-search { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.pojia-search input { flex: 1 1 180px; min-width: 0; }
+.pojia-answer { margin: 0; padding: 12px 14px; max-width: 860px; overflow-x: auto;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2);
+  color: var(--text); font: calc(12.5px * var(--fs, 1))/1.7 var(--mono); white-space: pre-wrap; }

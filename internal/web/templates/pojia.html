@@ -1,0 +1,36 @@
+{{define "content"}}{{with .Data}}
+{{if .Off}}
+<p class="empty-state">{{T "POJIA indexes disclosed bug bounty reports. Set its API key under Settings > Accounts to search them here."}}</p>
+{{else}}
+<p class="lead">{{T "Search how bugs were actually found: disclosed reports with their discovery paths, payloads and fixes, from POJIA's index."}}</p>
+
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Search reports"}}</h2></div>
+  <div class="panel-body">
+    <form method="get" action="/pojia" class="pojia-search">
+      <input type="text" name="q" value="{{.Query}}" placeholder="{{T "keywords, a CVE id, or #report id"}}">
+      <input type="text" name="class" value="{{.Class}}" placeholder="{{T "class, e.g. xss, sqli, ssrf"}}">
+      <input type="text" name="program" value="{{.Program}}" placeholder="{{T "program handle"}}">
+      <button type="submit" class="small">{{T "Search"}}</button>
+    </form>
+    {{if .Results}}<pre class="pojia-answer">{{.Results}}</pre>{{end}}
+    {{if .Payloads}}
+    <h3>{{T "Payloads for this class"}}</h3>
+    <pre class="pojia-answer">{{.Payloads}}</pre>
+    {{end}}
+  </div>
+</section>
+
+{{if .CVE}}
+<section class="panel">
+  <div class="panel-head"><h2>{{T "CVE"}}</h2></div>
+  <div class="panel-body"><pre class="pojia-answer">{{.CVEAnswer}}</pre></div>
+</section>
+{{end}}
+
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Vulnerability classes"}}</h2><span class="aside">{{T "click one to search it"}}</span></div>
+  <div class="panel-body"><pre class="pojia-answer pojia-classes">{{.Classes}}</pre></div>
+</section>
+{{end}}
+{{end}}{{end}}
