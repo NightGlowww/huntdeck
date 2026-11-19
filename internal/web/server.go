@@ -215,6 +215,8 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("GET /.well-known/security.txt", s.securityTxt)
 	s.routeVNC(mux)
 	mux.HandleFunc("GET /api", s.apiDocs)
+	mux.HandleFunc("POST /api/tokens", s.createAPIToken)
+	mux.HandleFunc("POST /api/tokens/revoke", s.revokeAPIToken)
 
 	mux.HandleFunc("GET /login", s.loginPage)
 	mux.HandleFunc("POST /login", s.loginSubmit)
@@ -297,7 +299,9 @@ func NewHandler(d Deps) (http.Handler, error) {
 		inner = s.Metrics.middleware(s.Log, inner)
 	}
 	if s.auth != nil { // the access password, when one is set (auth.go)
-		inner = s.auth.middleware(inner)
+		// A bearer token is another key to the same gate; it is checked first so a
+		// script never needs a cookie jar.
+		inner = s.tokenGate(inner, s.auth.middleware(inner))
 	}
 	// A panic becomes a logged 500 rather than a dropped connection; the
 	// recoverer sits inside the security headers so its error page carries them.

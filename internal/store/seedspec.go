@@ -156,6 +156,7 @@ var seedTables = []seedTable{
 var seedLeftOut = map[string]string{
 	"schema_migrations":  "the seed's own migrations record its version",
 	"count_version":      "kept by triggers",
+	"api_tokens":         "a secret of the user's; never in a seed",
 	"program_user_stats": "the user's own numbers",
 	"program_tags":       "the user's tags",
 	"program_notes":      "the user's own notes",

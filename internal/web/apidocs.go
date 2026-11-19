@@ -1,11 +1,15 @@
 package web
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mdpsec/huntdeck/internal/store"
 )
@@ -24,6 +28,11 @@ type apiDocsData struct {
 	// Password says this instance asks for its access password, so the login
 	// paragraph must not claim scripts need no credential.
 	Password bool
+	// Tokens are the API tokens, live and retired; NewToken is the one just
+	// minted, shown once; Flash says what just happened.
+	Tokens   []apiTokenRow
+	NewToken string
+	Flash    string
 }
 
 type apiDocGroup struct {
@@ -66,7 +75,14 @@ func servedReadOnly(method, path string) bool {
 	return method == http.MethodGet || readOnlyPOST[path]
 }
 
+// apiDocs is the page an ordinary GET renders.
 func (s *server) apiDocs(w http.ResponseWriter, r *http.Request) {
+	s.renderAPIDocs(w, r, "", "")
+}
+
+// renderAPIDocs builds the page; the token handlers reuse it to show a freshly
+// minted token once, in the body, and a short confirmation otherwise.
+func (s *server) renderAPIDocs(w http.ResponseWriter, r *http.Request, newToken, flash string) {
 	o := s.openapi
 	// The page's own words (summaries, descriptions, tags) come from the
 	// spec, in English; openapi.zh.json has the Chinese by operation id, tag
@@ -109,6 +125,10 @@ func (s *server) apiDocs(w http.ResponseWriter, r *http.Request) {
 			continue // a test makes sure there are none
 		}
 		groups[op.Tags[0]].Ops = append(groups[op.Tags[0]].Ops, o.docOp(method, path, op, d.Base, platform, handle, zh))
+	}
+	d.NewToken, d.Flash = newToken, flash
+	if tokens, err := s.Store.APITokens(r.Context()); err == nil {
+		d.Tokens = tokenRows(tokens)
 	}
 	s.render(w, r, http.StatusOK, "api", pageData{Title: "API", Nav: "api", Data: d})
 }
@@ -302,4 +322,69 @@ func (o *openAPI) sampleOf(s map[string]any, field string, depth int) any {
 // slug makes an anchor of a name: "Scope check" is "scope-check".
 func slug(name string) string {
 	return strings.ReplaceAll(strings.ToLower(name), " ", "-")
+}
+
+// apiTokensPanel lists the tokens and the form to mint one.
+type apiTokenRow struct {
+	ID       int64
+	Name     string
+	Created  time.Time
+	LastUsed *time.Time
+	Revoked  *time.Time
+}
+
+func tokenRows(list []store.APIToken) []apiTokenRow {
+	out := make([]apiTokenRow, 0, len(list))
+	for _, t := range list {
+		out = append(out, apiTokenRow{ID: t.ID, Name: t.Name, Created: t.CreatedAt, LastUsed: t.LastUsedAt, Revoked: t.RevokedAt})
+	}
+	return out
+}
+
+// newToken makes a token from 32 random bytes, hex-encoded: only its digest is
+// stored, and it is shown once on the page that created it.
+func newTokenValue() (string, error) {
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(buf), nil
+}
+
+// createAPIToken mints one and shows it once, in the response body rather than a
+// redirect, so it never reaches a URL bar, a history or a log.
+func (s *server) createAPIToken(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4<<10)
+	name := strings.TrimSpace(r.PostFormValue("name"))
+	if name == "" {
+		name = "token"
+	}
+	if len(name) > 60 {
+		name = name[:60]
+	}
+	value, err := newTokenValue()
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	if _, err := s.Store.CreateAPIToken(r.Context(), name, value); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	s.renderAPIDocs(w, r, value, "token-created")
+}
+
+// revokeAPIToken retires one.
+func (s *server) revokeAPIToken(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4<<10)
+	id, err := strconv.ParseInt(r.PostFormValue("id"), 10, 64)
+	if err != nil {
+		s.renderAPIDocs(w, r, "", "token-revoked")
+		return
+	}
+	if err := s.Store.RevokeAPIToken(r.Context(), id); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	s.renderAPIDocs(w, r, "", "token-revoked")
 }

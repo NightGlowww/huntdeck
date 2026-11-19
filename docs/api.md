@@ -68,6 +68,19 @@ curl -s -o /dev/null -w '%{http_code}\n' -H "If-None-Match: $(sed -n 's/^[Ee][Tt
 curl -s "http://127.0.0.1:8080/api/v1/targets?kind=wildcards&since=24h&comment=1"
 ```
 
+## Tokens (`/api` → API tokens)
+
+A script can present a token instead of a browser session:
+
+```sh
+curl -s -H "Authorization: Bearer $HUNTDECK_TOKEN" https://huntdeck.example/api/v1/status
+```
+
+Mint one on the API page. Only its SHA-256 is stored, so the token is shown
+once; revoking it takes effect on the next request and touches nothing else.
+A token grants exactly what the access password grants — it is the same gate,
+not an account, and there are no scopes or roles.
+
 ## The hunt queue (`/api/v1/queue`)
 
 HuntQueue ranks targets by "can I start today, and what is it worth per hour":

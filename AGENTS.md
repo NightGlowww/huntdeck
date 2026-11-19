@@ -212,10 +212,13 @@ the config reads is missing from `docs/configuration.md` or `.env.example`, and
    state.
 4. **One container.** Nothing that needs a second service (no Postgres,
    Redis or external queue): SQLite is the database and the job queue.
-5. **No accounts.** HuntDeck deliberately has no users, roles or API tokens;
-   don't add any. The only gate is the optional single access password
+5. **No accounts.** HuntDeck deliberately has no users, roles or per-user
+   identity; don't add any. The gate is the optional single access password
    (`HUNTDECK_PASSWORD`, `internal/web/auth.go`): one password, one signed
-   cookie, no identity behind it. Protection is where it's reachable plus the
+   cookie, no identity behind it. `api_tokens` (migration 0065) adds one
+   narrow exception for scripts: a token is another key to the **same** gate,
+   carries no identity, is stored only as a SHA-256 digest, and is revoked from
+   the API page. Adding a token must never grow into roles or scopes. Protection is where it's reachable plus the
    guards in `internal/web`: `hostGuard` (DNS rebinding),
    `http.CrossOriginProtection` (CSRF), and a strict CSP (HuntDeck's own
    scripts, styles and connections only), `no-referrer`, `frame-ancestors 'none'`.

@@ -325,3 +325,23 @@ func safeNext(next string) string {
 	}
 	return next
 }
+
+// tokenGate accepts `Authorization: Bearer <token>` as another way to pass the
+// single access gate, for a script that has no browser to log in with. A token
+// is one key to the same lock: it grants what the password grants, and revoking
+// it takes nothing else away.
+func (s *server) tokenGate(open, guarded http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		header := r.Header.Get("Authorization")
+		if !strings.HasPrefix(header, "Bearer ") {
+			guarded.ServeHTTP(w, r)
+			return
+		}
+		token := strings.TrimSpace(strings.TrimPrefix(header, "Bearer "))
+		if token == "" || s.Store == nil || s.Store.CheckAPIToken(r.Context(), token) != nil {
+			writeJSONError(w, http.StatusUnauthorized, "unauthorized: that token is unknown or revoked")
+			return
+		}
+		open.ServeHTTP(w, r)
+	})
+}

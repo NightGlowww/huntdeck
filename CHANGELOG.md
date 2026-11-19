@@ -12,6 +12,10 @@ start) stay compatible within a major version.
 
 ### Added
 
+- **API tokens** for scripts (`/api` → API tokens): a bearer token is another
+  key to the same password gate, stored only as a SHA-256 digest, shown once
+  and revocable. It carries no identity, so it never grows into accounts or
+  scopes.
 - **HuntQueue**: targets ranked by whether they can start today and what the
   work is worth per hour, rebuilt every half hour. A `/queue` page with
   combinable filter chips, `huntdeck queue` on the command line,

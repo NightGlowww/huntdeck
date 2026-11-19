@@ -1561,6 +1561,20 @@
     "for an AI agent, over stdio": "供 AI 智能体使用，走 stdio",
     "An agent can use everything above as tools instead of HTTP: huntdeck-mcp speaks the Model Context Protocol on stdin and stdout and covers the same data — programs, targets, the scope check, changes, disclosed reports and the hunt queue.": "上面的数据也可以不作为 HTTP、而是作为工具交给智能体：huntdeck-mcp 通过 stdin/stdout 讲 Model Context Protocol，覆盖同一批数据——项目、目标、范围检查、变更、已披露报告与狩猎队列。",
     "Those two variables are all it takes: the same address and password this page uses. docs/mcp.md in the repository lists the sixteen tools, their arguments, and what each answers; the queue tool takes explain for the factor breakdown.": "只需要两个变量：本页用的同一个地址和密码。仓库里的 docs/mcp.md 列出十六个工具、参数与各自的返回；队列工具传 explain 可拿到因子分解。",
-    "Where each number comes from, which ones are estimates, and how HuntScore is scored.": "每个数字的来源、哪些是估算，以及 HuntScore 如何评分。"
+    "Where each number comes from, which ones are estimates, and how HuntScore is scored.": "每个数字的来源、哪些是估算，以及 HuntScore 如何评分。",
+    "API tokens": "API 令牌",
+    "for scripts, instead of a browser session": "给脚本用，替代浏览器会话",
+    "Created. Copy it now: only its digest is stored, so it is never shown again.": "已创建。现在复制：只保存其摘要，之后不会再显示。",
+    "Revoked. Anything still sending it gets 401 from now on.": "已吊销。此后仍发送它的请求都会得到 401。",
+    "A token is one key to the same gate as the access password: it grants what the password grants, and revoking it takes nothing else away. Send it as an Authorization header; there is no cookie to keep.": "令牌与访问密码是同一道门的另一把钥匙：给它的权限与密码相同，吊销它也不会影响其他任何东西。以 Authorization 头发送即可，不需要维护 cookie。",
+    "what it is for, e.g. the nightly script": "用途，例如夜间脚本",
+    "Create token": "创建令牌",
+    "Created": "创建于",
+    "Last used": "最近使用",
+    "State": "状态",
+    "live": "有效",
+    "revoked": "已吊销",
+    "Revoke": "吊销",
+    "No tokens yet.": "还没有令牌。"
   }
 }
