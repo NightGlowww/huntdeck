@@ -410,6 +410,12 @@ listed with the way it goes red, and the way it was proved.
 | `TestEverySmokeMarkerIsItsOwnPage` | a page stops carrying its `data-page`, or two pages share one | this test |
 | `huntdeck backtest` | nothing: it reports how many cuts exist and what they show | by design |
 
+- **`scripts/restore-drill.sh`** — exercises the recovery path itself: backs up
+  the live database, restores it into a scratch directory, runs `doctor` on the
+  copy, compares its counts with the live one, and removes both. `verify-backup.sh`
+  only reads the archive; this writes a database and proves it opens. Run it after
+  a schema change, and once a quarter otherwise.
+
 Two of the shell gates are proved on every `make check`: `make gates` points
 `bench --check` at a closed port and `smoke` at a server that answers 200 to
 everything with no HuntDeck markup, and insists both say so. A gate that
