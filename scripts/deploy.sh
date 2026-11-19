@@ -119,7 +119,10 @@ else
   run rsync -az scripts/bench.sh "$host:$dir/scripts/bench.sh"
   run rsync -az scripts/perf-snapshot.sh "$host:$dir/scripts/perf-snapshot.sh"
   run rsync -az scripts/perf-diff.py "$host:$dir/scripts/perf-diff.py"
-  echo "==> image ($image, wrapped around the host's current one)"
+  echo "==> image ($image, the binary layered onto the published base image)"
+  # BASE defaults to ghcr.io/mdpsec/huntdeck:latest, which the host keeps in
+  # its image cache after the first pull; wrapping the running image instead
+  # would add a layer on every deploy.
   remote "cd $dir && sudo docker build -f Dockerfile.prod -t $image ."
   echo "==> restart"
   remote "cd $dir && sudo docker compose up -d --pull never"
