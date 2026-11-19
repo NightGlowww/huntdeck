@@ -49,7 +49,7 @@
           {{if and $.Data.Invites (not .InvitePending)}}{{with .JoinedAt}}<span class="chip joined" title="Accepted {{datetime .}} ({{ago .}})">{{T "joined"}}</span>{{end}}{{end}}
           {{if ne .State "open"}}<span class="chip {{.State}}">{{T .State}}</span>{{end}}
           {{if .RemovedAt}}<span class="chip removed">{{T "gone"}}</span>{{end}}
-          {{with .ResumedAt}}{{if recent .}}<span class="chip resumed" title="{{TF "Back open %s after being paused or closed" (datetime .)}}">{{T "resumed"}} {{ago .}}</span>{{end}}{{end}}
+          {{with .ResumedAt}}{{if recent .}}<span class="chip resumed" title="{{TF "Back open %s after being paused or closed" (datetime .)}}">{{T "resumed"}} <span class="when" data-ago data-at="{{iso .}}">{{ago .}}</span></span>{{end}}{{end}}
           {{if .Ignored}}<span class="chip ignored">{{T "ignored"}}</span>{{end}}
           {{range .Tags}}<a class="chip tag" href="/programs?tag={{.}}">{{.}}</a>{{end}}
         </div></td>
