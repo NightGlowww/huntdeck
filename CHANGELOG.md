@@ -1,13 +1,103 @@
 # Changelog
 
-All notable changes to HuntDeck. Versions follow [Semantic Versioning](https://semver.org/):
-the API under `/api/v1` and `/api/v2`, the configuration variables and the
-database (upgraded in place on start) stay compatible within a major
-version.
+All notable changes to HuntDeck. The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
+[Semantic Versioning](https://semver.org/): the API under `/api/v1` and
+`/api/v2`, the configuration variables and the database (upgraded in place on
+start) stay compatible within a major version.
 
-## Unreleased
+## [Unreleased]
 
-- The Add program form's seed checkbox reads "Include in seeds": it has
+### Added
+
+- **HuntQueue**: targets ranked by whether they can start today and what the
+  work is worth per hour, rebuilt every half hour. A `/queue` page with
+  combinable filter chips, `huntdeck queue` on the command line,
+  `/api/v1/queue` and an MCP tool; click a score (or pass `explain`) for the
+  factor breakdown, and what the queue keeps out is listed with its reason
+  rather than hidden. A snapshot of the day's scores is written once a day,
+  which is what `huntdeck backtest` counts its cuts from.
+- **An MCP server** over stdio (`huntdeck-mcp`): sixteen tools covering
+  programs, targets, scope checks, changes, disclosed reports and the queue,
+  with projections, paging and documented failure semantics.
+- **An optional single access password** (`HUNTDECK_PASSWORD`) in front of
+  the whole app, with a per-IP login budget and `HUNTDECK_CLIENT_IP_HEADER`
+  for copies behind a proxy.
+- **A Chinese interface** beside the English one, switchable in the sidebar
+  and remembered; a test keeps every template string translated.
+- **Maintenance commands**: `doctor` (integrity, schema, backups, and how
+  fresh the polls, the queue and the score history are), `backup` (which
+  reads its own archive back before trusting it), `restore` with
+  `--dry-run`, `compact`, `backtest` and `ai-check`.
+- `/metrics` with Prometheus counters for this process, behind the login.
+- API program answers take `parts=` and page the scope, so a tool can read a
+  program's facts, brief and rules in 64 KB instead of the full 155 KB.
+- Guides and the reviews behind them: a daily-use order for the pages, a
+  deploy runbook with a release checklist, a performance reference, and four
+  independent audits with every finding resolved or accepted in writing —
+  plus tests that keep the docs honest (every route, page, command, tool and
+  source path the docs name is checked).
+
+### Changed
+
+- `/api/v1/queue` honours the page's filters (`platform`, `kind`,
+  `added`, `paying`, `one`); a window that does not parse is a 400, not a
+  silently ignored filter.
+- The queue's quality input subtracts freshness's weighted contribution
+  rather than its raw part, so a program whose strength is fresh scope is no
+  longer over-penalised (migration 0064 stores the contribution per row).
+- Payouts in other currencies are converted to US dollars with a fixed table
+  before they are compared; the page says so, and says what happens to a
+  currency the table does not know.
+- A build from a tree with uncommitted work says how many files were pending,
+  so two dirty builds from one commit are distinguishable.
+- Deploys run the checks first and write a performance record beside the
+  compose file.
+
+### Fixed
+
+- The queue's second page was unreachable: its pager sat inside a branch that
+  is false on every normal day.
+- `/queue?one=1&added=7d` returned 500 after "one per program" moved into
+  Go without its join.
+- "One per program" returned every tied row (574 rows over 114 programs);
+  the tie-break is now deterministic.
+- The board's footer claimed "40 targets shown" over 12 rows; it now says
+  how many match the filter.
+- Sign out, and the language switch, did not exist on a phone: the sidebar's
+  footer was hidden below 700 px and the open menu brought back only the
+  navigation.
+- Relative times froze on an open page (the top bar's "Updated 5m ago", the
+  queue's build time, every WHEN cell); they tick now, and a test fails if a
+  relative time is printed without its timestamp.
+- The light palette dropped below WCAG AA on platform tags and status chips,
+  and input borders below 3:1; both measured and corrected.
+- At 400% zoom the board and Changes scrolled sideways; the headers wrap and
+  the pages fit their width.
+- Screen-reader fixes: filter state uses `aria-current` instead of
+  `aria-pressed` on links, 119 decorative icons are marked hidden, and the
+  accessible names the page gave controls are translated.
+- Policy extraction lost a program's real deadline when a response-time
+  sentence came first, and produced invalid UTF-8 on non-ASCII policy text.
+- The AI client accepted `null` as a successful answer and miscounted
+  braces inside strings.
+- `robots.txt`, the sitemap and `security.txt` answered with a login
+  redirect; a crawler now reads `Disallow: /` instead of the login page.
+- `/notifications` was a 404 (the page lives under `/settings/`), and the
+  deliveries panel hid its own filters when no message had been sent yet.
+- A program's "show all" scope rendered every entry; it stops at 2,000 and
+  points at the export, and the client-side filter says how many rows remain.
+- The notifications channel filter could not be applied without JavaScript.
+- The `?` shortcut list the search box promised now opens, and `g` then a
+  letter navigates, as the keyboard documentation had claimed all along.
+
+### Removed
+
+- A dead `missingScoreDay` helper and its test: the daily snapshot is driven
+  by the server's ticker, which the helper's existence obscured.
+- A stray 30 MB cross-compiled binary from the tree; `.gitignore` covers
+  build outputs now.
+
   always covered every seed.
 
 ## v1.0.0 (2026-11-13)
