@@ -84,6 +84,9 @@ type programData struct {
 	// NoteAt when it was last saved: HuntDeck keeps it, not the browser.
 	Note   string
 	NoteAt time.Time
+	// NoteErr says the stored note could not be read: the tab refuses to
+	// open an empty editor, because saving it would overwrite the real text.
+	NoteErr bool
 }
 
 // programTab is one of a program page's tabs.
@@ -159,6 +162,11 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 	// survives a browser or a second device.
 	if note, at, err := s.Store.ProgramNote(ctx, p.ID); err == nil {
 		d.Note, d.NoteAt = note, at
+	} else {
+		// An unreadable note must not look like an empty one: the editor would
+		// open blank and the next save would overwrite what is stored.
+		s.Log.WarnContext(ctx, "program: cannot read the note", "program", p.Handle, "error", err)
+		d.NoteErr = true
 	}
 	// The Scope tab's copy link: these rows as plain text, before anything
 	// else is loaded.

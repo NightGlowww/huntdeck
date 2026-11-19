@@ -1617,6 +1617,7 @@
     "No bounties here: the parts weigh to %s, and only %d%% of that counts, so %s.": "该程序无赏金：四部分加权为 %s，其中仅 %d%% 计入评分，因此为 %s。",
     "The parts are averaged by their weights, and a program that pays no bounties has that average multiplied by 0.75: the four parts of a disclosure-only program weigh to a higher number than the score it shows, and its program page says so under the parts.": "四部分按其权重取平均；无赏金项目再将该平均值乘以 0.75——因此纯披露型项目的四部分加权值会高于它显示的分数，程序页在四部分下方也写明了这一点。",
     "Another %s target(s) scored under the floor and are not listed.": "另有 %s 个目标评分低于门槛，未列入本表。",
-    "The queue could not be read just now; it is rebuilt every half hour.": "本次未能读取队列；该表每半小时重建一次。"
+    "The queue could not be read just now; it is rebuilt every half hour.": "本次未能读取队列；该表每半小时重建一次。",
+    "The stored note could not be read just now, so the editor stays closed: saving an empty one would replace what is there. Reload in a moment.": "本次未能读取已保存的笔记，因此编辑器保持关闭：保存空白会覆盖已有内容。请稍后重新加载。"
   }
 }

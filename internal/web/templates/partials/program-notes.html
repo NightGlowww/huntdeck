@@ -2,6 +2,12 @@
    kept by HuntDeck (program_notes) so they survive a browser, a cache clear
    or a second device. Saving is a plain POST: no script needed. */}}
 {{define "program-notes"}}{{with .Data.P}}
+{{if $.Data.NoteErr}}
+<section class="panel pnotes">
+  <div class="panel-head"><h2>{{T "Notes"}}</h2></div>
+  <p class="empty-state">{{T "The stored note could not be read just now, so the editor stays closed: saving an empty one would replace what is there. Reload in a moment."}}</p>
+</section>
+{{else}}
 <section class="panel pnotes">
   <form method="post" action="/programs/{{.Platform}}/{{.Handle}}/note">
   <div class="panel-head"><h2><label for="notes-text">{{T "Notes"}}</label></h2>
@@ -15,4 +21,5 @@
   </div>
   </form>
 </section>
+{{end}}
 {{end}}{{end}}
