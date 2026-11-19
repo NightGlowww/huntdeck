@@ -45,7 +45,10 @@ col.w-name { width: 200px; }
 .queue-filters .chip.on { border-color: color-mix(in srgb, var(--accent) 55%, transparent);
   background: var(--accent-weak); color: var(--accent); font-weight: 600; }
 
-/* The one chip that is an action rather than a filter: it undoes the others.
-   Dashed edge and muted text say "not a state, a reset". */
-.queue-filters .chip.clear { border-style: dashed; color: var(--muted); }
-.queue-filters .chip.clear:hover { color: var(--text); border-color: var(--border-input); }
+/* The one chip in the row that is an action rather than a filter: it undoes
+   the others. Sentence case and a leading x say "not a state, a reset" - in
+   caps with the same shape it read as one more filter beside the others. */
+.queue-filters .chip.clear { border-style: dashed; color: var(--muted);
+  text-transform: none; letter-spacing: 0; margin-left: 4px; }
+.queue-filters .chip.clear span[aria-hidden] { margin-right: 2px; font-size: 1.15em; line-height: 1; }
+.queue-filters .chip.clear:hover { color: var(--text); border-color: var(--border-input); background: var(--surface-3); }
