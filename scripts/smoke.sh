@@ -145,6 +145,20 @@ if [ -n "$mcp" ] && [ -x "$mcp" ]; then
     ''|0) bad "MCP tools/list" "no answer" ;;
     *) ok "MCP tools/list" "$tools tools" ;;
   esac
+  # Listing the tools says nothing about calling one: a tool whose body is broken
+  # passes a list and fails a user. Ask for status and read the answer.
+  called=$(printf '%s\n%s\n' \
+    '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"smoke","version":"1"}}}' \
+    '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"huntdeck_status","arguments":{}}}' \
+    | HUNTDECK_URL="$url" HUNTDECK_PASSWORD="$password" "$mcp" 2>/dev/null | tail -1 \
+    | python3 -c 'import json,sys
+d=json.load(sys.stdin)
+t=json.loads(d["result"]["content"][0]["text"])
+print(len(t.get("platforms") or []))' 2>/dev/null || echo "")
+  case "$called" in
+    "") bad "MCP tools/call" "no answer" ;;
+    *) ok "MCP tools/call" "status: $called platforms" ;;
+  esac
 fi
 
 
