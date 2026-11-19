@@ -269,7 +269,9 @@ func (s *server) dashboard(w http.ResponseWriter, r *http.Request) {
 	tHead := time.Since(t0)
 	// The queue is derived data read straight from its table: five rows, one
 	// query, and the page answers "what now" without a second click.
-	if top, _, err := s.Store.HuntQueueTop(ctx, store.QueueFilter{}, 5, 0); err == nil {
+	// One per program: the board's five said "vinted" four times, which is five
+	// rows of the same decision. The queue page keeps the full list.
+	if top, _, err := s.Store.HuntQueueTop(ctx, store.QueueFilter{OnePerProgram: true}, 5, 0); err == nil {
 		d.Queue = s.queueViews(r, top)
 	}
 	if err := s.boardTargets(r, &d); err != nil {
