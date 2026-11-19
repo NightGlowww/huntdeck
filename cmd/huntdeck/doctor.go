@@ -332,6 +332,20 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 			ok("score history: %d day(s), newest %s", len(days), days[len(days)-1])
 		}
 	}
+	if qdays, err := s.QueueDays(ctx); err == nil {
+		// The queue's own history is the second clock: comparing it with HuntScore
+		// starts at two cuts, the verdict needs eight.
+		switch {
+		case len(qdays) == 0:
+			ok("queue history: no snapshot yet (the first rebuild writes one)")
+		case len(qdays) < 2:
+			ok("queue history: %d day(s), newest %s (the comparison starts at 2)", len(qdays), qdays[len(qdays)-1])
+		case len(qdays) < 8:
+			ok("queue history: %d day(s), newest %s (the verdict needs 8, ~%s away)", len(qdays), qdays[len(qdays)-1], humanDuration(time.Duration(8-len(qdays))*24*time.Hour))
+		default:
+			ok("queue history: %d day(s), newest %s", len(qdays), qdays[len(qdays)-1])
+		}
+	}
 	if n, computed, err := s.HuntQueueCount(ctx, store.QueueFilter{}); err == nil {
 		switch {
 		case computed.IsZero():
