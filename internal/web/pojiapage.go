@@ -54,6 +54,8 @@ func (s *server) pojiaPage(w http.ResponseWriter, r *http.Request) {
 		d.Payloads = s.pojiaCall(ctx, client, "payloads", map[string]any{"class": d.Class})
 	}
 	d.Classes = s.pojiaCall(ctx, client, "classes", nil)
+	d.ClassEntries = parsePojiaClasses(d.Classes)
+	d.ClassEntries = parsePojiaClasses(d.Classes)
 	s.render(w, r, http.StatusOK, "pojia", pageData{Title: "POJIA", Nav: "pojia", Data: d})
 }
 
@@ -149,6 +151,8 @@ type pojiaPageData struct {
 	Classes       string
 	// Failed says the search call could not be answered.
 	Failed bool
+	// ClassEntries is the class list parsed, for the chip grid.
+	ClassEntries []pojiaClassEntry
 }
 
 type pojiaReportData struct {

@@ -39,13 +39,13 @@
 {{range .Groups}}
 <section class="panel acct" id="acct-{{.Key}}">
   <div class="panel-head"><h2>{{if .Platform}}{{template "pf" .Key}}{{else}}{{.Label}}{{end}}</h2>
-    <span class="aside">{{if eq .Key "ai"}}{{T "optional"}}{{else if not .Platform}}{{T "every platform's traffic"}}{{else if .Polled}}{{T "polled"}}{{else}}{{T "not set up"}}{{end}}</span></div>
+    <span class="aside">{{if or (eq .Key "ai") (eq .Key "pojia")}}{{T "optional"}}{{else if not .Platform}}{{T "every platform's traffic"}}{{else if .Polled}}{{T "polled"}}{{else}}{{T "not set up"}}{{end}}</span></div>
   {{if .SignIn}}<div class="acct-signin signins">{{range .SignIn}}{{template "signin" .}}{{end}}</div>{{end}}
   <form method="post" action="/settings/accounts" class="acct-form" autocomplete="off">
     <input type="hidden" name="group" value="{{.Key}}">
-    {{if eq .Key "ai"}}
+    {{if or (eq .Key "ai") (eq .Key "pojia")}}
     {{/* The model is not a platform: no API section, no website login, no tuning. */}}
-    <div class="acct-sec"><h3 class="acct-legend">{{T "Endpoint and key"}}</h3>
+    <div class="acct-sec"><h3 class="acct-legend">{{if eq .Key "pojia"}}{{T "Endpoint"}}{{else}}{{T "Endpoint and key"}}{{end}}</h3>
       {{range .Fields}}{{template "acct-field" .}}{{end}}
     </div>
     {{else}}

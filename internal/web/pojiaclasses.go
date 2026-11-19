@@ -8,7 +8,7 @@ import (
 )
 
 // pojiaClassLine matches one line of POJIA's class list: "xss — 跨站脚本 ...".
-var pojiaClassLine = regexp.MustCompile(`(?m)^(\w+) — `)
+var pojiaClassLine = regexp.MustCompile(`(?m)^(\\w+) — `)
 
 // pojiaClasses makes the class list navigable: each class key becomes a link
 // that searches it here. The rest of the text is escaped.

@@ -1681,6 +1681,7 @@
     "Similar reports": "相似历史报告",
     "described features, matched to history": "按你描述的功能匹配历史",
     "or describe a feature: historically similar reports come back": "或描述一个功能点：返回历史上相似的报告",
-    "Find similar": "找相似"
+    "Find similar": "找相似",
+    "Endpoint": "端点"
   }
 }
