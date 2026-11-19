@@ -15,7 +15,9 @@
 {{end}}
 <section class="panel">
   <div class="panel-head"><h2>{{T "Start today"}}</h2><span class="sub">{{TF "%d of %d targets" (len .Rows) .Total}}</span></div>
-  {{if not .Rows}}
+  {{if and (not .Rows) .Pager.Beyond}}
+  {{template "past-end" .Pager}}
+  {{else if not .Rows}}
   <p class="empty-state">{{T "No target matches these filters."}} <a class="link" href="/queue">{{T "Clear the filters"}}</a></p>
   {{else}}
   <div class="table-wrap" id="list" tabindex="-1">

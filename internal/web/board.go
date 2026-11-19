@@ -302,7 +302,14 @@ func (s *server) dashboard(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	if polled, err := s.Store.HasFinishedPoll(ctx); err == nil && !polled {
+	switch polled, err := s.Store.HasFinishedPoll(ctx); {
+	case err != nil:
+		// The platform "last checked" times fall back to the seed import when
+		// nothing has polled, which is the claim NoPollsYet exists to prevent. A
+		// failed check cannot tell; say nothing rather than assert the wrong one.
+		s.Log.WarnContext(ctx, "board: cannot tell whether a poll has finished", "error", err)
+		d.Checked = nil
+	case !polled:
 		d.NoPollsYet = true
 	}
 	order := s.platformNames()

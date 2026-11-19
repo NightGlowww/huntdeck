@@ -1472,7 +1472,6 @@
     "Add credentials to poll your platforms": "添加凭据以轮询你的平台",
     "These reports as a .txt file": "这些报告下载为 .txt 文件",
     "Stop the running poll now. It shows as interrupted, keeps what it had saved, and the next one picks up from there": "立即停止正在运行的轮询。它会标记为已中断，保留已保存的数据，下次轮询从那里继续。",
-    "Kept in HuntDeck: it follows you to another browser, and an export or a backup carries it.": "笔记保存在 HuntDeck 里：换浏览器也还在，导出或备份都会带上它。",
     "Save note": "保存笔记",
     "not written yet": "还没有内容",
     "saved %s": "已保存 %s",
@@ -1618,6 +1617,8 @@
     "The parts are averaged by their weights, and a program that pays no bounties has that average multiplied by 0.75: the four parts of a disclosure-only program weigh to a higher number than the score it shows, and its program page says so under the parts.": "四部分按其权重取平均；无赏金项目再将该平均值乘以 0.75——因此纯披露型项目的四部分加权值会高于它显示的分数，程序页在四部分下方也写明了这一点。",
     "Another %s target(s) scored under the floor and are not listed.": "另有 %s 个目标评分低于门槛，未列入本表。",
     "The queue could not be read just now; it is rebuilt every half hour.": "本次未能读取队列；该表每半小时重建一次。",
-    "The stored note could not be read just now, so the editor stays closed: saving an empty one would replace what is there. Reload in a moment.": "本次未能读取已保存的笔记，因此编辑器保持关闭：保存空白会覆盖已有内容。请稍后重新加载。"
+    "The stored note could not be read just now, so the editor stays closed: saving an empty one would replace what is there. Reload in a moment.": "本次未能读取已保存的笔记，因此编辑器保持关闭：保存空白会覆盖已有内容。请稍后重新加载。",
+    "Clear what is saved here: the field stays empty even if your environment sets it, until you save a value or reset to .env": "清空此处保存的值：该字段将保持为空（即使 .env 中设了值），直到你再次保存或重置为 .env。",
+    "Kept in HuntDeck: it follows you to another browser, and a backup of the data directory carries it. A target export does not.": "保存在 HuntDeck 中：换浏览器也在，备份数据目录会带上它；目标导出不含笔记。"
   }
 }

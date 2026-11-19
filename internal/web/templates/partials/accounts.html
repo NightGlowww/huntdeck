@@ -11,7 +11,7 @@
     {{if eq .Kind "bool"}}<label class="toggle"><input type="checkbox" id="acct-{{.Name}}" name="{{.Name}}" value="true"{{if .On}} checked{{end}}> <span class="muted small">{{if .On}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label>
     {{else if .Secret}}<input type="password" id="acct-{{.Name}}" name="{{.Name}}" autocomplete="new-password" spellcheck="false" maxlength="4096"
       placeholder="{{if .Unreadable}}{{T "enter it again"}}{{else if .Set}}{{T "set · type to replace"}}{{else}}{{T "not set"}}{{end}}">
-      {{if or .Set .Unreadable}}<label class="acct-clear" title="{{T "Clear what is saved here, so this field falls back to your environment"}}">
+      {{if or .Set .Unreadable}}<label class="acct-clear" title="{{T "Clear what is saved here: the field stays empty even if your environment sets it, until you save a value or reset to .env"}}">
         <input type="checkbox" name="clear_{{.Name}}" value="1">
         <span class="acct-clear-face">{{T "Clear"}}</span>
       </label>{{end}}
