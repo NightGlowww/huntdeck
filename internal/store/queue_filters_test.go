@@ -61,6 +61,17 @@ func newQueueTest(t *testing.T) *queueTest {
 			}
 			q.ids[p.handle] = id
 			q.pays[p.handle] = pays
+			// One in-scope entry per program. The queue counts scope_entries to
+			// decide whether a candidate can be started; without one every candidate
+			// came back gated, so a rebuild could neither rank one nor drop one.
+			if _, err := tx.tx.ExecContext(q.ctx, `INSERT INTO scope_entries
+				(program_id, entry_key, content_hash, in_scope, asset_type, platform_asset_type,
+				 identifier, bounty_eligible, first_seen_at, updated_at, removed_at)
+				VALUES (?, ?, ?, 1, 'url', 'url', ?, 1, ?, ?, NULL)`,
+				id, "k-"+p.handle, "h-"+p.handle, p.handle+".example.com",
+				TimeFormat, TimeFormat); err != nil {
+				return err
+			}
 		}
 		return nil
 	})

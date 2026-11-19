@@ -4,7 +4,8 @@
 <section class="panel">
   <div class="panel-head"><h2>{{T "Running it"}}</h2><span class="aside">{{T "one process, no port"}}</span></div>
   <div class="panel-body">
-    <pre class="code"><code>HUNTDECK_URL={{.Base}} HUNTDECK_PASSWORD=… huntdeck-mcp</code></pre>
+    <div class="ex-head"><span>{{T "Command"}}</span><button type="button" class="ghost small" data-copy="#mcp-cmd"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
+    <pre class="code"><code id="mcp-cmd">HUNTDECK_URL={{.Base}} HUNTDECK_PASSWORD=… huntdeck-mcp</code></pre>
     <p class="muted small">{{T "It talks to the API over HTTP with those two variables, so a token works too: set HUNTDECK_TOKEN instead of the password and the gate accepts it the same way."}}</p>
   </div>
 </section>
@@ -13,7 +14,8 @@
   <div class="panel-head"><h2>{{T "Hooking it up"}}</h2><span class="aside">{{T "any MCP client"}}</span></div>
   <div class="panel-body">
     <p>{{T "Most clients take a command and its environment; this is the shape they ask for:"}}</p>
-    <pre class="code"><code>{"mcpServers": {"huntdeck": {
+    <div class="ex-head"><span>{{T "Client configuration"}}</span><button type="button" class="ghost small" data-copy="#mcp-json"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
+    <pre class="code"><code id="mcp-json">{"mcpServers": {"huntdeck": {
   "command": "huntdeck-mcp",
   "env": {"HUNTDECK_URL": "{{.Base}}", "HUNTDECK_TOKEN": "hs_…"}
 }}}</code></pre>

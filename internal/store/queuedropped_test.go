@@ -19,7 +19,14 @@ func TestQueueDroppedCountsTheFloor(t *testing.T) {
 	q := newQueueTest(t)
 	ctx := q.ctx
 	now := time.Date(2026, 11, 19, 12, 0, 0, 0, time.UTC)
-	q.seed(t, queueSeedRows(time.Now()))
+	// The shared rows all score above the floor. This one does not, and with a
+	// scope entry behind it (the fixture seeds one per program) it is a real
+	// candidate that the rebuild must drop — and count.
+	rows := append(queueSeedRows(time.Now()), queueSeed{
+		program: "acme", kind: "domain", value: "low.acme.example.com", score: 5,
+		added: time.Now().AddDate(0, 0, -3),
+	})
+	q.seed(t, rows)
 	if n, err := q.s.QueueDropped(ctx); err != nil || n != 0 {
 		t.Fatalf("before any rebuild: %d, %v", n, err)
 	}
@@ -44,6 +51,9 @@ func TestQueueDroppedCountsTheFloor(t *testing.T) {
 	blocked, err := q.s.HuntQueueGatedCount(ctx, QueueFilter{})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if dropped < 1 {
+		t.Fatalf("not counted as dropped: cands=%d ranked=%d blocked=%d dropped=%d", len(cands), ranked, blocked, dropped)
 	}
 	if want := len(cands) - ranked - blocked; dropped != want {
 		t.Errorf("dropped %d, but %d candidates minus %d ranked and %d blocked is %d", dropped, len(cands), ranked, blocked, want)

@@ -1646,6 +1646,8 @@
     "A token is minted on the API page and revoked there; the password works too, in HUNTDECK_PASSWORD. Nothing else is needed: the tools speak plain JSON-RPC on stdin and stdout, one message a line.": "令牌在 API 页签发与吊销；也可以直接用密码，放在 HUNTDECK_PASSWORD 里。此外无需任何配置：这些工具在 stdin/stdout 上讲纯 JSON-RPC，一行一条消息。",
     "How many targets are blocked could not be read just now.": "本次未能读取有多少目标被挡住。",
     "Nothing is blocked among the targets this filter keeps.": "当前筛选保留的目标中，没有无法开工的。",
-    "This list comes from the same registry the server answers tools/list from, so it cannot list a tool that does not exist or miss one that does. A server started with HUNTDECK_MCP_READONLY=1 leaves out the ones marked as changing data.": "此列表来自服务端回答 tools/list 的同一份注册表，因此既不会列出不存在的工具，也不会漏掉已有的工具。以 HUNTDECK_MCP_READONLY=1 启动的服务会略去标记为「会修改数据」的那些。"
+    "This list comes from the same registry the server answers tools/list from, so it cannot list a tool that does not exist or miss one that does. A server started with HUNTDECK_MCP_READONLY=1 leaves out the ones marked as changing data.": "此列表来自服务端回答 tools/list 的同一份注册表，因此既不会列出不存在的工具，也不会漏掉已有的工具。以 HUNTDECK_MCP_READONLY=1 启动的服务会略去标记为「会修改数据」的那些。",
+    "Command": "命令",
+    "Client configuration": "客户端配置"
   }
 }
