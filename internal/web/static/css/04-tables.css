@@ -5,12 +5,12 @@ th, td { padding: 7px 12px; text-align: left; vertical-align: middle; }
 th:first-child, td:first-child { padding-left: 16px; }
 th:last-child, td:last-child { padding-right: 16px; }
 thead th { height: 34px; background: var(--surface-2); border-bottom: 1px solid var(--border);
-  color: var(--muted); font-size: 10.5px; font-weight: 650; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+  color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 650; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
 tbody tr { border-bottom: 1px solid var(--border); }
 tbody tr:last-child { border-bottom: 0; }
 tbody tr:hover { background: var(--row-hover); }
 td.num, th.num { text-align: right; }
-td.num { font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+td.num { font-family: var(--mono); font-size: calc(12.5px * var(--fs, 1)); font-variant-numeric: tabular-nums; }
 td.shrink, th.shrink { width: 1%; white-space: nowrap; }
 .zero { color: var(--faint); }
 /* A cell or value that's only a "—" shows its tooltip (why there's
@@ -69,10 +69,10 @@ col.w-you { width: 112px; }
    says what moved it. No script, and it works on a card as well as in a table. */
 .why-score > summary { cursor: pointer; list-style: none; font-variant-numeric: tabular-nums; }
 .why-score > summary::-webkit-details-marker { display: none; }
-.why-score > summary::after { content: "▾"; margin-left: 4px; font-size: 9px; opacity: .55; }
+.why-score > summary::after { content: "▾"; margin-left: 4px; font-size: calc(9px * var(--fs, 1)); opacity: .55; }
 .why-score[open] > summary::after { content: "▴"; }
 .why-score .factors { margin: 6px 0 0; padding: 0; list-style: none; text-align: left; font-weight: 400; }
-.why-score .factors li { display: flex; gap: 6px; justify-content: space-between; white-space: nowrap; font-size: 11px; }
+.why-score .factors li { display: flex; gap: 6px; justify-content: space-between; white-space: nowrap; font-size: calc(11px * var(--fs, 1)); }
 .why-score .fname { color: var(--text-2); }
 
 /* The poll history has ten columns and, at a laptop width, they do not fit: the

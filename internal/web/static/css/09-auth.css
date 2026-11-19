@@ -20,22 +20,22 @@ body.auth {
   box-shadow: 0 30px 70px -34px rgb(3 8 20 / .45), 0 1px 0 color-mix(in srgb, #fff 6%, transparent) inset;
   backdrop-filter: blur(14px);
 }
-.auth-brand { padding: 0; font-size: 15px; }
+.auth-brand { padding: 0; font-size: calc(15px * var(--fs, 1)); }
 .auth-brand .logo { width: 30px; height: 30px; border-radius: 8px; }
 .auth-brand .word b { color: var(--accent); }
-.auth-card h1 { margin: 22px 0 4px; font-size: 22px; font-weight: 650; letter-spacing: -0.02em; }
-.auth-sub { margin: 0 0 18px; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.auth-card h1 { margin: 22px 0 4px; font-size: calc(22px * var(--fs, 1)); font-weight: 650; letter-spacing: -0.02em; }
+.auth-sub { margin: 0 0 18px; color: var(--muted); font-size: calc(13.5px * var(--fs, 1)); line-height: 1.5; }
 .auth-err {
-  margin: 0 0 14px; padding: 9px 11px; border-radius: 8px; font-size: 13px; line-height: 1.45;
+  margin: 0 0 14px; padding: 9px 11px; border-radius: 8px; font-size: calc(13px * var(--fs, 1)); line-height: 1.45;
   color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--bad) 32%, var(--border));
 }
-.auth-form label { display: block; margin-bottom: 6px; color: var(--text-2); font-size: 12.5px; font-weight: 600; }
+.auth-form label { display: block; margin-bottom: 6px; color: var(--text-2); font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; }
 .auth-field { position: relative; }
 .auth-field input {
   width: 100%; box-sizing: border-box; height: 44px; padding: 0 46px 0 12px;
   border: 1px solid var(--border-input); border-radius: 9px;
-  background: var(--surface-2); color: var(--text); font: inherit; font-size: 14.5px;
+  background: var(--surface-2); color: var(--text); font: inherit; font-size: calc(14.5px * var(--fs, 1));
 }
 .auth-field input:focus { border-color: var(--accent); outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 1px; }
 .auth-reveal {
@@ -45,20 +45,20 @@ body.auth {
 }
 .auth-reveal:hover { background: var(--surface-3); color: var(--text); }
 .auth-reveal .i { width: 17px; height: 17px; }
-.auth-hint { margin: 8px 0 18px; color: var(--faint); font-size: 12px; }
+.auth-hint { margin: 8px 0 18px; color: var(--faint); font-size: calc(12px * var(--fs, 1)); }
 .auth-submit {
   width: 100%; height: 44px; border: 1px solid color-mix(in srgb, var(--accent) 70%, #000);
   border-radius: 9px; background: var(--accent); color: var(--on-accent);
-  font: inherit; font-size: 14.5px; font-weight: 600; cursor: pointer;
+  font: inherit; font-size: calc(14.5px * var(--fs, 1)); font-weight: 600; cursor: pointer;
   box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--accent) 80%, transparent);
 }
 .auth-submit:hover { background: color-mix(in srgb, var(--accent) 88%, var(--text)); }
 .auth-submit:active { transform: translateY(1px); }
-.auth-foot { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; color: var(--faint); font-size: 12px; }
+.auth-foot { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; color: var(--faint); font-size: calc(12px * var(--fs, 1)); }
 .auth-langs { display: flex; align-items: center; gap: 2px; }
 .auth-langs button {
   padding: 2px 7px; border: 0; border-radius: 6px; background: transparent;
-  color: var(--muted); font: inherit; font-size: 12px; cursor: pointer;
+  color: var(--muted); font: inherit; font-size: calc(12px * var(--fs, 1)); cursor: pointer;
 }
 .auth-langs button:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
 .auth-langs button[aria-current="true"] { color: var(--accent); font-weight: 600; cursor: default; }
@@ -70,5 +70,5 @@ body.auth {
 .auth-lock .i { width: 15px; height: 15px; stroke-width: 1.8; }
 html[lang="zh"] .auth-card h1 { letter-spacing: 0; }
 /* Caps Lock is on: the hint under the password field says so. */
-.auth-caps { margin: 6px 0 0; color: var(--warn, #b7791f); font-size: 12px; }
+.auth-caps { margin: 6px 0 0; color: var(--warn, #b7791f); font-size: calc(12px * var(--fs, 1)); }
 .auth-caps::before { content: "⇪ "; }

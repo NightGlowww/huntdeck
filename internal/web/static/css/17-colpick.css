@@ -29,17 +29,17 @@ table.surface:is([data-hide~="pay"], [data-show~="pay"]) .kind-under .lbl.pay { 
 .colpick .grip:hover, .colpick .grip:focus-visible { background: var(--row-hover); color: var(--text); }
 .colpick .grip .i { width: 14px; height: 14px; stroke-width: 2.4; }
 .colpick span.grip { cursor: default; }
-.colpick .cl { padding: 4px 6px; color: var(--text-2); font-size: 13px; }
-.colpick .cl.gl { color: var(--muted); font-size: 12px; font-weight: 600; }
+.colpick .cl { padding: 4px 6px; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); }
+.colpick .cl.gl { color: var(--muted); font-size: calc(12px * var(--fs, 1)); font-weight: 600; }
 .colpick .crow.fixed .cl { color: var(--muted); }
-.colpick .pin { margin-left: auto; padding-right: 6px; color: var(--faint); font-size: 11.5px; }
+.colpick .pin { margin-left: auto; padding-right: 6px; color: var(--faint); font-size: calc(11.5px * var(--fs, 1)); }
 .colpick li.dragging > .crow { background: var(--accent-weak); }
 .colpick.dragging, .colpick.dragging * { cursor: grabbing; user-select: none; }
 /* Plain rows, not the bordered toggles forms use (.check). */
 .colpick .check, .colpick .check:has(input:checked) { display: flex; align-items: center; gap: 8px; height: auto; padding: 4px 6px;
-  border: 0; border-radius: 5px; background: none; color: var(--text-2); font-size: 13px; cursor: pointer; }
+  border: 0; border-radius: 5px; background: none; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); cursor: pointer; }
 .colpick .check:hover { background: var(--row-hover); color: var(--text); }
 .colpick .check input { margin: 0; accent-color: var(--accent); }
 .colpick .menu-reset { margin-top: 4px; padding: 6px; border: 0; border-top: 1px solid var(--border); background: none; color: var(--accent);
-  font: inherit; font-size: 12.5px; text-align: left; cursor: pointer; }
+  font: inherit; font-size: calc(12.5px * var(--fs, 1)); text-align: left; cursor: pointer; }
 .colpick .menu-reset:hover { text-decoration: underline; }

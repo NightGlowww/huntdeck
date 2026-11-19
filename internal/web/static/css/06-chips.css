@@ -26,7 +26,7 @@ col.w-hunt { width: 108px; }
 /* One hue: the parts are always in the same order (fresh, competition,
    payout, response) and named in tooltips and on the program page. */
 .huntbars rect { fill: var(--info); }
-.huntscore .panel-head h2 .hunt { margin-left: 8px; font-size: 18px; }
+.huntscore .panel-head h2 .hunt { margin-left: 8px; font-size: calc(18px * var(--fs, 1)); }
 .huntparts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px 28px; padding: 14px 18px 16px; }
 .hp-head { display: flex; align-items: center; gap: 10px; }
 .hp-name { font-weight: 600; min-width: 92px; cursor: help; }
@@ -34,7 +34,7 @@ col.w-hunt { width: 108px; }
 .hp-bar .track { fill: var(--surface-3); }
 .hp-bar .fill { fill: var(--info); }
 .hp-score { font-family: var(--mono); font-weight: 600; min-width: 3ch; text-align: right; }
-.hp-weight { color: var(--muted); font-size: 12px; margin-left: auto; }
+.hp-weight { color: var(--muted); font-size: calc(12px * var(--fs, 1)); margin-left: auto; }
 col.w-type-s { width: 122px; }
 col.w-num-m { width: 90px; }
 col.w-name { width: 200px; }

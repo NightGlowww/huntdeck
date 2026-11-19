@@ -5,7 +5,7 @@
   .brand { padding: 4px 0 14px; }
   .brand .word, .nav .group, .version, .demo-note .dn-more { display: none; }
   .nav .label, .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* icons alone show, the labels still name them */
-  .demo-note { padding: 4px 2px; font-size: 11px; }
+  .demo-note { padding: 4px 2px; font-size: calc(11px * var(--fs, 1)); }
   .nav a { justify-content: center; width: 42px; padding: 0; }
   .sidebar .foot { border-top: 0; width: 100%; align-items: center; }
   /* The rail is 60px: the switcher stacks, the sign-out shortens, and the
@@ -13,8 +13,8 @@
   .lang-switch { flex-direction: column; gap: 0; padding: 0; }
   .lang-switch .i, .lang-switch .full { display: none; }
   .lang-switch .short { display: inline; }
-  .lang-switch button { font-size: 11px; padding: 1px 5px; }
-  .sign-out button { height: 28px; padding: 0 4px; font-size: 11px; }
+  .lang-switch button { font-size: calc(11px * var(--fs, 1)); padding: 1px 5px; }
+  .sign-out button { height: 28px; padding: 0 4px; font-size: calc(11px * var(--fs, 1)); }
   .sign-out .i { display: block; }
   .sign-out .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .omni kbd { display: none; }
@@ -30,7 +30,7 @@
   .sidebar .foot { padding: 0; }
   .topbar { position: static; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 0 14px; } /* search, then the buttons beside it */
   .tb-title { display: none; } /* the sidebar marks the page */
-  .m-heading { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; margin: 0 0 12px; font-size: 18px; font-weight: 650; line-height: 1.25; }
+  .m-heading { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; margin: 0 0 12px; font-size: calc(18px * var(--fs, 1)); font-weight: 650; line-height: 1.25; }
   .vis-toggle-m { display: block; } /* the title bar's toggle, here instead */
   .tb-right { container-type: normal; } /* sized by its buttons (their labels are already hidden) */
   .tb-right .updated { display: none; }
@@ -49,7 +49,7 @@
   .js .sidebar { position: relative; z-index: 7; justify-content: space-between; overflow: visible; }
   .js .brand .word { display: inline; }
   .js .nav-toggle:not([hidden]) { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border: 1px solid var(--border);
-    border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: 13px; font-weight: 550; cursor: pointer; }
+    border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: calc(13px * var(--fs, 1)); font-weight: 550; cursor: pointer; }
   .js .nav-toggle[aria-expanded="true"] { border-color: var(--accent); background: var(--accent-weak); }
   .js .nav, .js .sidebar .foot { display: none; }
   .js .nav-toggle { margin-left: auto; }

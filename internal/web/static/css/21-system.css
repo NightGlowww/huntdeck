@@ -2,8 +2,8 @@
    notifications.html, notification.html, methodology.html). */
 
 /* Help that belongs to a panel, under its content. */
-.panel-foot { margin: 0; padding: 10px 16px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12.5px; line-height: 1.5; }
-.panel-foot code { font-size: 11.5px; }
+.panel-foot { margin: 0; padding: 10px 16px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); line-height: 1.5; }
+.panel-foot code { font-size: calc(11.5px * var(--fs, 1)); }
 /* Two panels side by side; one above the other when narrow. */
 .pair2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
 .pair2 > .panel + .panel { margin-top: 0; }
@@ -17,12 +17,12 @@
 /* Platforms: each credential's sign-in on a line; a browser sync is a
    row under its platform's. */
 .signins { display: grid; gap: 4px; }
-.signin { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 13px; }
+.signin { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: calc(13px * var(--fs, 1)); }
 .signin .sn { color: var(--text); font-weight: 500; }
 .signin-why { max-width: 460px; margin: 2px 0 2px; color: var(--bad); line-height: 1.4; white-space: normal; }
 table.schedule tr.has-sub td { border-bottom: 0; }
 table.schedule tr.sub td { padding-top: 4px; padding-bottom: 10px; border-top: 0; background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
-.subl { display: inline-flex; align-items: center; gap: 8px; padding-left: 4px; color: var(--text-2); font-size: 13px; }
+.subl { display: inline-flex; align-items: center; gap: 8px; padding-left: 4px; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); }
 .subl::before { content: ""; width: 10px; height: 10px; margin-top: -8px; border-left: 1.5px solid var(--border); border-bottom: 1.5px solid var(--border); border-radius: 0 0 0 3px; }
 /* Narrower, the table keeps to the page: what's known about each credential
    goes to its tooltip (a refusal's reason stays), then the headings shorten
@@ -59,12 +59,12 @@ table.runs td:nth-child(8) { white-space: normal; }
 .chip.stalled { background: var(--bad-weak); color: var(--bad); }
 
 /* ---------- Methodology: where each number comes from, then a card a topic ---------- */
-.src { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 10px; font-size: 11.5px; font-weight: 650; white-space: nowrap; }
+.src { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 10px; font-size: calc(11.5px * var(--fs, 1)); font-weight: 650; white-space: nowrap; }
 .src.good { background: var(--good-weak); color: var(--good); }
 .src.acc { background: var(--accent-weak); color: var(--accent); }
 .src.warn { background: var(--warn-weak); color: var(--warn); }
 .src.none { background: var(--surface-3); color: var(--faint); }
-.srcd { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.srcd { display: block; margin-top: 3px; color: var(--muted); font-size: calc(12px * var(--fs, 1)); line-height: 1.4; }
 table.glance td { vertical-align: top; }
 table.glance td:first-child { color: var(--text); font-weight: 600; }
 .panel-head .aside .src { margin-left: 4px; }
@@ -81,7 +81,7 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 .nrow:last-child { border-bottom: 0; }
 .nrow:hover { background: var(--surface-2); }
 .nrow.off .nlogo { opacity: .5; }
-.nlogo { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9px; background: var(--accent); color: var(--on-accent); font-size: 16px; font-weight: 700; }
+.nlogo { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9px; background: var(--accent); color: var(--on-accent); font-size: calc(16px * var(--fs, 1)); font-weight: 700; }
 .nlogo.discord { background: #5865f2; color: #fff; }
 .nlogo.telegram { background: #229ed9; color: #fff; }
 .nmain { min-width: 0; }
@@ -100,20 +100,20 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 
 /* An example message, as a chat would show it. */
 .msgs { display: grid; gap: 12px; }
-.msg { display: grid; gap: 4px; min-width: 0; padding: 10px 14px 11px; border-left: 4px solid var(--accent); border-radius: 8px; background: var(--surface-2); font-size: 13px; }
+.msg { display: grid; gap: 4px; min-width: 0; padding: 10px 14px 11px; border-left: 4px solid var(--accent); border-radius: 8px; background: var(--surface-2); font-size: calc(13px * var(--fs, 1)); }
 .msg.good { border-left-color: var(--good); }
 .msg.warn { border-left-color: var(--warn); }
 .msg.bad { border-left-color: var(--bad); }
 .msg-t { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
 .msg-t b { min-width: 0; overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-.msg-pf { flex: none; color: var(--muted); font-size: 12px; }
-.msg-at { flex: none; margin-left: auto; color: var(--faint); font-size: 11.5px; white-space: nowrap; }
+.msg-pf { flex: none; color: var(--muted); font-size: calc(12px * var(--fs, 1)); }
+.msg-at { flex: none; margin-left: auto; color: var(--faint); font-size: calc(11.5px * var(--fs, 1)); white-space: nowrap; }
 .msg-l { color: var(--text-2); overflow-wrap: anywhere; }
 .msg-p { color: var(--text); font-weight: 600; }
 .msg-p:hover { color: var(--accent); }
 .msg-assets { display: grid; gap: 3px; margin: 2px 0 0; padding: 0; list-style: none; }
 .msg-assets code { overflow-wrap: anywhere; }
-.pv-stat { margin: 0; font-size: 13px; }
+.pv-stat { margin: 0; font-size: calc(13px * var(--fs, 1)); }
 
 /* ---------- A channel's form, its preview beside it ---------- */
 .fgrid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 16px; align-items: start; }
@@ -126,7 +126,7 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 .channel-form { display: grid; gap: 16px; min-width: 0; }
 .evgroups { display: grid; gap: 16px; }
 .evg { min-width: 0; margin: 0; padding: 0; border: 0; }
-.evg legend { margin-bottom: 8px; padding: 0; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.evg legend { margin-bottom: 8px; padding: 0; color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 .evgroups .events-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
 .actbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 /* Save comes first in the form, so Enter saves; it's shown last. */
@@ -160,7 +160,7 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
   table.glance tr:last-child { border-bottom: 0; }
   table.glance td { border-bottom: 0; }
   table.glance td:first-child { grid-column: 1 / -1; padding-bottom: 0; }
-  table.glance td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 4px; color: var(--muted); font-size: 10.5px;
+  table.glance td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 4px; color: var(--muted); font-size: calc(10.5px * var(--fs, 1));
     font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 }
 @media (max-width: 1000px) {
@@ -187,8 +187,8 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 .own-scope { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .own-scope.one { grid-template-columns: minmax(0, 1fr); }
 .own-scope label { display: grid; gap: 6px; }
-.own-scope label > span:first-child { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-.own-scope.one textarea { white-space: pre-wrap; font-family: inherit; font-size: 13px; }
+.own-scope label > span:first-child { color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.own-scope.one textarea { white-space: pre-wrap; font-family: inherit; font-size: calc(13px * var(--fs, 1)); }
 .own-form .act-delete { margin-right: auto; }
 .own-form input.amount { width: 120px; }
 .own-note { margin: 12px 0 0; }
@@ -196,7 +196,7 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 /* The delivery history's filters: status chips and a channel select. */
 .nfilters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 14px; border-bottom: 1px solid var(--border); }
 .nfilters .nfchan { display: flex; align-items: center; gap: 6px; margin-left: auto; }
-.nfilters select { height: 30px; padding: 0 8px; border: 1px solid var(--border-input); border-radius: 7px; background: var(--surface); color: var(--text); font: inherit; font-size: 12.5px; }
+.nfilters select { height: 30px; padding: 0 8px; border: 1px solid var(--border-input); border-radius: 7px; background: var(--surface); color: var(--text); font: inherit; font-size: calc(12.5px * var(--fs, 1)); }
 /* The channel card's lines: what it sends, its delivery counts, then its
    schedule — each with a little room, so three short lines don't read as
    one block. */

@@ -32,18 +32,18 @@
 .ffold { display: none; flex: none; }
 .ffold .i { width: 15px; height: 15px; }
 .ffold b { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent);
-  color: var(--on-accent); font-size: 11px; font-weight: 650; }
+  color: var(--on-accent); font-size: calc(11px * var(--fs, 1)); font-weight: 650; }
 .ffold .chev { transform: rotate(90deg); }
 .ffold .hide { display: none; }
 .fsearch input[type="search"] { height: 32px; }
 .fsearch .fnot { margin-top: 6px; }
-.fsearch .fnot input[type="search"] { height: 30px; font-size: 12.5px; }
+.fsearch .fnot input[type="search"] { height: 30px; font-size: calc(12.5px * var(--fs, 1)); }
 .fform { display: flex; gap: 6px; margin: 6px 0 2px; }
-.fform input { flex: 1; min-width: 0; height: 28px; font-size: 12.5px; }
+.fform input { flex: 1; min-width: 0; height: 28px; font-size: calc(12.5px * var(--fs, 1)); }
 .facet { padding: 10px 0 8px; border-top: 1px solid var(--border); }
 .fgroups > .facet:first-child { border-top: 0; }
 .ft { margin: 0 4px 5px; color: var(--muted); font: 650 10.5px var(--sans); letter-spacing: .07em; text-transform: uppercase; }
-.fc { display: flex; align-items: center; gap: 8px; padding: 3px 4px; border-radius: 5px; color: var(--text-2); font-size: 13px; }
+.fc { display: flex; align-items: center; gap: 8px; padding: 3px 4px; border-radius: 5px; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); }
 .fc:hover { background: var(--row-hover); color: var(--text); }
 .fc .box { flex: none; display: grid; place-items: center; width: 14px; height: 14px; border: 1.5px solid var(--border-2); border-radius: 4px; }
 .fc.on { color: var(--text); font-weight: 550; }
@@ -53,20 +53,20 @@
 .fc .box.round { border-radius: 50%; }
 .fc.on .box.round::after { width: 6px; height: 6px; margin: 0; border: 0; border-radius: 50%; background: var(--on-accent); transform: none; }
 .fc .fl { flex: 1; display: flex; align-items: center; gap: 6px; min-width: 0; }
-.fc .fl .ptag { min-width: 30px; height: 17px; font-size: 9.5px; }
+.fc .fl .ptag { min-width: 30px; height: 17px; font-size: calc(9.5px * var(--fs, 1)); }
 .fc em { color: var(--muted); font: 12px var(--mono); font-style: normal; font-variant-numeric: tabular-nums; }
 
 .activef { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
-.af { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border-radius: 12px; background: var(--accent-weak); color: var(--accent); font-size: 12px; font-weight: 600; }
+.af { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 10px; border-radius: 12px; background: var(--accent-weak); color: var(--accent); font-size: calc(12px * var(--fs, 1)); font-weight: 600; }
 .af:hover { box-shadow: inset 0 0 0 1px var(--accent); }
 .activef .grow { flex: 1; }
-.activef .total { margin-right: 4px; color: var(--text); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.activef .total { margin-right: 4px; color: var(--text); font-size: calc(13px * var(--fs, 1)); font-weight: 600; font-variant-numeric: tabular-nums; }
 /* The bar heading every list: its count, what it shows, active filters,
    and on some pages quick sorts at the right. */
-.activef .what { color: var(--muted); font-size: 12.5px; }
+.activef .what { color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); }
 .activef .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
 .activef .qv { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border: 1px solid var(--border); border-radius: 12px;
-  color: var(--text-2); font-size: 12px; font-weight: 550; white-space: nowrap; }
+  color: var(--text-2); font-size: calc(12px * var(--fs, 1)); font-weight: 550; white-space: nowrap; }
 .activef .qv:hover { border-color: var(--accent); color: var(--accent); }
 .activef .qv.on { border-color: var(--accent); background: var(--accent-weak); color: var(--accent); }
 
@@ -89,9 +89,9 @@
 /* Average bounty has its own column where the box has room for it (about
    1900px windows); narrower, it's the Bounty column's second line. */
 .plist-table .c-avg { display: none; }
-.plist-table .avg-under { display: block; color: var(--muted); font-size: 11.5px; }
+.plist-table .avg-under { display: block; color: var(--muted); font-size: calc(11.5px * var(--fs, 1)); }
 /* Hunters: those earning points in the last 90 days under the count. */
-.plist-table .h90 { display: block; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.plist-table .h90 { display: block; color: var(--muted); font-size: calc(11.5px * var(--fs, 1)); white-space: nowrap; }
 /* Rows are as tall as the other lists' (20-lists.css); with the average
    as a second line, every row keeps room for it, so rows with and without
    one are the same height. */
@@ -144,10 +144,10 @@
    headings. */
 .plist-table :is(th, td):is(.c-paid, .c-comp, .c-resolved) { padding-left: 8px; padding-right: 8px; text-align: center; }
 .plist-table td.charted { padding-top: 3px; padding-bottom: 3px; }
-.plist-table td.charted .v { display: block; font-size: 12px; line-height: 1.25; }
+.plist-table td.charted .v { display: block; font-size: calc(12px * var(--fs, 1)); line-height: 1.25; }
 .plist-table td.charted .tchart { display: block; max-width: 190px; margin: 0 auto; }
 .plist-table td.charted .tchart svg { width: 100%; height: 26px; }
-.plist-table th small.sorthint { display: block; margin-top: 2px; color: var(--accent); font-size: 10px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.plist-table th small.sorthint { display: block; margin-top: 2px; color: var(--accent); font-size: calc(10px * var(--fs, 1)); font-weight: 500; letter-spacing: 0; text-transform: none; }
 /* A figure saved on one day so far: its number, the dotted placeholder
    under it until the line starts. */
 .plist-table td.firstday .tchart { display: block; max-width: 190px; margin: 1px auto 0; }
@@ -265,7 +265,7 @@
 
 /* A chip row's own label (the Scope tab's two rows: type, then when it was
    added), so the second row reads as a filter rather than more types. */
-.chipbar-label { align-self: center; margin-right: 2px; color: var(--muted); font-size: 12px; }
+.chipbar-label { align-self: center; margin-right: 2px; color: var(--muted); font-size: calc(12px * var(--fs, 1)); }
 
 /* A quick-filter chip's count (Scope changes N): separated, and a little
    quieter than the label, so the label doesn't read as one word. */

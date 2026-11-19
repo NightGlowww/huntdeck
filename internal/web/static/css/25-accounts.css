@@ -7,16 +7,16 @@
 .acct-form { display: grid; gap: 12px; padding: 14px 16px; }
 .acct-field { display: grid; grid-template-columns: 190px minmax(0, 1fr) 108px; align-items: center; gap: 4px 12px; }
 .acct-label { display: grid; gap: 1px; color: var(--text-2); font-weight: 500; line-height: 1.35; }
-.acct-label code { justify-self: start; padding: 0; background: none; color: var(--muted); font-size: 10.5px; font-weight: 400; overflow-wrap: anywhere; }
+.acct-label code { justify-self: start; padding: 0; background: none; color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 400; overflow-wrap: anywhere; }
 .acct-input { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.acct-input input[type="text"], .acct-input input[type="password"] { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12.5px; }
+.acct-input input[type="text"], .acct-input input[type="password"] { flex: 1; min-width: 0; font-family: var(--mono); font-size: calc(12.5px * var(--fs, 1)); }
 /* The Clear action beside a saved value: a small ghost button, not a bare
    checkbox. The input stays a checkbox (no script needed) and only its face
    is drawn; checked shows what the Save will do. */
 .acct-clear { position: relative; display: inline-flex; flex: none; }
 .acct-clear input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
 .acct-clear-face { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 9px; border: 1px solid var(--border-input);
-  border-radius: 8px; color: var(--text-2); font-size: 12px; line-height: 1; white-space: nowrap;
+  border-radius: 8px; color: var(--text-2); font-size: calc(12px * var(--fs, 1)); line-height: 1; white-space: nowrap;
   transition: color .12s, border-color .12s, background .12s; }
 .acct-clear-face .i { width: 12px; height: 12px; }
 .acct-clear:hover .acct-clear-face { color: var(--text); border-color: var(--muted); }
@@ -50,11 +50,11 @@
 @media (prefers-reduced-motion: reduce) { .button.is-busy::after, button.is-busy::after { animation: none; } }
 
 /* Where a saved value comes from: quieter than the field it belongs to. */
-.acct-src .chip { font-size: 10px; letter-spacing: .03em; padding: 1px 7px; opacity: .85; }
+.acct-src .chip { font-size: calc(10px * var(--fs, 1)); letter-spacing: .03em; padding: 1px 7px; opacity: .85; }
 
 /* Where a value comes from, as a quiet note rather than a badge: the field is
    the thing to read, this only says where it came from. */
-.acct-src .chip { border: 0; background: none; padding: 0; color: var(--muted); font-size: 11px; letter-spacing: 0; opacity: 1; }
+.acct-src .chip { border: 0; background: none; padding: 0; color: var(--muted); font-size: calc(11px * var(--fs, 1)); letter-spacing: 0; opacity: 1; }
 .acct-src .chip.ok { color: var(--good); }
 .acct-src .chip.ok::before { content: "✓"; margin-right: 4px; }
 .acct-src .chip.failed { color: var(--bad); }
@@ -68,20 +68,20 @@
 .acct-grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1500px) { .acct-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
 .acct { display: flex; flex-direction: column; min-width: 0; }
-.acct .panel-head h2 { font-size: 15.5px; }
+.acct .panel-head h2 { font-size: calc(15.5px * var(--fs, 1)); }
 .acct-form { display: flex; flex-direction: column; gap: 18px; padding: 16px 18px 18px; }
 .acct-sec { border: 0; margin: 0; padding: 0; display: grid; gap: 14px; }
-.acct-sec > legend { padding: 0 0 2px; font-size: 11px; font-weight: 700; letter-spacing: .07em;
+.acct-sec > legend { padding: 0 0 2px; font-size: calc(11px * var(--fs, 1)); font-weight: 700; letter-spacing: .07em;
   text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .acct-sec > legend .muted { text-transform: none; letter-spacing: 0; font-weight: 500; }
 .acct-more { border-top: 1px solid var(--border); padding-top: 12px; }
-.acct-more > summary { cursor: pointer; font-size: 12.5px; color: var(--text-2); padding: 2px 0; }
+.acct-more > summary { cursor: pointer; font-size: calc(12.5px * var(--fs, 1)); color: var(--text-2); padding: 2px 0; }
 .acct-more[open] > summary { margin-bottom: 12px; }
 .acct-field { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr) auto;
   gap: 10px 14px; align-items: center; }
 .acct-field .acct-help { grid-column: 2 / -1; margin: -4px 0 0; }
-.acct-label { font-size: 13px; font-weight: 550; display: grid; gap: 1px; }
-.acct-label code { font-size: 10.5px; color: var(--muted); font-weight: 400; }
+.acct-label { font-size: calc(13px * var(--fs, 1)); font-weight: 550; display: grid; gap: 1px; }
+.acct-label code { font-size: calc(10.5px * var(--fs, 1)); color: var(--muted); font-weight: 400; }
 .acct-input input[type="text"], .acct-input input[type="password"] { width: 100%; }
 .acct-src .src-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
   background: var(--ok, #2e8b57); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok, #2e8b57) 18%, transparent); }
@@ -108,7 +108,7 @@
 }
 
 
-.acct-legend { grid-column: 1 / -1; margin: 0; padding: 0 0 4px; font-size: 11px; font-weight: 700;
+.acct-legend { grid-column: 1 / -1; margin: 0; padding: 0 0 4px; font-size: calc(11px * var(--fs, 1)); font-weight: 700;
   letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: flex; gap: 8px;
   align-items: baseline; flex-wrap: wrap; }
 .acct-legend .muted { text-transform: none; letter-spacing: 0; font-weight: 500; }

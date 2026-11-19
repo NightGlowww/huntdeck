@@ -21,10 +21,10 @@ p { margin: 0 0 10px; }
 code, kbd, .mono { font-family: var(--mono); font-size: 0.92em; }
 code { padding: 1px 5px; border-radius: 4px; background: var(--surface-3); color: var(--text-2); }
 kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border: 1px solid var(--border-input);
-  border-bottom-width: 2px; border-radius: 5px; color: var(--muted); font-size: 11px; background: var(--surface); }
+  border-bottom-width: 2px; border-radius: 5px; color: var(--muted); font-size: calc(11px * var(--fs, 1)); background: var(--surface); }
 .muted { color: var(--muted); }
 .faint { color: var(--faint); }
-.small { font-size: 12px; }
+.small { font-size: calc(12px * var(--fs, 1)); }
 .nowrap { white-space: nowrap; }
 .link { color: var(--accent); }
 /* In running text a link is underlined too, so it isn't told apart by its
@@ -59,13 +59,13 @@ main.content:focus { outline: none; }
    a couple of seconds. */
 .toast { position: fixed; left: 50%; bottom: 26px; z-index: 90; transform: translate(-50%, 10px);
   padding: 9px 16px; border: 1px solid var(--border-input); border-radius: 999px; background: var(--surface);
-  color: var(--text); font-size: 13px; box-shadow: 0 8px 28px rgb(0 0 0 / .18); opacity: 0; pointer-events: none;
+  color: var(--text); font-size: calc(13px * var(--fs, 1)); box-shadow: 0 8px 28px rgb(0 0 0 / .18); opacity: 0; pointer-events: none;
   transition: opacity .14s ease, transform .14s ease; }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
 /* A field's own error, under it (app.js adds it when the form is submitted
    with something wrong). */
-.field-error { margin: 4px 0 0; color: var(--bad); font-size: 12px; }
+.field-error { margin: 4px 0 0; color: var(--bad); font-size: calc(12px * var(--fs, 1)); }
 input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"] { border-color: var(--bad); }
 /* A row ticked by a press and hold: a quick flash so the tick isn't the
    only sign it worked. */
@@ -84,3 +84,11 @@ tr.longpress > td { background: var(--accent-weak); transition: background .2s e
 button.link { background: none; border: 0; padding: 2px 0; color: var(--accent); cursor: pointer; }
 button.link:hover { text-decoration: underline; }
 button.link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+/* Settings › Display › Text size: every font size above is multiplied by --fs.
+   Text grows and wraps; boxes keep their proportions, so nothing clips. */
+:root { --fs: 1; }
+:root[data-fs="sm"] { --fs: .94; }
+:root[data-fs="lg"] { --fs: 1.1; }
+:root[data-fs="xl"] { --fs: 1.22; }
+

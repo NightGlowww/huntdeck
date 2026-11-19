@@ -6,7 +6,7 @@
 .kb-help { width: min(420px, calc(100vw - 32px)); padding: 18px 20px; border: 1px solid var(--border-input); border-radius: var(--radius);
   background: var(--surface); color: var(--text); box-shadow: 0 16px 48px rgba(0, 0, 0, .3); }
 .kb-help::backdrop { background: rgba(0, 0, 0, .35); }
-.kb-help h2 { margin: 0 0 12px; font-size: 15px; }
-.kb-help dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0 0 16px; font-size: 13px; }
+.kb-help h2 { margin: 0 0 12px; font-size: calc(15px * var(--fs, 1)); }
+.kb-help dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0 0 16px; font-size: calc(13px * var(--fs, 1)); }
 .kb-help dt { white-space: nowrap; color: var(--muted); }
 .kb-help dd { margin: 0; }

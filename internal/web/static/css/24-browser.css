@@ -8,13 +8,13 @@
 .bwr-tab .signin { min-width: 0; }
 .bwr-tab .signin .sn { display: none; } /* the button names it */
 .bwr-tab .signin .sp { display: inline; overflow: hidden; text-overflow: ellipsis; }
-.bwr-err { margin: 0; padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--bad-weak); color: var(--bad); font-size: 13px; }
+.bwr-err { margin: 0; padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--bad-weak); color: var(--bad); font-size: calc(13px * var(--fs, 1)); }
 .bwr-note { margin: 0; padding: 18px 16px; }
 /* As wide as the panel, as tall as fits the window: the screen is scaled to fit inside. */
 .vnc { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: calc(100vh - 230px); overflow: hidden;
   border-radius: 0 0 var(--radius) var(--radius); background: var(--surface-3); }
 .vnc-screen { position: absolute; inset: 0; }
-.vnc-msg { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 16px; background: rgb(0 0 0 / 55%); color: #e6e8ec; font-size: 14px; text-align: center; pointer-events: none; }
+.vnc-msg { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 16px; background: rgb(0 0 0 / 55%); color: #e6e8ec; font-size: calc(14px * var(--fs, 1)); text-align: center; pointer-events: none; }
 .vnc-msg[hidden] { display: none; }
 @media (max-width: 700px) {
   .bwr-tab { flex-wrap: wrap; }

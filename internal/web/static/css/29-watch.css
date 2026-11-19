@@ -6,4 +6,4 @@
 tr.since-visit > td:first-child, li.since-visit { box-shadow: inset 3px 0 0 var(--accent); }
 li.since-visit li.since-visit { box-shadow: none; }
 .since-note { padding: 1px 7px; border-radius: 4px; background: var(--accent-weak); color: var(--accent);
-  font-size: 12px; font-weight: 600; white-space: nowrap; }
+  font-size: calc(12px * var(--fs, 1)); font-weight: 600; white-space: nowrap; }

@@ -1,9 +1,7 @@
 /* ---------- shell ---------- */
 .shell { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 100vh; }
 .sidebar {
-  /* The shell is zoomed by --fs-zoom (Settings › Display), so 100vh inside it
-     is the unzoomed viewport: divide it back to keep the sidebar one screen tall. */
-  position: sticky; top: var(--db-h); height: calc(100vh / var(--fs-zoom) - var(--db-h)); display: flex; flex-direction: column; gap: 4px;
+  position: sticky; top: var(--db-h); height: calc(100vh - var(--db-h)); display: flex; flex-direction: column; gap: 4px;
   padding: 14px 10px; border-right: 1px solid var(--border); background: var(--side);
   /* No `overscroll-behavior: contain`: with the pointer over the sidebar, the
      wheel scrolled the sidebar and stopped there, so the page looked stuck (and
@@ -11,7 +9,7 @@
      chains to the page again at either end. */
   overflow-y: auto; scrollbar-width: thin; /* a short screen (a phone on its side) scrolls it */
 }
-.brand { display: flex; align-items: center; gap: 9px; padding: 4px 8px 14px; font-size: 15px; font-weight: 650; letter-spacing: -0.02em; }
+.brand { display: flex; align-items: center; gap: 9px; padding: 4px 8px 14px; font-size: calc(15px * var(--fs, 1)); font-weight: 650; letter-spacing: -0.02em; }
 .brand .logo { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--on-accent); }
 .brand .logo .i { width: 17px; height: 17px; stroke-width: 2; }
 .brand b { color: var(--accent); font-weight: 650; }
@@ -21,11 +19,11 @@
 .nav a:hover { background: var(--surface-3); color: var(--text); }
 .nav a[aria-current="page"] { background: var(--accent-weak); color: var(--accent); }
 .nav a[aria-current="page"] .i { stroke-width: 2; }
-.nav .group { margin: 14px 10px 4px; color: var(--muted); font-size: 10.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.nav .group { margin: 14px 10px 4px; color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .sidebar .spacer { flex: 1; }
 .sidebar .foot { display: grid; gap: 8px; padding: 10px 4px 0; border-top: 1px solid var(--border); }
 .theme-toggle, .tb-btn { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 10px; border: 1px solid var(--border);
-  border-radius: 6px; background: transparent; color: var(--text-2); cursor: pointer; font: inherit; font-size: 12.5px; white-space: nowrap; }
+  border-radius: 6px; background: transparent; color: var(--text-2); cursor: pointer; font: inherit; font-size: calc(12.5px * var(--fs, 1)); white-space: nowrap; }
 .theme-toggle:hover, .tb-btn:hover { background: var(--surface-3); color: var(--text); }
 .version { padding: 0 6px; color: var(--faint); font: 11px/1.4 var(--mono); overflow-wrap: anywhere; }
 /* A read-only copy (HUNTDECK_READ_ONLY) says so above the version, and in a
@@ -37,10 +35,10 @@
 :root[data-demo-banner="off"] { --db-h: 0px; }
 .demo-banner { position: sticky; top: 0; z-index: 6; display: flex; align-items: center; gap: 12px; box-sizing: border-box; height: var(--db-h);
   padding: 0 14px 0 54px; border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); background: color-mix(in srgb, var(--accent) 13%, var(--bg));
-  color: var(--text-2); font-size: 13px; line-height: 1.4; }
+  color: var(--text-2); font-size: calc(13px * var(--fs, 1)); line-height: 1.4; }
 /* Centred, with the × on the right balanced by the padding on the left. */
 .demo-banner .db-in { flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px; min-width: 0; }
-.demo-banner b { flex: none; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 11.5px; font-weight: 650;
+.demo-banner b { flex: none; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: calc(11.5px * var(--fs, 1)); font-weight: 650;
   letter-spacing: .02em; text-transform: uppercase; }
 .demo-banner .db-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .demo-banner .db-short { display: none; }
@@ -52,7 +50,7 @@
 .demo-banner .db-follow { display: inline-flex; align-items: center; gap: 5px; }
 .demo-banner .db-follow .i { width: 13px; height: 13px; }
 .demo-banner .db-x { display: none; flex: none; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted);
-  font-size: 19px; line-height: 1; cursor: pointer; }
+  font-size: calc(19px * var(--fs, 1)); line-height: 1; cursor: pointer; }
 .js .demo-banner .db-x { display: block; }
 .demo-banner .db-x:hover { background: var(--surface-3); color: var(--text); }
 :root[data-demo-banner="off"] .demo-banner { display: none; }
@@ -63,7 +61,7 @@
   .demo-banner .db-text { flex: 1 1 200px; white-space: normal; }
   .sidebar .demo-note { display: none; } /* the banner says so; the nav needs the room */
 }
-.demo-note { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; background: var(--accent-weak); color: var(--text-2); font-size: 12px; line-height: 1.35; text-align: center; }
+.demo-note { margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; background: var(--accent-weak); color: var(--text-2); font-size: calc(12px * var(--fs, 1)); line-height: 1.35; text-align: center; }
 .demo-note b { color: var(--accent); font-weight: 650; }
 
 .content { min-width: 0; display: flex; flex-direction: column; }
@@ -85,15 +83,15 @@
 .tb-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; container: tb-right / inline-size; }
 @container tb-right (max-width: 480px) { .tb-right .updated { display: none; } }
 @container tb-right (max-width: 380px) { .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } } /* still the button's name */
-.tb-right .updated { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+.tb-right .updated { color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); white-space: nowrap; }
 
 .page { width: 100%; padding: 22px 28px 48px; }
 
 /* Every page's name sits in the top bar's left corner, in the same place
    and style; detail pages show the trail back instead (Programs /
    HackerOne) and keep their own name, chips and actions as content. */
-.tb-title { display: flex; align-items: center; min-width: 0; color: var(--muted); font-size: 13px; white-space: nowrap; }
-.tb-title h1 { overflow: hidden; color: var(--text); font-size: 16px; font-weight: 650; line-height: 1.2; text-overflow: ellipsis; }
+.tb-title { display: flex; align-items: center; min-width: 0; color: var(--muted); font-size: calc(13px * var(--fs, 1)); white-space: nowrap; }
+.tb-title h1 { overflow: hidden; color: var(--text); font-size: calc(16px * var(--fs, 1)); font-weight: 650; line-height: 1.2; text-overflow: ellipsis; }
 .tb-title .trail { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .tb-title .trail a { color: var(--text-2); font-weight: 600; }
 .tb-title .trail a:hover { color: var(--accent); }
@@ -123,16 +121,16 @@
 .tb-menu > summary::-webkit-details-marker { display: none; }
 .tb-menu .menu { position: absolute; right: 0; top: 40px; z-index: 30; display: grid; gap: 2px; min-width: 200px; max-width: calc(100vw - 16px); padding: 6px;
   border: 1px solid var(--border-input); border-radius: 8px; background: var(--surface); box-shadow: 0 8px 28px rgba(0, 0, 0, .22); }
-.tb-menu .menu a { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 5px; color: var(--text-2); font-size: 13px; }
+.tb-menu .menu a { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 5px; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); }
 .tb-menu .menu a:hover { background: var(--row-hover); color: var(--text); }
-.tb-menu .menu-note { max-width: 320px; margin: 4px 0 0; padding: 6px 8px 2px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; line-height: 1.4; }
+.tb-menu .menu-note { max-width: 320px; margin: 4px 0 0; padding: 6px 8px 2px; border-top: 1px solid var(--border); color: var(--muted); font-size: calc(12px * var(--fs, 1)); line-height: 1.4; }
 .tb-menu .menu-note b { display: block; margin-bottom: 2px; color: var(--text-2); font-weight: 600; }
 .tb-menu .menu-note span { display: block; overflow-wrap: anywhere; }
 .tb-menu .menu-note i { color: var(--faint); font-style: normal; }
 /* A read-only copy's note atop the user's own pages, which it shows empty. */
 .demo-tour { display: flex; align-items: baseline; gap: 10px; margin: 0 0 16px; padding: 11px 14px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
-  border-radius: var(--radius); background: var(--accent-weak); color: var(--text-2); font-size: 13.5px; line-height: 1.5; }
-.demo-tour b { flex: none; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 11px; font-weight: 650;
+  border-radius: var(--radius); background: var(--accent-weak); color: var(--text-2); font-size: calc(13.5px * var(--fs, 1)); line-height: 1.5; }
+.demo-tour b { flex: none; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: calc(11px * var(--fs, 1)); font-weight: 650;
   letter-spacing: .02em; text-transform: uppercase; }
 /* Forms that would change something are switched off there (app.js; the server refuses them anyway). */
 :root[data-read-only] form[method="post" i] :is(button, input, select, textarea, label) { cursor: not-allowed; }
@@ -147,13 +145,13 @@
 .lang-switch .i { width: 14px; height: 14px; margin-right: 3px; color: var(--faint); }
 .lang-switch button {
   padding: 2px 6px; border: 0; border-radius: 6px; background: transparent;
-  color: var(--muted); font: inherit; font-size: 11.5px; cursor: pointer;
+  color: var(--muted); font: inherit; font-size: calc(11.5px * var(--fs, 1)); cursor: pointer;
 }
 .lang-switch button:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
 .lang-switch button[aria-current="true"] { color: var(--accent); font-weight: 600; cursor: default; }
 .sign-out button {
   width: 100%; height: 30px; border: 1px solid var(--border); border-radius: 6px;
-  background: transparent; color: var(--text-2); font: inherit; font-size: 12.5px; cursor: pointer;
+  background: transparent; color: var(--text-2); font: inherit; font-size: calc(12.5px * var(--fs, 1)); cursor: pointer;
 }
 .sign-out button:hover { background: var(--surface-3); color: var(--text); }
 /* The language switcher's stand-ins and the sign-out's icon, for the 60px
@@ -173,21 +171,21 @@
 /* A poll runs in the background and changes the numbers: say so instead of
    leaving the page looking finished. */
 .poll-run { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border: 1px solid var(--border-input);
-  border-radius: 999px; color: var(--text-2); font-size: 11.5px; }
+  border-radius: 999px; color: var(--text-2); font-size: calc(11.5px * var(--fs, 1)); }
 .poll-run .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: poll-pulse 1.6s ease-in-out infinite; }
 @keyframes poll-pulse { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .poll-run .dot { animation: none; } }
 /* A dot alone says nothing, and there are two of these: keep the words, and
    let the search field give up the room (it already truncates its placeholder). */
 @media (max-width: 900px) {
-  .poll-run { font-size: 11px; padding: 2px 7px; }
+  .poll-run { font-size: calc(11px * var(--fs, 1)); padding: 2px 7px; }
   .poll-run-label { white-space: nowrap; }
 }
 
 /* The offline notice sits under the top bar, out of the way of the content. */
 .offline-bar { position: fixed; left: 50%; transform: translateX(-50%); top: calc(8px + var(--db-h, 0px)); z-index: 60;
   padding: 8px 14px; border: 1px solid var(--warn); border-radius: 8px; background: var(--warn-weak);
-  color: var(--text); font-size: 13px; box-shadow: 0 8px 24px rgb(0 0 0 / .18); }
+  color: var(--text); font-size: calc(13px * var(--fs, 1)); box-shadow: 0 8px 24px rgb(0 0 0 / .18); }
 .offline-bar[hidden] { display: none; }
 /* Under the top bar, full width: centred, it covered the search box. */
 .offline-bar { left: 0; right: 0; top: calc(56px + var(--db-h, 0px)); transform: none;
@@ -197,22 +195,11 @@
 .keyhelp { border: 1px solid var(--border-2); border-radius: 12px; padding: 18px 20px; background: var(--surface); color: var(--text);
   max-width: 420px; box-shadow: 0 20px 60px rgb(0 0 0 / .3); }
 .keyhelp::backdrop { background: rgb(8 10 18 / .55); }
-.keyhelp h2 { margin: 0 0 12px; font-size: 15px; }
+.keyhelp h2 { margin: 0 0 12px; font-size: calc(15px * var(--fs, 1)); }
 .keyhelp dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; margin: 0 0 16px; }
 .keyhelp dt { margin: 0; }
-.keyhelp dd { margin: 0; color: var(--text-2); font-size: 13px; }
+.keyhelp dd { margin: 0; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); }
 .keyhelp form { margin: 0; text-align: right; }
 
-/* ---------- text size (Settings › Display) ----------
-   The whole shell scales, so every label, control and column grows together
-   and the layout reflows into the space it has, the way browser zoom does —
-   bigger text without a second set of breakpoints. `width` and `min-height`
-   divided by the same factor keep the shell filling the window instead of
-   overflowing it. */
-:root { --fs-zoom: 1; }
-:root[data-fs="sm"] { --fs-zoom: .94; }
-:root[data-fs="lg"] { --fs-zoom: 1.1; }
-:root[data-fs="xl"] { --fs-zoom: 1.22; }
-.shell { zoom: var(--fs-zoom); width: calc(100% / var(--fs-zoom));
-  min-height: calc(100vh / var(--fs-zoom)); }
+
 

@@ -2,7 +2,7 @@
 
 /* Head: name, chips and the meta line on the left, a few actions on the right. */
 .ph { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 16px; }
-.ph h1 { font-size: 22px; line-height: 1.2; }
+.ph h1 { font-size: calc(22px * var(--fs, 1)); line-height: 1.2; }
 .ph .metaline { margin-top: 6px; }
 .ph-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .ph-actions form { margin: 0; }
@@ -15,7 +15,7 @@
 .tb-menu .menu button:hover { background: var(--row-hover); color: var(--text); filter: none; }
 .tb-menu .menu .i { width: 14px; height: 14px; color: var(--muted); }
 /* "Add tag": a small form under the link. */
-.addtag > summary { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-size: 12.5px; cursor: pointer; }
+.addtag > summary { display: inline-flex; align-items: center; gap: 5px; color: var(--accent); font-size: calc(12.5px * var(--fs, 1)); cursor: pointer; }
 .addtag > summary .i { width: 13px; height: 13px; }
 .addtag .menu { left: 0; right: auto; top: 26px; gap: 8px; width: min(300px, calc(100vw - 40px)); padding: 12px; }
 .addtag .menu input { width: 100%; }
@@ -30,9 +30,9 @@
 .kpi:first-child { border-left: 0; }
 .kpi .l { overflow: hidden; color: var(--muted); font: 650 10.5px var(--sans); letter-spacing: .07em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 .kpi .v { overflow: hidden; color: var(--text); font: 650 20px/1.25 var(--mono); font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
-.kpi .v .score { font-size: 22px; font-weight: 700; }
+.kpi .v .score { font-size: calc(22px * var(--fs, 1)); font-weight: 700; }
 .kpi .v .upto { color: var(--muted); font: 12px var(--sans); }
-.kpi .h { overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.kpi .h { overflow: hidden; color: var(--muted); font-size: calc(12px * var(--fs, 1)); text-overflow: ellipsis; white-space: nowrap; }
 .kpi .tchart { align-self: end; margin-top: 2px; }
 .kpi .tchart svg { width: 100%; height: 30px; }
 @media (max-width: 1640px) {
@@ -51,8 +51,8 @@
 @media (max-width: 700px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kpi { min-height: 92px; padding: 10px 12px; }
-  .kpi .v { font-size: 17px; }
-  .kpi .v .score { font-size: 19px; }
+  .kpi .v { font-size: calc(17px * var(--fs, 1)); }
+  .kpi .v .score { font-size: calc(19px * var(--fs, 1)); }
   .kpi .h { white-space: normal; } /* two half-width cells a row: the subline wraps rather than being cut */
   .kpi:nth-child(odd) { border-left: 0; }
   .kpi:nth-child(even) { border-left: 1px solid var(--border); }
@@ -62,7 +62,7 @@
 /* Tabs under the headline. */
 .ptabs { display: flex; gap: 4px; margin: 16px 0 14px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: none; }
 .ptabs a { display: inline-flex; flex: none; align-items: center; gap: 7px; margin-bottom: -1px; padding: 9px 14px 10px; border-bottom: 2px solid transparent;
-  color: var(--text-2); font-size: 13.5px; font-weight: 600; }
+  color: var(--text-2); font-size: calc(13.5px * var(--fs, 1)); font-weight: 600; }
 .ptabs a:hover { color: var(--text); }
 .ptabs a.on { border-bottom-color: var(--accent); color: var(--accent); }
 .ptabs .count { min-width: 20px; padding: 0 6px; border-radius: 9px; background: var(--surface-3); color: var(--muted); font: 600 11px/18px var(--mono); text-align: center; }
@@ -74,8 +74,8 @@
   .ptabs a { padding: 9px 9px 10px; }
 }
 @media (max-width: 480px) {
-  .ptabs a { gap: 4px; padding: 9px 4px 10px; font-size: 13px; }
-  .ptabs .count { min-width: 0; padding: 0 4px; font-size: 10px; line-height: 16px; }
+  .ptabs a { gap: 4px; padding: 9px 4px 10px; font-size: calc(13px * var(--fs, 1)); }
+  .ptabs .count { min-width: 0; padding: 0 4px; font-size: calc(10px * var(--fs, 1)); line-height: 16px; }
 }
 
 /* ---------- the tabs' layouts ---------- */
@@ -93,7 +93,7 @@
 @media (min-width: 1501px) { .polgrid.wide { grid-template-columns: 260px minmax(0, 1fr); } }
 .toc { position: sticky; top: calc(72px + var(--db-h)); display: flex; flex-direction: column; max-height: calc(100dvh - 88px - var(--db-h)); }
 .toc-list { display: grid; align-content: start; padding: 6px 8px 10px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
-.toc-list a { padding: 4px 8px; border-radius: 5px; color: var(--text-2); font-size: 12.5px; line-height: 1.35; }
+.toc-list a { padding: 4px 8px; border-radius: 5px; color: var(--text-2); font-size: calc(12.5px * var(--fs, 1)); line-height: 1.35; }
 .toc-list a:hover { background: var(--row-hover); color: var(--text); }
 .toc-list a.t1 { margin-top: 6px; color: var(--text); font-weight: 600; }
 .toc-list a.t1:first-child { margin-top: 0; }
@@ -113,7 +113,7 @@
 /* HuntScore: its four parts, two a row. */
 .huntscore .huntparts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; padding: 12px 18px 14px; }
 /* Each part's reasons on one line under it, the comparisons in bold. */
-.hp-why { margin: 4px 0 0; color: var(--text-2); font-size: 12.5px; line-height: 1.5; }
+.hp-why { margin: 4px 0 0; color: var(--text-2); font-size: calc(12.5px * var(--fs, 1)); line-height: 1.5; }
 .hp-why b { color: var(--text); font-weight: 600; }
 .huntscore .hp-bar { flex: 0 1 140px; width: auto; min-width: 48px; }
 .huntscore .hp-weight { white-space: nowrap; }
@@ -139,8 +139,8 @@
 .before li { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: start; gap: 10px; padding: 10px 16px; border-top: 1px solid var(--border); }
 .before li > .i { margin-top: 2px; color: var(--accent); }
 .before li b { display: block; font-weight: 600; overflow-wrap: anywhere; }
-.before li span { display: block; margin-top: 2px; color: var(--muted); font-size: 12.5px; }
-.before li span.faint { color: var(--faint); font-size: 11.5px; }
+.before li span { display: block; margin-top: 2px; color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); }
+.before li span.faint { color: var(--faint); font-size: calc(11.5px * var(--fs, 1)); }
 .before li .icon-btn { margin: -4px -6px 0 0; }
 .before li.alert > .i, .before li.alert b { color: var(--bad); }
 
@@ -151,7 +151,7 @@
 .scope-search { margin: 0; }
 .search.sm input[type="search"] { width: 260px; height: 30px; }
 .seg { display: inline-flex; padding: 2px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
-.seg a { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 6px; color: var(--text-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.seg a { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 6px; color: var(--text-2); font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; white-space: nowrap; }
 .seg a:hover { color: var(--text); }
 .seg a.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, .12); }
 .seg em, .fchip em { color: var(--muted); font: 11px var(--mono); font-style: normal; }
@@ -160,7 +160,7 @@
 .scope-table th.sc-bounty, .scope-table th.sc-sev { width: 96px; }
 .scope-table th.sc-added { width: 112px; } /* "≤ 2018-12-12"; its age is in the tooltip */
 .scope-table td.asset { min-width: 0; max-width: none; }
-.scope-table td.asset .expands { margin-top: 3px; font-family: var(--mono); font-size: 12px; color: var(--text-2); overflow-wrap: anywhere; }
+.scope-table td.asset .expands { margin-top: 3px; font-family: var(--mono); font-size: calc(12px * var(--fs, 1)); color: var(--text-2); overflow-wrap: anywhere; }
 .scope-table td.notes { min-width: 0; }
 .note1, .note > summary { display: block; overflow: hidden; color: var(--text-2); text-overflow: ellipsis; white-space: nowrap; }
 .note { margin: 0; }
@@ -260,7 +260,7 @@
 
 /* A program not taking reports: a strip above its head, in the state's colour. */
 .state-banner { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px; padding: 10px 14px; border-radius: 8px;
-  border: 1px solid; font-size: 13.5px; line-height: 1.4; }
+  border: 1px solid; font-size: calc(13.5px * var(--fs, 1)); line-height: 1.4; }
 .state-banner b { font: 700 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .state-banner.paused { background: var(--warn-weak); border-color: var(--warn); color: var(--warn); }
 .state-banner.paused span { color: var(--text); }

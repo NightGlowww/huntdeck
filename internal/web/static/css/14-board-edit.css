@@ -1,6 +1,6 @@
 /* Customizing the board. */
 .board-editbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 10px 14px;
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 10px; background: var(--accent-weak); color: var(--text-2); font-size: 13px; }
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 10px; background: var(--accent-weak); color: var(--text-2); font-size: calc(13px * var(--fs, 1)); }
 .board-editbar > span { flex: 1; }
 .board-editbar b { color: var(--text); }
 .bx-bar, .bx-edge { display: none; }

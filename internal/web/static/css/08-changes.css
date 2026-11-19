@@ -4,10 +4,10 @@
 .tag.add { background: var(--good-weak); color: var(--good); }
 .tag.del { background: var(--bad-weak); color: var(--bad); }
 .tag.mod { background: var(--warn-weak); color: var(--warn); }
-.feed .view, td .view { margin-left: 6px; font-size: 12px; white-space: nowrap; }
+.feed .view, td .view { margin-left: 6px; font-size: calc(12px * var(--fs, 1)); white-space: nowrap; }
 
 /* Policy diffs: a line per row, changed words marked within edited lines. */
-.diff { font-size: 13px; line-height: 1.55; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.diff { font-size: calc(13px * var(--fs, 1)); line-height: 1.55; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .diff .dl { display: flex; gap: 10px; padding: 1px 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .diff .dl .sign { flex: none; width: 1ch; font-family: var(--mono); color: var(--muted); user-select: none; }
 .diff .dl .t { flex: 1; min-width: 0; }
@@ -17,7 +17,7 @@
 .diff .dl.del .sign { color: var(--bad); }
 .diff .dl.ins mark { background: color-mix(in srgb, var(--good) 30%, transparent); color: inherit; border-radius: 2px; }
 .diff .dl.del mark { background: color-mix(in srgb, var(--bad) 28%, transparent); color: inherit; border-radius: 2px; text-decoration: line-through; }
-.diff .dl.skip { color: var(--muted); background: var(--surface-2); font-size: 12px; padding: 3px 12px; }
+.diff .dl.skip { color: var(--muted); background: var(--surface-2); font-size: calc(12px * var(--fs, 1)); padding: 3px 12px; }
 .diff-old { color: var(--bad); text-decoration: line-through; }
 .diff-new { color: var(--good); font-weight: 600; }
 
@@ -30,7 +30,7 @@
 .feed .what { min-width: 0; display: grid; gap: 2px; }
 .feed .who { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .feed .who a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.feed .detail { color: var(--text-2); font-size: 12.5px; overflow-wrap: anywhere; }
+.feed .detail { color: var(--text-2); font-size: calc(12.5px * var(--fs, 1)); overflow-wrap: anywhere; }
 .feed .detail.asset { color: var(--text); }
 
 dl.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); margin: 0; }
@@ -43,7 +43,7 @@ dl.facts > :nth-last-child(-n+2) { border-bottom: 0; }
 .metaline > * + *::before { content: "·"; margin: 0 9px; color: var(--faint); }
 .metaline b { color: var(--text-2); font-weight: 550; }
 /* The Changes list's orders, at the right of its header bar. */
-.activef .sorts { display: flex; align-items: center; gap: 4px; margin-left: auto; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+.activef .sorts { display: flex; align-items: center; gap: 4px; margin-left: auto; color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); white-space: nowrap; }
 .activef .sortopt { padding: 2px 9px; border: 1px solid var(--border-input); border-radius: 12px; color: var(--muted); }
 .activef .sortopt.on { border-color: var(--accent); background: var(--accent-weak); color: var(--accent); font-weight: 600; }
-.activef .sortopt small { font-size: 11px; font-weight: 500; }
+.activef .sortopt small { font-size: calc(11px * var(--fs, 1)); font-weight: 500; }
