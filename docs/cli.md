@@ -10,9 +10,11 @@ and the ones that can take `--data` say so.
 - **`huntdeck status`** — programs and scope per platform, and the last polls.
 - **`huntdeck changes [--since 24h] [--limit 200]`** — recent changes, newest first.
 - **`huntdeck score [-n 25]`** — recompute HuntsScores now and print the best.
-- **`huntdeck queue [-limit 40] [-explain] [-candidates 2000]`** — the HuntQueue
-  ranking: which targets can start today and what the work is worth. `-explain`
-  prints each factor.
+- **`huntdeck queue [-limit 40] [-explain] [-candidates 2000] [-platform P] [-kind K] [-paying] [-fresh]`** —
+  the HuntQueue ranking: which targets can start today and what the work is
+  worth. `-explain` prints each factor, computing rather than reading the
+  saved table (which carries scores, not factors); `-fresh` does the same
+  for timing; `-kind` and `-paying` narrow the candidates.
 - **`huntdeck backtest [-top 10] [-horizon 4320h]`** — what the top ten by
   HuntScore, and by the queue, would have captured at each past cut. Needs a few
   days of history: it says how many cuts it has.
@@ -29,7 +31,7 @@ and the ones that can take `--data` say so.
 
 ## Polling
 
-- **`huntdeck poll [--platform h1] [--mode full|quick] [--limit N] [--force-removals]`**
+- **`huntdeck poll [--platform h1] [--mode full|quick] [--limit N] [--force-removals] [--refetch-scope]`**
   — poll now instead of waiting for the scheduler. `--limit` never removes
   anything; `--force-removals` is for a listing that really did shrink.
 - **`huntdeck stats [HANDLE…] [--platform h1]`** — fetch a program's public stats
@@ -37,7 +39,7 @@ and the ones that can take `--data` say so.
 
 ## Backups
 
-- **`huntdeck backup [--to FILE] [--keep N] [--no-sessions]`** — one file holding
+- **`huntdeck backup [--to FILE] [--keep N] [--no-sessions] [--verify=false]`** — one file holding
   the database, the settings key and the sessions; it reads the archive back
   before reporting success.
 - **`huntdeck restore --from FILE [--data DIR] [--dry-run] [--force] [--no-sessions]`**
