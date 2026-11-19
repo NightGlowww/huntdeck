@@ -339,7 +339,15 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 		case time.Since(computed) > 2*time.Hour:
 			warn("the queue was rebuilt %s ago (%d targets): is the server running?", humanDuration(time.Since(computed)), n)
 		default:
-			ok("queue: %d targets, rebuilt %s ago", n, humanDuration(time.Since(computed)))
+			dropped, dropErr := s.QueueDropped(ctx)
+			switch {
+			case dropErr != nil:
+				ok("queue: %d targets, rebuilt %s ago (the left-out count could not be read)", n, humanDuration(time.Since(computed)))
+			case dropped > 0:
+				ok("queue: %d targets, rebuilt %s ago, %d left out under the floor", n, humanDuration(time.Since(computed)), dropped)
+			default:
+				ok("queue: %d targets, rebuilt %s ago, nothing left out", n, humanDuration(time.Since(computed)))
+			}
 		}
 	}
 }

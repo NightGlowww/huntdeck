@@ -146,6 +146,9 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 	}
 	if n, err := s.Store.QueueDropped(ctx); err == nil {
 		d.BelowFloor = n
+	} else {
+		// The line is absent either way; the log tells the two apart.
+		s.Log.WarnContext(ctx, "queue: cannot read the left-out count", "error", err)
 	}
 	s.render(w, r, http.StatusOK, "queue", pageData{Title: "Hunt queue", Nav: "queue", Data: d})
 }
