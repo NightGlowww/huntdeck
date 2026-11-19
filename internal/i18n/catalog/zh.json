@@ -1738,6 +1738,10 @@
     "Give the scanner its own host: a scan is the heaviest thing either side runs. Stopping a task in the scanner records the stop but does not kill the node's run, so a scan started on a shared host outlives its task.": "给扫描器独立的主机：扫描是两边最重的负载。在扫描器里停止任务只记录停止，并不会杀掉节点上正在跑的进程——所以共享主机上启动的扫描会比它的任务活得更久。",
     "Handing over…": "派发中…",
     "Asking…": "询问中…",
-    "Saving…": "保存中…"
+    "Saving…": "保存中…",
+    "Reading policies. On a program page the rules beside the policy are quoted from the policy text; with the model configured, running huntdeck ai-extract asks it for the rules each policy states, cached against the policy's hash so the same text is read once.": "读政策。程序页政策旁的规则是从政策原文摘出的；配置模型后，运行 huntdeck ai-extract 会让它列出每份政策规定的规则，并按政策文本的哈希缓存，同一段文本只读一次。",
+    "Run it from the polling settings": "在轮询设置里运行",
+    "To turn it on, set the endpoint, the model and the key on the Model page, then run huntdeck ai-extract (or press the button below): the model reads each policy once and the result is cached against the policy text.": "启用方式：在「模型」页填好端点、模型与密钥，然后运行 huntdeck ai-extract（或按下方按钮）：模型把每份政策读一次，结果按政策文本缓存。",
+    "Model page": "模型页"
   }
 }
