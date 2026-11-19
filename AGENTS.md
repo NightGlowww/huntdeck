@@ -190,9 +190,11 @@ a test that every message they ask for exists), and `TestPaletteContrast`
 reads `static/css/00-theme.css` and fails when a palette's text drops below
 WCAG AA (4.5:1) on the surfaces it sits on, in light or dark.
 
-Two more guard the reference: `TestEnvVarsAreDocumented` fails when a variable
-the config reads is missing from `docs/configuration.md` or `.env.example`, and
-`TestEveryToolIsDocumented` fails when an MCP tool and `docs/mcp.md` disagree.
+Three more guard the reference: `TestEnvVarsAreDocumented` fails when a variable
+the config reads is missing from `docs/configuration.md` or `.env.example`,
+`TestEveryToolIsDocumented` fails when an MCP tool and `docs/mcp.md` disagree,
+and `TestEveryCommandIsDocumented` fails when a CLI command and `docs/cli.md`
+disagree in either direction.
 
 ### Ground rules
 
