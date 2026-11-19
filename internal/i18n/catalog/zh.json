@@ -1582,6 +1582,12 @@
     "A model read these from the same policy": "模型从同一份政策中读出的规则",
     "( %s, %s )": "（%s，%s）",
     "A paraphrase, not a quote: check it against the policy above before relying on it.": "这是转述而非原文引用：依赖它之前请对照上面的政策原文。",
-    "(%s, %s)": "（%s，%s）"
+    "(%s, %s)": "（%s，%s）",
+    "Optional capabilities": "可选能力",
+    "off unless you set them up": "未配置即关闭",
+    "AI policy extraction": "AI 政策抽取",
+    "the program page shows only the rules quoted from the policy": "程序页只显示取自政策原文的规则",
+    "To turn it on, set HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL to an OpenAI-compatible endpoint, then run huntdeck ai-extract: the model reads each policy once and the result is cached against the policy text.": "启用方式：把 HUNTDECK_AI_BASE_URL 与 HUNTDECK_AI_MODEL 指向 OpenAI 兼容端点，然后运行 huntdeck ai-extract——模型每份政策只读一次，结果按政策文本缓存。",
+    "%s, %d cached reading(s)": "%s，已缓存 %d 份读数"
   }
 }

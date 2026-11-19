@@ -107,3 +107,10 @@ func (s *Store) ClearAIRules(ctx context.Context) (int64, error) {
 	}
 	return res.RowsAffected()
 }
+
+// CountAIRules is how many cached readings exist, for the status line.
+func (s *Store) CountAIRules(ctx context.Context) (int, error) {
+	var n int
+	err := s.db.R.QueryRowContext(ctx, "SELECT COUNT(*) FROM program_ai_rules").Scan(&n)
+	return n, err
+}

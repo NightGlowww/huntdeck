@@ -100,6 +100,9 @@ type Deps struct {
 	AllowedHosts []string
 	// ReadOnly serves a read-only copy, such as a demo (readonly.go).
 	ReadOnly bool
+	// AIBaseURL and AIModel are the optional model, empty when it is off.
+	// Settings reports which, so an off-by-default feature is visible.
+	AIBaseURL, AIModel string
 	// DemoSeed exports seeds for a demo copy (demoseed.go); nil where it can't.
 	DemoSeed DemoSeeder
 	// Timezone is the IANA zone to show times in until one is chosen in

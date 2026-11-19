@@ -25,6 +25,9 @@ type settingsData struct {
 	Accounts   *accountsData // the Accounts tab, where settings can be saved
 	CanSave    bool          // there's an Accounts tab to set credentials in
 	DemoSeed   *demoSeedData // the Polling tab's demo seed, where it can be exported
+	// AI is the optional model: whether it is wired, and how many policy
+	// readings it has cached. Off is normal; saying so is not.
+	AI aiState
 }
 
 // settingsTab is a tab of the Settings page (?tab=).
@@ -101,6 +104,7 @@ func (s *server) renderSettings(w http.ResponseWriter, r *http.Request, status i
 	d := settingsData{Tab: openTab(r)}
 	d.CanSave = s.Accounts != nil
 	d.DemoSeed = s.demoSeedData(r.Context())
+	d.AI = s.aiStateFor(r.Context())
 	hidden := map[string]bool{"browser": !s.hasBrowser(), "accounts": !d.CanSave}
 	if s.ReadOnly {
 		hidden = nil // a tour: every tab, with nothing in it
