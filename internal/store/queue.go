@@ -264,6 +264,13 @@ func (s *Store) RefreshHuntQueue(ctx context.Context, now time.Time) error {
 			return err
 		}
 		defer func() { _ = stmt.Close() }()
+		// Keep the head of the queue for today, so a backtest can later ask what
+		// this table would have picked. hunt_queue itself is replaced every rebuild
+		// and holds no history; the scores table is an upsert, so a day settles on
+		// its last rebuild.
+		if err := snapshotQueueHead(ctx, tx, rows, now); err != nil {
+			return err
+		}
 		for _, r := range rows {
 			b, _ := json.Marshal(r.Reasons)
 			fb, _ := json.Marshal(r.Factors)

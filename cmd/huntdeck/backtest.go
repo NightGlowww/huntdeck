@@ -88,6 +88,16 @@ func backtestCmd(args []string, stdout, stderr io.Writer) int {
 		}
 		fmt.Fprintf(stdout, "%s  top-%d by HuntScore captures $%.0f of $%.0f (%.1f%%)\n", day, n, captured, total, share)
 	}
-	fmt.Fprintln(stdout, "\nHuntQueue is not comparable yet: it needs queue rows at each cut, which\narrive with the materialised table (next step).")
+	qd, err := s.QueueDays(ctx)
+	if err != nil {
+		fmt.Fprintf(stderr, "huntdeck backtest: %v\n", err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "\nqueue cuts available (days with a queue snapshot): %d\n", len(qd))
+	if len(qd) < 2 {
+		fmt.Fprintln(stdout, "the queue is snapshotted once a day from now on; a comparison needs a few days of it")
+	} else {
+		fmt.Fprintln(stdout, "the head of each day is stored, so a comparison can be asked for once the cuts line up")
+	}
 	return 0
 }
