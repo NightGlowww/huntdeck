@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/scanhandoff"
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
 	"github.com/mdpsec/huntdeck/internal/store"
 )
@@ -84,63 +85,15 @@ func (s *server) scanNow(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/scan?created="+strconv.Itoa(created), http.StatusSeeOther)
 }
 
-// handOff creates one scan task per batch of waiting targets. It is what both
-// the button and the periodic pass call, so they cannot drift.
+// handOff runs the shared handoff: the page and the poll loop use one
+// implementation, so they cannot drift.
 func (s *server) handOff(ctx context.Context, manual bool) (int, error) {
-	cfg, err := s.Store.ScanConfigRow(ctx)
-	if err != nil {
-		return 0, err
-	}
-	if !manual && !cfg.Enabled {
-		return 0, nil
-	}
-	if cfg.TemplateID == "" || cfg.NodeName == "" {
-		return 0, fmt.Errorf("pick a template and a node first")
-	}
 	if s.ScanKey.Reveal() == "" {
 		return 0, fmt.Errorf("no scanner key configured")
 	}
 	ctx, cancel := context.WithTimeout(ctx, scanTaskTimeout)
 	defer cancel()
-	client := s.scanClient()
-	cands, err := s.Store.ScanCandidates(ctx, cfg.Kinds, cfg.PerTask*4)
-	if err != nil {
-		return 0, err
-	}
-	if len(cands) == 0 {
-		return 0, nil
-	}
-	perTask := cfg.PerTask
-	if perTask <= 0 {
-		perTask = 50
-	}
-	created := 0
-	for start := 0; start < len(cands); start += perTask {
-		end := start + perTask
-		if end > len(cands) {
-			end = len(cands)
-		}
-		batch := cands[start:end]
-		targets := make([]string, 0, len(batch))
-		for _, c := range batch {
-			targets = append(targets, c.Target)
-		}
-		name := "huntdeck-" + s.Store.Now().UTC().Format("20060102-150405") + "-" + strconv.Itoa(created+1)
-		id, err := client.CreateTask(ctx, name, cfg.TemplateID, cfg.NodeName, targets)
-		if err != nil {
-			return created, err
-		}
-		if err := client.StartTask(ctx, id); err != nil {
-			// Created but not started: record it anyway, so it is not created
-			// twice; starting is a separate act the operator can do.
-			s.Log.WarnContext(ctx, "scan: task created but not started", "task", id, "error", err)
-		}
-		if err := s.Store.MarkHandedOff(ctx, batch, id); err != nil {
-			return created, err
-		}
-		created++
-	}
-	return created, nil
+	return scanhandoff.Run(ctx, s.Store, s.scanClient(), manual)
 }
 
 func urlQuery(s string) string {

@@ -23,8 +23,10 @@ import (
 	"github.com/mdpsec/huntdeck/internal/notify"
 	"github.com/mdpsec/huntdeck/internal/overrides"
 	"github.com/mdpsec/huntdeck/internal/platform"
+	"github.com/mdpsec/huntdeck/internal/scanhandoff"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
 	"github.com/mdpsec/huntdeck/internal/scope"
+	"github.com/mdpsec/huntdeck/internal/scopesentry"
 	"github.com/mdpsec/huntdeck/internal/store"
 	"github.com/mdpsec/huntdeck/internal/syncer"
 	"github.com/mdpsec/huntdeck/internal/version"
@@ -352,6 +354,16 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 			}
 			if err := a.store.RefreshHuntQueue(ctx, a.store.Now()); err != nil && ctx.Err() == nil {
 				log.Warn("hunt queue not rebuilt", "err", err)
+			}
+			// The same clock hands new targets to the scanner, when the operator
+			// turned that on: off is the default and the honest one.
+			if a.cfg.ScanKey.Reveal() != "" {
+				client := &scopesentry.Client{BaseURL: a.cfg.ScanURL, Key: a.cfg.ScanKey.Reveal()}
+				if n, err := scanhandoff.Run(ctx, a.store, client, false); err != nil && ctx.Err() == nil {
+					log.Warn("scan handoff failed", "err", err)
+				} else if n > 0 {
+					log.Info("scan tasks created", "tasks", n)
+				}
 			}
 			select {
 			case <-ctx.Done():
