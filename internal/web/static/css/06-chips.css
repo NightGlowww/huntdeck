@@ -39,6 +39,12 @@ col.w-type-s { width: 122px; }
 col.w-num-m { width: 90px; }
 col.w-name { width: 200px; }
 
+/* The filter that is in force. Without this the queue's chips all looked the
+   same and the page never said what it was showing - the board's chips had an
+   on state, this page's did not. */
+.queue-filters .chip.on { border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: var(--accent-weak); color: var(--accent); font-weight: 600; }
+
 /* The one chip that is an action rather than a filter: it undoes the others.
    Dashed edge and muted text say "not a state, a reset". */
 .queue-filters .chip.clear { border-style: dashed; color: var(--muted); }
