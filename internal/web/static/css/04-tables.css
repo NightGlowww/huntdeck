@@ -92,3 +92,11 @@ col.w-you { width: 112px; }
    become a 11000px strip. */
 .table-wrap.tall { max-height: calc(100vh - 16rem); overflow: auto; }
 .table-wrap.tall thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); }
+
+/* On a phone the header row is hidden and every row is a card, so the bounded
+   box buys nothing and a nested scroll area traps the page scroll: the list
+   scrolls with the page there. The sticky header is for wide screens, where
+   the table really is a table. */
+@media (max-width: 700px) {
+  .table-wrap.tall { max-height: none; overflow: visible; }
+}
