@@ -123,6 +123,24 @@ else
   echo "  healthz did not come up; see the logs above" >&2
   exit 1
 fi
+# The container is recreated, not hot-swapped: for a moment the old one still
+# answers, and a smoke run against it fails 200-without-the-new-markup.
+# Wait for the version this deploy built before judging anything else.
+if [ -z "$dry" ]; then
+  running=""
+  for i in $(seq 1 30); do
+    running=$(remote "cd $dir && sudo docker compose exec -T huntdeck /huntdeck version 2>/dev/null" | awk '{print $2}') || running=""
+    [ "$running" = "$ver" ] && break
+    sleep 1
+  done
+  if [ "$running" = "$ver" ]; then
+    echo "  running $running"
+  else
+    echo "  the container runs ${running:-nothing} after 30s, this deploy built $ver" >&2
+    exit 1
+  fi
+fi
+
 # Then the whole of it, from the host: pages, API, login. The password is
 # read from the host's .env there and never travels through here.
 echo "==> smoke"
@@ -151,18 +169,6 @@ else
       echo "  smoke failed after the deploy; the container is up, see the lines above" >&2
       exit 1
     fi
-  fi
-fi
-
-# A deploy that shipped nothing must fail: compare the version this run built
-# with the one the container is actually running.
-if [ -z "$dry" ]; then
-  running=$(remote "cd $dir && sudo docker compose exec -T huntdeck /huntdeck version" | awk '{print $2}') || running=""
-  if [ "$running" = "$ver" ]; then
-    echo "  running $running"
-  else
-    echo "  the container runs ${running:-nothing}, this deploy built $ver" >&2
-    exit 1
   fi
 fi
 

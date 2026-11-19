@@ -101,11 +101,32 @@ case "$status" in
   *) ok "status payload" "$status platforms" ;;
 esac
 
-# 5. the pages
-for path in "/" "/programs" "/targets" "/disclosed" "/settings"; do
-  got=$(curl -s -m 20 -b "$jar" -o /dev/null -w '%{http_code}' "$url$path" || true)
-  [ "$got" = 200 ] && ok "GET $path" "200" || bad "GET $path" "answered $got"
-done
+# 5. the pages, and something only that page has: a template that renders an
+# empty shell, or one page's body served for another, answers 200 like any
+# other and would otherwise pass. The markers are ids, not words, so they read
+# the same in either language.
+while IFS="|" read -r path marker; do
+  body=$(curl -s -m 20 -b "$jar" "$url$path" || true)
+  want=$(printf 'data-page="%s"' "$marker")
+  if [ -z "$body" ]; then
+    bad "GET $path" "no answer"
+  # No pipe: grep -q exits on the first match, and under pipefail the writer
+  # then dies of SIGPIPE, which turns a match into a failure.
+  elif [ "${body#*$want}" != "$body" ]; then
+    ok "GET $path" "200, $marker"
+  else
+    bad "GET $path" "200 without $want (a login page, an empty shell, or the wrong page?)"
+  fi
+done <<EOF
+/|dashboard
+/queue|queue
+/programs|programs
+/targets|targets
+/disclosed|disclosed
+/changes|changes
+/settings|settings
+/api|api
+EOF
 
 # 6. the MCP server, when it is beside us
 if [ -n "$mcp" ] && [ -x "$mcp" ]; then
