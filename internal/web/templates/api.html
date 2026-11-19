@@ -17,7 +17,7 @@
     <dl class="apifacts">
       <div><dt>{{T "Address"}}</dt><dd><code>{{.Base}}</code></dd></div>
       {{if .ReadOnly}}<div><dt>Login</dt><dd>{{T "None, and no token."}} {{T "HuntDeck Public's API sits behind bot protection, so the curl examples get a challenge from a terminal or script: use"}} <b>{{T "Send"}}</b> {{T "on this page, or open an address in your browser. On a HuntDeck you run yourself, scripts work without any token."}}</dd></div>
-      {{else if .Password}}<div><dt>{{T "Login"}}</dt><dd>{{T "This instance asks for its access password. Sign in once in a browser and that session cookie is the credential (30 days); scripts send the same cookie. There are no API tokens to create or revoke — the password is the only key."}}</dd></div>
+      {{else if .Password}}<div><dt>{{T "Login"}}</dt><dd>{{T "This instance asks for its access password. A browser session lasts 30 days; a script can send that cookie, or mint an API token below and send it as a Bearer header. Both are keys to the same gate."}}</dd></div>
       {{else}}<div><dt>{{T "Login"}}</dt><dd>{{T "None, and no token. Keep HuntDeck on your own machine or private network."}}</dd></div>{{end}}
       <div><dt>{{T "Format"}}</dt><dd>{{T "JSON; target lists as plain text, one per line. Errors:"}} <code>{"error": "…"}</code>.</dd></div>
       <div><dt>{{T "Pages"}}</dt><dd><code>limit</code> {{T "and"}} <code>offset</code>{{T ";"}} {{T "each list gives its"}} <code>total</code>.</dd></div>

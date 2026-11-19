@@ -114,6 +114,11 @@ func (s *server) renderAPIDocs(w http.ResponseWriter, r *http.Request, newToken,
 	d.ReadOnly = s.ReadOnly
 	if s.ReadOnly { // not "reached only from your own machine": this one is public
 		d.Description = strings.Replace(d.Description, privateNote, "There is no login and no token.", 1)
+	} else if d.Password {
+		// The spec speaks for a default install; this one has a password, and
+		// saying otherwise was a lie the page kept telling.
+		d.Description = strings.Replace(d.Description, privateNote,
+			"This instance asks for its access password; a browser session or an API token (below) is the credential.", 1)
 	}
 	for _, rt := range s.apiRoutes() {
 		method, path, _ := strings.Cut(rt.Pattern, " ")
