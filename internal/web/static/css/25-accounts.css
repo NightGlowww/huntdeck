@@ -121,3 +121,13 @@
 .acct-sec + .acct-sec, .acct-sec + .acct-more { border-top: 1px solid var(--border); padding-top: 16px; }
 .acct-form > .acct-sec:first-of-type { padding-top: 2px; }
 
+
+/* Below 1700px the last-run status beside each interval is what pushed the
+   platform table past its panel (and gave the page a sideways scroll). It stays
+   in the poll history right below; keep the interval itself. */
+@media (max-width: 1700px) {
+  #platforms .pollc > span { display: none; }
+  #platforms .c-wide { max-width: 260px; }
+  #platforms .c-wide .signins > * { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
