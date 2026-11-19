@@ -19,6 +19,8 @@ type ArgInfo struct {
 	Name string
 	Type string
 	What string
+	// Required marks an argument the tool will not run without.
+	Required bool
 }
 
 // Catalog is every tool the server offers, in the order it offers them.
@@ -26,9 +28,20 @@ func Catalog() []ToolInfo {
 	out := make([]ToolInfo, 0, len(tools))
 	for _, t := range tools {
 		info := ToolInfo{Name: t.Name, Description: t.Description, Write: t.Write}
-		for _, name := range sortedKeys(t.Schema) {
-			what, typ := describeArg(t.Schema[name])
-			info.Arguments = append(info.Arguments, ArgInfo{Name: name, Type: typ, What: what})
+		// The schema is a JSON Schema object: the arguments are under "properties",
+		// not the object's own keywords (type, additionalProperties, required).
+		props, _ := t.Schema["properties"].(map[string]any)
+		required := map[string]bool{}
+		if list, ok := t.Schema["required"].([]any); ok {
+			for _, name := range list {
+				if s, ok := name.(string); ok {
+					required[s] = true
+				}
+			}
+		}
+		for _, name := range sortedKeys(props) {
+			what, typ := describeArg(props[name])
+			info.Arguments = append(info.Arguments, ArgInfo{Name: name, Type: typ, What: what, Required: required[name]})
 		}
 		out = append(out, info)
 	}

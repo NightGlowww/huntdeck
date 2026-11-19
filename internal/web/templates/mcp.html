@@ -19,7 +19,7 @@
       <p>{{.Description}}</p>
       {{if .Arguments}}
       <table class="mcp-args"><thead><tr><th>{{T "Argument"}}</th><th>{{T "Type"}}</th><th>{{T "What it is for"}}</th></tr></thead><tbody>
-        {{range .Arguments}}<tr><td><code>{{.Name}}</code></td><td>{{.Type}}</td><td>{{.What}}</td></tr>{{end}}
+        {{range .Arguments}}<tr><td><code>{{.Name}}</code>{{if .Required}} <span class="chip small">{{T "required"}}</span>{{end}}</td><td>{{.Type}}</td><td>{{.What}}</td></tr>{{end}}
       </tbody></table>
       {{else}}<p class="muted small">{{T "No arguments."}}</p>{{end}}
     </div>
