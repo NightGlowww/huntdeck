@@ -3,8 +3,10 @@
 The API page in the sidebar documents every endpoint and can send GETs for
 you; `/api/v1/openapi.json` is the same as an OpenAPI 3.1 description.
 
-There's no login and no token: scripts and curl work as they are against
-your own HuntDeck.
+With no access password set there's no login and no token: scripts and curl
+work as they are. With `HUNTDECK_PASSWORD` set, a browser sends the session
+cookie it gets at the login page, and a script sends either that cookie or an
+API token (`Authorization: Bearer …`, minted on the API page).
 
 
 Targets come back as plain text by default, streamed in full, so they pipe

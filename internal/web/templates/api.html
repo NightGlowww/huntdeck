@@ -25,7 +25,7 @@
   </div>
   <p class="panel-foot">{{T "Import"}} <a class="link" href="/api/v1/openapi.json">openapi.json</a> {{T "into Postman, Insomnia or Bruno, or give it to a client generator. Send runs a GET here, against this HuntDeck."}}</p>
 </section>
-<section class="panel" id="tokens">
+{{if .Password}}<section class="panel" id="tokens">
   <div class="panel-head"><h2>{{T "API tokens"}}</h2><span class="aside">{{T "for scripts, instead of a browser session"}}</span></div>
   <div class="panel-body">
     {{if eq .Flash "token-created"}}<p class="flash ok">{{T "Created. Copy it now: only its digest is stored, so it is never shown again."}}</p>
@@ -49,7 +49,7 @@
     </tbody></table></div>
     {{else}}<p class="muted small">{{T "No tokens yet."}}</p>{{end}}
   </div>
-</section>
+</section>{{else}}<section class="panel" id="tokens"><div class="panel-head"><h2>{{T "API tokens"}}</h2></div><div class="panel-body"><p class="muted small">{{T "No access password is set, so there is nothing for a token to unlock: every script reaches this API directly."}}</p></div></section>{{end}}
 <section class="panel" id="mcp">
   <div class="panel-head"><h2>{{T "MCP server"}}</h2><span class="aside">{{T "for an AI agent, over stdio"}}</span></div>
   <div class="panel-body">
