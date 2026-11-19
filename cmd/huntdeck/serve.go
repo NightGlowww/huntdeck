@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mdpsec/huntdeck/internal/ai"
 	"io"
 	"log/slog"
 	"net"
@@ -13,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mdpsec/huntdeck/internal/ai"
 
 	"github.com/mdpsec/huntdeck/internal/browser"
 	"github.com/mdpsec/huntdeck/internal/config"

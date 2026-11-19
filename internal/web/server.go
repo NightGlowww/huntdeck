@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"github.com/mdpsec/huntdeck/internal/ai"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -16,6 +15,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/mdpsec/huntdeck/internal/ai"
 
 	"github.com/mdpsec/huntdeck/internal/i18n"
 	"github.com/mdpsec/huntdeck/internal/overrides"

@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/mdpsec/huntdeck/internal/policyai"
 	"io"
-	"strings"
+
+	"github.com/mdpsec/huntdeck/internal/policyai"
 
 	"github.com/mdpsec/huntdeck/internal/ai"
 	"github.com/mdpsec/huntdeck/internal/config"
@@ -68,25 +68,4 @@ func aiExtractCmd(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stdout, "read %d, skipped %d, failed %d\n", res.Read, res.Skipped, res.Failed)
 	return 0
-}
-
-const policySystem = "You read bug bounty program policies and list the rules a tester must follow. " +
-	"Answer with JSON only: an array of objects with title (one short sentence, imperative), " +
-	"detail (optional, one sentence) and kind (one of header, email, rate, creds, warn, other). " +
-	"Use only what the policy states; do not invent rules and do not restate the bounty table."
-
-func policyUser(policy string) string {
-	return "Policy text:\n\n" + aiTrim(policy, 12000) + "\n\nList its rules."
-}
-
-// aiTrim keeps a policy under the model's context without cutting mid-sentence.
-func aiTrim(s string, max int) string {
-	if len(s) <= max {
-		return s
-	}
-	cut := s[:max]
-	if i := strings.LastIndexAny(cut, ".\n"); i > max/2 {
-		return cut[:i+1]
-	}
-	return cut
 }
