@@ -3,7 +3,10 @@
    data-place, or a layout saved in the browser) and sets it just under whatever is above
    it in those columns. Without the script the boxes simply stack. Each box is a size
    container, so what's inside fits whatever width it's given. */
-.board { position: relative; display: flex; flex-direction: column; gap: 16px; }
+/* The board's blocks are groups, not neighbours: the queue strip, the totals and
+   the attack surface each begin a new thought, so they sit further apart than the
+   panels inside them. */
+.board { position: relative; display: flex; flex-direction: column; gap: 28px; }
 .board.packed { display: block; }
 .board.packed > .bx { position: absolute; top: 0; left: 0; }
 /* Hidden until placed, so a half-loaded page doesn't flash the boxes stacked; shown anyway

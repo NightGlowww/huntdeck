@@ -82,7 +82,9 @@
 
 /* The tab's subject, and a side column. */
 .ov { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 16px; align-items: start; }
-.stack { display: grid; gap: 16px; align-content: start; min-width: 0; }
+/* Panels in a column are one group: 12px, so they read together, while the board's
+   top-level blocks keep their 28px. */
+.stack { display: grid; gap: 12px; align-content: start; min-width: 0; }
 .stack > .panel + .panel, .ov > .panel { margin-top: 0; }
 @media (max-width: 1400px) { .ov { grid-template-columns: minmax(0, 1fr) 380px; } }
 @media (max-width: 1150px) { .ov { grid-template-columns: minmax(0, 1fr); } }
