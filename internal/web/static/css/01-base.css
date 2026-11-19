@@ -1,6 +1,11 @@
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
+/* A fast flick on a page that cannot scroll (Settings' short tabs) makes macOS
+   Chrome rubber-band the whole viewport: the shell slides up, the top bar and the
+   sidebar's first items go off-screen, and the window shows white. The page never
+   moved, but it looks broken while the bounce lasts. */
+html, body { overscroll-behavior: none; }
 /* No scrollbars: pages scroll with the wheel, trackpad or keys. Without
    one on any page, the top bar's search sits in the same spot on all. */
 html { scrollbar-width: none; }
