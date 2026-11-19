@@ -1691,6 +1691,7 @@
     "Key": "密钥",
     "Revoke this key? The client using it gets 401 from now on.": "吊销这枚密钥？使用它的客户端从现在起会收到 401。",
     "The shape an MCP client in another process expects: HTTP, the key in a header, no binary to run. The key is this connection's own (kind mcp), minted here and revoked here; the instance answers at /mcp/rpc, one JSON-RPC message per POST. The stdio binary below is the same server for terminals.": "其他进程里的 MCP 客户端要的形态：HTTP、密钥放在头里、无需运行二进制。密钥为本连接专属（kind 为 mcp），在此签发、在此吊销；实例在 /mcp/rpc 应答，每个 POST 一条 JSON-RPC 消息。下方的 stdio 二进制是同一个服务端，供终端使用。",
-    "The same server as a stdio process, for a terminal agent that spawns commands; a client in another app uses the HTTP shape above.": "同一个服务端的 stdio 进程形态，供会拉起命令的终端智能体使用；其他应用里的客户端用上面的 HTTP 形态。"
+    "The same server as a stdio process, for a terminal agent that spawns commands; a client in another app uses the HTTP shape above.": "同一个服务端的 stdio 进程形态，供会拉起命令的终端智能体使用；其他应用里的客户端用上面的 HTTP 形态。",
+    "more of this program": "看该程序更多报告"
   }
 }
