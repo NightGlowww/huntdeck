@@ -57,6 +57,9 @@ type dashboardData struct {
 
 	// Queue is HuntQueue's top rows: what to hunt today, above the grid.
 	Queue []queueRowView
+	// QueueErr says the read failed, so the strip can say that instead of
+	// disappearing as if there were nothing to show.
+	QueueErr bool
 
 	// Fresh attack surface: the best recently added targets.
 	Filter      boardFilter
@@ -273,6 +276,11 @@ func (s *server) dashboard(w http.ResponseWriter, r *http.Request) {
 	// rows of the same decision. The queue page keeps the full list.
 	if top, _, err := s.Store.HuntQueueTop(ctx, store.QueueFilter{OnePerProgram: true}, 5, 0); err == nil {
 		d.Queue = s.queueViews(r, top)
+	} else {
+		// Without this the strip simply vanished, which reads the same as a queue
+		// with nothing to offer. Log it, and let the page say so.
+		s.Log.WarnContext(ctx, "board: cannot read the queue strip", "error", err)
+		d.QueueErr = true
 	}
 	if err := s.boardTargets(r, &d); err != nil {
 		s.serverError(w, r, err)

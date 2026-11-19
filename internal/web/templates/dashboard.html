@@ -24,6 +24,7 @@
   <button type="button" class="button small" data-board-done>{{T "Done"}}</button>
 </div>
 
+{{if .QueueErr}}<section class="panel queue-strip"><div class="panel-head"><h2>{{T "Hunt queue"}}</h2></div><p class="empty-state">{{T "The queue could not be read just now; it is rebuilt every half hour."}}</p></section>{{end}}
 {{if .Queue}}
 <section class="panel queue-strip">
   <div class="panel-head"><h2>{{T "Hunt queue"}}</h2><span class="sub">{{T "start today"}} · <a class="link" href="/queue">{{T "open the queue"}}</a></span></div>
