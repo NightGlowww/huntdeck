@@ -26,10 +26,16 @@ type queueData struct {
 	// Cuts is how many days of HuntScore history exist; the backtest needs
 	// QueueCutsNeeded before it can judge the ranking.
 	Cuts int
+	// CutsUnknown says the history could not be read: the page then does
+	// not print "0 of 8 snapshots", which would be a claim about the data.
+	CutsUnknown bool
 	// BelowFloor is how many targets the rebuild left out for scoring under
 	// the floor: the page says so, so a short list does not read as complete.
 	BelowFloor int
-	Pager      pager
+	// BelowFloorUnknown says the count could not be read, so the page does not
+	// imply that nothing was left out.
+	BelowFloorUnknown bool
+	Pager             pager
 	// Total is every ranked target, not just this page: the heading said "50
 	// targets" when the queue held 207.
 	Total int
@@ -110,10 +116,14 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 	d.IgnoredWindow = ignored
 	if days, err := s.Store.ScoreDays(ctx); err == nil {
 		d.Cuts = len(days)
+	} else {
+		// "0 of 8 snapshots" is a claim about the data; a failed read is not.
+		s.Log.WarnContext(ctx, "queue: cannot read the score history", "error", err)
+		d.CutsUnknown = true
 	}
 	d.Pager = newPager(r, perPage, total)
 	d.Total = total
-	if n, err := s.Store.HuntQueueGatedCount(ctx); err == nil {
+	if n, err := s.Store.HuntQueueGatedCount(ctx, filter); err == nil {
 		d.GatedTotal = n
 	}
 	if counts, err := s.Store.HuntQueueGateCounts(ctx); err == nil {
@@ -149,6 +159,7 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// The line is absent either way; the log tells the two apart.
 		s.Log.WarnContext(ctx, "queue: cannot read the left-out count", "error", err)
+		d.BelowFloorUnknown = true
 	}
 	s.render(w, r, http.StatusOK, "queue", pageData{Title: "Hunt queue", Nav: "queue", Data: d})
 }

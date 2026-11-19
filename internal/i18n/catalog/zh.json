@@ -1619,6 +1619,9 @@
     "The queue could not be read just now; it is rebuilt every half hour.": "本次未能读取队列；该表每半小时重建一次。",
     "The stored note could not be read just now, so the editor stays closed: saving an empty one would replace what is there. Reload in a moment.": "本次未能读取已保存的笔记，因此编辑器保持关闭：保存空白会覆盖已有内容。请稍后重新加载。",
     "Clear what is saved here: the field stays empty even if your environment sets it, until you save a value or reset to .env": "清空此处保存的值：该字段将保持为空（即使 .env 中设了值），直到你再次保存或重置为 .env。",
-    "Kept in HuntDeck: it follows you to another browser, and a backup of the data directory carries it. A target export does not.": "保存在 HuntDeck 中：换浏览器也在，备份数据目录会带上它；目标导出不含笔记。"
+    "Kept in HuntDeck: it follows you to another browser, and a backup of the data directory carries it. A target export does not.": "保存在 HuntDeck 中：换浏览器也在，备份数据目录会带上它；目标导出不含笔记。",
+    "The score history could not be read just now, so how many snapshots exist is unknown.": "本次未能读取评分历史，因此无法确定已有多少快照。",
+    "How many targets the floor left out could not be read.": "未能读取有多少目标因低于门槛被排除。",
+    "Nothing is blocked among the %d targets this filter keeps.": "当前筛选的 %d 个目标中，没有无法开工的。"
   }
 }

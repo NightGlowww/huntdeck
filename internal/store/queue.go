@@ -517,9 +517,17 @@ func (s *Store) HuntQueueBuiltAt(ctx context.Context) (time.Time, error) {
 
 // HuntQueueGatedCount is how many targets the queue keeps out, and why they
 // are worth counting: "one invitation away" is a decision, not noise.
-func (s *Store) HuntQueueGatedCount(ctx context.Context) (int, error) {
+// HuntQueueGatedCount is how many blocked targets the same filter keeps: the
+// page shows a filtered list, so an unfiltered total beside it would count
+// rows the reader cannot see.
+func (s *Store) HuntQueueGatedCount(ctx context.Context, f QueueFilter) (int, error) {
+	where, args := f.where()
 	var n int
-	err := s.db.R.QueryRowContext(ctx, "SELECT COUNT(*) FROM hunt_queue WHERE gate <> ''").Scan(&n)
+	//nolint:gosec // where is built from constant clauses; every value is bound
+	err := s.db.R.QueryRowContext(ctx, `
+SELECT COUNT(*) FROM hunt_queue q JOIN programs p ON p.id = q.program_id
+  LEFT JOIN target_scores ts ON ts.program_id = q.program_id AND ts.kind = q.kind AND ts.value = q.value
+ WHERE q.gate <> ''`+where, args...).Scan(&n)
 	return n, err
 }
 
