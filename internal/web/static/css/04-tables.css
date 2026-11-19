@@ -73,3 +73,15 @@ col.w-you { width: 112px; }
 .why-score .factors { margin: 6px 0 0; padding: 0; list-style: none; text-align: left; font-weight: 400; }
 .why-score .factors li { display: flex; gap: 6px; justify-content: space-between; white-space: nowrap; font-size: 11px; }
 .why-score .fname { color: var(--text-2); }
+
+/* The poll history has ten columns and, at a laptop width, they do not fit: the
+   wrap scrolled sideways and a trackpad's diagonal wheel got locked to that axis,
+   so the page looked stuck while the table slid to its end. Below 1500px the
+   numbers are dropped instead — each run still says what it was, and widening the
+   window brings the counts back. */
+@media (max-width: 1500px) {
+  table.runs th:nth-child(n + 8), table.runs td:nth-child(n + 8) { display: none; }
+}
+@media (max-width: 1100px) {
+  table.runs th:nth-child(6), table.runs td:nth-child(6) { display: none; }
+}
