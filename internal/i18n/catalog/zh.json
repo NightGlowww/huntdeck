@@ -1577,6 +1577,7 @@
     "Revoke": "吊销",
     "No tokens yet.": "还没有令牌。",
     "This instance asks for its access password. A browser session lasts 30 days; a script can send that cookie, or mint an API token below and send it as a Bearer header. Both are keys to the same gate.": "本实例要求输入访问密码。浏览器会话有效期 30 天；脚本可以沿用同一个 cookie，也可以在下方签发 API 令牌并以 Bearer 头发送。两者都是同一道门的钥匙。",
-    "No access password is set, so there is nothing for a token to unlock: every script reaches this API directly.": "未设置访问密码，因此令牌无处可用：任何脚本都能直接访问该 API。"
+    "No access password is set, so there is nothing for a token to unlock: every script reaches this API directly.": "未设置访问密码，因此令牌无处可用：任何脚本都能直接访问该 API。",
+    "Where the program's policy states a rule it is quoted; the rest comes from what the platform publishes.": "项目政策里写明的规则按原文引用；其余来自平台公开的信息。"
   }
 }

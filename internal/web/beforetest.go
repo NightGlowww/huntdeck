@@ -260,6 +260,11 @@ func excerptAround(text, match string) string {
 		end++
 	}
 	s := strings.Join(strings.Fields(text[start:end]), " ")
+	// A policy written in Markdown puts "### Heading" on the line the sentence
+	// starts on; the markers are not part of what the rule says.
+	if i := strings.Index(s, " "); i > 0 && strings.Trim(s[:i], "#") == "" {
+		s = strings.TrimSpace(s[i+1:])
+	}
 	if len(s) > 160 {
 		s = s[:157] + "…"
 	}
