@@ -13,10 +13,10 @@
       <input type="text" name="program" value="{{.Program}}" placeholder="{{T "program handle"}}">
       <button type="submit" class="small">{{T "Search"}}</button>
     </form>
-    {{if .Results}}<pre class="pojia-answer">{{.Results}}</pre>{{end}}
+    {{if .Results}}<pre class="pojia-answer">{{pojiaLinks .Results}}</pre>{{end}}
     {{if .Payloads}}
     <h3>{{T "Payloads for this class"}}</h3>
-    <pre class="pojia-answer">{{.Payloads}}</pre>
+    <pre class="pojia-answer">{{pojiaLinks .Payloads}}</pre>
     {{end}}
   </div>
 </section>
@@ -24,7 +24,7 @@
 {{if .CVE}}
 <section class="panel">
   <div class="panel-head"><h2>{{T "CVE"}}</h2></div>
-  <div class="panel-body"><pre class="pojia-answer">{{.CVEAnswer}}</pre></div>
+  <div class="panel-body"><pre class="pojia-answer">{{pojiaLinks .CVEAnswer}}</pre></div>
 </section>
 {{end}}
 
