@@ -8,7 +8,46 @@ start) stay compatible within a major version.
 
 ## [Unreleased]
 
-## v1.1.0 (2026-11-19)
+## v1.3.0 (2026-11-19)
+
+### Added
+
+- **Policy extraction with a model, when one is configured**: `huntdeck ai-extract`
+  (or the button in Settings › Polling) asks an OpenAI-compatible endpoint for the
+  rules a program's policy states, caches the answer against the policy's hash so
+  the same text is never sent twice, and shows it beside the rules quoted from the
+  policy — on the program page and as `ai_rules` in the API and the MCP tool. No
+  page render calls a model; with no endpoint set, nothing changes.
+- **Optional capabilities in Settings**, so an off-by-default feature is visible
+  where a person looks: on, off, which model, how many readings are cached.
+- **A text-size setting** (small, standard, large, extra large) that scales type
+  rather than the layout.
+- `scripts/gates.sh` and `scripts/restore-drill.sh`: the first proves the shell
+  gates fail when they should, the second restores a backup into a scratch
+  directory, runs `doctor` on it and compares counts with the live database.
+
+### Fixed
+
+- **Smoke passed on any 200.** The page checks now look for each page's own
+  `data-page` marker, so a login page served for every route, or an empty shell,
+  fails. A fresh install with no platforms is no longer reported as broken.
+- **bench passed on an unanswered route.** A refused connection takes no time;
+  `--check` counts routes that did not answer and exits 1.
+- **A deploy that shipped nothing passed.** The version this run built is waited
+  for and asserted against the running container.
+- **English inside the Chinese interface**: the Stats cells ("32d to decision",
+  "since Oct 28", an English month in the collecting line), the Settings sign-in
+  column ("accepted at the last poll") and the program policy note. Text is now
+  produced in templates from translation keys, which is a written rule in
+  `AGENTS.md`.
+- The API page claimed there are no tokens, and the token endpoints were
+  registered outside `apiRoutes`, invisible to the page, the spec and every guard.
+- The copy and download actions on the Changes page sat on different baselines.
+- The board's queue box showed five rows of one program.
+
+## v1.2.0 (2026-11-19)
+
+The 1.1.1-1.1.3 tags were patch releases the same day; their fixes are below.
 
 ### Added
 
