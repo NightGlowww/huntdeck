@@ -1,6 +1,6 @@
 /* change tags in feeds */
 .tag { display: inline-flex; justify-content: center; align-items: center; min-width: 76px; height: 19px; padding: 0 6px; border-radius: 4px;
-  font: 600 10.5px/1 var(--mono); text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; background: var(--surface-3); color: var(--text-2); }
+  font: 600 calc(10.5px * var(--fs, 1))/1 var(--mono); text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; background: var(--surface-3); color: var(--text-2); }
 .tag.add { background: var(--good-weak); color: var(--good); }
 .tag.del { background: var(--bad-weak); color: var(--bad); }
 .tag.mod { background: var(--warn-weak); color: var(--warn); }

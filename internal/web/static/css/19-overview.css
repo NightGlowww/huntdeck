@@ -4,15 +4,15 @@
 .ov-tile { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 13px 18px 12px; border-left: 1px solid var(--border); }
 .ov-tile:first-child { border-left: 0; }
 .ov-tile .l { overflow: hidden; color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 600; letter-spacing: .06em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
-.ov-tile .v { font: 600 24px/1.2 var(--mono); letter-spacing: -.03em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ov-tile .v { font: 600 calc(24px * var(--fs, 1))/1.2 var(--mono); letter-spacing: -.03em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ov-tile .h { color: var(--muted); font-size: calc(12px * var(--fs, 1)); }
 .ov-tile .ov-spark { margin-top: auto; padding-top: 6px; }
 .ov-tile .ov-spark svg { height: 38px; }
 /* Open programs: paid and free, a line each. */
 .ov-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: auto; }
 .ov-split > div { display: flex; flex-direction: column; min-width: 0; }
-.ov-split .h b { color: var(--text); font: 600 13px var(--mono); }
-.ov-also { color: var(--muted); font: 600 13px var(--mono); letter-spacing: 0; }
+.ov-split .h b { color: var(--text); font: 600 calc(13px * var(--fs, 1)) var(--mono); }
+.ov-also { color: var(--muted); font: 600 calc(13px * var(--fs, 1)) var(--mono); letter-spacing: 0; }
 
 /* A sparkline at its box's width, its first and last month or day under it. */
 .ov-spark { min-width: 0; }
@@ -47,7 +47,7 @@ a.ov-plat:hover .ov-go { color: var(--accent); }
 .ov-programs td .name { color: var(--text); font-weight: 600; }
 .ov-programs td .name:hover { color: var(--accent); }
 .ov-cell { display: grid; gap: 5px; min-width: 0; }
-.ov-n { font: 600 15px/1.2 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ov-n { font: 600 calc(15px * var(--fs, 1))/1.2 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ov-n small { color: var(--muted); font-size: calc(11.5px * var(--fs, 1)); font-weight: 600; }
 
 /* Under the tables: what the colours and dashes mean. */

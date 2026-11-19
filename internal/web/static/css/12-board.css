@@ -47,10 +47,10 @@ table.surface .tv-row .tv { min-width: 0; }
 table.surface .tv-row .more { flex: none; color: var(--muted); font-size: calc(12px * var(--fs, 1)); white-space: nowrap; }
 table.surface .tv-row .more:hover { color: var(--accent); }
 .pay { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; color: var(--muted); }
-.pay .amt { color: var(--text); font: 600 12.5px var(--mono); }
+.pay .amt { color: var(--text); font: 600 calc(12.5px * var(--fs, 1)) var(--mono); }
 .pay .upto { font-size: calc(12px * var(--fs, 1)); }
 .pay .none { color: var(--faint); }
-table.surface td.c-ptotal { font: 600 12.5px var(--mono); white-space: nowrap; }
+table.surface td.c-ptotal { font: 600 calc(12.5px * var(--fs, 1)) var(--mono); white-space: nowrap; }
 .kind-under { display: none; margin-top: 3px; overflow: hidden; white-space: nowrap; }
 /* Phones: the program goes under the target, its column hidden. */
 .prog-under { display: none; margin-top: 3px; }
@@ -59,13 +59,13 @@ table.surface th:first-child, table.surface td:first-child { padding-left: 16px;
 table.surface td.asset { font-weight: 600; font-size: calc(13px * var(--fs, 1)); }
 table.surface tr:has(input.pick:checked) td { background: var(--accent-weak); }
 .kd { display: inline-block; width: 78px; padding: 1px 0; border-radius: 4px; background: var(--surface-3); color: var(--muted);
-  font: 600 10.5px/17px var(--mono); text-align: center; text-transform: uppercase; }
+  font: 600 calc(10.5px * var(--fs, 1))/17px var(--mono); text-align: center; text-transform: uppercase; }
 .kd.wildcard { background: var(--accent-weak); color: var(--accent); }
 .kd.ios, .lbl.kind.ios { text-transform: none; }
-.lbl { display: inline-block; margin-right: 4px; padding: 0 6px; border-radius: 4px; background: var(--surface-3); color: var(--muted); font: 600 11px/18px var(--mono); }
+.lbl { display: inline-block; margin-right: 4px; padding: 0 6px; border-radius: 4px; background: var(--surface-3); color: var(--muted); font: 600 calc(11px * var(--fs, 1))/18px var(--mono); }
 .lbl.kind { text-transform: uppercase; } .lbl.kind.wildcard { background: var(--accent-weak); color: var(--accent); }
 /* HuntScore and target scores: just the number, the same on every page. */
-.score { color: var(--accent); font: 700 13px var(--mono); }
+.score { color: var(--accent); font: 700 calc(13px * var(--fs, 1)) var(--mono); }
 td.acts { text-align: right; white-space: nowrap; }
 .icon-btn, button.icon-btn { display: inline-grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 6px; background: none; color: var(--muted); }
 .icon-btn:hover, button.icon-btn:hover { background: var(--surface-3); color: var(--accent); filter: none; }
@@ -80,9 +80,9 @@ td.acts { text-align: right; white-space: nowrap; }
 .dcard .dh { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
 .dcard .dh .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-weight: 600; }
 .dcard .dh b { color: var(--text); }
-.dcard .st { display: flex; gap: 6px; margin-left: auto; font: 700 12px var(--mono); white-space: nowrap; }
+.dcard .st { display: flex; gap: 6px; margin-left: auto; font: 700 calc(12px * var(--fs, 1)) var(--mono); white-space: nowrap; }
 .dcard .st .add { color: var(--good); } .dcard .st .del { color: var(--bad); } .dcard .st .mod { color: var(--warn); }
-.dl { display: flex; gap: 8px; min-width: 0; padding: 2px 12px; font: 12.5px/1.75 var(--mono); }
+.dl { display: flex; gap: 8px; min-width: 0; padding: 2px 12px; font: calc(12.5px * var(--fs, 1))/1.75 var(--mono); }
 .dl .sign { width: 10px; flex: none; }
 .dl code, .dl > a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0; background: none; color: inherit; font: inherit; }
 .dl .names { min-width: 0; font-family: var(--sans); font-size: calc(13px * var(--fs, 1)); }
@@ -95,7 +95,7 @@ td.acts { text-align: right; white-space: nowrap; }
 
 .picks { margin: 0; padding: 0; list-style: none; }
 .picks li { display: flex; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
-.pick-score { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 9px; background: var(--accent-weak); color: var(--accent); font: 700 15px var(--mono); }
+.pick-score { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 9px; background: var(--accent-weak); color: var(--accent); font: 700 calc(15px * var(--fs, 1)) var(--mono); }
 .pick-body { min-width: 0; flex: 1; }
 .pick-body .prog { max-width: none; }
 .pick-body .why { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -104,7 +104,7 @@ td.acts { text-align: right; white-space: nowrap; }
 .picks + .more-link { border-top: 0; }
 
 /* The Invites box: groups (waiting, joined) under small headings. */
-.inv-group { padding: 8px 16px 4px; border-bottom: 1px solid var(--border); color: var(--muted); font: 700 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.inv-group { padding: 8px 16px 4px; border-bottom: 1px solid var(--border); color: var(--muted); font: 700 calc(10.5px * var(--fs, 1)) var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 .inv-accept { color: var(--accent); font-weight: 600; white-space: nowrap; }
 .inv-accept:hover { text-decoration: underline; }
 .inv-act { flex: none; align-self: center; }

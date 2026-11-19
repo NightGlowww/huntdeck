@@ -15,7 +15,7 @@
 .bx-bar button:hover { background: var(--surface-3); color: var(--text); }
 .bx-grip { touch-action: none; cursor: grab; }
 .bx-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-weight: 600; }
-.bx-w { color: var(--muted); font: 600 12px var(--mono); white-space: nowrap; }
+.bx-w { color: var(--muted); font: 600 calc(12px * var(--fs, 1)) var(--mono); white-space: nowrap; }
 .board.editing .bx-edge { display: block; position: absolute; top: 0; bottom: 0; z-index: 4; width: 16px; cursor: ew-resize; touch-action: none; }
 .bx-edge.l { left: -9px; } .bx-edge.r { right: -9px; }
 .bx-edge::after { content: ""; position: absolute; top: 50%; left: 6px; width: 4px; height: 44px; max-height: 60%; transform: translateY(-50%); border-radius: 2px;

@@ -20,5 +20,5 @@
   table.cards tbody tr:not(:has(> :is(.c-target, .c-detail, .c-report, .c-wide)))::before { content: ""; flex-basis: 100%; }
   table.cards td:is(:empty, :has(> .zero:only-child), :has(> .chips:only-child:empty)) { display: none; }
   table.cards td[data-label] { display: inline-flex; align-items: center; gap: 4px; }
-  table.cards td[data-label]::before { content: attr(data-label); color: var(--muted); font: 12px var(--sans); }
+  table.cards td[data-label]::before { content: attr(data-label); color: var(--muted); font: calc(12px * var(--fs, 1)) var(--sans); }
 }

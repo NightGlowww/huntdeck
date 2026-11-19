@@ -211,4 +211,4 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
    article), for kinds where the cards would hide its shape. */
 .pv-text { margin: 0 0 10px; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere;
   background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
-  color: var(--text); font: 12.5px/1.55 var(--sans); }
+  color: var(--text); font: calc(12.5px * var(--fs, 1))/1.55 var(--sans); }

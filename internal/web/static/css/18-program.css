@@ -11,7 +11,7 @@
 .ph-actions .tb-menu[open] > summary .chev-d { transform: rotate(-90deg); }
 /* Menus hold buttons as well as links. */
 .tb-menu .menu button { display: flex; align-items: center; gap: 8px; width: 100%; height: auto; padding: 6px 8px; border: 0; border-radius: 5px;
-  background: none; color: var(--text-2); font: 13px var(--sans); text-align: left; justify-content: flex-start; }
+  background: none; color: var(--text-2); font: calc(13px * var(--fs, 1)) var(--sans); text-align: left; justify-content: flex-start; }
 .tb-menu .menu button:hover { background: var(--row-hover); color: var(--text); filter: none; }
 .tb-menu .menu .i { width: 14px; height: 14px; color: var(--muted); }
 /* "Add tag": a small form under the link. */
@@ -28,10 +28,10 @@
 .kpi { display: grid; grid-template-rows: auto auto 1fr; align-content: start; gap: 3px; min-width: 0; min-height: 99px; padding: 12px 16px;
   border-left: 1px solid var(--border); }
 .kpi:first-child { border-left: 0; }
-.kpi .l { overflow: hidden; color: var(--muted); font: 650 10.5px var(--sans); letter-spacing: .07em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
-.kpi .v { overflow: hidden; color: var(--text); font: 650 20px/1.25 var(--mono); font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+.kpi .l { overflow: hidden; color: var(--muted); font: 650 calc(10.5px * var(--fs, 1)) var(--sans); letter-spacing: .07em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.kpi .v { overflow: hidden; color: var(--text); font: 650 calc(20px * var(--fs, 1))/1.25 var(--mono); font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
 .kpi .v .score { font-size: calc(22px * var(--fs, 1)); font-weight: 700; }
-.kpi .v .upto { color: var(--muted); font: 12px var(--sans); }
+.kpi .v .upto { color: var(--muted); font: calc(12px * var(--fs, 1)) var(--sans); }
 .kpi .h { overflow: hidden; color: var(--muted); font-size: calc(12px * var(--fs, 1)); text-overflow: ellipsis; white-space: nowrap; }
 .kpi .tchart { align-self: end; margin-top: 2px; }
 .kpi .tchart svg { width: 100%; height: 30px; }
@@ -65,7 +65,7 @@
   color: var(--text-2); font-size: calc(13.5px * var(--fs, 1)); font-weight: 600; }
 .ptabs a:hover { color: var(--text); }
 .ptabs a.on { border-bottom-color: var(--accent); color: var(--accent); }
-.ptabs .count { min-width: 20px; padding: 0 6px; border-radius: 9px; background: var(--surface-3); color: var(--muted); font: 600 11px/18px var(--mono); text-align: center; }
+.ptabs .count { min-width: 20px; padding: 0 6px; border-radius: 9px; background: var(--surface-3); color: var(--muted); font: 600 calc(11px * var(--fs, 1))/18px var(--mono); text-align: center; }
 /* A phone: tighter, so every tab fits (a program's five, Settings' five),
    counts and all; at the narrowest the counts shrink, and a row still too
    wide scrolls sideways. */
@@ -117,7 +117,7 @@
 .hp-why b { color: var(--text); font-weight: 600; }
 .huntscore .hp-bar { flex: 0 1 140px; width: auto; min-width: 48px; }
 .huntscore .hp-weight { white-space: nowrap; }
-.huntscore .panel-head h2 .score { color: var(--text); font: 700 13px var(--mono); letter-spacing: 0; }
+.huntscore .panel-head h2 .score { color: var(--text); font: 700 calc(13px * var(--fs, 1)) var(--mono); letter-spacing: 0; }
 @media (max-width: 900px) { .huntscore .huntparts { grid-template-columns: minmax(0, 1fr); } }
 
 /* Stats: a tidy grid of what the headline doesn't show. */
@@ -127,7 +127,7 @@
 .bounty-sev { width: 100%; }
 .bounty-sev td { padding: 8px 16px; border-top: 1px solid var(--border); }
 .bounty-sev td.num { font-family: var(--mono); }
-.bounty-sev .sev-meta { color: var(--muted); font: 11.5px var(--sans); white-space: normal; }
+.bounty-sev .sev-meta { color: var(--muted); font: calc(11.5px * var(--fs, 1)) var(--sans); white-space: normal; }
 .by-asset { border-top: 1px solid var(--border); }
 .by-asset > summary { display: flex; align-items: center; gap: 6px; padding: 10px 16px; color: var(--text-2); cursor: pointer; list-style: none; }
 .by-asset > summary::-webkit-details-marker { display: none; }
@@ -154,7 +154,7 @@
 .seg a { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 6px; color: var(--text-2); font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; white-space: nowrap; }
 .seg a:hover { color: var(--text); }
 .seg a.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, .12); }
-.seg em, .fchip em { color: var(--muted); font: 11px var(--mono); font-style: normal; }
+.seg em, .fchip em { color: var(--muted); font: calc(11px * var(--fs, 1)) var(--mono); font-style: normal; }
 .scope-table th.sc-asset { width: 36%; }
 .scope-table th.sc-type { width: 120px; }
 .scope-table th.sc-bounty, .scope-table th.sc-sev { width: 96px; }
@@ -261,7 +261,7 @@
 /* A program not taking reports: a strip above its head, in the state's colour. */
 .state-banner { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px; padding: 10px 14px; border-radius: 8px;
   border: 1px solid; font-size: calc(13.5px * var(--fs, 1)); line-height: 1.4; }
-.state-banner b { font: 700 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.state-banner b { font: 700 calc(12px * var(--fs, 1))/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .state-banner.paused { background: var(--warn-weak); border-color: var(--warn); color: var(--warn); }
 .state-banner.paused span { color: var(--text); }
 .state-banner.closed, .state-banner.removed { background: var(--bad-weak); border-color: var(--bad); color: var(--bad); }

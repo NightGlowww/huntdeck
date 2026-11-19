@@ -17,7 +17,7 @@
 .stat { display: grid; gap: 2px; padding: 13px 18px 14px; border-left: 1px solid var(--border); margin-left: -1px; }
 a.stat:hover { background: var(--surface-2); color: inherit; }
 .stat .l { color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-.stat .v { font: 600 24px/1.2 var(--mono); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.stat .v { font: 600 calc(24px * var(--fs, 1))/1.2 var(--mono); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .stat .h { color: var(--muted); font-size: calc(12px * var(--fs, 1)); }
 .stat.hot .v { color: var(--accent); }
 .stat .v.zero { color: var(--faint); }
@@ -41,7 +41,7 @@ a.stat:hover { background: var(--surface-2); color: inherit; }
 .lead { max-width: min(1400px, 100%); margin: 0 2px 16px; color: var(--muted); text-wrap: pretty; }
 .md p, .panel-foot, .acct-help, .empty-state { text-wrap: pretty; }
 .count { display: inline-grid; place-items: center; min-width: 22px; height: 18px; padding: 0 6px; border-radius: 9px; background: var(--surface-3);
-  color: var(--muted); font: 600 11px/1 var(--mono); letter-spacing: 0; text-transform: none; }
+  color: var(--muted); font: 600 calc(11px * var(--fs, 1))/1 var(--mono); letter-spacing: 0; text-transform: none; }
 .panel-body { padding: 14px 16px; }
 .panel > :last-child { border-bottom-left-radius: inherit; border-bottom-right-radius: inherit; }
 details.panel > summary { list-style: none; cursor: pointer; }

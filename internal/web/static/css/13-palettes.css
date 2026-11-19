@@ -18,7 +18,7 @@
 .pv-text { flex: 1; height: 6px; border-radius: 3px; background: var(--text-2); opacity: .55; }
 .pv-text.short { flex: 0 0 55%; background: var(--muted); }
 .pv-btn { width: 34px; height: 12px; border-radius: 4px; background: var(--accent); }
-.pv-chip { padding: 0 4px; border-radius: 3px; font: 600 9.5px/14px var(--mono); }
+.pv-chip { padding: 0 4px; border-radius: 3px; font: 600 calc(9.5px * var(--fs, 1))/14px var(--mono); }
 .pv-chip.add { background: var(--good-weak); color: var(--good); }
 .pv-chip.mod { background: var(--warn-weak); color: var(--warn); }
 .pv-chip.del { background: var(--bad-weak); color: var(--bad); }

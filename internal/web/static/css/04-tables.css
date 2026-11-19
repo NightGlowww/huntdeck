@@ -29,7 +29,7 @@ tr.removed td.asset { text-decoration: line-through; text-decoration-color: var(
 .prog { display: flex; align-items: center; gap: 8px; min-width: 0; max-width: 46ch; }
 .prog > * { flex: none; }
 .prog .name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.prog .handle { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faint); font: 11.5px var(--mono); }
+.prog .handle { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faint); font: calc(11.5px * var(--fs, 1)) var(--mono); }
 .prog .chips { flex-wrap: nowrap; }
 table.fixed { table-layout: fixed; }
 table.fixed td { overflow: hidden; text-overflow: ellipsis; }

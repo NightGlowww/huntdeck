@@ -3,7 +3,7 @@
    first, a row per line, every row the same height. */
 .flist td { height: 44px; padding-top: 0; padding-bottom: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 table.fixed.flist td.asset { white-space: nowrap; }
-.flist td.c-target { font: 12.5px var(--mono); }
+.flist td.c-target { font: calc(12.5px * var(--fs, 1)) var(--mono); }
 .flist .c-open { padding-left: 4px; padding-right: 10px; text-align: center; }
 .flist th.c-open { width: 44px; }
 .flist .chips { flex-wrap: nowrap; }
@@ -12,8 +12,8 @@ table.fixed.flist td.asset { white-space: nowrap; }
 
 .tlist th.c-prog { width: 300px; }
 .tlist th.c-bounty { width: 190px; }
-.tlist td.c-bounty .amt { font: 12.5px var(--mono); font-variant-numeric: tabular-nums; }
-.tlist td.c-bounty .upto { color: var(--muted); font: 11.5px var(--sans); }
+.tlist td.c-bounty .amt { font: calc(12.5px * var(--fs, 1)) var(--mono); font-variant-numeric: tabular-nums; }
+.tlist td.c-bounty .upto { color: var(--muted); font: calc(11.5px * var(--fs, 1)) var(--sans); }
 .tlist th.c-score { width: 110px; }
 .tlist th.c-added { width: 160px; }
 .clist th.c-prog { width: 300px; }

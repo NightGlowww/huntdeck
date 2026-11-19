@@ -16,7 +16,7 @@ table.surface:is([data-hide~="pay"], [data-show~="pay"]) .kind-under .lbl.pay { 
   border: 1px solid var(--border-input); border-radius: 8px; background: var(--surface); box-shadow: 0 8px 28px rgba(0, 0, 0, .22); }
 .colpick .menu[hidden] { display: none; }
 .colpick .menu::-webkit-scrollbar { display: none; }
-.colpick .menu-title { margin: 2px 6px 4px; color: var(--muted); font: 650 10.5px var(--sans); letter-spacing: .07em; text-transform: uppercase; }
+.colpick .menu-title { margin: 2px 6px 4px; color: var(--muted); font: 650 calc(10.5px * var(--fs, 1)) var(--sans); letter-spacing: .07em; text-transform: uppercase; }
 .colpick .menu-title span { margin-left: 4px; color: var(--faint); font-weight: 500; letter-spacing: 0; text-transform: none; }
 /* Rows reorder by their handle (columns.js); the 90-day columns are a
    group, indented under their heading. */

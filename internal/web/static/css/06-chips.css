@@ -1,7 +1,7 @@
 /* ---------- chips and tags ---------- */
 .chips { display: inline-flex; flex-wrap: wrap; gap: 4px; vertical-align: middle; }
 .chip { display: inline-flex; align-items: center; height: 19px; padding: 0 6px; border-radius: 4px; background: var(--surface-3); color: var(--text-2);
-  font: 600 10.5px/1 var(--mono); letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; }
+  font: 600 calc(10.5px * var(--fs, 1))/1 var(--mono); letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; }
 .chip.bbp, .chip.yes, .chip.ok, .chip.in, .chip.new { background: var(--good-weak); color: var(--good); }
 .chip.vdp { background: var(--info-weak); color: var(--info); }
 .chip.private { background: var(--priv-weak); color: var(--priv); }

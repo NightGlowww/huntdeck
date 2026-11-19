@@ -5,7 +5,7 @@ input[type="search"], input[type="text"], input[type="url"], input[type="passwor
 }
 select { padding-right: 8px; }
 textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-input); border-radius: 6px; background: var(--surface-2); color: var(--text);
-  font: 12.5px/1.6 var(--mono); resize: vertical; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+  font: calc(12.5px * var(--fs, 1))/1.6 var(--mono); resize: vertical; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
 input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 1px;
 }
@@ -23,8 +23,8 @@ button.small, .button.small { height: 26px; padding: 0 9px; font-size: calc(12px
 button.small .i, .button.small .i { width: 14px; height: 14px; }
 .button.disabled { opacity: .45; pointer-events: none; }
 form.inline { display: inline-flex; gap: 6px; }
-input.interval { width: 76px; height: 28px; padding: 0 8px; font: 12.5px var(--mono); }
-input.digest-at { width: 120px; font: 12.5px var(--mono); }
+input.interval { width: 76px; height: 28px; padding: 0 8px; font: calc(12.5px * var(--fs, 1)) var(--mono); }
+input.digest-at { width: 120px; font: calc(12.5px * var(--fs, 1)) var(--mono); }
 label.toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 table.schedule td { vertical-align: middle; }
 
@@ -50,7 +50,7 @@ table.schedule td { vertical-align: middle; }
 .flash.err { border-color: color-mix(in srgb, var(--bad) 40%, transparent); background: var(--bad-weak); color: var(--bad); }
 
 .pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--border);
-  color: var(--muted); font: 12px var(--mono); }
+  color: var(--muted); font: calc(12px * var(--fs, 1)) var(--mono); }
 .pager .buttons { display: flex; gap: 6px; }
 
 .empty-state { padding: 36px 24px; text-align: center; color: var(--muted); }
@@ -61,12 +61,12 @@ table.schedule td { vertical-align: middle; }
 
 
 pre.code { margin: 0; padding: 12px 14px; overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2);
-  font: 12.5px/1.65 var(--mono); }
+  font: calc(12.5px * var(--fs, 1))/1.65 var(--mono); }
 pre.code code { padding: 0; background: none; color: var(--text); }
 .note { margin: 10px 2px 0; color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); }
 
 .verdict { display: inline-flex; align-items: center; justify-content: center; min-width: 116px; height: 26px; padding: 0 10px; border-radius: 5px;
-  font: 700 11.5px/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+  font: 700 calc(11.5px * var(--fs, 1))/1 var(--mono); letter-spacing: .05em; text-transform: uppercase; }
 .verdict.in { background: var(--good-weak); color: var(--good); }
 .verdict.out { background: var(--bad-weak); color: var(--bad); }
 .profile-form input.interval { height: 32px; } /* beside the form's other boxes; a table's stay compact */
