@@ -4,13 +4,13 @@
 <section class="panel">
   <div class="panel-head"><h2>{{T "Hooking it up"}}</h2><span class="aside">{{T "any MCP client"}}</span></div>
   <div class="panel-body">
-    {{if .NewToken}}<p class="flash ok">{{T "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it on the API page when this connection retires."}}</p>{{end}}
-    {{if .Flash}}<p class="flash ok">{{T "Revoked. Anything still sending it gets 401 from now on."}}</p>{{end}}
+    {{if .NewToken}}<p class="flash ok">{{T "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it here when this connection retires."}}</p>{{end}}
+    {{if eq .Flash "revoked"}}<p class="flash ok">{{T "Revoked. Anything still sending it gets 401 from now on."}}</p>{{else if eq .Flash "missing"}}<p class="flash err">{{T "No such live key: it was already revoked, or another tab revoked it first."}}</p>{{end}}
     {{if not .NewToken}}<form method="post" action="/mcp/token" class="token-form mcp-token">
       <span class="muted small">{{T "A key of its own for this connection, so what the MCP client holds is not whatever else uses the API:"}}</span>
       <button type="submit" class="small">{{T "Mint a key for this connection"}}</button>
     </form>{{end}}
-    {{if .Keys}}<div class="table-wrap"><table class="tokens"><thead><tr><th>{{T "Key"}}</th><th>{{T "Created"}}</th><th>{{T "Last used"}}</th><th>{{T "State"}}</th><th></th></tr></thead><tbody>
+    {{if .Keys}}<div class="table-wrap"><table class="tokens"><thead><tr><th>{{T "Name"}}</th><th>{{T "Created"}}</th><th>{{T "Last used"}}</th><th>{{T "State"}}</th><th></th></tr></thead><tbody>
       {{range .Keys}}<tr><td>{{.Name}}</td><td><span class="when" title="{{datetime .CreatedAt}}">{{ago .CreatedAt}}</span></td><td>{{if .LastUsedAt}}<span class="when" title="{{datetime .LastUsedAt}}">{{ago .LastUsedAt}}</span>{{else}}<span class="zero">—</span>{{end}}</td><td>{{if .RevokedAt}}<span class="chip failed">{{T "revoked"}}</span>{{else}}<span class="chip ok">{{T "live"}}</span>{{end}}</td><td>{{if not .RevokedAt}}<form method="post" action="/mcp/revoke" class="inline"><input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small secondary" data-confirm="{{T "Revoke this key? The client using it gets 401 from now on."}}">{{T "Revoke"}}</button></form>{{end}}</td></tr>{{end}}
     </tbody></table></div>{{end}}
     <div class="ex-head"><span>{{T "Client configuration"}}</span><button type="button" class="ghost small" data-copy="#mcp-json"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>

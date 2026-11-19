@@ -52,6 +52,12 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 			d.BelowFloor = pct < scanhandoff.MinFreePercent
 		}
 	}
+	// The three POSTs redirect back here with what happened; without reading
+	// their query a failed handoff looked like a page that did nothing at all.
+	q := r.URL.Query()
+	d.Saved = q.Get("saved") != ""
+	d.Created = q.Get("created")
+	d.Failure = q.Get("error")
 	d.Waiting, _ = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 200)
 	d.HandedOff, d.LastHandoff, _ = s.Store.ScanHandoffCount(r.Context())
 	s.render(w, r, http.StatusOK, "scan", pageData{Title: "Scan handoff", Nav: "scan", Data: d})
@@ -121,4 +127,8 @@ type scanPageData struct {
 	ScannerFreeKnown bool
 	BelowFloor       bool
 	Error            string
+	// Saved, Created and Failure are what the POSTs report when they come back.
+	Saved   bool
+	Created string
+	Failure string
 }

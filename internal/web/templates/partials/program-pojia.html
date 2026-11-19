@@ -3,7 +3,7 @@
    program waits, ten seconds at most. Called with . = the page's Data. */}}
 {{define "program-pojia"}}{{if .Pojia}}{{if or .Pojia.Found .PojiaStale}}
 <section class="panel pojia" id="pojia">
-  <div class="panel-head"><h2>{{T "What it has paid for"}}</h2><span class="aside"><a class="link" href="/pojia?program={{.P.Handle}}">{{T "more of this program"}}</a> &middot; {{T "from POJIA's disclosed reports"}}{{if .PojiaStale}} &middot; <span class="warn">{{T "cached: POJIA could not be reached"}}</span>{{else}} &middot; <span title="{{datetime .Pojia.FetchedAt}}">{{ago .Pojia.FetchedAt}}</span>{{end}}</span></div>
+  <div class="panel-head"><h2>{{T "What it has paid for"}}</h2><span class="aside"><a class="link" href="/pojia?program={{.P.Handle}}">{{T "more of this program"}}</a> &middot; {{T "from POJIA's disclosed reports"}} &middot; <span title="{{datetime .Pojia.FetchedAt}}">{{ago .Pojia.FetchedAt}}</span></span></div>
   <div class="panel-body"><pre class="pojia-profile">{{.Pojia.Profile}}</pre></div>
 </section>
 {{else}}

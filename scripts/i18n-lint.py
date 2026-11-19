@@ -29,6 +29,9 @@ NAMES = {
 }
 # Two ASCII words in a row that aren't only names: prose the page still
 # writes in English.
+# An HTML entity is punctuation, not a word: &middot; between two links is
+# not English copy. Entities are dropped before counting.
+ENTITY = re.compile(r"&[a-zA-Z]+;|&#\d+;")
 WORDS = re.compile(r"[A-Za-z][A-Za-z'’-]{2,}")
 # Anything handed to T/TF is translated already.
 TRANSLATED = re.compile(r'\{\{-?\s*T(?:F)?\s+"(?:[^"\\]|\\.)*"(?:[^}]*)\}\}')
@@ -57,7 +60,7 @@ def main() -> int:
                     continue
                 if "secret.key" in text or text.endswith((".com", ".net", ".key", ".json")):
                     continue
-                words = [w for w in WORDS.findall(text) if w.lower() not in NAMES]
+                words = [w for w in WORDS.findall(ENTITY.sub(" ", text)) if w.lower() not in NAMES]
                 if len(words) >= 2:
                     found.append((kind, text))
         for kind, text in found:

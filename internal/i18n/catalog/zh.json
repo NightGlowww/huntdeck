@@ -1742,6 +1742,10 @@
     "Reading policies. On a program page the rules beside the policy are quoted from the policy text; with the model configured, running huntdeck ai-extract asks it for the rules each policy states, cached against the policy's hash so the same text is read once.": "读政策。程序页政策旁的规则是从政策原文摘出的；配置模型后，运行 huntdeck ai-extract 会让它列出每份政策规定的规则，并按政策文本的哈希缓存，同一段文本只读一次。",
     "Run it from the polling settings": "在轮询设置里运行",
     "To turn it on, set the endpoint, the model and the key on the Model page, then run huntdeck ai-extract (or press the button below): the model reads each policy once and the result is cached against the policy text.": "启用方式：在「模型」页填好端点、模型与密钥，然后运行 huntdeck ai-extract（或按下方按钮）：模型把每份政策读一次，结果按政策文本缓存。",
-    "Model page": "模型页"
+    "Model page": "模型页",
+    "Created %s scan task(s).": "已创建 %s 个扫描任务。",
+    "The handoff did not run: %s": "派发没有执行：%s",
+    "No such live key: it was already revoked, or another tab revoked it first.": "没有这枚有效密钥：它已被吊销，或另一个标签页先吊销了它。",
+    "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it here when this connection retires.": "已为此连接签发。请立即复制：只存摘要，不再显示。连接停用时在本页吊销它。"
   }
 }

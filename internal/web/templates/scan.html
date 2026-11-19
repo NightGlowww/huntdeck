@@ -13,6 +13,9 @@
 <p class="muted small">{{T "Give the scanner its own host: a scan is the heaviest thing either side runs. Stopping a task in the scanner records the stop but does not kill the node's run, so a scan started on a shared host outlives its task."}}</p>
 
 {{if .Error}}<p class="flash warn">{{TF "The scanner answered with an error: %s" .Error}}</p>{{end}}
+{{if .Saved}}<p class="flash ok">{{T "Saved."}}</p>{{end}}
+{{if .Created}}<p class="flash ok">{{TF "Created %s scan task(s)." .Created}}</p>{{end}}
+{{if .Failure}}<p class="flash err">{{TF "The handoff did not run: %s" .Failure}}</p>{{end}}
 {{if .BelowFloor}}<p class="flash warn">{{TF "The scanner host has %.0f%% memory free; a handoff is refused below %.0f%%. A scan task is heavy: a full-template run has taken a host down before." .ScannerFree 25.0}}</p>{{end}}
 {{if and .ScannerFreeKnown (not .BelowFloor)}}<p class="muted small">{{TF "Scanner host: %.0f%% memory free, which is above the %.0f%% floor." .ScannerFree 25.0}}</p>{{end}}
 

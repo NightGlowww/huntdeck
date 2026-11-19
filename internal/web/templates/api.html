@@ -52,7 +52,7 @@
         <td class="token-acts">
         	{{if .Revoked}}<form method="post" action="/api/tokens/delete" class="inline" data-confirm="{{TF "Delete the token %s and its history? This cannot be undone." .Name}}"><input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small secondary">{{T "Delete"}}</button></form>{{else}}
         	<form method="post" action="/api/tokens/rotate" class="inline" data-confirm="{{TF "Rotate %s? The current value stops working immediately; the new one is shown once." .Name}}"><input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small secondary">{{T "Rotate"}}</button></form>
-        	<form method="post" action="/api/tokens/revoke" class="inline"><input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small secondary">{{T "Revoke"}}</button></form>{{end}}
+        	<form method="post" action="/api/tokens/revoke" class="inline"><input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small secondary" data-confirm="{{T "Revoke this key? The client using it gets 401 from now on."}}">{{T "Revoke"}}</button></form>{{end}}
         </td>
       </tr>{{end}}
     </tbody></table></div>
