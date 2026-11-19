@@ -263,7 +263,7 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 		Metrics: web.NewMetrics(), DB: a.db, Store: a.store, Poller: poller, Progress: progress, Platforms: infos, WebSyncs: webSyncs, Schedule: sched,
 		Version: version.String(), AllowedHosts: a.cfg.AllowedHosts, Timezone: a.cfg.Timezone, Notify: notifier, VNC: vnc,
 		Language: a.cfg.Language, Password: a.cfg.Password.Reveal(),
-		Browser: host, Accounts: a.saved, Restart: restart, ReadOnly: a.cfg.ReadOnly, AIBaseURL: a.cfg.AIBaseURL, AIModel: a.cfg.AIModel, AI: aiClient(a.cfg), PojiaURL: a.cfg.PojiaURL, PojiaKey: a.cfg.PojiaKey, FeedbackEmail: a.cfg.FeedbackEmail, ClientIPHeader: a.cfg.ClientIPHeader, PublicURL: a.cfg.PublicURL, XAccount: a.cfg.XAccount, RepoURL: a.cfg.RepoURL,
+		Browser: host, Accounts: a.saved, Restart: restart, ReadOnly: a.cfg.ReadOnly, AIBaseURL: a.cfg.AIBaseURL, AIModel: a.cfg.AIModel, AI: aiClient(a.cfg), PojiaURL: a.cfg.PojiaURL, PojiaKey: a.cfg.PojiaKey, ScanURL: a.cfg.ScanURL, ScanKey: a.cfg.ScanKey, FeedbackEmail: a.cfg.FeedbackEmail, ClientIPHeader: a.cfg.ClientIPHeader, PublicURL: a.cfg.PublicURL, XAccount: a.cfg.XAccount, RepoURL: a.cfg.RepoURL,
 	}
 	seeds := &demoSeeds{st: a.store, dir: a.cfg.DataDir, log: log}
 	if !a.cfg.ReadOnly {

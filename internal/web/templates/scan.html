@@ -1,0 +1,49 @@
+{{define "content"}}{{with .Data}}
+{{if .Off}}
+<p class="empty-state">{{T "Point HuntDeck at a ScopeSentry instance to scan the targets it finds. Set its endpoint and an ssk_ key under Settings > Accounts > Scan handoff."}}</p>
+{{else}}
+<p class="lead">{{T "Targets HuntDeck finds, scanned by ScopeSentry: each new in-scope target is handed over once, as a scan task, and recorded so a re-poll does not queue it again."}}</p>
+
+{{if .Error}}<p class="flash warn">{{TF "The scanner answered with an error: %s" .Error}}</p>{{end}}
+
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Handoff"}}</h2><span class="aside">{{T "off unless you turn it on"}}</span></div>
+  <div class="panel-body">
+    <form method="post" action="/scan/save" class="scan-form">
+      <label class="scan-row"><span>{{T "Enabled"}}</span>
+        <input type="checkbox" name="enabled" value="1"{{if .Config.Enabled}} checked{{end}}>
+        <span class="muted small">{{T "new targets are handed over as polls find them"}}</span></label>
+      <label class="scan-row"><span>{{T "Template"}}</span>
+        <select name="template_id">
+          <option value="">{{T "pick one"}}</option>
+          {{range .Templates}}<option value="{{.ID}}"{{if eq .ID $.Data.Config.TemplateID}} selected{{end}}>{{.Name}}</option>{{end}}
+        </select></label>
+      <label class="scan-row"><span>{{T "Node"}}</span>
+        <select name="node_name">
+          <option value="">{{T "pick one"}}</option>
+          {{range .Nodes}}<option value="{{.Name}}"{{if eq .Name $.Data.Config.NodeName}} selected{{end}}>{{.Name}}{{if not .Online}} ({{T "offline"}}){{end}} · {{.Version}}{{end}}
+        </select></label>
+      <label class="scan-row"><span>{{T "Targets per task"}}</span>
+        <input type="number" name="per_task" min="1" max="500" value="{{.Config.PerTask}}">
+        <span class="muted small">{{T "one scan task per batch"}}</span></label>
+      <label class="scan-row"><span>{{T "Kinds"}}</span>
+        <input type="text" name="kinds" value="{{join .Config.Kinds ","}}" placeholder="{{T "wildcard, domain, url, ip, cidr (empty: every kind)"}}"></label>
+      <div class="scan-actions"><button type="submit" class="small">{{T "Save"}}</button></div>
+    </form>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Waiting to be scanned"}}</h2>
+    <span class="aside">{{TF "%d target(s), %d handed over so far" (len .Waiting) .HandedOff}}</span></div>
+  <div class="panel-body">
+    {{if .Waiting}}
+    <ul class="scan-list">{{range .Waiting}}<li><code>{{.Target}}</code> <span class="muted small">{{.Platform}} · {{.Kind}}</span></li>{{end}}</ul>
+    <form method="post" action="/scan/now" class="scan-actions">
+      <button type="submit" class="small" data-confirm="{{TF "Create scan tasks for these %d targets now?" (len .Waiting)}}">{{T "Hand them over now"}}</button>
+    </form>
+    {{else}}
+    <p class="muted small">{{T "Nothing new: every in-scope target has been handed over already."}}</p>
+    {{end}}
+  </div>
+</section>{{end}}{{end}}{{end}}

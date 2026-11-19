@@ -80,6 +80,10 @@ type Config struct {
 	// stateless MCP endpoint.
 	PojiaURL string
 	PojiaKey Secret
+	// ScanURL and ScanKey are a ScopeSentry instance: whose MCP endpoint takes
+	// the targets HuntDeck finds and scans them.
+	ScanURL string
+	ScanKey Secret
 	// HUNTDECK_CLIENT_IP_HEADER: the header a proxy in front puts the
 	// visitor's address in (CF-Connecting-IP behind Cloudflare), for a
 	// read-only copy's per-visitor limits. Set it only when every request
@@ -254,6 +258,8 @@ func Load(src Source) (Config, error) {
 		cfg.PojiaURL = "https://cve.pojia.ai/mcp"
 	}
 	cfg.PojiaKey = Secret(strings.TrimSpace(r.get("HUNTDECK_POJIA_KEY", "")))
+	cfg.ScanURL = strings.TrimSpace(r.get("HUNTDECK_SCAN_URL", ""))
+	cfg.ScanKey = Secret(strings.TrimSpace(r.get("HUNTDECK_SCAN_KEY", "")))
 	cfg.Password = Secret(r.get("HUNTDECK_PASSWORD", ""))
 	if p := cfg.Password.Reveal(); p != "" && len(p) < 8 {
 		r.errs = append(r.errs, errors.New("HUNTDECK_PASSWORD: use at least 8 characters"))

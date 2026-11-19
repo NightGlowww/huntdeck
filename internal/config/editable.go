@@ -44,6 +44,8 @@ const (
 	// GroupPojia is the disclosed-report library: POJIA answers what a program
 	// has historically paid for.
 	GroupPojia = "pojia"
+	// GroupScan is the scanner the handoff sends targets to.
+	GroupScan = "scan"
 )
 
 // Editable lists every field Settings can set.
@@ -108,6 +110,11 @@ var Editable = []Field{
 	{Name: "HUNTDECK_POJIA_URL", Group: GroupPojia, Label: "Endpoint", Kind: KindText,
 		Default: "https://cve.pojia.ai/mcp",
 		Help:    "Its MCP endpoint; leave at the default unless you run your own."},
+
+	{Name: "HUNTDECK_SCAN_URL", Group: GroupScan, Label: "Endpoint", Kind: KindText,
+		Help: "A ScopeSentry instance, e.g. http://10.0.8.4:8082. The handoff calls its MCP endpoint."},
+	{Name: "HUNTDECK_SCAN_KEY", Group: GroupScan, Label: "MCP key", Kind: KindSecret,
+		Help: "An ssk_ key scoped to task:write, task:read, node:read and template:read."},
 }
 
 // EditableField returns the editable field called name.

@@ -51,7 +51,7 @@ type restartState struct {
 
 // accountGroups are the groups' keys in order, platforms first.
 var accountGroups = []string{config.GroupHackerOne, config.GroupBugcrowd, config.GroupIntigriti,
-	config.GroupYesWeHack, config.GroupNetwork, config.GroupAI, config.GroupPojia}
+	config.GroupYesWeHack, config.GroupNetwork, config.GroupAI, config.GroupPojia, config.GroupScan}
 
 // accountsTab gathers the Accounts tab.
 func (s *server) accountsTab(ctx context.Context, rows []platformRow) (*accountsData, error) {
@@ -74,10 +74,12 @@ func (s *server) accountsTab(ctx context.Context, rows []platformRow) (*accounts
 			label = "Optional model"
 		case config.GroupPojia:
 			label = "POJIA reports"
+		case config.GroupScan:
+			label = "Scan handoff"
 		case config.GroupNetwork:
 			label = "Proxy and login browser"
 		}
-		g := accountGroup{Key: key, Label: label, Platform: key != config.GroupNetwork && key != config.GroupAI && key != config.GroupPojia}
+		g := accountGroup{Key: key, Label: label, Platform: key != config.GroupNetwork && key != config.GroupAI && key != config.GroupPojia && key != config.GroupScan}
 		if g.Platform {
 			g.Label = platformLabel(key)
 		}

@@ -162,3 +162,14 @@ poll shows as partial with the reason. If it's real, run
   fetched from POJIA and cached a week.
 - **HUNTDECK_POJIA_URL** - its endpoint; https://cve.pojia.ai/mcp by default.
 
+
+## Scan handoff
+
+- **HUNTDECK_SCAN_URL** - a ScopeSentry instance (its web address).
+- **HUNTDECK_SCAN_KEY** - an ssk_ key from that instance, scoped to
+  task:write, task:read, node:read and template:read.
+
+With both set, the Scan page lists the instance's templates and nodes;
+turning the handoff on creates one scan task per batch of new in-scope
+targets and records each target so a re-poll does not queue it twice.
+

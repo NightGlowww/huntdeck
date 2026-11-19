@@ -111,6 +111,9 @@ type Deps struct {
 	// PojiaKey and PojiaURL are the disclosed-report library; empty key is off.
 	PojiaURL string
 	PojiaKey config.Secret
+	// ScanURL and ScanKey are a ScopeSentry instance the handoff sends targets to.
+	ScanURL string
+	ScanKey config.Secret
 	// DemoSeed exports seeds for a demo copy (demoseed.go); nil where it can't.
 	DemoSeed DemoSeeder
 	// Timezone is the IANA zone to show times in until one is chosen in
@@ -230,6 +233,9 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /mcp/token", s.mcpToken)
 	mux.HandleFunc("POST /mcp/revoke", s.mcpRevoke)
 	mux.HandleFunc("/mcp/rpc", s.mcpRPC) // the handler answers 405 + Allow on non-POST itself
+	mux.HandleFunc("GET /scan", s.scanPage)
+	mux.HandleFunc("POST /scan/save", s.scanSave)
+	mux.HandleFunc("POST /scan/now", s.scanNow)
 	mux.HandleFunc("GET /pojia", s.pojiaPage)
 	mux.HandleFunc("GET /pojia/report", s.pojiaReport)
 
