@@ -125,7 +125,11 @@
     const wide = () => {
       const wrap = table.closest(".table-wrap");
       if (wrap) {
-        wrap.classList.toggle("is-wide", table.style.minWidth !== "" || table.scrollWidth > wrap.clientWidth + 1);
+        const overflows = table.style.minWidth !== "" || table.scrollWidth > wrap.clientWidth + 1;
+        wrap.classList.toggle("is-wide", overflows);
+        // A wrapper that has to scroll cannot hold a heading pinned to the
+        // window: that is what put the poll history's header across its rows.
+        wrap.classList.toggle("fits", !overflows);
       }
     };
     const fit = () => {

@@ -48,14 +48,15 @@ col.w-num-s { width: 72px; }
 col.w-date { width: 120px; }
 col.w-you { width: 112px; }
 
-/* Below 1601px the headings get a sticky home at the window's top, but only
-   where the heading and the rows stay in the same column grid: list tables
-   (.ptable) and tables that fit their column. A table that scrolls sideways
-   (.is-wide) must not pin its heading — the heading and the body scroll on
-   different axes and the header ends up printed over the first row, which is
-   what the settings platform table looked like. */
+/* A sticky heading only works when the wrapper is not itself a scroll
+   container: with `overflow-x: auto` the heading sticks to the wrapper's own
+   box, so it floated over the middle of the table as the page scrolled (the
+   poll history kept a header printed across its rows). columns.js marks a table
+   that fits with .fits, which turns the wrapper back into plain overflow, and
+   only then does the heading pin to the window. */
 @media (max-width: 1600px) {
-  .ptable thead th, .table-wrap:not(.is-wide) thead th { position: sticky; top: 56px; z-index: 3;
+  .table-wrap.fits { overflow-x: visible; }
+  .table-wrap.fits thead th { position: sticky; top: 56px; z-index: 3;
     background: var(--surface-2); border-bottom-color: transparent; box-shadow: inset 0 -1px var(--border); }
 }
 
