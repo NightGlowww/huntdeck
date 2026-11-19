@@ -50,7 +50,13 @@ func (s *server) apiQueue(w http.ResponseWriter, r *http.Request) {
 		}
 		out.Rows = append(out.Rows, item)
 	}
-	if gated, err := s.Store.HuntQueueGated(r.Context(), store.QueueFilter{}, 20); err == nil {
+	gated, gatedErr := s.Store.HuntQueueGated(r.Context(), store.QueueFilter{}, 20)
+	if gatedErr != nil {
+		// The row list above is still an honest answer; this extra section is
+		// not, so say so in the log rather than sending an empty list that reads as
+		// "nothing is gated".
+		s.Log.WarnContext(r.Context(), "api: cannot read the gated queue rows", "error", gatedErr)
+	} else {
 		for _, row := range gated {
 			out.Gated = append(out.Gated, apiQueueRow{
 				Platform: row.Platform, Handle: row.Handle, Kind: row.Kind, Value: row.Value,
