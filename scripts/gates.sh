@@ -44,6 +44,27 @@ kill "$srv" 2>/dev/null
 wait "$srv" 2>/dev/null
 rm -rf "$dir"
 
+# 3. the backup verifier, when a container is reachable: with no archive it
+#    must say so rather than pass quietly. docker needs sudo on some hosts,
+#    so the probe tries both.
+dkr=""
+if docker ps >/dev/null 2>&1; then dkr="docker";
+elif sudo -n docker ps >/dev/null 2>&1; then dkr="sudo -n docker"; fi
+if [ -n "$dkr" ]; then
+  runner="$root/scripts/verify-backup.sh"
+  if [ "$dkr" = "sudo -n docker" ]; then
+    if sudo -n env HUNTDECK_CONTAINER=no-such-container bash "$runner" >/tmp/gates-backup.log 2>&1; then blind "verify-backup (no archive)"
+    elif grep -q "no backup archive" /tmp/gates-backup.log; then pass "verify-backup (no archive)"
+    else blind "verify-backup (failed for another reason)"; fi
+  else
+    if HUNTDECK_CONTAINER=no-such-container bash "$runner" >/tmp/gates-backup.log 2>&1; then blind "verify-backup (no archive)"
+    elif grep -q "no backup archive" /tmp/gates-backup.log; then pass "verify-backup (no archive)"
+    else blind "verify-backup (failed for another reason)"; fi
+  fi
+else
+  say "verify-backup" "skipped (docker needs sudo here)"
+fi
+
 echo
 if [ "$fails" -gt 0 ]; then
   echo "$fails gate(s) did not fail when they should" >&2
