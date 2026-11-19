@@ -99,6 +99,24 @@ var tools = []tool{
 		},
 	},
 	{
+		Name:        "huntdeck_invites",
+		Description: "Private programs you were invited to: what the platform offered, when, and whether you joined. The page and the API have this list; the tools did not.",
+		Schema: object(map[string]any{
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack or independent"),
+			"sort":     prop("string", "newest (default), huntscore, bounty or name"),
+			"limit":    prop("integer", "How many to return (default 30, at most 1000)"),
+			"offset":   prop("integer", "Skip this many"),
+		}),
+		Call: func(ctx context.Context, s *Server, args map[string]any) (string, error) {
+			q := query(args, "platform", "sort")
+			q.Set("limit", strconv.Itoa(numberArg(args, "limit", 30)))
+			if n := numberArg(args, "offset", 0); n > 0 {
+				q.Set("offset", strconv.Itoa(n))
+			}
+			return s.get(ctx, "/api/v1/invites", q)
+		},
+	},
+	{
 		Name:        "huntdeck_targets",
 		Description: "In-scope targets (wildcards, domains, URLs, apps, APIs…) with the program that lists them and its bounty.",
 		Schema: object(map[string]any{

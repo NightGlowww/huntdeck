@@ -63,6 +63,7 @@ invent error codes of its own. A large answer is refused rather than truncated
 | Tool | What it answers |
 |---|---|
 | `huntdeck_status` | Programs and scope entries per platform, last poll |
+| `huntdeck_invites` | Private programs you were invited to (`platform`, `sort`, `limit`, `offset`) |
 | `huntdeck_programs` | Search programs (`q`, `platform`, `state`, `bounty`, `sort`, `limit`, `offset`) |
 | `huntdeck_program` | One program in full, by `platform` and `handle`, `parts` picks the projection (default `facts,brief,rules`; `scope_limit`/`scope_offset` page the scope: a full program with 5,000 disclosures is a megabyte) |
 | `huntdeck_programs_csv` | The matching programs as CSV text, every column |

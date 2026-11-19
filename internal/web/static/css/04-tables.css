@@ -48,17 +48,11 @@ col.w-num-s { width: 72px; }
 col.w-date { width: 120px; }
 col.w-you { width: 112px; }
 
-/* A sticky heading only works when the wrapper is not itself a scroll
-   container: with `overflow-x: auto` the heading sticks to the wrapper's own
-   box, so it floated over the middle of the table as the page scrolled (the
-   poll history kept a header printed across its rows). columns.js marks a table
-   that fits with .fits, which turns the wrapper back into plain overflow, and
-   only then does the heading pin to the window. */
-@media (max-width: 1600px) {
-  .table-wrap.fits { overflow-x: visible; }
-  .table-wrap.fits thead th { position: sticky; top: 56px; z-index: 3;
-    background: var(--surface-2); border-bottom-color: transparent; box-shadow: inset 0 -1px var(--border); }
-}
+/* No sticky table headings. A sticky element pins to the nearest scroll
+   container, and .panel is one (overflow: hidden, for its rounded corners):
+   the heading stuck to the panel instead of the window and floated across
+   the rows as the page scrolled. Three attempts to make it stick to the
+   window failed the same way; the heading scrolls with its table now. */
 
 /* The list a pager link returns to: no focus ring, but it is focused, so the
    keyboard continues from the list and the page scrolls to its top. */

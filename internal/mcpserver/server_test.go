@@ -61,6 +61,9 @@ func instance(t *testing.T, password string) *httptest.Server {
 		// `["pays"]]}` — invalid JSON that no test had parsed until one did.
 		_, _ = io.WriteString(w, body+"}]}")
 	}))
+	mux.HandleFunc("/api/v1/invites", auth(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, `{"programs":[{"platform":"hackerone","handle":"acme","private":true}],"total":1}`)
+	}))
 	mux.HandleFunc("/api/v1/board", auth(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(w, `{"totals":{"programs":1},"picks":[]}`)
 	}))
