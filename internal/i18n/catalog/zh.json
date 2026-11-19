@@ -1613,6 +1613,7 @@
     "tries again after": "之后重试",
     "signs in at the next run": "下次运行时登录",
     "renewed": "已续期",
-    "Those two variables are all it takes: the same address and password this page uses. docs/mcp.md in the repository lists every tool, its arguments, and what it answers; the queue tool takes explain for the factor breakdown.": "只需要两个变量：本页用的同一个地址和密码。仓库里的 docs/mcp.md 列出每个工具、参数与各自的返回；队列工具传 explain 可拿到因子分解。"
+    "Those two variables are all it takes: the same address and password this page uses. docs/mcp.md in the repository lists every tool, its arguments, and what it answers; the queue tool takes explain for the factor breakdown.": "只需要两个变量：本页用的同一个地址和密码。仓库里的 docs/mcp.md 列出每个工具、参数与各自的返回；队列工具传 explain 可拿到因子分解。",
+    "No bounties here: the parts weigh to %s, and only %d%% of that counts, so %s.": "该程序无赏金：四部分加权为 %s，其中仅 %d%% 计入评分，因此为 %s。"
   }
 }

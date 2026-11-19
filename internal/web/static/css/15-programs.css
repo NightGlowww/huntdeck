@@ -281,3 +281,7 @@
 @media (max-width: 720px) {
   .activef .quick, .activef .sorts { margin-left: 0; }
 }
+
+/* The no-bounty scaling note under the parts: without it the four numbers do
+   not add up to the score above them. */
+.hp-note { grid-column: 1 / -1; margin: 10px 2px 0; color: var(--muted); font-size: calc(12px * var(--fs, 1)); }

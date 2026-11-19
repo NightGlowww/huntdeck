@@ -28,6 +28,9 @@ var templateFS embed.FS
 var staticFS embed.FS
 
 var funcs = template.FuncMap{
+	// huntMean is what the parts weigh, before any scaling: a no-bounty
+	// program's score is 75% of it, and the panel says so.
+	"huntMean": huntMean,
 	// softBreak lets a long URL wrap at its own punctuation instead of
 	// anywhere: a phone shows "cybersource.c / om" without it.
 	"softBreak": softBreak,
