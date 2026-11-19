@@ -20,16 +20,17 @@ type ovCell struct {
 	// English literals here, which a Chinese page showed untranslated.
 	AlsoKey, NoteKey string
 	Chart            *lineChart
-	Wait             string // "Nov 12"
+	Wait             *time.Time // the day the line starts
 }
 
 // lineFrom is when a number saved daily since since gets its line: with
 // the second day's save.
-func lineFrom(since *time.Time) string {
+func lineFrom(since *time.Time) *time.Time {
 	if since == nil {
-		return ""
+		return nil
 	}
-	return since.AddDate(0, 0, 1).UTC().Format("Jan 2") // the next day's save
+	at := since.AddDate(0, 0, 1) // the next day's save
+	return &at
 }
 
 // The row's cells; nil for a number there's no line of, or the platform
@@ -143,7 +144,7 @@ func (r platformStats) ResolveCell() *ovCell {
 // program's Stats tab both use it.
 func backlogNote(days float64) string {
 	if days > backlogDays {
-		return "backlog cleared"
+		return "backlog cleared" // a translation key, rendered by the template
 	}
 	return ""
 }

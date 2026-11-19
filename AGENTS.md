@@ -232,6 +232,11 @@ the config reads is missing from `docs/configuration.md` or `.env.example`, and
 - `context.Context` first on anything that does I/O, and honoured. Wrap
   errors with context (`fmt.Errorf("hackerone: list programs page %d: %w", n, err)`);
   don't log *and* return the same error. Log with `log/slog`.
+- **User-visible text is produced in templates.** Go supplies data and, where the
+  words are fixed, a translation key the template renders through `{{T}}`; it
+  never builds a sentence. Three leaks shipped this way before the rule: "32d to
+  decision", "accepted at the last poll" and "backlog cleared" sat in a Chinese
+  page in English because a struct field held the literal.
 - Small files: split by topic before about 500 lines. Build anything two
   pages need once (a partial in `templates/partials/`, a shared script, a
   stylesheet in `static/css/`, joined in name order).

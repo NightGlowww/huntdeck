@@ -35,8 +35,8 @@ type resolutionView struct {
 	// MonthMedian is the last full month's median days to resolve, as the
 	// Stats pages give it (nil if none was resolved then), in MonthName,
 	// with its backlog note.
-	MonthMedian          *float64
-	MonthName, MonthAlso string
+	MonthMedian             *float64
+	MonthName, MonthNoteKey string
 }
 
 func buildResolutionView(sum store.ResolutionSummary, currency string) resolutionView {
@@ -52,7 +52,7 @@ func buildResolutionView(sum store.ResolutionSummary, currency string) resolutio
 		last := sum.Months[n-2]
 		v.MonthName, v.MonthMedian = last.Month.Format("January"), last.MedianDays
 		if last.MedianDays != nil {
-			v.MonthAlso = backlogNote(*last.MedianDays)
+			v.MonthNoteKey = backlogNote(*last.MedianDays)
 		}
 	}
 

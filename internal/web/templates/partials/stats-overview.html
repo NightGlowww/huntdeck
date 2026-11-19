@@ -62,7 +62,7 @@
 {{define "ov-none"}}<span class="zero" title="{{if .}}{{TF "%s doesn't share this" (platformLabel .)}}{{else}}{{T "No platform shares this"}}{{end}}">—</span>{{end}}
 
 
-{{define "ov-collecting"}}{{with .}}<span class="ov-wait" title="{{T "The line starts once enough of it is saved"}}">{{T "line from"}} {{.}}</span>{{end}}{{end}}
+{{define "ov-collecting"}}{{with .}}<span class="ov-wait" title="{{T "The line starts once enough of it is saved"}}">{{T "line from"}} {{datetime .}}</span>{{end}}{{end}}
 
 {{/* A sparkline (lineChart) with its first and last month or day under it. */}}
 {{define "ov-spark"}}<div class="ov-spark"><span class="tchart {{.Tone}}" data-days="{{.Days}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{.Label}}">

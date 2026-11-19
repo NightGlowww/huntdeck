@@ -248,7 +248,7 @@ func TestStatsRecentValidAndDecisions(t *testing.T) {
 	h1, igt := d.Rows[0], d.Rows[1]
 
 	c := igt.ValidCell()
-	if c == nil || c.N != "7" || c.AlsoKey != "since" || c.Also != "Oct 28" || c.Chart == nil || c.Wait != "" {
+	if c == nil || c.N != "7" || c.AlsoKey != "since" || c.Also != "Oct 28" || c.Chart == nil || c.Wait != nil {
 		t.Errorf("intigriti valid cell %+v; want 7 with since Oct 28", c)
 	}
 	ywhSince := time.Date(2026, 11, 5, 21, 0, 0, 0, time.UTC)
