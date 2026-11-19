@@ -38,6 +38,9 @@ const (
 	GroupIntigriti = "intigriti"
 	GroupYesWeHack = "yeswehack"
 	GroupNetwork   = "network"
+	// GroupAI is the optional model: an OpenAI-compatible endpoint that reads
+	// a program's policy and states the rules it sets.
+	GroupAI = "ai"
 )
 
 // Editable lists every field Settings can set.
@@ -90,6 +93,12 @@ var Editable = []Field{
 		Help: "For all platform traffic and the login browser, such as http://user:password@host:port (http:// for the login browser) or socks5://host:port."},
 	{Name: "HUNTDECK_CHROME_TIMEZONE", Group: GroupNetwork, Label: "Login browser's time zone", Kind: KindText,
 		Help: "Should match the proxy's country, such as America/New_York."},
+	{Name: "HUNTDECK_AI_BASE_URL", Group: GroupAI, Label: "Endpoint", Kind: KindText,
+		Help: "An OpenAI-compatible base URL, e.g. https://api.openai.com/v1 or a local server."},
+	{Name: "HUNTDECK_AI_MODEL", Group: GroupAI, Label: "Model", Kind: KindText,
+		Help: "The model name the endpoint knows, e.g. gpt-4o-mini."},
+	{Name: "HUNTDECK_AI_KEY", Group: GroupAI, Label: "API key", Kind: KindSecret,
+		Help: "Sent as a bearer token. Left empty for a local server that needs none."},
 }
 
 // EditableField returns the editable field called name.

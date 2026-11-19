@@ -50,7 +50,8 @@ type restartState struct {
 }
 
 // accountGroups are the groups' keys in order, platforms first.
-var accountGroups = []string{config.GroupHackerOne, config.GroupBugcrowd, config.GroupIntigriti, config.GroupYesWeHack, config.GroupNetwork}
+var accountGroups = []string{config.GroupHackerOne, config.GroupBugcrowd, config.GroupIntigriti,
+	config.GroupYesWeHack, config.GroupNetwork, config.GroupAI}
 
 // accountsTab gathers the Accounts tab.
 func (s *server) accountsTab(ctx context.Context, rows []platformRow) (*accountsData, error) {
@@ -67,7 +68,14 @@ func (s *server) accountsTab(ctx context.Context, rows []platformRow) (*accounts
 	}
 	d := &accountsData{}
 	for _, key := range accountGroups {
-		g := accountGroup{Key: key, Label: "Proxy and login browser", Platform: key != config.GroupNetwork}
+		label := "Proxy and login browser"
+		switch key {
+		case config.GroupAI:
+			label = "Optional model"
+		case config.GroupNetwork:
+			label = "Proxy and login browser"
+		}
+		g := accountGroup{Key: key, Label: label, Platform: key != config.GroupNetwork && key != config.GroupAI}
 		if g.Platform {
 			g.Label = platformLabel(key)
 		}

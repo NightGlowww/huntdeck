@@ -1648,6 +1648,7 @@
     "Nothing is blocked among the targets this filter keeps.": "当前筛选保留的目标中，没有无法开工的。",
     "This list comes from the same registry the server answers tools/list from, so it cannot list a tool that does not exist or miss one that does. A server started with HUNTDECK_MCP_READONLY=1 leaves out the ones marked as changing data.": "此列表来自服务端回答 tools/list 的同一份注册表，因此既不会列出不存在的工具，也不会漏掉已有的工具。以 HUNTDECK_MCP_READONLY=1 启动的服务会略去标记为「会修改数据」的那些。",
     "Command": "命令",
-    "Client configuration": "客户端配置"
+    "Client configuration": "客户端配置",
+    "Integrations": "集成"
   }
 }

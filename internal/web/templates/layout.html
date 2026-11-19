@@ -104,9 +104,10 @@
       <div class="group">{{T "System"}}</div>
       <a href="/methodology"{{if eq .Nav "methodology"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span class="label">{{T "Methodology"}}</span></a>
             <a href="/settings/notifications"{{if eq .Nav "notifications"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg><span class="label">{{T "Notifications"}}</span></a>
+            <a href="/settings"{{if eq .Nav "settings"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">{{T "Settings"}}</span></a>
+			<div class="group">{{T "Integrations"}}</div>
       <a href="/api"{{if eq .Nav "api"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-code"/></svg><span class="label">{{T "API"}}</span></a>
       <a href="/mcp"{{if eq .Nav "mcp"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-code"/></svg><span class="label">{{T "MCP"}}</span></a>
-            <a href="/settings"{{if eq .Nav "settings"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">{{T "Settings"}}</span></a>
       {{- with .Feedback}}
       <a href="{{.}}"{{if $.FeedbackOut}} target="_blank" rel="noopener noreferrer" title="{{T "Found a bug, or have an idea? Open an issue on GitHub"}}"{{else}}{{if eq $.Nav "feedback"}} aria-current="page"{{end}} title="{{T "Found a bug, or have an idea? Write to us"}}"{{end}}><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg><span class="label">{{T "Feedback"}}</span></a>{{end}}
     </nav>
