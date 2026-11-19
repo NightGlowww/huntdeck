@@ -17,17 +17,15 @@
     <pre class="code"><code id="mcp-json">{
   "mcpServers": {
     "huntdeck": {
-      "type": "stdio",
-      "command": "huntdeck-mcp",
-      "args": [],
-      "env": {
-        "HUNTDECK_URL": "{{.Base}}",
-        "HUNTDECK_TOKEN": "{{if .NewToken}}{{.NewToken}}{{else}}mcp_…{{end}}"
+      "type": "http",
+      "url": "{{.Base}}/mcp/rpc",
+      "headers": {
+        "Authorization": "Bearer {{if .NewToken}}{{.NewToken}}{{else}}mcp_…{{end}}"
       }
     }
   }
 }</code></pre>
-    <p class="muted small">{{T "The .mcp.json shape Claude Code and most clients expect. The key above is this connection's own token (named mcp), minted here and revoked on the API page; the password works too, in HUNTDECK_PASSWORD. The tools speak JSON-RPC on stdin and stdout, one message a line."}}</p>
+    <p class="muted small">{{T "The shape an MCP client in another process expects: HTTP, the key in a header, no binary to run. The key is this connection's own (kind mcp), minted here and revoked here; the instance answers at /mcp/rpc, one JSON-RPC message per POST. The stdio binary below is the same server for terminals."}}</p>
   </div>
 </section>
 
@@ -36,7 +34,7 @@
   <div class="panel-body">
     <div class="ex-head"><span>{{T "Command"}}</span><button type="button" class="ghost small" data-copy="#mcp-cmd"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
     <pre class="code"><code id="mcp-cmd">HUNTDECK_URL={{.Base}} HUNTDECK_TOKEN={{if .NewToken}}…just minted above{{else}}mcp_…{{end}} huntdeck-mcp</code></pre>
-    <p class="muted small">{{T "It talks to the instance over HTTP with that address and key; nothing else is configured."}}</p>
+    <p class="muted small">{{T "The same server as a stdio process, for a terminal agent that spawns commands; a client in another app uses the HTTP shape above."}}</p>
   </div>
 </section>
 

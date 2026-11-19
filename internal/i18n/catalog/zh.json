@@ -1689,6 +1689,8 @@
     "The .mcp.json shape Claude Code and most clients expect. The key above is this connection's own token (named mcp), minted here and revoked on the API page; the password works too, in HUNTDECK_PASSWORD. The tools speak JSON-RPC on stdin and stdout, one message a line.": "Claude Code 与多数客户端要求的 .mcp.json 格式。上面的 key 是本连接专属令牌（名为 mcp），在此签发、在 API 页吊销；也可以用密码，放在 HUNTDECK_PASSWORD。工具在 stdin/stdout 上讲 JSON-RPC，一行一条消息。",
     "It talks to the instance over HTTP with that address and key; nothing else is configured.": "它用该地址与密钥通过 HTTP 访问实例；无需其他配置。",
     "Key": "密钥",
-    "Revoke this key? The client using it gets 401 from now on.": "吊销这枚密钥？使用它的客户端从现在起会收到 401。"
+    "Revoke this key? The client using it gets 401 from now on.": "吊销这枚密钥？使用它的客户端从现在起会收到 401。",
+    "The shape an MCP client in another process expects: HTTP, the key in a header, no binary to run. The key is this connection's own (kind mcp), minted here and revoked here; the instance answers at /mcp/rpc, one JSON-RPC message per POST. The stdio binary below is the same server for terminals.": "其他进程里的 MCP 客户端要的形态：HTTP、密钥放在头里、无需运行二进制。密钥为本连接专属（kind 为 mcp），在此签发、在此吊销；实例在 /mcp/rpc 应答，每个 POST 一条 JSON-RPC 消息。下方的 stdio 二进制是同一个服务端，供终端使用。",
+    "The same server as a stdio process, for a terminal agent that spawns commands; a client in another app uses the HTTP shape above.": "同一个服务端的 stdio 进程形态，供会拉起命令的终端智能体使用；其他应用里的客户端用上面的 HTTP 形态。"
   }
 }

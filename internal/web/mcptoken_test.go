@@ -15,11 +15,11 @@ func TestMCPPageMintsAWorkingKey(t *testing.T) {
 	if res.StatusCode != http.StatusOK {
 		t.Fatalf("mint: %d", res.StatusCode)
 	}
-	i := strings.Index(body, "HUNTDECK_TOKEN\": \"")
+	i := strings.Index(body, "Bearer ")
 	if i < 0 {
 		t.Fatal("the page does not carry the minted key")
 	}
-	tok := body[i+len("HUNTDECK_TOKEN\": \""):]
+	tok := body[i+len("Bearer "):]
 	tok = tok[:strings.Index(tok, "\"")]
 	if len(tok) != len("mcp_")+64 {
 		t.Fatalf("key is %d chars, want 64", len(tok))
