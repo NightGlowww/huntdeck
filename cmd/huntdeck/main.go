@@ -30,6 +30,11 @@ Commands:
   score        Recompute HuntScores now and list the best   [-n 25]
   status       Show what is stored and recent polls
   changes      Show recent changes                [--since 24h] [--limit 200]
+  backup [--to FILE]  Write one file holding the database, the settings key and the sessions
+                                                  [--data DIR] [--no-sessions] [--keep N]
+  doctor       Look the data directory over: writability, schema, key, space  [--data DIR]
+  restore --from FILE  Unpack such a file into a data directory (stop HuntDeck first)
+                                                  [--data DIR] [--force] [--no-sessions] [--dry-run]
   seed export FILE  Write the public programs' data to FILE, for others to start from (.gz to compress)
   seed import FILE  Load such a file into a new, empty install (or put it in the data
                     directory as seed.db or seed.db.gz, and the first start loads it)
@@ -54,8 +59,15 @@ var commands = map[string]command{
 	"stats":       statsFetchCmd,
 	"score":       scoreCmd,
 	"status":      statusCmd,
+	"queue":       queueCmd,
+	"backtest":    backtestCmd,
+	"compact":     compactCmd,
+	"ai-check":    aiCheckCmd,
 	"changes":     changesCmd,
 	"seed":        seedCmd,
+	"backup":      backupCmd,
+	"restore":     restoreCmd,
+	"doctor":      doctorCmd,
 }
 
 func main() {

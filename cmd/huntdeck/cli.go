@@ -284,6 +284,13 @@ func statusCmd(args []string, stdout, stderr io.Writer) int {
 		}
 		_ = tw.Flush()
 	}
+
+	if days, err := app.store.ScoreDays(ctx); err == nil && len(days) > 0 {
+		fmt.Fprintf(stdout, "\nScore history: %d day(s), newest %s (the backtest wants 8)\n", len(days), days[len(days)-1])
+	}
+	if at, err := app.store.HuntQueueBuiltAt(ctx); err == nil && !at.IsZero() {
+		fmt.Fprintf(stdout, "Queue: built %s\n", app.store.Now().Sub(at).Round(time.Second))
+	}
 	return 0
 }
 
@@ -346,6 +353,9 @@ func scoreCmd(args []string, stdout, stderr io.Writer) int {
 	if err := huntscore.Refresh(ctx, app.store, time.Now()); err != nil {
 		fmt.Fprintf(stderr, "score: %v\n", err)
 		return 1
+	}
+	if err := app.store.RefreshHuntQueue(ctx, time.Now()); err != nil {
+		fmt.Fprintf(stderr, "queue: %v\n", err)
 	}
 	picks, err := app.store.TopHunts(ctx, *n)
 	if err != nil {

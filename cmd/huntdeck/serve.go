@@ -131,6 +131,9 @@ func openApp(ctx context.Context, stderr io.Writer, quiet bool) (*app, bool) {
 		if err := huntscore.Refresh(ctx, a.store, a.store.Now()); err != nil {
 			log.Warn("cannot rescore after deriving targets", "err", err)
 		}
+		if err := a.store.RefreshHuntQueue(ctx, a.store.Now()); err != nil {
+			a.log.Warn("hunt queue not rebuilt", "err", err)
+		}
 	}
 	// The API's per-field updated_at: dated from history the first time,
 	// and a seed's or an upgrade's values brought up to date.
@@ -186,6 +189,14 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 	}
 	defer a.close()
 	log := a.log
+	// Hold the data directory for as long as this server runs: a restore
+	// elsewhere has to know it cannot swap the database underneath us.
+	if release, err := lockData(a.cfg.DataDir); err != nil {
+		log.Error("data directory is in use", "err", err)
+		return 1, false
+	} else {
+		defer release()
+	}
 	restart := newRestarter(ctx, restartNow, log, a.store)
 
 	// With VNC on, login browsers show on one display that noVNC (in the
@@ -246,8 +257,10 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 		return web.RunProgress(p), ok
 	}
 	deps := web.Deps{
-		Log: log, DB: a.db, Store: a.store, Poller: poller, Progress: progress, Platforms: infos, WebSyncs: webSyncs, Schedule: sched,
+		Log:     log,
+		Metrics: web.NewMetrics(), DB: a.db, Store: a.store, Poller: poller, Progress: progress, Platforms: infos, WebSyncs: webSyncs, Schedule: sched,
 		Version: version.String(), AllowedHosts: a.cfg.AllowedHosts, Timezone: a.cfg.Timezone, Notify: notifier, VNC: vnc,
+		Language: a.cfg.Language, Password: a.cfg.Password.Reveal(),
 		Browser: host, Accounts: a.saved, Restart: restart, ReadOnly: a.cfg.ReadOnly, FeedbackEmail: a.cfg.FeedbackEmail, ClientIPHeader: a.cfg.ClientIPHeader, PublicURL: a.cfg.PublicURL, XAccount: a.cfg.XAccount, RepoURL: a.cfg.RepoURL,
 	}
 	seeds := &demoSeeds{st: a.store, dir: a.cfg.DataDir, log: log}
@@ -296,7 +309,7 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 			seeds.Run(ctx)
 		}()
 	}
-	wg.Add(3)
+	wg.Add(4)
 	go func() {
 		defer wg.Done()
 		scheduler.Run(ctx, log, a.store, a.syncer, sched, scheduleJobs(platforms))
@@ -307,6 +320,45 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 			notifier.Run(ctx)
 		}
 	}()
+	go func() {
+		defer wg.Done()
+		// HuntQueue is derived data: rebuild it now and then, so the table follows
+		// the polls without anyone running a command.
+		if a.cfg.ReadOnly {
+			return
+		}
+		tick := time.NewTicker(30 * time.Minute)
+		defer tick.Stop()
+		for {
+			// One HuntScore row per day: the backtest in docs/design/ai-layer.md
+			// counts them as its point-in-time cuts, so they have to keep coming
+			// without anyone running a command.
+			now := a.store.Now()
+			// The day column is UTC (huntscore writes time.DateOnly on UTC), so the
+			// comparison has to be too: at 02:00 in Shanghai it is still yesterday
+			// in UTC, and a local-date check would ask for a row that exists.
+			if day, err := a.store.LatestScoreDay(ctx); err == nil && scoreDayDue(day, now) {
+				switch err := huntscore.Refresh(ctx, a.store, now); {
+				case err != nil && ctx.Err() == nil:
+					log.Warn("daily score refresh failed", "err", err)
+				case err == nil:
+					// One line a day, so "did today's cut land?" is answerable from
+					// the logs without opening the database. Name the day that was
+					// written, not the one that was already there.
+					log.Info("daily score snapshot written", "day", now.UTC().Format(time.DateOnly))
+				}
+			}
+			if err := a.store.RefreshHuntQueue(ctx, a.store.Now()); err != nil && ctx.Err() == nil {
+				log.Warn("hunt queue not rebuilt", "err", err)
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case <-tick.C:
+			}
+		}
+	}()
+
 	go func() {
 		defer wg.Done()
 		web.Warm(ctx, deps)
@@ -356,4 +408,12 @@ func migrate(_, stderr io.Writer) int {
 	}
 	a.close()
 	return 0
+}
+
+// scoreDayDue reports whether the day's HuntScore row still has to be written.
+// The day column is a UTC date, so the comparison is too: at 02:00 in Shanghai
+// it is still yesterday in UTC, and a local-date check would ask for a row that
+// already exists every evening east of Greenwich.
+func scoreDayDue(latest string, now time.Time) bool {
+	return latest != now.UTC().Format(time.DateOnly)
 }

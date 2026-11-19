@@ -209,6 +209,19 @@ func loginBrowser(cfg config.Config, display string, log *slog.Logger) *weblogin
 			log.Warn("login browser: old HackerOne profile not removed", "err", err)
 		}
 	}
+	// The profile holds live platform sessions, so it is kept to this user only:
+	// a renderer runs unsandboxed in a container (measured: Chrome aborts here
+	// without --no-sandbox), and this directory is the part of the data
+	// directory it actually writes to.
+	if err := os.MkdirAll(profile, 0o700); err != nil {
+		log.Warn("login browser: cannot create the profile directory", "err", err)
+	} else if info, err := os.Stat(profile); err == nil && info.Mode().Perm()&0o077 != 0 {
+		if err := os.Chmod(profile, 0o700); err != nil { //nolint:gosec // a directory needs its execute bit; 0700 is the tightest that works
+			log.Warn("login browser: profile directory is readable by others", "mode", info.Mode().Perm())
+		}
+	}
+	log.Info("login browser", "profile", profile, "headless", cfg.ChromeHeadless,
+		"sandbox", "off (a container without user namespaces aborts Chrome with it on)")
 	return weblogin.NewHost(weblogin.Chrome{Path: cfg.Chrome, Headless: cfg.ChromeHeadless, Proxy: cfg.Proxy,
 		TimeZone: cfg.ChromeTimezone, Profile: profile, Display: display})
 }
