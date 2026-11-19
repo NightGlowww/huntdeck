@@ -63,7 +63,9 @@ func (s *server) pojiaFetchInline(ctx context.Context, p *store.ProgramDetail, d
 // pojiaRefresh updates the cache without holding a page open.
 func (s *server) pojiaRefresh(ctx context.Context, p *store.ProgramDetail, done chan<- struct{}) {
 	client := &pojia.Client{BaseURL: s.PojiaURL, Key: s.PojiaKey.Reveal()}
-	go func() {
+	// The request is over by design: this refresh outlives it and must not be
+	// cancelled with it, so a fresh context is the point, not an oversight.
+	go func() { //nolint:gosec // G118: the goroutine must outlive the request
 		if done != nil {
 			defer close(done)
 		}
