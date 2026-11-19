@@ -1622,6 +1622,23 @@
     "Kept in HuntDeck: it follows you to another browser, and a backup of the data directory carries it. A target export does not.": "保存在 HuntDeck 中：换浏览器也在，备份数据目录会带上它；目标导出不含笔记。",
     "The score history could not be read just now, so how many snapshots exist is unknown.": "本次未能读取评分历史，因此无法确定已有多少快照。",
     "How many targets the floor left out could not be read.": "未能读取有多少目标因低于门槛被排除。",
-    "Nothing is blocked among the %d targets this filter keeps.": "当前筛选的 %d 个目标中，没有无法开工的。"
+    "Nothing is blocked among the %d targets this filter keeps.": "当前筛选的 %d 个目标中，没有无法开工的。",
+    "The same data as tools instead of HTTP: huntdeck-mcp speaks the Model Context Protocol on stdin and stdout, and an agent drives it with the address and password this page shows.": "同一批数据，以工具而非 HTTP 提供：huntdeck-mcp 通过 stdin/stdout 讲 Model Context Protocol，智能体用本页显示的地址和密码即可驱动它。",
+    "Running it": "运行方式",
+    "one process, no port": "一个进程，不占端口",
+    "It talks to the API over HTTP with those two variables, so a token works too: set HUNTDECK_TOKEN instead of the password and the gate accepts it the same way.": "它用这两个变量通过 HTTP 访问 API，因此令牌同样可用：把 HUNTDECK_PASSWORD 换成 HUNTDECK_TOKEN 即可，门禁接受方式一致。",
+    "Tools": "工具",
+    "%d in all": "共 %d 个",
+    "This list comes from the server is own registry, so it cannot list a tool that does not exist or miss one that does.": "此列表来自服务端自身的注册表，因此既不会列出不存在的工具，也不会漏掉已有的工具。",
+    "changes data": "会修改数据",
+    "Argument": "参数",
+    "What it is for": "用途",
+    "No arguments.": "无参数。",
+    "The same data as tools, over stdio, with its own page:": "同一批数据也可以作为工具、通过 stdio 提供，见单独页面：",
+    "for an AI agent": "供 AI 智能体使用",
+    "MCP": "MCP",
+    "since restart": "重启后尚未检查",
+    "no poll has run yet; it checks at the next one": "还没有轮询跑过，下次轮询时检查",
+    "no run has needed it yet; it signs in at the next one": "还没有需要它的运行，下次运行时登录"
   }
 }

@@ -51,11 +51,9 @@
   </div>
 </section>{{else}}<section class="panel" id="tokens"><div class="panel-head"><h2>{{T "API tokens"}}</h2></div><div class="panel-body"><p class="muted small">{{T "No access password is set, so there is nothing for a token to unlock: every script reaches this API directly."}}</p></div></section>{{end}}
 <section class="panel" id="mcp">
-  <div class="panel-head"><h2>{{T "MCP server"}}</h2><span class="aside">{{T "for an AI agent, over stdio"}}</span></div>
+  <div class="panel-head"><h2>{{T "MCP server"}}</h2><span class="aside">{{T "for an AI agent"}}</span></div>
   <div class="panel-body">
-    <p>{{T "An agent can use everything above as tools instead of HTTP: huntdeck-mcp speaks the Model Context Protocol on stdin and stdout and covers the same data — programs, targets, the scope check, changes, disclosed reports and the hunt queue."}}</p>
-    <pre class="code"><code>HUNTDECK_URL={{.Base}} HUNTDECK_PASSWORD=… huntdeck-mcp</code></pre>
-    <p class="muted small">{{T "Those two variables are all it takes: the same address and password this page uses. docs/mcp.md in the repository lists every tool, its arguments, and what it answers; the queue tool takes explain for the factor breakdown."}}</p>
+    <p>{{T "The same data as tools, over stdio, with its own page:"}} <a class="link" href="/mcp">{{T "MCP server"}} →</a></p>
   </div>
 </section>
 

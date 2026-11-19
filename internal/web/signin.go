@@ -80,7 +80,7 @@ func credentialLine(c platform.Credential, poll *time.Time) signIn {
 	case poll != nil:
 		line.State, line.LabelKey, line.Parts = "ok", "ok", []signPart{{TextKey: "accepted at the last poll", When: poll}}
 	default:
-		line.LabelKey, line.Parts = "not checked", []signPart{{TextKey: "checked at the next poll"}}
+		line.LabelKey, line.Parts = "since restart", []signPart{{TextKey: "no poll has run yet; it checks at the next one"}}
 	}
 	return line
 }
@@ -115,7 +115,7 @@ func websiteLine(ws platform.WebSession) signIn {
 			line.Parts = append(line.Parts, signPart{TextKey: "tries again after", At: ws.RetryAfter})
 		}
 	default:
-		line.LabelKey, line.Parts = "not checked", []signPart{{TextKey: "signs in at the next run"}}
+		line.LabelKey, line.Parts = "since restart", []signPart{{TextKey: "no run has needed it yet; it signs in at the next one"}}
 	}
 	if ws.LastRenewal != nil && ws.SignedIn {
 		line.Parts = append(line.Parts, signPart{TextKey: "renewed", When: ws.LastRenewal})

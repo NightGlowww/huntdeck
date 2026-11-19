@@ -29,7 +29,7 @@ func TestSignInLines(t *testing.T) {
 		{"vouched for by the last good poll", []platform.Credential{{Name: "API token"}}, nil, runs,
 			[]string{"ok ok API token: accepted at the last poll"}},
 		{"not used yet", []platform.Credential{{Name: "API token"}}, nil, nil,
-			[]string{" not checked API token: checked at the next poll"}},
+			[]string{" since restart API token: no poll has run yet; it checks at the next one"}},
 		{"public only", []platform.Credential{}, nil, nil, []string{" public No login: public programs only"}},
 		{"website signed in", []platform.Credential{{Name: "API token", LastOK: ago(time.Minute)}},
 			&platform.WebSession{SignedIn: true, LastRenewal: ago(time.Hour)}, nil,

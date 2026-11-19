@@ -1,0 +1,28 @@
+{{define "content"}}{{with .Data}}
+<p class="lead">{{T "The same data as tools instead of HTTP: huntdeck-mcp speaks the Model Context Protocol on stdin and stdout, and an agent drives it with the address and password this page shows."}}</p>
+
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Running it"}}</h2><span class="aside">{{T "one process, no port"}}</span></div>
+  <div class="panel-body">
+    <pre class="code"><code>HUNTDECK_URL={{.Base}} HUNTDECK_PASSWORD=… huntdeck-mcp</code></pre>
+    <p class="muted small">{{T "It talks to the API over HTTP with those two variables, so a token works too: set HUNTDECK_TOKEN instead of the password and the gate accepts it the same way."}}</p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Tools"}}</h2><span class="aside">{{TF "%d in all" (len .Tools)}}</span></div>
+  <div class="panel-body">
+    <p class="muted small">{{T "This list comes from the server is own registry, so it cannot list a tool that does not exist or miss one that does."}}</p>
+    {{range .Tools}}
+    <div class="mcp-tool" id="{{.Name}}">
+      <h3><code>{{.Name}}</code>{{if .Write}} <span class="chip">{{T "changes data"}}</span>{{end}}</h3>
+      <p>{{.Description}}</p>
+      {{if .Arguments}}
+      <table class="mcp-args"><thead><tr><th>{{T "Argument"}}</th><th>{{T "Type"}}</th><th>{{T "What it is for"}}</th></tr></thead><tbody>
+        {{range .Arguments}}<tr><td><code>{{.Name}}</code></td><td>{{.Type}}</td><td>{{.What}}</td></tr>{{end}}
+      </tbody></table>
+      {{else}}<p class="muted small">{{T "No arguments."}}</p>{{end}}
+    </div>
+    {{end}}
+  </div>
+</section>{{end}}{{end}}
