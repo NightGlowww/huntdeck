@@ -65,6 +65,20 @@ else
   say "verify-backup" "skipped (docker needs sudo here)"
 fi
 
+# 4. the deploy gate, read-only: ask a real host what it runs and hand it a
+#    deliberately wrong expectation. Nothing is built, shipped or restarted.
+if [ -n "${HUNTDECK_DEPLOY_HOST:-}" ] && ssh -o BatchMode=yes -o ConnectTimeout=5 "$HUNTDECK_DEPLOY_HOST" true 2>/dev/null; then
+  if "$root/scripts/deploy.sh" --host "$HUNTDECK_DEPLOY_HOST" --check --expect v0.0.0 >/tmp/gates-deploy.log 2>&1; then
+    blind "deploy --expect"
+  elif grep -q "the host runs" /tmp/gates-deploy.log; then
+    pass "deploy --expect"
+  else
+    blind "deploy --expect (failed for another reason)"
+  fi
+else
+  say "deploy --expect" "skipped (set HUNTDECK_DEPLOY_HOST to a reachable host)"
+fi
+
 echo
 if [ "$fails" -gt 0 ]; then
   echo "$fails gate(s) did not fail when they should" >&2

@@ -402,7 +402,7 @@ listed with the way it goes red, and the way it was proved.
 | `make check` | gofmt, vet, a test, govulncheck or i18n lint fails | the suite itself |
 | `scripts/smoke.sh` | a route answers with the wrong status, or a page answers 200 without its own `data-page` (a login page for every route, an empty shell) | a marker typo, and the Linux SIGPIPE bug it exposed |
 | `scripts/bench.sh --check` | a route is slower than its budget, or does not answer at all | run against a stopped instance: `26 route(s) did not answer` |
-| `scripts/deploy.sh` | the container does not run the version this run built, healthz never comes up, or smoke fails | a deploy that shipped nothing used to pass; the version is now waited for and asserted |
+| `scripts/deploy.sh` | the container does not run the version this run built, healthz never comes up, or smoke fails | a deploy that shipped nothing used to pass; the version is now waited for and asserted, and gates.sh proves the comparison with --check --expect v0.0.0 |
 | `huntdeck doctor` | the data directory is unwritable, integrity or foreign keys fail, a backup is stale, the proxy is unreachable, polls or the queue are stale | `FAIL` lines and a non-zero exit |
 | `scripts/verify-backup.sh` | a backup does not open, or its counts differ from the live database | a truncated archive |
 | `TestAPIRoutesAreDeclaredOnce` | an API route is registered on the mux instead of in `apiRoutes` | a one-line rogue route |
