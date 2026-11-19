@@ -280,3 +280,8 @@
    tabs under the top bar instead of leaving them behind. */
 .ptabs { position: sticky; top: calc(var(--db-h) + 56px); z-index: 3; background: var(--bg); }
 @media (max-width: 900px) { .ptabs { top: var(--db-h); } }
+
+/* POJIA's profile is lines of counts: keep them as they are, but not as wide
+   as the page and with the mono face the rest of the numbers use. */
+.pojia-profile { margin: 0; padding: 0; max-width: 640px; overflow-x: auto;
+  color: var(--text); font: calc(12.5px * var(--fs, 1))/1.7 var(--mono); white-space: pre-wrap; }

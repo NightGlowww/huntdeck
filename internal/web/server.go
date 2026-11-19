@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/ai"
+	"github.com/mdpsec/huntdeck/internal/config"
 
 	"github.com/mdpsec/huntdeck/internal/i18n"
 	"github.com/mdpsec/huntdeck/internal/overrides"
@@ -107,6 +108,9 @@ type Deps struct {
 	AIBaseURL, AIModel string
 	// AI is the configured model, nil when it is off.
 	AI *ai.Client
+	// PojiaKey and PojiaURL are the disclosed-report library; empty key is off.
+	PojiaURL string
+	PojiaKey config.Secret
 	// DemoSeed exports seeds for a demo copy (demoseed.go); nil where it can't.
 	DemoSeed DemoSeeder
 	// Timezone is the IANA zone to show times in until one is chosen in

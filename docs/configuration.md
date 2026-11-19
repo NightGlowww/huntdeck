@@ -153,3 +153,12 @@ If a platform suddenly reports most of your programs gone, or a program's
 scope as empty, HuntDeck assumes a platform glitch and removes nothing; the
 poll shows as partial with the reason. If it's real, run
 `huntdeck poll --platform <name> --force-removals`.
+
+## POJIA
+
+- **HUNTDECK_POJIA_KEY** - a key for cve.pojia.ai, the disclosed-bug-bounty
+  library. With one set, a program page shows what the program has
+  historically paid for (report count, bounty total, class distribution),
+  fetched from POJIA and cached a week.
+- **HUNTDECK_POJIA_URL** - its endpoint; https://cve.pojia.ai/mcp by default.
+

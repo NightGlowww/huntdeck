@@ -1657,6 +1657,11 @@
     "No such token.": "没有这个令牌。",
     "Rotate": "轮换",
     "Delete the token %s and its history? This cannot be undone.": "删除令牌「%s」及其历史记录？此操作不可撤销。",
-    "Rotate %s? The current value stops working immediately; the new one is shown once.": "轮换「%s」？当前值立即失效；新值只显示一次。"
+    "Rotate %s? The current value stops working immediately; the new one is shown once.": "轮换「%s」？当前值立即失效；新值只显示一次。",
+    "What it has paid for": "它为什么付钱",
+    "from POJIA's disclosed reports": "来自 POJIA 收录的披露报告",
+    "cached: POJIA could not be reached": "缓存：POJIA 暂时无法访问",
+    "POJIA does not index this program.": "POJIA 未收录该厂商。",
+    "POJIA reports": "POJIA 报告库"
   }
 }

@@ -76,6 +76,10 @@ type Config struct {
 	AIBaseURL string
 	AIModel   string
 	AIKey     Secret
+	// POJIA indexes publicly disclosed bug bounty reports; the key is for its
+	// stateless MCP endpoint.
+	PojiaURL string
+	PojiaKey Secret
 	// HUNTDECK_CLIENT_IP_HEADER: the header a proxy in front puts the
 	// visitor's address in (CF-Connecting-IP behind Cloudflare), for a
 	// read-only copy's per-visitor limits. Set it only when every request
@@ -245,6 +249,11 @@ func Load(src Source) (Config, error) {
 	if (cfg.AIBaseURL == "") != (cfg.AIModel == "") {
 		r.errs = append(r.errs, fmt.Errorf("HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL go together: set both, or neither"))
 	}
+	cfg.PojiaURL = strings.TrimSpace(r.get("HUNTDECK_POJIA_URL", ""))
+	if cfg.PojiaURL == "" {
+		cfg.PojiaURL = "https://cve.pojia.ai/mcp"
+	}
+	cfg.PojiaKey = Secret(strings.TrimSpace(r.get("HUNTDECK_POJIA_KEY", "")))
 	cfg.Password = Secret(r.get("HUNTDECK_PASSWORD", ""))
 	if p := cfg.Password.Reveal(); p != "" && len(p) < 8 {
 		r.errs = append(r.errs, errors.New("HUNTDECK_PASSWORD: use at least 8 characters"))

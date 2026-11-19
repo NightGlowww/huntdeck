@@ -26,7 +26,8 @@
       {{if not $p.OffersBounty}}<p class="hp-note">{{TF "No bounties here: the parts weigh to %s, and only %d%% of that counts, so %s." (printf "%.1f" (huntMean .)) 75 (printf "%.1f" .Score)}}</p>{{end}}
     </section>
     {{end}}
-    {{template "program-platform-stats" .}}
+    {{if $.Data.PojiaEnabled}}{{template "program-pojia" .}}{{end}}
+  {{template "program-platform-stats" .}}
     {{template "program-fresh" .}}
     {{template "program-latest-disclosed" .}}
     {{template "program-recent" .}}

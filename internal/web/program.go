@@ -87,6 +87,11 @@ type programData struct {
 	// NoteErr says the stored note could not be read: the tab refuses to
 	// open an empty editor, because saving it would overwrite the real text.
 	NoteErr bool
+	// Pojia is the disclosed-report history panel; PojiaEnabled says a key is
+	// configured, PojiaStale that the answer shown is older than a week.
+	Pojia        *store.PojiaProfile
+	PojiaEnabled bool
+	PojiaStale   bool
 }
 
 // programTab is one of a program page's tabs.
@@ -147,6 +152,11 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := programData{P: p, Tab: oneOf(tab, programTabs...)}
+	// POJIA's disclosed-report history: cached for a week, fetched on the first
+	// visit after that. A missing key leaves the panel off entirely.
+	if s.PojiaKey.Reveal() != "" {
+		s.pojiaPanel(ctx, r, p, &d)
+	}
 	if p.State != "open" {
 		since, err := s.Store.StateSince(ctx, p.ID)
 		if err != nil {

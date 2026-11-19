@@ -41,6 +41,9 @@ const (
 	// GroupAI is the optional model: an OpenAI-compatible endpoint that reads
 	// a program's policy and states the rules it sets.
 	GroupAI = "ai"
+	// GroupPojia is the disclosed-report library: POJIA answers what a program
+	// has historically paid for.
+	GroupPojia = "pojia"
 )
 
 // Editable lists every field Settings can set.
@@ -99,6 +102,12 @@ var Editable = []Field{
 		Help: "The model name the endpoint knows, e.g. gpt-4o-mini."},
 	{Name: "HUNTDECK_AI_KEY", Group: GroupAI, Label: "API key", Kind: KindSecret,
 		Help: "Sent as a bearer token. Left empty for a local server that needs none."},
+
+	{Name: "HUNTDECK_POJIA_KEY", Group: GroupPojia, Label: "API key", Kind: KindSecret,
+		Help: "From cve.pojia.ai. Fuels the disclosed-history panel on a program page."},
+	{Name: "HUNTDECK_POJIA_URL", Group: GroupPojia, Label: "Endpoint", Kind: KindText,
+		Default: "https://cve.pojia.ai/mcp",
+		Help:    "Its MCP endpoint; leave at the default unless you run your own."},
 }
 
 // EditableField returns the editable field called name.
