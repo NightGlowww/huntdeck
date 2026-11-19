@@ -131,3 +131,8 @@
   #platforms .c-wide .signins > * { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
+
+/* A little air between the sign-in badge and its sentence, which runs together
+   once the line truncates. */
+#platforms .signins .chip { margin-right: 7px; }
+
