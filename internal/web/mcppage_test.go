@@ -24,6 +24,34 @@ func TestMCPPageListsEveryTool(t *testing.T) {
 	if len(catalog) < 5 {
 		t.Fatalf("catalog has %d tools", len(catalog))
 	}
+	// A table built from the schema object instead of its properties listed
+	// additionalProperties, properties, required and type as arguments, which is
+	// what the first version of the page did. "type" is left out on purpose: one
+	// tool has an argument of that name.
+	for _, keyword := range []string{"additionalProperties", "properties", "required"} {
+		if strings.Contains(plain, "<code>"+keyword+"</code>") {
+			t.Errorf("the page lists the schema keyword %q as an argument", keyword)
+		}
+	}
+	// required is stored as []string; reading it as []any marked nothing.
+	for _, tool := range catalog {
+		for _, arg := range tool.Arguments {
+			if arg.Required && !strings.Contains(plain, "<code>"+arg.Name+"</code>") {
+				t.Errorf("required argument %s of %s is not on the page", arg.Name, tool.Name)
+			}
+		}
+	}
+	wantRequired := false
+	for _, tool := range catalog {
+		for _, arg := range tool.Arguments {
+			if arg.Required {
+				wantRequired = true
+			}
+		}
+	}
+	if wantRequired && !strings.Contains(plain, "required") {
+		t.Error("tools have required arguments and the page marks none")
+	}
 	for _, tool := range catalog {
 		if !strings.Contains(plain, tool.Name) {
 			t.Errorf("the page does not list %s", tool.Name)
