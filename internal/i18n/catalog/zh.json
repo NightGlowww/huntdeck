@@ -1588,6 +1588,11 @@
     "AI policy extraction": "AI 政策抽取",
     "the program page shows only the rules quoted from the policy": "程序页只显示取自政策原文的规则",
     "To turn it on, set HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL to an OpenAI-compatible endpoint, then run huntdeck ai-extract: the model reads each policy once and the result is cached against the policy text.": "启用方式：把 HUNTDECK_AI_BASE_URL 与 HUNTDECK_AI_MODEL 指向 OpenAI 兼容端点，然后运行 huntdeck ai-extract——模型每份政策只读一次，结果按政策文本缓存。",
-    "%s, %d cached reading(s)": "%s，已缓存 %d 份读数"
+    "%s, %d cached reading(s)": "%s，已缓存 %d 份读数",
+    "Read three policies now": "现在读取三份政策",
+    "No model is configured: set HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL first.": "尚未配置模型：请先设置 HUNTDECK_AI_BASE_URL 与 HUNTDECK_AI_MODEL。",
+    "The model read the policies it had not seen; the program pages show what it found.": "模型已读取尚未读过的政策；程序页会显示结果。",
+    "Every policy here has been read already; nothing was sent.": "这里的政策都已读过，本次没有发送任何内容。",
+    "The endpoint refused the request; the server log has the reason.": "端点拒绝了请求，具体原因见服务端日志。"
   }
 }

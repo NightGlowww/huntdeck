@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/mdpsec/huntdeck/internal/policyai"
 	"io"
 	"strings"
 
 	"github.com/mdpsec/huntdeck/internal/ai"
 	"github.com/mdpsec/huntdeck/internal/config"
-	"github.com/mdpsec/huntdeck/internal/store"
 )
 
 // aiExtractCmd asks the configured model to read each program's policy and keeps
@@ -57,44 +57,16 @@ func aiExtractCmd(args []string, stdout, stderr io.Writer) int {
 	}
 	defer app.close()
 
-	rows, err := app.store.PoliciesWithText(ctx, *platform, *limit)
+	client2 := &ai.Client{BaseURL: cfg.AIBaseURL, APIKey: cfg.AIKey.Reveal(), Model: cfg.AIModel}
+	res, err := policyai.Extract(ctx, app.store, client2, policyai.Options{Platform: *platform, Limit: *limit, Force: *force})
 	if err != nil {
 		fmt.Fprintf(stderr, "huntdeck ai-extract: %v\n", err)
 		return 1
 	}
-	var read, skipped, failed int
-	for _, p := range rows {
-		policy := strings.TrimSpace(p.Policy)
-		if len(policy) < 80 {
-			skipped++
-			continue
-		}
-		hash := store.PolicyHash(policy)
-		if !*force {
-			if got, err := app.store.AIReading(ctx, p.ID, hash); err == nil && got != nil {
-				skipped++
-				continue
-			}
-		}
-		var rules []store.AIRule
-		err := client.CompleteJSON(ctx, policySystem, policyUser(policy), &rules)
-		if err != nil {
-			failed++
-			fmt.Fprintf(stderr, "  %s/%s: %v\n", p.Platform, p.Handle, err)
-			continue
-		}
-		if len(rules) > 12 {
-			rules = rules[:12]
-		}
-		if err := app.store.SaveAIRules(ctx, p.ID, hash, rules, cfg.AIModel); err != nil {
-			failed++
-			fmt.Fprintf(stderr, "  %s/%s: %v\n", p.Platform, p.Handle, err)
-			continue
-		}
-		read++
-		fmt.Fprintf(stdout, "%s/%s: %d rule(s)\n", p.Platform, p.Handle, len(rules))
+	for _, e := range res.Errors {
+		fmt.Fprintf(stderr, "  %s\n", e)
 	}
-	fmt.Fprintf(stdout, "read %d, skipped %d, failed %d\n", read, skipped, failed)
+	fmt.Fprintf(stdout, "read %d, skipped %d, failed %d\n", res.Read, res.Skipped, res.Failed)
 	return 0
 }
 

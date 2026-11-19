@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mdpsec/huntdeck/internal/ai"
 	"io"
 	"log/slog"
 	"net"
@@ -261,7 +262,7 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 		Metrics: web.NewMetrics(), DB: a.db, Store: a.store, Poller: poller, Progress: progress, Platforms: infos, WebSyncs: webSyncs, Schedule: sched,
 		Version: version.String(), AllowedHosts: a.cfg.AllowedHosts, Timezone: a.cfg.Timezone, Notify: notifier, VNC: vnc,
 		Language: a.cfg.Language, Password: a.cfg.Password.Reveal(),
-		Browser: host, Accounts: a.saved, Restart: restart, ReadOnly: a.cfg.ReadOnly, AIBaseURL: a.cfg.AIBaseURL, AIModel: a.cfg.AIModel, FeedbackEmail: a.cfg.FeedbackEmail, ClientIPHeader: a.cfg.ClientIPHeader, PublicURL: a.cfg.PublicURL, XAccount: a.cfg.XAccount, RepoURL: a.cfg.RepoURL,
+		Browser: host, Accounts: a.saved, Restart: restart, ReadOnly: a.cfg.ReadOnly, AIBaseURL: a.cfg.AIBaseURL, AIModel: a.cfg.AIModel, AI: aiClient(a.cfg), FeedbackEmail: a.cfg.FeedbackEmail, ClientIPHeader: a.cfg.ClientIPHeader, PublicURL: a.cfg.PublicURL, XAccount: a.cfg.XAccount, RepoURL: a.cfg.RepoURL,
 	}
 	seeds := &demoSeeds{st: a.store, dir: a.cfg.DataDir, log: log}
 	if !a.cfg.ReadOnly {
@@ -416,4 +417,13 @@ func migrate(_, stderr io.Writer) int {
 // already exists every evening east of Greenwich.
 func scoreDayDue(latest string, now time.Time) bool {
 	return latest != now.UTC().Format(time.DateOnly)
+}
+
+// aiClient is the configured model, or nil when it is off: one place that
+// decides what configured means, for the server and the settings page.
+func aiClient(cfg config.Config) *ai.Client {
+	if strings.TrimSpace(cfg.AIBaseURL) == "" || strings.TrimSpace(cfg.AIModel) == "" {
+		return nil
+	}
+	return &ai.Client{BaseURL: cfg.AIBaseURL, APIKey: cfg.AIKey.Reveal(), Model: cfg.AIModel}
 }

@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"github.com/mdpsec/huntdeck/internal/ai"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -103,6 +104,8 @@ type Deps struct {
 	// AIBaseURL and AIModel are the optional model, empty when it is off.
 	// Settings reports which, so an off-by-default feature is visible.
 	AIBaseURL, AIModel string
+	// AI is the configured model, nil when it is off.
+	AI *ai.Client
 	// DemoSeed exports seeds for a demo copy (demoseed.go); nil where it can't.
 	DemoSeed DemoSeeder
 	// Timezone is the IANA zone to show times in until one is chosen in
@@ -254,6 +257,7 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /settings/poll", s.pollNow)
 	mux.HandleFunc("POST /settings/platform", s.saveSchedule)
 	mux.HandleFunc("POST /settings/platform/reset", s.resetSchedule)
+	mux.HandleFunc("POST /settings/ai/extract", s.extractPolicies)
 	mux.HandleFunc("POST /settings/websync", s.saveWebSync)
 	mux.HandleFunc("POST /settings/websync/reset", s.resetWebSync)
 	mux.HandleFunc("POST /settings/huntscore", s.saveHuntPreset)
@@ -594,6 +598,10 @@ var flashMessages = map[string]string{
 	"seed-exported":      "Demo seed exported to the data directory.",
 	"seed-daily-on":      "A demo seed will be exported every 12 hours.",
 	"seed-daily-off":     "Regular demo seed export turned off.",
+	"ai-off":             "No model is configured: set HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL first.",
+	"ai-read":            "The model read the policies it had not seen; the program pages show what it found.",
+	"ai-none":            "Every policy here has been read already; nothing was sent.",
+	"ai-failed":          "The endpoint refused the request; the server log has the reason.",
 	"huntscore-saved":    "HuntScore weighting saved and every program rescored.",
 	"timezone-saved":     "Time zone saved. Dates and times now show in it.",
 	"channel-saved":      "Channel saved.",
