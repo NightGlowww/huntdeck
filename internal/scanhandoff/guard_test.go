@@ -2,6 +2,7 @@ package scanhandoff
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -24,6 +25,12 @@ func TestHeadroomRefusesWhenShort(t *testing.T) {
 		{"exactly the floor", MinFreePercent, true, nil, false},
 		{"just under", MinFreePercent - 0.1, true, nil, true},
 		{"nearly out", 4, true, nil, true},
+		// A scanner that does not say how much memory it has is not a scanner
+		// with memory to spare. These two rows are the ones the first version of
+		// this table left out, which is why the code let unknown through.
+		{"unknown, no error", 0, false, nil, true},
+		{"unknown, with error", 0, false, errors.New("boom"), true},
+		{"zero free", 0, true, nil, true},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

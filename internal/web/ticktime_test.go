@@ -19,7 +19,10 @@ func TestBoardRelativeTimesTick(t *testing.T) {
 	if !strings.Contains(body, "data-at=") {
 		t.Skip("this fixture has no times to tick")
 	}
-	const window = 200
+	// A sibling data-at would satisfy a "look back N bytes" check while the
+	// ticker, which walks elements, would never find it: the test has to read the
+	// markup as markup. Each .when must carry data-at itself, or sit inside the
+	// nearest element that opened before it - which is its parent.
 	checked := 0
 	for i := 0; ; {
 		j := strings.Index(body[i:], "class=\"when")
@@ -32,11 +35,7 @@ func TestBoardRelativeTimesTick(t *testing.T) {
 			break
 		}
 		tag := body[j : j+end]
-		from := j - window
-		if from < 0 {
-			from = 0
-		}
-		if !strings.Contains(tag, "data-at=") && !strings.Contains(body[from:j], "data-at=") {
+		if !strings.Contains(tag, "data-at=") && !parentHasDataAt(body, j) {
 			t.Errorf("a .when span cannot tick: %s", tag)
 		}
 		checked++
@@ -46,4 +45,41 @@ func TestBoardRelativeTimesTick(t *testing.T) {
 		t.Fatal("no .when spans were checked: the guard is looking at nothing")
 	}
 	t.Logf("checked %d .when spans", checked)
+}
+
+// parentHasDataAt reports whether the element containing the span that starts at
+// pos carries data-at. The ticker walks elements, so a sibling with data-at is
+// not enough: the test has to read the markup as markup, not as nearby bytes.
+func parentHasDataAt(body string, pos int) bool {
+	depth := 0
+	for i := pos - 1; i >= 0; i-- {
+		if body[i] != '>' {
+			continue
+		}
+		open := strings.LastIndex(body[:i], "<")
+		if open < 0 {
+			return false
+		}
+		tag := body[open : i+1]
+		switch {
+		case strings.HasPrefix(tag, "</"):
+			depth++
+		case isVoidTag(tag):
+			continue
+		case depth > 0:
+			depth--
+		default:
+			return strings.Contains(tag, "data-at=")
+		}
+	}
+	return false
+}
+
+func isVoidTag(tag string) bool {
+	for _, v := range []string{"<br", "<img", "<input", "<hr", "<meta", "<link", "<use", "<path", "<col"} {
+		if strings.HasPrefix(tag, v) {
+			return true
+		}
+	}
+	return false
 }

@@ -48,6 +48,10 @@ table.schedule td { vertical-align: middle; }
 .flash { margin: 0 0 16px; padding: 10px 14px; border: 1px solid; border-radius: var(--radius); }
 .flash.ok { border-color: color-mix(in srgb, var(--good) 40%, transparent); background: var(--good-weak); color: var(--good); }
 .flash.err { border-color: color-mix(in srgb, var(--bad) 40%, transparent); background: var(--bad-weak); color: var(--bad); }
+/* Between ok and err: a warning is a thing to read, not a failure. Six
+   pages wrote class="flash warn" and there was no rule, so every warning
+   rendered as a plain black-bordered paragraph. */
+.flash.warn { border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: var(--warn-weak); color: var(--warn); }
 
 .pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--border);
   color: var(--muted); font: calc(12px * var(--fs, 1)) var(--mono); }

@@ -22,12 +22,13 @@ var headroom = func(client *scopesentry.Client) (float64, bool, error) {
 // CheckHeadroom refuses a handoff when the scanner host is short on memory.
 func CheckHeadroom(ctx context.Context, client *scopesentry.Client) error {
 	pct, ok, err := headroom(client)
-	if err != nil || !ok {
-		// Unknown is not permission: say so rather than guess.
-		if err != nil {
-			return fmt.Errorf("cannot read the scanner's memory headroom: %w", err)
-		}
-		return nil
+	if err != nil {
+		return fmt.Errorf("cannot read the scanner's memory headroom: %w", err)
+	}
+	if !ok {
+		// Unknown is not permission. The comment said so and the code let it
+		// through: a scanner that does not report its memory got a free pass.
+		return fmt.Errorf("the scanner did not report its memory headroom: no new scans")
 	}
 	if pct < MinFreePercent {
 		return fmt.Errorf("the scanner host has %.0f%% memory free (needs %.0f%%): no new scans", pct, MinFreePercent)

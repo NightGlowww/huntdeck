@@ -11,6 +11,10 @@ import (
 
 // MemAvailablePercent reads the scanner host's free memory from its /healthz.
 // It is the number the handoff checks before handing over more work.
+//
+// The field is decoded as a pointer so "the scanner did not say" and "the
+// scanner answered zero" stay different things: zero is a real reading (nothing
+// free) and must be refused as such, not mistaken for missing data.
 func (c *Client) MemAvailablePercent(ctx context.Context) (float64, bool, error) {
 	if c.BaseURL == "" {
 		return 0, false, fmt.Errorf("scopesentry: no endpoint configured")
@@ -31,14 +35,17 @@ func (c *Client) MemAvailablePercent(ctx context.Context) (float64, bool, error)
 	defer func() { _ = res.Body.Close() }()
 	var out struct {
 		Host struct {
-			MemAvailablePercent float64 `json:"memAvailablePercent"`
+			MemAvailablePercent *float64 `json:"memAvailablePercent"`
 		} `json:"host"`
 	}
 	if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
 		return 0, false, err
 	}
-	if out.Host.MemAvailablePercent == 0 {
+	if out.Host.MemAvailablePercent == nil {
 		return 0, false, nil
 	}
-	return out.Host.MemAvailablePercent, true, nil
+	if v := *out.Host.MemAvailablePercent; v >= 0 {
+		return v, true, nil
+	}
+	return 0, false, nil
 }

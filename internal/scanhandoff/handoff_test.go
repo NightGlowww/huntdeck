@@ -114,8 +114,11 @@ func TestHandoffSendsEachTargetOnce(t *testing.T) {
 	st := newHandoffStore(t)
 	ctx := context.Background()
 	seed(t, st, []string{"a.example.com", "b.example.com"})
+	// The schedule is off on purpose: the operator pressing "send now" is the
+	// whole point of manual, and with Enabled true the flag never decides
+	// anything (changing it to if !cfg.Enabled used to pass every test).
 	if err := st.SaveScanConfig(ctx, store.ScanConfig{
-		Enabled: true, TemplateID: "tpl", NodeName: "node", PerTask: 1,
+		Enabled: false, TemplateID: "tpl", NodeName: "node", PerTask: 1,
 	}); err != nil {
 		t.Fatal(err)
 	}

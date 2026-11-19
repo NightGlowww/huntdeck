@@ -164,6 +164,18 @@ const FOCUS_CHECK = `(() => {
 const wantFocus = args.includes('--focus');
 const answer = await evaluate(wantFocus ? FOCUS_CHECK : js);
 console.log(JSON.stringify(answer, null, 2));
-if (wantFocus && answer && answer.withoutVisibleFocus > 0) process.exitCode = 1;
+// A page with no focusable controls, or an answer that did not serialise,
+// must not read as a pass: the check exists to look at something.
+if (wantFocus) {
+  if (!answer || typeof answer.focusable !== 'number') {
+    console.error('dom-probe: the focus check produced no answer');
+    process.exitCode = 3;
+  } else if (answer.focusable === 0) {
+    console.error('dom-probe: no focusable controls on ' + path + ': nothing was checked');
+    process.exitCode = 1;
+  } else if (answer.withoutVisibleFocus > 0) {
+    process.exitCode = 1;
+  }
+}
 chrome.kill();
 ws.close();
