@@ -57,3 +57,12 @@ language to controlled parameters) and what is theatre (summarising changes,
 polishing score reasons, suggesting attacks, chatting with the database). The
 offline path — HuntQueue — was built first on purpose: it needs no key, no
 network, and it can be wrong in a way that can be measured.
+
+**Built since**: policy extraction. `huntdeck ai-extract` (or the button in
+Settings › Polling) asks an OpenAI-compatible model for the rules a policy
+states, caches them against the policy's hash so the same text is never sent
+twice, and the program page, the API (`ai_rules`) and the MCP tool show them
+beside the rules quoted from the policy, marked as a paraphrase. No page render
+calls a model, and with no endpoint configured every page is exactly as it was.
+Still proposal: the brief that returns row ids only, and the one-call query
+translation.

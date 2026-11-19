@@ -1,6 +1,8 @@
 # HuntDeck 的可选 AI 层：LLM 该做与不该做，以及一个不用 LLM 的决策模型
 
-状态：设计提案。没有实现，没有改动仓库里的任何文件；本文件是唯一产物。
+状态：**部分已实现**（2026-11-19 更新）。本文件最初是纯提案；现在 §3 的 HuntQueue 与 §2 的政策抽取都已上线，其余仍是提案。下面第 0 节之后有一张「提案 → 现状」对照表，写清哪些落地、哪些没有。
+
+读代码的时间点是提案写成时；实现之后以代码与 `docs/` 为准。
 读过的代码（下面每条判断的依据）：`internal/huntscore/{huntscore,parts,fresh,targets}.go`、`internal/web/beforetest.go`、`internal/scope/{scope,match}.go`、`internal/web/changes.go`、`internal/store/{huntscore,accepted,resolutions,disclosures,programlist,besttargets,board,notify}.go`、`internal/syncer/{rules,scope}.go`、`internal/notify/*`、`internal/secretbox`、`internal/config/editable.go`、`cmd/huntdeck/serve.go`、`docs/{performance,web-ui,notifications}.md`。
 
 规模与预算按 `docs/performance.md` 的记录：1,337 个程序 / 75,795 条 scope / 53,251 个 target / 10,772 条变更；页面热 50 ms、API 100 ms、首击 900 ms 的预算。
@@ -17,6 +19,16 @@
 
 ---
 
+
+## 提案 → 现状（2026-11-19）
+
+| 提案 | 现状 | 证据 |
+|---|---|---|
+| §3 HuntQueue：确定性公式 + 显式权重 + 回测验收线 | **已实现** | `internal/huntqueue`（七个因子相乘，权重显式）；`/queue` 页、`/api/v1/queue`、`huntdeck queue`、MCP `huntdeck_queue` 四个出口；`huntdeck backtest` 数切点，当前 3/8 |
+| §2 政策抽取（唯一值得交给 LLM 的文本） | **已实现** | `internal/policyai` + `huntdeck ai-extract` + 设置页按钮；按政策 hash 缓存，结果只作为**转述**并列在引用原文的规则旁 |
+| 开打前 brief（模型只返回行 ID，不写事实） | 未实现 | 仍是提案：需要先有「行 ID → 事实」的稳定投影 |
+| 查询翻译（1 次调用、800 ms 超时、失败回落） | 未实现 | 仍是提案：搜索框目前是纯子串匹配 |
+| 「LLM 不在页面请求路径上」 | **已遵守** | 抽取只在命令与设置页的按钮里发生，页面渲染从不调用模型 |
 ## 1. 对照现有能力：LLM 在哪里有用，在哪里是戏
 
 先摆清楚 HuntDeck 已经不需要 LLM 的部分：
