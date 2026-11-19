@@ -80,7 +80,7 @@
       {{if .AI.On}}<span class="chip ok">{{T "on"}}</span> {{TF "%s, %d cached reading(s)" .AI.Model .AI.Readings}}
       {{else}}<span class="chip">{{T "off"}}</span> {{T "the program page shows only the rules quoted from the policy"}}{{end}}</p>
     <p class="muted small">{{T "To turn it on, set HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL to an OpenAI-compatible endpoint, then run huntdeck ai-extract: the model reads each policy once and the result is cached against the policy text."}}</p>
-    {{if .AI.On}}<form method="post" action="/settings/ai/extract" class="inline"><button type="submit" class="small">{{T "Read three policies now"}}</button></form>{{end}}
+    {{if .AI.On}}<form method="post" action="/settings/ai/extract" class="inline" data-busy="{{T "Reading…"}}" data-stay-busy><button type="submit" class="small">{{T "Read three policies now"}}</button></form>{{end}}
 
   </div>
 </section>

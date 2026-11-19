@@ -1594,6 +1594,7 @@
     "The model read the policies it had not seen; the program pages show what it found.": "模型已读取尚未读过的政策；程序页会显示结果。",
     "Every policy here has been read already; nothing was sent.": "这里的政策都已读过，本次没有发送任何内容。",
     "The endpoint refused the request; the server log has the reason.": "端点拒绝了请求，具体原因见服务端日志。",
-    "every %s": "每 %s"
+    "every %s": "每 %s",
+    "Reading…": "读取中…"
   }
 }
