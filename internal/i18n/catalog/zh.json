@@ -1655,6 +1655,8 @@
     "Deleted.": "已删除。",
     "A live token cannot be deleted: revoke it first, so one click cannot remove something a script still uses.": "有效令牌不能直接删除：请先吊销，避免一次误点删掉仍在使用的密钥。",
     "No such token.": "没有这个令牌。",
-    "Rotate": "轮换"
+    "Rotate": "轮换",
+    "Delete the token %s and its history? This cannot be undone.": "删除令牌「%s」及其历史记录？此操作不可撤销。",
+    "Rotate %s? The current value stops working immediately; the new one is shown once.": "轮换「%s」？当前值立即失效；新值只显示一次。"
   }
 }
