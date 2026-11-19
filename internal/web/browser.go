@@ -60,7 +60,7 @@ func (s *server) browserTab(rows []platformRow) *browserData {
 		row := browserTabRow{Name: name}
 		if i := slices.IndexFunc(rows, func(r platformRow) bool { return r.Name == name }); i >= 0 {
 			for j := range rows[i].SignIn {
-				if l := rows[i].SignIn[j]; l.Name == "Website login" {
+				if l := rows[i].SignIn[j]; l.NameKey == "Website login" {
 					l.Watch = "" // the link here
 					row.Login = &l
 				}

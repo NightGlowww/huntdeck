@@ -51,9 +51,9 @@ func TestSignInLines(t *testing.T) {
 		for _, l := range s.signIns(p, tt.runs, web) {
 			var parts []string
 			for _, pt := range l.Parts {
-				parts = append(parts, pt.Text)
+				parts = append(parts, pt.TextKey)
 			}
-			line := l.State + " " + l.Label + " " + l.Name + ": " + strings.Join(parts, ", ")
+			line := l.State + " " + l.LabelKey + " " + l.NameKey + ": " + strings.Join(parts, ", ")
 			if l.Problem != "" {
 				line += " | " + l.Problem
 			}

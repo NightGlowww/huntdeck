@@ -618,7 +618,7 @@
     "full": "全量",
     "web": "浏览器",
     "running": "进行中",
-    "ok": "成功",
+    "ok": "正常",
     "partial": "部分成功",
     "failed": "失败",
     "interrupted": "已中断",
@@ -1598,6 +1598,21 @@
     "Reading…": "读取中…",
     "counted from": "统计自",
     "to decision": "到判定",
-    "backlog cleared": "清了积压"
+    "backlog cleared": "清了积压",
+    "No login": "无登录",
+    "rejected": "被拒绝",
+    "not checked": "未检查",
+    "public": "公开",
+    "public programs only": "仅公开项目",
+    "refused": "被拒绝",
+    "not retried until a restart": "重启前不再重试",
+    "accepted": "已接受",
+    "signed in": "已登录",
+    "expires": "到期",
+    "accepted at the last poll": "上次轮询时已接受",
+    "checked at the next poll": "下次轮询时检查",
+    "tries again after": "之后重试",
+    "signs in at the next run": "下次运行时登录",
+    "renewed": "已续期"
   }
 }
