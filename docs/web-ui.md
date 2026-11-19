@@ -237,3 +237,15 @@ sees on a laptop. Checked 2026-11-19 on the board, queue, a program page and
 Settings: the sidebar becomes a Menu button, the queue list and the program
 header stack, and Settings' platform table turns into one labelled block per
 platform.
+
+**Alignment is measured, not eyeballed.** `scripts/layout-audit.mjs` walks every
+page at two widths and reports sibling boxes that sit side by side, have the same
+height and yet do not share a top: the class of bug where two chips are a few
+pixels apart because one is an inline-block and the other a flex item, with no
+differing property to point at. It found the board's kind chip and amount 5px
+apart (offsetTop 75 against 70, identical computed styles); after the row became
+a flex line both measure 70. Run it after touching a table or a chip row:
+
+```sh
+HD_PASSWORD='…' node scripts/layout-audit.mjs --base https://huntdeck.example --sizes 390,1400
+```
