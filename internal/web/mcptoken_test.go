@@ -21,7 +21,7 @@ func TestMCPPageMintsAWorkingKey(t *testing.T) {
 	}
 	tok := body[i+len("HUNTDECK_TOKEN\": \""):]
 	tok = tok[:strings.Index(tok, "\"")]
-	if len(tok) != 64 {
+	if len(tok) != len("mcp_")+64 {
 		t.Fatalf("key is %d chars, want 64", len(tok))
 	}
 	// The key opens the same gate as the password.
