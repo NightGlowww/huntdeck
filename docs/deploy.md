@@ -390,3 +390,25 @@ What worked, in order:
 The rule that follows: never put `rm` in the same line as a `/dev/...` path, and
 keep the instance id written down somewhere that does not need the host.
 
+
+## The gates, and how each one fails
+
+A check that cannot fail is worse than no check: it turns "nobody looked" into
+"all clear". Three of these were exactly that until 2026-11-19, so each is
+listed with the way it goes red, and the way it was proved.
+
+| Gate | Fails when | Proved by |
+|---|---|---|
+| `make check` | gofmt, vet, a test, govulncheck or i18n lint fails | the suite itself |
+| `scripts/smoke.sh` | a route answers with the wrong status, or a page answers 200 without its own `data-page` (a login page for every route, an empty shell) | a marker typo, and the Linux SIGPIPE bug it exposed |
+| `scripts/bench.sh --check` | a route is slower than its budget, or does not answer at all | run against a stopped instance: `26 route(s) did not answer` |
+| `scripts/deploy.sh` | the container does not run the version this run built, healthz never comes up, or smoke fails | a deploy that shipped nothing used to pass; the version is now waited for and asserted |
+| `huntdeck doctor` | the data directory is unwritable, integrity or foreign keys fail, a backup is stale, the proxy is unreachable, polls or the queue are stale | `FAIL` lines and a non-zero exit |
+| `scripts/verify-backup.sh` | a backup does not open, or its counts differ from the live database | a truncated archive |
+| `TestAPIRoutesAreDeclaredOnce` | an API route is registered on the mux instead of in `apiRoutes` | a one-line rogue route |
+| `TestAPIDocMentionsEveryRoute` | `docs/api.md` misses a served route | the token endpoints, before their section existed |
+| `TestEverySmokeMarkerIsItsOwnPage` | a page stops carrying its `data-page`, or two pages share one | this test |
+| `huntdeck backtest` | nothing: it reports how many cuts exist and what they show | by design |
+
+Rule for anything new: write down the way it fails, and make it fail once on
+purpose before trusting it.
