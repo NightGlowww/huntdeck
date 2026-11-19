@@ -10,9 +10,10 @@
 //   --theme light|dark|both   (default both)
 //   --pages 'name=path,…'     (default a spread of the UI)
 //   --chrome PATH    the browser (default Chrome on macOS, chromium elsewhere)
-//   --sizes W,…      viewport widths to capture, e.g. 390,1280,1400 (default:
 //                    the --width, one size)
-//   --width N        viewport width when --sizes is not given (default 1400)
+//   --sizes W,…      viewport widths to capture (default 390,1400: the phone
+//                    layout stacks the tables, so it is a different page)
+//   --width N        a single viewport width, when --sizes is not given
 //   --password-env NAME       the variable holding the access password
 //                             (default HD_PASSWORD; skip it when no password is set)
 //
@@ -32,7 +33,7 @@ const flag = (name, fallback) => {
 const base = flag('base', 'http://127.0.0.1:8080').replace(/\/$/, '');
 const out = flag('out', 'ui-audit');
 const themeArg = flag('theme', 'both');
-const sizes = (flag('sizes', '') || String(flag('width', '1400')))
+const sizes = (flag('sizes', '') || String(flag('width', '390,1400')))
   .split(',').map((s) => Number(s.trim())).filter((n) => n > 0);
 if (sizes.length === 0) { console.error('no viewport size'); process.exit(2); }
 const passwordEnv = flag('password-env', 'HD_PASSWORD');

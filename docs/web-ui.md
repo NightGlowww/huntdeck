@@ -229,3 +229,11 @@ resetting the layout, and keeps the keyboard on the box handles: the arrow
 keys move a box, Shift with the arrow keys resizes it, Esc leaves the editor.
 `?` lists every keyboard shortcut; `/` focuses the search; `g` then a letter
 opens a page.
+
+**Phone width is part of the check.** The audit captures 390 px as well as
+1400 px by default: at that width the tables become stacked cards (each row
+carries its own labels) rather than a squeezed grid, which is a layout nobody
+sees on a laptop. Checked 2026-11-19 on the board, queue, a program page and
+Settings: the sidebar becomes a Menu button, the queue list and the program
+header stack, and Settings' platform table turns into one labelled block per
+platform.
