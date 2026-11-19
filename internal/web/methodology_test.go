@@ -2,15 +2,21 @@ package web
 
 import (
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 )
 
-// The methodology page is written twice, once per language, and both copies are
-// outside the i18n linter's reach by design. That is how the Chinese page came
-// to be missing the HuntQueue section the English one gained: nothing compared
-// them. The section ids are the shape of the page, so they are what is compared.
-func TestMethodologyPagesHaveTheSameSections(t *testing.T) {
+// A long page may be written out in full per language rather than a sentence at
+// a time (templates/<page>.<lang>.html). Those copies are outside the i18n
+// linter by design, which is how the Chinese methodology page came to be
+// missing the HuntQueue section the English one gained: nothing compared them.
+//
+// The guard walks the mechanism, not one instance: every translated page is
+// compared with its source, by section id, so the next page to get a
+// translation is covered without anyone remembering to add a test.
+func TestTranslatedPagesHaveTheSameSections(t *testing.T) {
 	id := regexp.MustCompile(`id="([a-z0-9-]+)"`)
 	sections := func(path string) map[string]bool {
 		t.Helper()
@@ -24,19 +30,37 @@ func TestMethodologyPagesHaveTheSameSections(t *testing.T) {
 		}
 		return out
 	}
-	en := sections("templates/methodology.html")
-	zh := sections("templates/methodology.zh.html")
-	if len(en) < 10 {
-		t.Fatalf("only %d sections found in the English page: is the parser looking?", len(en))
+	translated, err := filepath.Glob("templates/*.zh.html")
+	if err != nil || len(translated) == 0 {
+		t.Fatalf("no translated pages found (%v): the guard is looking at nothing", err)
 	}
-	for id := range en {
-		if !zh[id] {
-			t.Errorf("the Chinese methodology page has no section %q", id)
+	compared := 0
+	for _, zhPath := range translated {
+		source := strings.TrimSuffix(zhPath, ".zh.html") + ".html"
+		if _, err := os.Stat(source); err != nil {
+			t.Errorf("%s has no source page", zhPath)
+			continue
 		}
+		en, zh := sections(source), sections(zhPath)
+		if len(en) == 0 && len(zh) == 0 {
+			// A page with no section ids has nothing to compare; the count below
+			// makes sure at least one page does, so the parser cannot be blind.
+			continue
+		}
+		compared++
+		for section := range en {
+			if !zh[section] {
+				t.Errorf("%s is missing section %q", zhPath, section)
+			}
+		}
+		for section := range zh {
+			if !en[section] {
+				t.Errorf("%s has section %q that its source does not", zhPath, section)
+			}
+		}
+		t.Logf("%s: %d sections, in step with %s", zhPath, len(zh), source)
 	}
-	for id := range zh {
-		if !en[id] {
-			t.Errorf("the English methodology page has no section %q", id)
-		}
+	if compared == 0 {
+		t.Fatal("no translated page had section ids: the guard is looking at nothing")
 	}
 }
