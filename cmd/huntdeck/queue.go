@@ -28,7 +28,7 @@ func queueCmd(args []string, stdout, stderr io.Writer) int {
 	kind := fs.String("kind", "", "only this kind of asset (domain, wildcard, url, ip, cidr)")
 	paying := fs.Bool("paying", false, "only programs that pay bounties")
 	fresh := fs.Bool("fresh", false, "skip the materialised table and compute now (for timing)")
-	explain := fs.Bool("explain", false, "show what each factor did to the score")
+	explain := fs.Bool("explain", false, "show what each factor did to the score (computes now: the saved table has no factors)")
 	if err := fs.Parse(args); err != nil {
 		if err != nil && args != nil && len(args) > 0 && args[0] == "-h" {
 			return 0
@@ -55,7 +55,11 @@ func queueCmd(args []string, stdout, stderr io.Writer) int {
 	s := store.New(d, time.Now)
 	// The table first: it is what the app keeps up to date, and reading it is one
 	// query instead of the candidate joins.
-	if !*fresh {
+	// The materialised table carries scores, not the factors that made them, so
+	// an explanation has to be computed: --explain implies the same path as
+	// --fresh. Without this the flags parsed, the shortcut returned first, and
+	// "huntdeck queue --explain" printed the plain table.
+	if !*fresh && !*explain {
 		if top, computed, err := s.HuntQueueTop(ctx, store.QueueFilter{Platform: *platform, Kind: *kind, Paying: *paying}, *limit, 0); err == nil && len(top) > 0 && time.Since(computed) < 48*time.Hour {
 			fmt.Fprintf(stdout, "materialised %s ago\n", time.Since(computed).Round(time.Minute))
 			printMaterialised(stdout, top)
