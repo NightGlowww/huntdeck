@@ -73,6 +73,7 @@ func doctorCmd(args []string, stdout, stderr io.Writer) int {
 	}
 
 	doctorProxy(context.Background(), ok, bad)
+	doctorAI(context.Background(), filepath.Join(dir, "huntdeck.db"), ok, warn)
 
 	// The database: presence, schema version against this binary's migrations.
 	dbPath := filepath.Join(dir, "huntdeck.db")
@@ -371,4 +372,26 @@ func doctorProxy(ctx context.Context, ok, bad func(string, ...any)) {
 	}
 	_ = conn.Close()
 	ok("proxy %s is reachable", host)
+}
+
+// doctorAI says whether the optional model is set up and how many readings it has
+// left behind. Silence would be worse: with no endpoint the program pages quietly
+// show only the rules quoted from the policy.
+func doctorAI(ctx context.Context, path string, ok, _ func(string, ...any)) {
+	base, model := strings.TrimSpace(os.Getenv("HUNTDECK_AI_BASE_URL")), strings.TrimSpace(os.Getenv("HUNTDECK_AI_MODEL"))
+	if base == "" || model == "" {
+		// Optional, so not a warning: every page works without it.
+		ok("ai policy extraction: off (optional; needs HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL)")
+		return
+	}
+	d, err := db.Open(ctx, path)
+	if err != nil {
+		return
+	}
+	defer func() { _ = d.Close() }()
+	var n int
+	if err := d.R.QueryRowContext(ctx, "SELECT COUNT(*) FROM program_ai_rules").Scan(&n); err != nil {
+		return
+	}
+	ok("ai policy extraction: on (%s), %d cached reading(s)", model, n)
 }
