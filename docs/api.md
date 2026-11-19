@@ -26,7 +26,9 @@ curl -s -X POST http://127.0.0.1:8080/api/v1/invites/intigriti/<handle>/accept  
 curl -s "http://127.0.0.1:8080/api/v1/programs/hackerone/security"     # everything its page shows
 curl -s "http://127.0.0.1:8080/api/v1/board"     # the hunt board's summary
 curl -s "http://127.0.0.1:8080/api/v1/changes?since=30d&program=hackerone/security"
-curl -sO "http://127.0.0.1:8080/api/v1/programs/hackerone/security/scope.burp.json"   # or scope.zap.context, scope.caido.json
+curl -sO "http://127.0.0.1:8080/api/v1/programs/hackerone/security/scope.burp.json"   # Burp
+curl -sO "http://127.0.0.1:8080/api/v1/programs/hackerone/security/scope.zap.context" # ZAP
+curl -sO "http://127.0.0.1:8080/api/v1/programs/hackerone/security/scope.caido.json"  # Caido
 curl -s "http://127.0.0.1:8080/api/v1/stats?sort=perreport&bounty=1"     # program stats
 curl -s "http://127.0.0.1:8080/api/v1/disclosed?severity=critical&limit=20"  # what others got paid for
 curl -s "http://127.0.0.1:8080/healthz"                                     # {"status":"ok"}; the container healthcheck uses this

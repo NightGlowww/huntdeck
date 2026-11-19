@@ -20,6 +20,7 @@ func TestTemplatesAreTranslated(t *testing.T) {
 	}
 	pat := regexp.MustCompile(`\{\{-?\s*TF?\s+"([^"]*)"`)
 	var missing []string
+	seen := 0
 	err = fs.WalkDir(templateFS, "templates", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -32,6 +33,7 @@ func TestTemplatesAreTranslated(t *testing.T) {
 			return err
 		}
 		for _, m := range pat.FindAllStringSubmatch(string(body), -1) {
+			seen++
 			if !b.HasMsg("zh", m[1]) {
 				missing = append(missing, path+": "+m[1])
 			}
@@ -45,4 +47,10 @@ func TestTemplatesAreTranslated(t *testing.T) {
 		sort.Strings(missing)
 		t.Errorf("%d template string(s) have no zh translation:\n%s", len(missing), strings.Join(missing, "\n"))
 	}
+	// A regex that stopped matching would leave missing empty and pass: the
+	// count is what says the guard is still looking at the templates.
+	if seen < 400 {
+		t.Fatalf("only %d T/TF calls found across the templates: the pattern stopped matching", seen)
+	}
+	t.Logf("checked %d template strings", seen)
 }
