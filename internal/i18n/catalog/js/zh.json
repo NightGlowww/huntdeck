@@ -88,5 +88,15 @@
   "Close a menu, the mobile navigation or a dialog": "关闭菜单、移动端导航或对话框",
   "This list": "本列表",
   "Keyboard": "键盘快捷键",
-  "Open a page: h board, q queue, p programs, t targets, c changes, d disclosed, s settings, a API": "打开页面：h 看板、q 队列、p 程序、t 目标、c 变更、d 公开报告、s 设置、a API"
+  "Open a page: h board, q queue, p programs, t targets, c changes, d disclosed, s settings, a API": "打开页面：h 看板、q 队列、p 程序、t 目标、c 变更、d 公开报告、s 设置、a API",
+  "off: no scheduled polls": "off：不进行定时轮询",
+  "every %s %s": "每 %s %s",
+  "minute": "分钟",
+  "minutes": "分钟",
+  "hour": "小时",
+  "hours": "小时",
+  "day": "天",
+  "days": "天",
+  "not an interval: try 30m, 6h, 1d or off": "不是有效间隔：试试 30m、6h、1d 或 off",
+  "%s is faster than the %s floor": "%s 快于 %s 的下限"
 }
