@@ -8,7 +8,7 @@
     <form id="llm-save" method="post" action="/settings/accounts" autocomplete="off">
       <input type="hidden" name="group" value="ai">
     </form>
-    <form id="llm-test" method="post" action="/llm/test"></form>
+    <form id="llm-test" method="post" action="/llm/test" data-busy="{{T "Asking…"}}" data-stay-busy></form>
     <div class="acct-sec">{{range .Fields}}{{template "acct-field" .}}{{end}}</div>
     <div class="llm-actions">
       <button type="submit" form="llm-save" class="small">{{T "Save"}}</button>
