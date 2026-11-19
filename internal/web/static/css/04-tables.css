@@ -85,3 +85,10 @@ col.w-you { width: 112px; }
    two lines ("vidaxl-services-open-bug-bounty-program") otherwise ends with the
    platform jammed onto its second line, reading as part of the name. */
 .prog-platform { display: block; margin-top: 1px; }
+
+/* A long list keeps its column headers. The wrapper scrolls on its own and the
+   header sticks inside it: before this, 2000 rows scrolled the headings 650px
+   off screen and nothing said what a column was. Bounded so the page does not
+   become a 11000px strip. */
+.table-wrap.tall { max-height: calc(100vh - 16rem); overflow: auto; }
+.table-wrap.tall thead th { position: sticky; top: 0; z-index: 1; background: var(--surface); }
