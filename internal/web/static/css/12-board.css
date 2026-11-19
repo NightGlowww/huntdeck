@@ -193,7 +193,11 @@ td.acts .open-ext { width: 28px; height: 28px; }
 .qstrip { display: grid; gap: 6px; margin: 0; padding: 10px 16px 14px; list-style: none; }
 .qstrip li { display: grid; grid-template-columns: 56px minmax(120px, 200px) minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; align-items: baseline; }
 .qstrip .qs-score { font-variant-numeric: tabular-nums; font-weight: 650; color: var(--accent); }
-.qstrip code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A grid item stretches to its column, so the pill was as wide as the
+   column whatever the value was: short targets wore a long empty pill and
+   long ones were cut at the column edge rather than at their own. */
+.qstrip code { justify-self: start; max-width: 100%; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; }
 .qstrip .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 900px) {
   .qstrip li { grid-template-columns: 48px minmax(0, 1fr); }
@@ -201,4 +205,11 @@ td.acts .open-ext { width: 28px; height: 28px; }
   /* A phone has no hover and no second look: let the reasons wrap instead of
      ending in an ellipsis the reader cannot open. */
   .qstrip .muted { white-space: normal; overflow: visible; }
+}
+
+/* A long URL is one unbreakable token: at phone width it has to wrap inside its
+   cell rather than spill out of it. This belongs here, after the rule above it,
+   because the same selector in 10-responsive.css is overridden by file order. */
+@media (max-width: 420px) {
+  table.surface .tv { white-space: normal; max-width: none; overflow-wrap: anywhere; }
 }

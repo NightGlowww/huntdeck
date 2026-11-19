@@ -89,6 +89,7 @@
 @media (max-width: 420px) {
   .feed .view, td .view { white-space: normal; }
   .feed .what { display: block; }
-  table.surface .tv { white-space: normal; max-width: none; }
+  /* table.surface .tv is reset in 12-board.css, which loads after this file:
+     the rule that used to sit here never applied. Its replacement lives there. */
   .picks .why, .picks .why b { white-space: normal; }
 }

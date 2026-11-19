@@ -143,6 +143,9 @@ func TestHuntBoard(t *testing.T) {
 	}
 
 	_, body := e.do(c, http.MethodGet, "/?bounty=0&kind=wildcards", nil, nil)
+	// A long URL carries zero-width break opportunities; the assertions
+	// below read the text, not the wrapping.
+	body = strings.ReplaceAll(body, "\u200b", "")
 	// Program comes first, as on the Programs page.
 	if p, tg := strings.Index(body, `<th class="c-prog" data-col-fixed>`), strings.Index(body, `<th class="c-target"`); p < 0 || p > tg {
 		t.Errorf("program isn't the first column: program %d, target %d", p, tg)
@@ -267,6 +270,7 @@ func TestHuntBoardNewToYou(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, body := e.do(c, http.MethodGet, "/", nil, nil)
+	body = strings.ReplaceAll(body, "\u200b", "") // the wrapping, not the text
 	fresh := body[strings.Index(body, `id="fresh"`):]
 	fresh = fresh[:strings.Index(fresh, "</section>")]
 	if n := strings.Count(fresh, ".initech.example</div>"); n != 3 {
