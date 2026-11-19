@@ -38,6 +38,11 @@ func (n *Notifier) post(ctx context.Context, target string, body []byte, header 
 	for k, v := range header {
 		req.Header[k] = v
 	}
+	return n.do(req)
+}
+
+// do sends a prepared request and reads the reply.
+func (n *Notifier) do(req *http.Request) ([]byte, error) {
 	res, err := n.Client.Do(req)
 	if err != nil {
 		var ue *url.Error
@@ -123,4 +128,72 @@ func (n *Notifier) sendWebhook(ctx context.Context, c Config, kind string, body 
 	}
 	_, err := n.post(ctx, c.URL, body, h)
 	return err
+}
+
+// postForm sends a form body and reads the reply, keeping secrets out of
+// errors (ServerChan takes url-encoded fields).
+func (n *Notifier) postForm(ctx context.Context, target string, form url.Values) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, strings.NewReader(form.Encode()))
+	if err != nil {
+		return nil, &sendError{msg: "bad address", permanent: true}
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", "HuntDeck")
+	return n.do(req)
+}
+
+// sendBark pushes one message to an iOS device through Bark or a
+// self-hosted bark-server: POST {server}/push with the device key.
+func (n *Notifier) sendBark(ctx context.Context, cfg Config, text string) error {
+	group := strings.TrimSpace(cfg.Group)
+	if group == "" {
+		group = "HuntDeck"
+	}
+	payload := map[string]string{
+		"device_key": cfg.DeviceKey,
+		"title":      "HuntDeck",
+		"body":       text,
+		"group":      group,
+	}
+	if s := strings.TrimSpace(cfg.Sound); s != "" {
+		payload["sound"] = s
+	}
+	if l := strings.TrimSpace(cfg.Level); l != "" {
+		payload["level"] = l
+	}
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return &sendError{msg: "bad message", permanent: true}
+	}
+	reply, err := n.post(ctx, serverBase(cfg.Server, "https://api.day.app")+"/push", body, nil)
+	if err != nil {
+		return err
+	}
+	var r struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	if json.Unmarshal(reply, &r) == nil && r.Code != 0 && r.Code != 200 {
+		return &sendError{msg: "Bark refused it: " + truncate(strings.TrimSpace(r.Message), 120), permanent: r.Code == 400}
+	}
+	return nil
+}
+
+// sendServerChan pushes one message to WeChat through ServerChan (Server酱):
+// POST {server}/{SendKey}.send with title and desp (markdown).
+func (n *Notifier) sendServerChan(ctx context.Context, cfg Config, text string) error {
+	base := serverBase(cfg.Server, "https://sctapi.ftqq.com")
+	form := url.Values{"title": {"HuntDeck"}, "desp": {text}, "tags": {"HuntDeck"}}
+	reply, err := n.postForm(ctx, base+"/"+url.PathEscape(cfg.SendKey)+".send", form)
+	if err != nil {
+		return err
+	}
+	var r struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	if json.Unmarshal(reply, &r) == nil && r.Code != 0 {
+		return &sendError{msg: "ServerChan refused it: " + truncate(strings.TrimSpace(r.Message), 120)}
+	}
+	return nil
 }

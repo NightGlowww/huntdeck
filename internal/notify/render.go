@@ -193,6 +193,17 @@ func (r renderer) event(e Event) string {
 	return strings.Join(lines, "\n")
 }
 
+// Text renders a card's words in a language, with arguments; nil keeps them
+// English (deliveries to Discord, Telegram and webhooks are English).
+type Text func(msg string, args ...any) string
+
+func text(tr Text, msg string, args ...any) string {
+	if tr == nil {
+		return fmt.Sprintf(msg, args...)
+	}
+	return tr(msg, args...)
+}
+
 // Card is an event's parts as plain text, the same in every chat message
 // and on the web page's examples.
 type Card struct {
@@ -211,109 +222,118 @@ type CardAsset struct {
 	Notes      string // "wildcard, no bounty"
 }
 
-// Card returns e's parts.
-func (e Event) Card() Card {
-	c := Card{Emoji: emoji[e.Kind], Title: title(e), Platform: platformLabel(e.Platform), Detail: e.Detail}
+// Card returns e's parts, in English.
+func (e Event) Card() Card { return e.CardIn(nil) }
+
+// CardIn returns e's parts with their words from tr (the web page's
+// language); tr nil is English.
+func (e Event) CardIn(tr Text) Card {
+	c := Card{Emoji: emoji[e.Kind], Title: title(e, tr), Platform: platformLabel(e.Platform), Detail: e.Detail}
 	if p := e.Program; p != nil {
 		c.Platform = platformLabel(p.Platform)
 		if p.Bounty {
 			b := "BBP"
 			if p.TopBounty != nil && *p.TopBounty > 0 {
-				b += ", up to " + humanize.MoneyFull(*p.TopBounty, p.Currency)
+				b = text(tr, "BBP, up to %s", humanize.MoneyFull(*p.TopBounty, p.Currency))
 			}
 			c.About = append(c.About, b)
 		} else {
-			c.About = append(c.About, "VDP")
+			c.About = append(c.About, text(tr, "VDP"))
 		}
 		if p.Private {
-			c.About = append(c.About, "private")
+			c.About = append(c.About, text(tr, "private"))
 		}
 		if p.HuntScore != nil {
-			c.About = append(c.About, fmt.Sprintf("HuntScore %.0f", *p.HuntScore))
+			c.About = append(c.About, text(tr, "HuntScore %.0f", *p.HuntScore))
 		}
 	}
 	for i, a := range e.Assets {
 		if i == assetsShown {
 			break
 		}
-		c.Assets = append(c.Assets, CardAsset{a.Identifier, strings.Join(assetNotes(e.Kind, a), ", ")})
+		c.Assets = append(c.Assets, CardAsset{a.Identifier, strings.Join(assetNotes(e.Kind, a, tr), ", ")})
 	}
 	c.More = e.count() - len(c.Assets)
 	return c
 }
 
 // title is an event's headline.
-func title(e Event) string {
+func title(e Event, tr Text) string {
 	n := e.count()
+	assets := func() string {
+		if n == 1 {
+			return text(tr, "%d asset", n)
+		}
+		return text(tr, "%d assets", n)
+	}
 	switch e.Kind {
 	case EventInvite:
-		return "New private invite"
+		return text(tr, "New private invite")
 	case EventLaunch:
-		return "New program"
+		return text(tr, "New program")
 	case EventScopeAdded:
-		return plural(n, "new in-scope asset", "new in-scope assets")
+		if n == 1 {
+			return text(tr, "%d new in-scope asset", n)
+		}
+		return text(tr, "%d new in-scope assets", n)
 	case EventScopeRemoved:
-		return plural(n, "asset", "assets") + " taken out of scope"
+		return text(tr, "%s taken out of scope", assets())
 	case EventScopeOut:
-		return "Out-of-scope list changed (" + plural(n, "asset", "assets") + ")"
+		return text(tr, "Out-of-scope list changed (%s)", assets())
 	case EventScopeChanged:
-		return plural(n, "scope entry", "scope entries") + " edited"
+		if n == 1 {
+			return text(tr, "%d scope entry edited", n)
+		}
+		return text(tr, "%d scope entries edited", n)
 	case EventReopened:
-		return "Reopened"
+		return text(tr, "Reopened")
 	case EventPaused:
 		if e.New == "closed" {
-			return "Closed"
+			return text(tr, "Closed")
 		}
-		return "Paused"
+		return text(tr, "Paused")
 	case EventRemoved:
-		return "No longer listed"
+		return text(tr, "No longer listed")
 	case EventBountyRaised:
-		return "Bounties raised"
+		return text(tr, "Bounties raised")
 	case EventRewardsChanged:
-		return "Bounty table changed"
+		return text(tr, "Bounty table changed")
 	case EventPolicyChanged:
-		return "Rules edited"
+		return text(tr, "Rules edited")
 	case EventAnnouncement:
-		return "Announcement"
+		return text(tr, "Announcement")
 	case EventPlatformProblem:
-		return "Polls failing"
+		return text(tr, "Polls failing")
 	case EventPlatformRecovered:
-		return "Polls working again"
+		return text(tr, "Polls working again")
 	case EventTest:
-		return "Test message: this channel works"
+		return text(tr, "Test message: this channel works")
 	}
 	return e.Kind
 }
 
 // assetNotes are what to say about an asset in an event of kind.
-func assetNotes(kind string, a Asset) []string {
+func assetNotes(kind string, a Asset, tr Text) []string {
 	var n []string
 	if a.Type == scope.AssetWildcard {
-		n = append(n, "wildcard")
+		n = append(n, text(tr, "wildcard"))
 	}
 	if a.NewRoot {
-		n = append(n, "new root domain")
+		n = append(n, text(tr, "new root domain"))
 	}
 	if kind == EventScopeOut {
 		if a.InScope {
-			n = append(n, "now in scope")
+			n = append(n, text(tr, "now in scope"))
 		} else {
-			n = append(n, "out of scope")
+			n = append(n, text(tr, "out of scope"))
 		}
 	}
 	if kind == EventScopeAdded && !a.Bounty {
-		n = append(n, "no bounty")
+		n = append(n, text(tr, "no bounty"))
 	} else if kind == EventScopeAdded && a.MaxSeverity != "" && !strings.EqualFold(a.MaxSeverity, "none") {
-		n = append(n, "up to "+strings.ToLower(a.MaxSeverity))
+		n = append(n, text(tr, "up to %s", strings.ToLower(a.MaxSeverity)))
 	}
 	return n
-}
-
-func plural(n int, one, many string) string {
-	if n == 1 {
-		return "1 " + one
-	}
-	return strconv.Itoa(n) + " " + many
 }
 
 // WebhookPayloadVersion is the webhook JSON format's version.
@@ -337,4 +357,40 @@ func webhookBody(kind string, events []Event, at time.Time, base string) ([]byte
 		SentAt  time.Time `json:"sent_at"`
 		Events  []Event   `json:"events"`
 	}{WebhookPayloadVersion, kind, at.UTC(), out})
+}
+
+// PreviewText is what one message of these events would look like in a
+// channel kind's own format: the settings form shows it for the kinds whose
+// shape matters (Bark's short notification, ServerChan's Markdown article),
+// where the generic cards would not tell the whole story.
+func PreviewText(kind string, events []Event, at time.Time, base string, loc *time.Location) (string, int) {
+	var st style
+	var limit int
+	switch kind {
+	case store.NotifyBark:
+		st, limit = plainStyle{}, barkLimit
+	case store.NotifyServerChan:
+		st, limit = discordStyle{}, serverChanLimit
+	default:
+		return "", 0
+	}
+	if len(events) == 0 {
+		return "", 0
+	}
+	parts := renderer{st: st, base: base, loc: loc}.parts(store.OutboxPoll, events, at, limit)
+	return strings.Join(parts, "\n\n"), len(parts)
+}
+
+// plainStyle is a channel that shows plain text (Bark): no markup, and a
+// link keeps its address in brackets so it stays usable.
+type plainStyle struct{}
+
+func (plainStyle) esc(s string) string  { return s }
+func (plainStyle) bold(s string) string { return s }
+func (plainStyle) code(s string) string { return s }
+func (plainStyle) link(text, href string) string {
+	if href == "" || strings.Contains(text, href) {
+		return text
+	}
+	return text + " (" + href + ")"
 }

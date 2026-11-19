@@ -102,6 +102,14 @@ type Config struct {
 	Token  string `json:"token,omitempty"`   // Telegram bot token
 	ChatID string `json:"chat_id,omitempty"` // Telegram chat
 	Secret string `json:"secret,omitempty"`  // webhook signing secret, optional
+	// Server is a Bark or ServerChan base address ("https://api.day.app",
+	// "https://sctapi.ftqq.com"); "" uses theirs.
+	Server    string `json:"server,omitempty"`
+	DeviceKey string `json:"device_key,omitempty"` // Bark device key
+	Group     string `json:"group,omitempty"`      // Bark notification group (default HuntDeck)
+	Sound     string `json:"sound,omitempty"`      // Bark sound name (its default when empty)
+	Level     string `json:"level,omitempty"`      // Bark interruption level: active, timeSensitive or passive
+	SendKey   string `json:"send_key,omitempty"`   // ServerChan SendKey
 }
 
 // ParseConfig reads a stored config.
@@ -137,6 +145,29 @@ func (c Config) Validate(kind string) error {
 		if !telegramChat.MatchString(c.ChatID) {
 			return errors.New("the Telegram chat ID should be a number (negative for groups) or @channelname")
 		}
+	case store.NotifyBark:
+		if err := checkServer(c.Server); err != nil {
+			return err
+		}
+		if !barkDeviceKey.MatchString(c.DeviceKey) {
+			return errors.New("the Bark device key is the last part of the push address (https://api.day.app/<key>/…)")
+		}
+		if len([]rune(c.Group)) > 40 {
+			return errors.New("the Bark group is at most 40 characters")
+		}
+		if len([]rune(c.Sound)) > 40 {
+			return errors.New("the Bark sound name is at most 40 characters")
+		}
+		if c.Level != "" && c.Level != "active" && c.Level != "timeSensitive" && c.Level != "passive" {
+			return errors.New("the Bark level is active, timeSensitive or passive")
+		}
+	case store.NotifyServerChan:
+		if err := checkServer(c.Server); err != nil {
+			return err
+		}
+		if !serverChanKey.MatchString(c.SendKey) {
+			return errors.New("the ServerChan SendKey looks like SCT123456T… (from sct.ftqq.com)")
+		}
 	case store.NotifyWebhook:
 		u, err := url.Parse(c.URL)
 		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" || u.User != nil {
@@ -157,6 +188,10 @@ func (c Config) Masked(kind string) string {
 		if i := strings.LastIndex(c.URL, "/"); i > 0 {
 			return c.URL[:i] + "/…"
 		}
+	case store.NotifyBark:
+		return "device …" + tail(c.DeviceKey)
+	case store.NotifyServerChan:
+		return "SendKey …" + tail(c.SendKey)
 	case store.NotifyWebhook:
 		if u, err := url.Parse(c.URL); err == nil {
 			return u.Scheme + "://" + u.Host + "/…"
@@ -189,4 +224,41 @@ func LastSlot(digestAt string, now time.Time, loc *time.Location) time.Time {
 		slot = time.Date(local.Year(), local.Month(), local.Day()-1, h, m, 0, 0, loc)
 	}
 	return slot.UTC()
+}
+
+var (
+	barkDeviceKey = regexp.MustCompile(`^[A-Za-z0-9_-]{6,120}$`)
+	serverChanKey = regexp.MustCompile(`^[A-Za-z0-9_-]{8,80}$`)
+)
+
+// checkServer checks an optional base address ("https://api.day.app").
+func checkServer(server string) error {
+	if strings.TrimSpace(server) == "" {
+		return nil
+	}
+	u, err := url.Parse(server)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" || u.User != nil {
+		return errors.New("the server address should be an http or https address, like https://api.day.app")
+	}
+	return nil
+}
+
+// serverBase is a channel's base address, or fallback when it has none.
+func serverBase(server, fallback string) string {
+	server = strings.TrimRight(strings.TrimSpace(server), "/")
+	if server == "" {
+		return fallback
+	}
+	if !strings.Contains(server, "://") {
+		server = "https://" + server
+	}
+	return server
+}
+
+// tail is the last four characters of a secret, for Masked.
+func tail(s string) string {
+	if len(s) <= 4 {
+		return "…"
+	}
+	return s[len(s)-4:]
 }

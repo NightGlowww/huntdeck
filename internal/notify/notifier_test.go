@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -352,5 +353,134 @@ func TestOwnEditsAreNotNotified(t *testing.T) {
 	runs, err := e.store.UnnotifiedRuns(ctx)
 	if err != nil || len(runs) != 0 {
 		t.Errorf("runs left to notify: %v, %v", runs, err)
+	}
+}
+
+// Bark takes a JSON POST to {server}/push with the device key and the text;
+// ServerChan takes a form POST to {server}/{SendKey}.send with title and desp.
+func TestBarkAndServerChanSends(t *testing.T) {
+	sink := newSink(t)
+	n := &Notifier{Client: sink.srv.Client(), Log: slog.New(slog.DiscardHandler)}
+	ctx := context.Background()
+
+	if err := n.sendBark(ctx, Config{Server: sink.srv.URL, DeviceKey: "aBcD123456"}, "hello bark"); err != nil {
+		t.Fatalf("bark: %v", err)
+	}
+	if got := sink.paths[0]; got != "/push" {
+		t.Errorf("bark path = %q", got)
+	}
+	var barkBody map[string]string
+	if err := json.Unmarshal([]byte(sink.got()[0]), &barkBody); err != nil {
+		t.Fatal(err)
+	}
+	if barkBody["device_key"] != "aBcD123456" || barkBody["body"] != "hello bark" || barkBody["title"] != "HuntDeck" {
+		t.Errorf("bark body = %v", barkBody)
+	}
+	if barkBody["group"] != "HuntDeck" {
+		t.Errorf("bark group defaults to %q", barkBody["group"])
+	}
+	if err := n.sendBark(ctx, Config{Server: sink.srv.URL, DeviceKey: "aBcD123456", Group: "Acme", Sound: "alarm", Level: "timeSensitive"}, "second"); err != nil {
+		t.Fatalf("bark with a group: %v", err)
+	}
+	var withGroup map[string]string
+	if err := json.Unmarshal([]byte(sink.got()[1]), &withGroup); err != nil {
+		t.Fatal(err)
+	}
+	if withGroup["group"] != "Acme" {
+		t.Errorf("bark group = %q", withGroup["group"])
+	}
+	if withGroup["sound"] != "alarm" || withGroup["level"] != "timeSensitive" {
+		t.Errorf("bark sound/level = %q/%q", withGroup["sound"], withGroup["level"])
+	}
+
+	if err := n.sendServerChan(ctx, Config{Server: sink.srv.URL, SendKey: "SCT123456Tabcdef"}, "hello wechat"); err != nil {
+		t.Fatalf("serverchan: %v", err)
+	}
+	if got := sink.paths[2]; got != "/SCT123456Tabcdef.send" {
+		t.Errorf("serverchan path = %q", got)
+	}
+	if ct := sink.headers[2].Get("Content-Type"); !strings.HasPrefix(ct, "application/x-www-form-urlencoded") {
+		t.Errorf("serverchan content type = %q", ct)
+	}
+	if form, err := url.ParseQuery(sink.got()[2]); err != nil || form.Get("desp") != "hello wechat" || form.Get("title") != "HuntDeck" {
+		t.Errorf("serverchan form = %v (%v)", form, err)
+	}
+	if form, _ := url.ParseQuery(sink.got()[2]); form.Get("tags") != "HuntDeck" {
+		t.Errorf("serverchan tags = %q", form.Get("tags"))
+	}
+}
+
+func TestBarkAndServerChanValidation(t *testing.T) {
+	cases := []struct {
+		name string
+		cfg  Config
+		kind string
+		ok   bool
+	}{
+		{"bark", Config{DeviceKey: "aBcD123456"}, store.NotifyBark, true},
+		{"bark with server", Config{DeviceKey: "aBcD123456", Server: "https://bark.example.com"}, store.NotifyBark, true},
+		{"bark without key", Config{}, store.NotifyBark, false},
+		{"bark with a slashy key", Config{DeviceKey: "a/b"}, store.NotifyBark, false},
+		{"bark with a bad server", Config{DeviceKey: "aBcD123456", Server: "ftp://x"}, store.NotifyBark, false},
+		{"bark with a bad level", Config{DeviceKey: "aBcD123456", Level: "loud"}, store.NotifyBark, false},
+		{"bark with a good level", Config{DeviceKey: "aBcD123456", Level: "passive"}, store.NotifyBark, true},
+		{"serverchan", Config{SendKey: "SCT123456Tabcdef"}, store.NotifyServerChan, true},
+		{"serverchan without key", Config{}, store.NotifyServerChan, false},
+	}
+	for _, c := range cases {
+		if err := c.cfg.Validate(c.kind); (err == nil) != c.ok {
+			t.Errorf("%s: Validate = %v, want ok=%v", c.name, err, c.ok)
+		}
+	}
+	if got := (Config{DeviceKey: "aBcD123456"}).Masked(store.NotifyBark); !strings.HasSuffix(got, "3456") || strings.Contains(got, "aBcD") {
+		t.Errorf("bark masked = %q", got)
+	}
+}
+
+// A poll's change reaches a Bark device and a ServerChan channel through the
+// same outbox as the other kinds.
+func TestBarkAndServerChanDeliveries(t *testing.T) {
+	e := newEnv(t)
+	bark, sc := newSink(t), newSink(t)
+	e.channel("phone", store.NotifyBark, Config{Server: bark.srv.URL, DeviceKey: "aBcD123456"}, DefaultRules(), true, "")
+	e.channel("wechat", store.NotifyServerChan, Config{Server: sc.srv.URL, SendKey: "SCT123456Tabcdef"}, DefaultRules(), true, "")
+
+	e.fake.SetPrograms(prog("acme", false))
+	e.fake.SetScope("acme", entry("1", "*.acme.example"))
+	e.poll() // the first import is a baseline: nothing to tell
+	e.tick()
+	if len(bark.got())+len(sc.got()) != 0 {
+		t.Fatal("the first import notified")
+	}
+
+	e.fake.SetPrograms(prog("acme", false), prog("secret", true))
+	e.fake.SetScope("acme", entry("1", "*.acme.example"), entry("2", "*.new-root.example"))
+	e.fake.SetScope("secret", entry("3", "app.secret.example"))
+	e.poll()
+	e.tick()
+
+	if len(bark.got()) == 0 {
+		t.Fatal("bark got nothing")
+	}
+	if bark.paths[0] != "/push" {
+		t.Errorf("bark path = %q", bark.paths[0])
+	}
+	var body map[string]string
+	if err := json.Unmarshal([]byte(bark.got()[0]), &body); err != nil {
+		t.Fatal(err)
+	}
+	if body["device_key"] != "aBcD123456" || !strings.Contains(body["body"], "new in-scope") {
+		t.Errorf("bark body = %q", bark.got()[0])
+	}
+
+	if len(sc.got()) == 0 {
+		t.Fatal("serverchan got nothing")
+	}
+	if !strings.HasSuffix(sc.paths[0], "/SCT123456Tabcdef.send") {
+		t.Errorf("serverchan path = %q", sc.paths[0])
+	}
+	form, err := url.ParseQuery(sc.got()[0])
+	if err != nil || !strings.Contains(form.Get("desp"), "new in-scope") {
+		t.Errorf("serverchan desp = %q", form.Get("desp"))
 	}
 }

@@ -346,6 +346,12 @@ func (n *Notifier) deliver(ctx context.Context, c store.NotifyChannel, kind stri
 	case store.NotifyTelegram:
 		parts = renderer{st: telegramStyle{}, base: base, loc: loc}.parts(kind, events, at, telegramLimit)
 		send = n.sendTelegram
+	case store.NotifyBark:
+		parts = renderer{st: plainStyle{}, base: base, loc: loc}.parts(kind, events, at, barkLimit)
+		send = n.sendBark
+	case store.NotifyServerChan:
+		parts = renderer{st: discordStyle{}, base: base, loc: loc}.parts(kind, events, at, serverChanLimit)
+		send = n.sendServerChan
 	default:
 		return 0, &sendError{msg: "unknown channel kind " + c.Kind, permanent: true}
 	}
@@ -372,3 +378,10 @@ func (n *Notifier) Test(ctx context.Context, c store.NotifyChannel) error {
 	_, err := n.deliver(ctx, c, store.OutboxTest, []Event{e}, e.At, 0, n.baseURL(ctx), n.location(ctx))
 	return err
 }
+
+const (
+	// barkLimit is what an iOS notification shows without a "more" tap;
+	// serverChanLimit is WeChat's article body, which Markdown fills.
+	barkLimit       = 3000
+	serverChanLimit = 8000
+)
