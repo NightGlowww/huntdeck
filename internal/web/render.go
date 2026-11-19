@@ -34,9 +34,11 @@ var funcs = template.FuncMap{
 	// softBreak lets a long URL wrap at its own punctuation instead of
 	// anywhere: a phone shows "cybersource.c / om" without it.
 	"softBreak": softBreak,
-	"ago":       ago,
-	"until":     until,
-	"agoPtr":    func(t *time.Time) string { return agoPtr(t) },
+	// pojiaLinks turns a POJIA answer into navigable HTML.
+	"pojiaLinks": pojiaLinks,
+	"ago":        ago,
+	"until":      until,
+	"agoPtr":     func(t *time.Time) string { return agoPtr(t) },
 	// day shows a UTC day bucket (daily snapshots, score history) as is.
 	"day": func(t time.Time) string { return fmtTime(t, time.UTC, "2006-01-02") },
 	// Money shows compact ("$8.3k"); the *Full funcs give it to the unit
