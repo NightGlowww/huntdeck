@@ -1046,3 +1046,44 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
 	});
 })();
 
+
+// A title is readable by a mouse and mostly invisible to a keyboard: focus a
+// button and the hint never appears. This shows the same text under whatever
+// takes focus, clamped to the window, and hides it again on blur, scroll or
+// Escape. The title stays where it is, so screen readers keep reading it.
+(() => {
+	let tip = null;
+	let owner = null;
+	const hide = () => {
+		if (tip) tip.remove();
+		tip = null;
+		owner = null;
+	};
+	const show = (el) => {
+		const text = el.getAttribute("title");
+		if (!text) return;
+		hide();
+		tip = document.createElement("div");
+		tip.className = "focus-tip";
+		tip.setAttribute("role", "tooltip");
+		tip.textContent = text;
+		document.body.append(tip);
+		owner = el;
+		const r = el.getBoundingClientRect();
+		const w = tip.offsetWidth;
+		const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+		let top = r.bottom + 8;
+		if (top + tip.offsetHeight > innerHeight - 8) top = Math.max(8, r.top - tip.offsetHeight - 8);
+		tip.style.left = left + "px";
+		tip.style.top = top + "px";
+	};
+	document.addEventListener("focusin", (e) => {
+		const el = e.target;
+		if (el instanceof Element && el.hasAttribute("title")) show(el);
+		else hide();
+	});
+	document.addEventListener("focusout", hide);
+	document.addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); });
+	addEventListener("scroll", hide, { passive: true });
+})();
+

@@ -203,3 +203,9 @@
 
 
 
+
+/* The focus tooltip: same text a title shows on hover, for a keyboard. */
+.focus-tip { position: fixed; z-index: 60; max-width: 320px; padding: 7px 10px; border-radius: 7px;
+  background: var(--text); color: var(--bg); font-size: calc(12px * var(--fs, 1)); line-height: 1.4;
+  pointer-events: none; box-shadow: 0 6px 20px rgb(0 0 0 / .25); }
+

@@ -23,9 +23,9 @@
         <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="enabled_{{$p.Name}}" value="1" form="sched" aria-label="Enable {{$p.Name}}"{{if $p.Enabled}} checked{{end}}> <span class="muted small">{{if $p.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
         <td class="c-wide">{{if $p.SignIn}}<div class="signins">{{range $p.SignIn}}{{template "signin" .}}{{end}}</div>{{else}}<span class="zero">—</span>{{end}}</td>
         <td data-label="Quick poll"><div class="pollc"><input type="text" class="interval" name="quick_{{$p.Name}}" value="{{interval $p.Quick}}" form="sched" aria-label="{{TF "%s quick poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
-          title="{{T "every"}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Quick)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "quick")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}</div></td>
+          title="{{TF "every %s" (interval $p.Quick)}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Quick)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "quick")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}</div></td>
         <td data-label="Full poll"><div class="pollc"><input type="text" class="interval" name="full_{{$p.Name}}" value="{{interval $p.Full}}" form="sched" aria-label="{{TF "%s full poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
-          title="{{T "every"}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Full)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "full")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}</div></td>
+          title="{{TF "every %s" (interval $p.Full)}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Full)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "full")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}</div></td>
         <td class="c-side num">
           {{if $p.Enabled}}<form method="post" action="/settings/poll" class="inline" data-busy="{{T "Polling…"}}">
             <input type="hidden" name="platform" value="{{$p.Name}}">
