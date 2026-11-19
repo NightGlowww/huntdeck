@@ -50,7 +50,13 @@ const defaultPages = [
   ['settings', '/settings'],
 ];
 const pages = flag('pages', '')
-  ? flag('pages', '').split(',').map((p) => p.split('=')).map(([name, path]) => [name.trim(), path.trim()])
+  ? flag('pages', '').split(',').map((p) => {
+      // Split on the first = only: a path may carry its own query (?tab=policy),
+      // and splitting on every = dropped it, so the audit photographed the
+      // default tab and filed it under the name it was given.
+      const i = p.indexOf('=');
+      return [p.slice(0, i).trim(), p.slice(i + 1).trim()];
+    })
   : defaultPages;
 const themes = themeArg === 'both' ? ['light', 'dark'] : [themeArg];
 
