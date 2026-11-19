@@ -10,7 +10,7 @@ GOLANGCI_LINT ?= golangci-lint
 # e.g. DOCKER_BUILD_FLAGS=--network=host on hosts without a docker0 bridge
 DOCKER_BUILD_FLAGS ?=
 
-.PHONY: build test lint vuln check docker release-image run fmt tidy clean i18n
+.PHONY: build test lint vuln check gates docker release-image run fmt tidy clean i18n
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/huntdeck ./cmd/huntdeck
@@ -44,7 +44,7 @@ verify-prod: ## ask a host which build it runs (see docs/deploy.md)
 	@test -n "$(HOST)" || { echo 'usage: make verify-prod HOST=<ssh-host> [EXPECT=<version>]' >&2; exit 2; }
 	scripts/deploy.sh --host $(HOST) --check $(if $(EXPECT),--expect $(EXPECT))
 
-check: fmtcheck lint test vuln i18n
+check: fmtcheck lint test vuln i18n gates
 
 docker:
 	docker build $(DOCKER_BUILD_FLAGS) --build-arg VERSION=$(VERSION) -t huntdeck:dev .
@@ -82,3 +82,6 @@ tidy:
 
 clean:
 	rm -rf bin
+
+gates: ## prove the shell gates fail when they should (no host, no data)
+	@scripts/gates.sh

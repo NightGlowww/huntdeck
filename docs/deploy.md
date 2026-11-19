@@ -410,5 +410,10 @@ listed with the way it goes red, and the way it was proved.
 | `TestEverySmokeMarkerIsItsOwnPage` | a page stops carrying its `data-page`, or two pages share one | this test |
 | `huntdeck backtest` | nothing: it reports how many cuts exist and what they show | by design |
 
+Two of the shell gates are proved on every `make check`: `make gates` points
+`bench --check` at a closed port and `smoke` at a server that answers 200 to
+everything with no HuntDeck markup, and insists both say so. A gate that
+passes those two is no longer a guess.
+
 Rule for anything new: write down the way it fails, and make it fail once on
 purpose before trusting it.
