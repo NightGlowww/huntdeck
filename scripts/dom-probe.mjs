@@ -10,6 +10,8 @@
 //   --base URL       where HuntDeck is (default http://127.0.0.1:8080)
 //   --path PATH      the page to open (default /)
 //   --js EXPRESSION  evaluated in the page after load and a scroll, printed as JSON
+//   --focus          instead of --js: check every focusable control shows a focus
+//                    ring when focused, and exit 1 when one does not
 //   --scroll N       scroll the window N pixels before evaluating (default 0)
 //   --width N        viewport width (default 1400)
 //   --chrome PATH    the browser (default Chrome on macOS, chromium elsewhere)
@@ -142,6 +144,23 @@ if (scroll) {
   await evaluate('window.scrollTo(0, ' + scroll + '); document.documentElement.scrollTop');
   await sleep(250);
 }
-console.log(JSON.stringify(await evaluate(js), null, 2));
+// A disabled control cannot take focus, so its style never changes: counting
+// it as missing a ring is an artefact of the check, not a defect.
+const FOCUS_CHECK = `(() => {
+  const els = [...document.querySelectorAll("a[href], button:not([disabled]), input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])")]
+    .filter((el) => !el.disabled && el.offsetParent !== null);
+  const style = (el) => { const s = getComputedStyle(el); return s.outlineStyle + "|" + s.outlineWidth + "|" + s.boxShadow; };
+  const missing = [];
+  for (const el of els) {
+    el.blur(); const b = style(el); el.focus(); const a = style(el);
+    if (a === b) missing.push({ tag: el.tagName, cls: (el.className || '').toString().slice(0, 24), text: (el.textContent || '').trim().slice(0, 24) });
+  }
+  if (document.activeElement) document.activeElement.blur();
+  return { focusable: els.length, withoutVisibleFocus: missing.length, samples: missing.slice(0, 8) };
+})()`;
+const wantFocus = args.includes('--focus');
+const answer = await evaluate(wantFocus ? FOCUS_CHECK : js);
+console.log(JSON.stringify(answer, null, 2));
+if (wantFocus && answer && answer.withoutVisibleFocus > 0) process.exitCode = 1;
 chrome.kill();
 ws.close();
