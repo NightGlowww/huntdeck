@@ -533,9 +533,16 @@ SELECT COUNT(*) FROM hunt_queue q JOIN programs p ON p.id = q.program_id
 
 // HuntQueueGateCounts is how many targets each gate keeps out: "one invitation
 // away" is a different decision from "needs an EEA identity".
-func (s *Store) HuntQueueGateCounts(ctx context.Context) (map[string]int, error) {
+// HuntQueueGateCounts is the same breakdown, for the same filter: a chip
+// counting gates from another platform would not match the rows below it.
+func (s *Store) HuntQueueGateCounts(ctx context.Context, f QueueFilter) (map[string]int, error) {
+	where, args := f.where()
+	//nolint:gosec // where is built from constant clauses; every value is bound
 	rows, err := s.db.R.QueryContext(ctx, `
-SELECT gate, COUNT(*) FROM hunt_queue WHERE gate <> '' GROUP BY gate ORDER BY COUNT(*) DESC`)
+SELECT q.gate, COUNT(*) FROM hunt_queue q JOIN programs p ON p.id = q.program_id
+  LEFT JOIN target_scores ts ON ts.program_id = q.program_id AND ts.kind = q.kind AND ts.value = q.value
+ WHERE q.gate <> ''`+where+`
+ GROUP BY q.gate ORDER BY COUNT(*) DESC`, args...)
 	if err != nil {
 		return nil, err
 	}

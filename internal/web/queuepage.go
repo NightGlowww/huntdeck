@@ -126,7 +126,7 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 	if n, err := s.Store.HuntQueueGatedCount(ctx, filter); err == nil {
 		d.GatedTotal = n
 	}
-	if counts, err := s.Store.HuntQueueGateCounts(ctx); err == nil {
+	if counts, err := s.Store.HuntQueueGateCounts(ctx, filter); err == nil {
 		for gate, n := range counts {
 			d.GatedBy = append(d.GatedBy, store.QueueGate{Gate: gate, Count: n})
 		}

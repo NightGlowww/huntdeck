@@ -413,7 +413,7 @@ func TestHuntQueueGatedRows(t *testing.T) {
 		t.Errorf("gated count %d, gated list %d rows", n, len(gated))
 	}
 
-	counts, err := q.s.HuntQueueGateCounts(q.ctx)
+	counts, err := q.s.HuntQueueGateCounts(q.ctx, QueueFilter{})
 	if err != nil {
 		t.Fatal(err)
 	}
