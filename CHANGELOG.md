@@ -8,6 +8,8 @@ start) stay compatible within a major version.
 
 ## [Unreleased]
 
+## v1.1.0 (2026-11-19)
+
 ### Added
 
 - **HuntQueue**: targets ranked by whether they can start today and what the

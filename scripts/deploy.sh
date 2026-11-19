@@ -86,10 +86,10 @@ else
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' EXIT
   run env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=deploy-$(date +%Y%m%d%H%M) -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
+    go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)} -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
     -o "$tmp/huntdeck" ./cmd/huntdeck
   run env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=deploy-$(date +%Y%m%d%H%M) -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
+    go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)} -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
     -o "$tmp/huntdeck-mcp" ./cmd/huntdeck-mcp
   echo "==> ship"
   run rsync -az "$tmp/huntdeck" "$host:$dir/huntdeck"
