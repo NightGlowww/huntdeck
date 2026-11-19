@@ -63,6 +63,7 @@ var commands = map[string]command{
 	"backtest":    backtestCmd,
 	"compact":     compactCmd,
 	"ai-check":    aiCheckCmd,
+	"ai-extract":  aiExtractCmd,
 	"changes":     changesCmd,
 	"seed":        seedCmd,
 	"backup":      backupCmd,

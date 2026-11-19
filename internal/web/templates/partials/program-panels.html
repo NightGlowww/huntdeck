@@ -54,6 +54,12 @@
   </ul>
   {{end}}
   {{if .Before}}<p class="panel-foot faint small">{{T "Where the program's policy states a rule it is quoted; the rest comes from what the platform publishes."}}</p>{{end}}
+  {{if .AIRules}}<div class="ai-rules">
+    <h3 class="ai-head">{{T "A model read these from the same policy"}} <span class="faint small">{{TF "(%s, %s)" .AIModel (.AIAt | ago)}}</span></h3>
+    <ul>{{range .AIRules}}<li><b>{{.Title}}</b>{{with .Detail}} <span>{{.}}</span>{{end}}</li>{{end}}</ul>
+    <p class="faint small">{{T "A paraphrase, not a quote: check it against the policy above before relying on it."}}</p>
+  </div>{{end}}
+
 </section>{{end}}
 {{end}}
 

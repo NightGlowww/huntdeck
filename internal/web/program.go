@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"slices"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/huntscore"
@@ -33,7 +34,12 @@ type programData struct {
 	// Before is what to know before testing: requirements and the rules
 	// for test traffic.
 	Before []testRule
-	Latest *store.UserStatsSnapshot // the user's own numbers, if the platform shares them
+	// AIRules are what a model read out of the same policy, when one was
+	// configured and had run; AIModel and AIAt say which and when.
+	AIRules []store.AIRule
+	AIModel string
+	AIAt    time.Time
+	Latest  *store.UserStatsSnapshot // the user's own numbers, if the platform shares them
 
 	InScope, OutOfScope, Removed []store.EntryView
 	Wildcards, Domains           []string
@@ -169,6 +175,13 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 		d.Latest = &p.Stats[n-1]
 	}
 	d.Before = beforeYouTest(p)
+	// A model reading, when one was cached for this exact policy text. It is
+	// advisory: the rules above quote the policy, this one paraphrases it.
+	if pol := strings.TrimSpace(p.Policy); pol != "" {
+		if r, err := s.Store.AIReading(ctx, p.ID, store.PolicyHash(pol)); err == nil && r != nil {
+			d.AIRules, d.AIModel, d.AIAt = r.Rules, r.Model, r.At
+		}
+	}
 	d.Docs = policyDocs(p)
 
 	items, _, err := s.Store.Programs(ctx, store.ProgramFilter{ID: p.ID})
