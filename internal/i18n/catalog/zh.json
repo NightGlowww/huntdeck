@@ -1677,6 +1677,10 @@
     "click one to search it": "点击任一类别即按它检索",
     "Disclosed report": "披露报告",
     "back to search": "返回搜索",
-    "POJIA could not be reached; try again in a moment.": "POJIA 暂时无法访问；稍后再试。"
+    "POJIA could not be reached; try again in a moment.": "POJIA 暂时无法访问；稍后再试。",
+    "Similar reports": "相似历史报告",
+    "described features, matched to history": "按你描述的功能匹配历史",
+    "or describe a feature: historically similar reports come back": "或描述一个功能点：返回历史上相似的报告",
+    "Find similar": "找相似"
   }
 }

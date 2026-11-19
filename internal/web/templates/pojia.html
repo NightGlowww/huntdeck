@@ -13,6 +13,10 @@
       <input type="text" name="program" value="{{.Program}}" placeholder="{{T "program handle"}}">
       <button type="submit" class="small">{{T "Search"}}</button>
     </form>
+    <form method="get" action="/pojia" class="pojia-search">
+      <input type="text" name="similar" value="{{.Similar}}" placeholder="{{T "or describe a feature: historically similar reports come back"}}">
+      <button type="submit" class="small">{{T "Find similar"}}</button>
+    </form>
     {{if .Failed}}<p class="flash warn">{{T "POJIA could not be reached; try again in a moment."}}</p>{{else if .Results}}<pre class="pojia-answer">{{pojiaLinks .Results}}</pre>{{end}}
     {{if .Payloads}}
     <h3>{{T "Payloads for this class"}}</h3>
@@ -20,6 +24,13 @@
     {{end}}
   </div>
 </section>
+
+{{if .SimilarAnswer}}
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Similar reports"}}</h2><span class="aside">{{T "described features, matched to history"}}</span></div>
+  <div class="panel-body"><pre class="pojia-answer">{{pojiaLinks .SimilarAnswer}}</pre></div>
+</section>
+{{end}}
 
 {{if .CVE}}
 <section class="panel">

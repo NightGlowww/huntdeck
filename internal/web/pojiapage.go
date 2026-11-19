@@ -38,6 +38,14 @@ func (s *server) pojiaPage(w http.ResponseWriter, r *http.Request) {
 			d.Results = answer
 		}
 	}
+	if d.Similar != "" {
+		answer := s.pojiaCall(ctx, client, "similar", map[string]any{"description": d.Similar})
+		if answer == "" {
+			d.Failed = true
+		} else {
+			d.SimilarAnswer = answer
+		}
+	}
 	if d.CVE != "" {
 		d.CVEAnswer = s.pojiaCall(ctx, client, "cve", map[string]any{"cve": d.CVE})
 	}
@@ -73,6 +81,9 @@ func (s *server) pojiaCall(ctx context.Context, c *pojia.Client, kind string, ar
 	tool := "search_reports"
 	ttl := 6 * time.Hour
 	switch kind {
+	case "similar":
+		tool = "similar_reports"
+		ttl = 24 * time.Hour
 	case "cve":
 		tool = "cve_lookup"
 		ttl = 24 * time.Hour
@@ -93,6 +104,8 @@ func (s *server) pojiaCall(ctx context.Context, c *pojia.Client, kind string, ar
 	var answer string
 	var err error
 	switch kind {
+	case "similar":
+		answer, err = c.SimilarReports(ctx, str(args, "description"))
 	case "search":
 		answer, err = c.SearchReports(ctx, str(args, "query"), str(args, "class"), str(args, "program"), 20)
 	case "cve":
@@ -122,15 +135,17 @@ func str(args map[string]any, key string) string {
 }
 
 type pojiaPageData struct {
-	Off       bool
-	Query     string
-	Class     string
-	Program   string
-	CVE       string
-	Results   string
-	CVEAnswer string
-	Payloads  string
-	Classes   string
+	Off           bool
+	Query         string
+	Class         string
+	Program       string
+	CVE           string
+	Similar       string
+	SimilarAnswer string
+	Results       string
+	CVEAnswer     string
+	Payloads      string
+	Classes       string
 	// Failed says the search call could not be answered.
 	Failed bool
 }
