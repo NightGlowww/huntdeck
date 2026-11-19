@@ -9,34 +9,75 @@ import (
 	"github.com/mdpsec/huntdeck/internal/store"
 )
 
-const pojiaCacheTTL = 7 * 24 * time.Hour
+// The panel's contract: a cached answer shows at once, a stale one shows at
+// once and refreshes in the background, and only the very first visit to a
+// program waits for POJIA — ten seconds at most. A failed fetch never writes
+// "not indexed" (that is POJIA's own wording alone) and never breaks the page.
+const (
+	pojiaFresh    = 7 * 24 * time.Hour
+	pojiaNotFound = 24 * time.Hour // a vendor may be indexed any day
+	pojiaFetch    = 10 * time.Second
+)
 
-// pojiaPanel fills the program page's POJIA block: the disclosed-report
-// history of this program, from POJIA's index. The answer is cached for a
-// week; a fetch that fails shows the cache if there is one, and the panel
-// never breaks the page.
 func (s *server) pojiaPanel(ctx context.Context, r *http.Request, p *store.ProgramDetail, d *programData) {
 	d.PojiaEnabled = true
-	if cached, err := s.Store.PojiaProfileFor(ctx, p.ID); err == nil && time.Since(cached.FetchedAt) < pojiaCacheTTL {
+	cached, err := s.Store.PojiaProfileFor(ctx, p.ID)
+	if err == nil {
+		ttl := pojiaFresh
+		if !cached.Found {
+			ttl = pojiaNotFound
+		}
+		if time.Since(cached.FetchedAt) < ttl {
+			d.Pojia = cached
+			return
+		}
+		// Stale: show it now, refresh for the next visit.
 		d.Pojia = cached
+		d.PojiaStale = true
+		s.pojiaRefresh(r.Context(), p, nil)
 		return
 	}
-	client := &pojia.Client{BaseURL: s.PojiaURL, Key: s.PojiaKey.Reveal()}
-	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	// No cache at all: this program's first visit pays one inline fetch.
+	s.pojiaFetchInline(r.Context(), p, d)
+}
+
+// pojiaFetchInline waits for the answer (first visit only).
+func (s *server) pojiaFetchInline(ctx context.Context, p *store.ProgramDetail, d *programData) {
+	ctx, cancel := context.WithTimeout(ctx, pojiaFetch)
 	defer cancel()
+	client := &pojia.Client{BaseURL: s.PojiaURL, Key: s.PojiaKey.Reveal()}
 	profile, found, err := client.ProgramProfile(ctx, p.Handle)
 	if err != nil {
-		s.Log.WarnContext(r.Context(), "program: cannot read the POJIA profile", "program", p.Handle, "error", err)
-		// The cache, stale as it is, still beats an empty panel.
-		if cached, cerr := s.Store.PojiaProfileFor(r.Context(), p.ID); cerr == nil {
-			d.Pojia = cached
-			d.PojiaStale = true
-		}
+		s.Log.WarnContext(ctx, "program: cannot read the POJIA profile", "program", p.Handle, "error", err)
+		d.PojiaFailed = true
 		return
 	}
-	saved := store.PojiaProfile{ProgramID: p.ID, Handle: p.Handle, Profile: profile, Found: found}
-	if err := s.Store.SavePojiaProfile(r.Context(), saved); err != nil {
-		s.Log.WarnContext(r.Context(), "program: cannot cache the POJIA profile", "error", err)
+	saved := store.PojiaProfile{ProgramID: p.ID, Handle: p.Handle, Profile: profile,
+		Found: found, FetchedAt: time.Now()}
+	if err := s.Store.SavePojiaProfile(ctx, saved); err != nil {
+		s.Log.WarnContext(ctx, "program: cannot cache the POJIA profile", "error", err)
 	}
 	d.Pojia = &saved
+}
+
+// pojiaRefresh updates the cache without holding a page open.
+func (s *server) pojiaRefresh(ctx context.Context, p *store.ProgramDetail, done chan<- struct{}) {
+	client := &pojia.Client{BaseURL: s.PojiaURL, Key: s.PojiaKey.Reveal()}
+	go func() {
+		if done != nil {
+			defer close(done)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), pojiaFetch)
+		defer cancel()
+		profile, found, err := client.ProgramProfile(ctx, p.Handle)
+		if err != nil {
+			s.Log.WarnContext(ctx, "pojia: background refresh failed", "program", p.Handle, "error", err)
+			return
+		}
+		saved := store.PojiaProfile{ProgramID: p.ID, Handle: p.Handle, Profile: profile,
+			Found: found, FetchedAt: time.Now()}
+		if err := s.Store.SavePojiaProfile(ctx, saved); err != nil {
+			s.Log.WarnContext(ctx, "pojia: cannot cache the refresh", "error", err)
+		}
+	}()
 }

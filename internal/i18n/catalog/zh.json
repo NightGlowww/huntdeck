@@ -1676,6 +1676,7 @@
     "Vulnerability classes": "漏洞类别",
     "click one to search it": "点击任一类别即按它检索",
     "Disclosed report": "披露报告",
-    "back to search": "返回搜索"
+    "back to search": "返回搜索",
+    "POJIA could not be reached; try again in a moment.": "POJIA 暂时无法访问；稍后再试。"
   }
 }

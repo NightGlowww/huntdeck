@@ -12,7 +12,7 @@ import (
 
 // pojiaPage is the POJIA library's front page: search disclosed reports, look
 // up a CVE, browse a class's payloads. Every answer comes from POJIA, cached:
-// searches for six hours, the rest for a week.
+// searches six hours, a CVE a day, the rest a week.
 func (s *server) pojiaPage(w http.ResponseWriter, r *http.Request) {
 	if s.PojiaKey.Reveal() == "" {
 		s.render(w, r, http.StatusOK, "pojia", pageData{Title: "POJIA", Nav: "pojia",
@@ -30,8 +30,13 @@ func (s *server) pojiaPage(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	client := &pojia.Client{BaseURL: s.PojiaURL, Key: s.PojiaKey.Reveal()}
 	if d.Query != "" || d.Class != "" || d.Program != "" {
-		d.Results = s.pojiaCall(ctx, client, "search", map[string]any{
+		answer := s.pojiaCall(ctx, client, "search", map[string]any{
 			"query": d.Query, "class": d.Class, "program": d.Program, "limit": 20})
+		if answer == "" {
+			d.Failed = true
+		} else {
+			d.Results = answer
+		}
 	}
 	if d.CVE != "" {
 		d.CVEAnswer = s.pojiaCall(ctx, client, "cve", map[string]any{"cve": d.CVE})
@@ -126,6 +131,8 @@ type pojiaPageData struct {
 	CVEAnswer string
 	Payloads  string
 	Classes   string
+	// Failed says the search call could not be answered.
+	Failed bool
 }
 
 type pojiaReportData struct {

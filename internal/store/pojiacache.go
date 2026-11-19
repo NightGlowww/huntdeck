@@ -48,11 +48,22 @@ func (s *Store) PojiaCached(ctx context.Context, key string, ttl time.Duration) 
 	return answer, nil
 }
 
-// SavePojiaCache stores one answer.
+// pojiaCacheKeep is how long an unused answer may sit before the next save
+// sweeps it; the read TTL already hides older rows.
+const pojiaCacheKeep = 30 * 24 * time.Hour
+
+// SavePojiaCache stores one answer and, in the same write, drops rows nobody
+// has refreshed in a month, so the table cannot grow without end.
 func (s *Store) SavePojiaCache(ctx context.Context, key, answer string) error {
-	_, err := s.db.W.ExecContext(ctx, `INSERT INTO pojia_cache (key, answer, fetched_at)
-		VALUES (?, ?, ?) ON CONFLICT (key) DO UPDATE SET answer = excluded.answer,
-		 fetched_at = excluded.fetched_at`,
-		key, answer, s.Now().UTC().Format(time.RFC3339))
-	return err
+	return s.Write(ctx, func(tx *Tx) error {
+		if _, err := tx.tx.ExecContext(ctx, `INSERT INTO pojia_cache (key, answer, fetched_at)
+			VALUES (?, ?, ?) ON CONFLICT (key) DO UPDATE SET answer = excluded.answer,
+			 fetched_at = excluded.fetched_at`,
+			key, answer, s.Now().UTC().Format(time.RFC3339)); err != nil {
+			return err
+		}
+		_, err := tx.tx.ExecContext(ctx, `DELETE FROM pojia_cache WHERE fetched_at < ?`,
+			s.Now().Add(-pojiaCacheKeep).UTC().Format(time.RFC3339))
+		return err
+	})
 }

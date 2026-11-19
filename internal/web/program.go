@@ -91,7 +91,10 @@ type programData struct {
 	// configured, PojiaStale that the answer shown is older than a week.
 	Pojia        *store.PojiaProfile
 	PojiaEnabled bool
-	PojiaStale   bool
+	// PojiaFailed says the fetch failed and nothing is cached, so the panel
+	// says that rather than hiding.
+	PojiaFailed bool
+	PojiaStale  bool
 }
 
 // programTab is one of a program page's tabs.

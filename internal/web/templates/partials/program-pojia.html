@@ -1,6 +1,6 @@
-{{/* The program page's POJIA panel: what this program has historically paid
-   for, from POJIA's index of disclosed reports. Cached a week; the page
-   never blocks on the fetch. Called with . = the page's Data. */}}
+{{/* The program page's POJIA panel. A cached answer shows at once; a stale one
+   shows at once and refreshes for the next visit; only the first visit to a
+   program waits, ten seconds at most. Called with . = the page's Data. */}}
 {{define "program-pojia"}}{{if .Pojia}}{{if or .Pojia.Found .PojiaStale}}
 <section class="panel pojia" id="pojia">
   <div class="panel-head"><h2>{{T "What it has paid for"}}</h2><span class="aside">{{T "from POJIA's disclosed reports"}}{{if .PojiaStale}} &middot; <span class="warn">{{T "cached: POJIA could not be reached"}}</span>{{else}} &middot; <span title="{{datetime .Pojia.FetchedAt}}">{{ago .Pojia.FetchedAt}}</span>{{end}}</span></div>
@@ -11,4 +11,9 @@
   <div class="panel-head"><h2>{{T "What it has paid for"}}</h2><span class="aside">{{T "from POJIA's disclosed reports"}}</span></div>
   <div class="panel-body"><p class="muted small">{{T "POJIA does not index this program."}}</p></div>
 </section>
-{{end}}{{end}}{{end}}
+{{end}}{{else if .PojiaFailed}}
+<section class="panel pojia" id="pojia">
+  <div class="panel-head"><h2>{{T "What it has paid for"}}</h2><span class="aside">{{T "from POJIA's disclosed reports"}}</span></div>
+  <div class="panel-body"><p class="muted small">{{T "POJIA could not be reached; try again in a moment."}}</p></div>
+</section>
+{{end}}{{end}}

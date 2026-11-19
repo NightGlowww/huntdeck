@@ -13,7 +13,7 @@
       <input type="text" name="program" value="{{.Program}}" placeholder="{{T "program handle"}}">
       <button type="submit" class="small">{{T "Search"}}</button>
     </form>
-    {{if .Results}}<pre class="pojia-answer">{{pojiaLinks .Results}}</pre>{{end}}
+    {{if .Failed}}<p class="flash warn">{{T "POJIA could not be reached; try again in a moment."}}</p>{{else if .Results}}<pre class="pojia-answer">{{pojiaLinks .Results}}</pre>{{end}}
     {{if .Payloads}}
     <h3>{{T "Payloads for this class"}}</h3>
     <pre class="pojia-answer">{{pojiaLinks .Payloads}}</pre>
@@ -30,7 +30,7 @@
 
 <section class="panel">
   <div class="panel-head"><h2>{{T "Vulnerability classes"}}</h2><span class="aside">{{T "click one to search it"}}</span></div>
-  <div class="panel-body"><pre class="pojia-answer pojia-classes">{{.Classes}}</pre></div>
+  <div class="panel-body"><pre class="pojia-answer pojia-classes">{{pojiaClasses .Classes}}</pre></div>
 </section>
 {{end}}
 {{end}}{{end}}
