@@ -6,6 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -69,6 +71,8 @@ func doctorCmd(args []string, stdout, stderr io.Writer) int {
 			ok("%s is writable", dir)
 		}
 	}
+
+	doctorProxy(context.Background(), ok, bad)
 
 	// The database: presence, schema version against this binary's migrations.
 	dbPath := filepath.Join(dir, "huntdeck.db")
@@ -337,4 +341,34 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 			ok("queue: %d targets, rebuilt %s ago", n, humanDuration(time.Since(computed)))
 		}
 	}
+}
+
+// doctorProxy checks that a configured proxy is reachable. HUNTDECK_PROXY
+// applies to every platform request, so one dead proxy stops all polling, and
+// the failure only showed up as a wall of "giving up after 5 attempts" in the
+// poll history. One dial here says it in a line.
+func doctorProxy(ctx context.Context, ok, bad func(string, ...any)) {
+	raw := strings.TrimSpace(os.Getenv("HUNTDECK_PROXY"))
+	if raw == "" {
+		return
+	}
+	u, err := url.Parse(raw)
+	if err != nil || u.Host == "" {
+		bad("HUNTDECK_PROXY is not a URL: %q", raw)
+		return
+	}
+	host := u.Host
+	if u.Port() == "" {
+		host = net.JoinHostPort(u.Hostname(), "80")
+	}
+	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
+	defer cancel()
+	var d net.Dialer
+	conn, err := d.DialContext(ctx, "tcp", host)
+	if err != nil {
+		bad("HUNTDECK_PROXY %s is not reachable (%v): every platform request goes through it", host, err)
+		return
+	}
+	_ = conn.Close()
+	ok("proxy %s is reachable", host)
 }
