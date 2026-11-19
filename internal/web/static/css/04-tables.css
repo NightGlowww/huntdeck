@@ -48,19 +48,14 @@ col.w-num-s { width: 72px; }
 col.w-date { width: 120px; }
 col.w-you { width: 112px; }
 
-/* Below 1601px the page itself scrolls, not the table: give the headings a
-   sticky home at the window's top. A table wider than its column keeps its
-   horizontal scroll (a scroll container cannot have a sticky child here), and
-   columns.js marks that case with .is-wide. */
+/* Below 1601px the headings get a sticky home at the window's top, but only
+   where the heading and the rows stay in the same column grid: list tables
+   (.ptable) and tables that fit their column. A table that scrolls sideways
+   (.is-wide) must not pin its heading — the heading and the body scroll on
+   different axes and the header ends up printed over the first row, which is
+   what the settings platform table looked like. */
 @media (max-width: 1600px) {
-  /* `overflow-x: clip` used to be here to "let the page scroll instead", but clip
-     removes the overflow from the page too: a table wider than its column (the
-     poll history at 1280) was cut off with no way to reach its right side. The
-     wrap keeps its own scroll, and the sticky heading still works inside it. */
-  /* The heading stays with the window even when the table scrolls sideways:
-     with .is-wide excluded it lost both its sticky position and its background,
-     so rows scrolled through it. */
-  .ptable thead th, .table-wrap thead th { position: sticky; top: 56px; z-index: 3;
+  .ptable thead th, .table-wrap:not(.is-wide) thead th { position: sticky; top: 56px; z-index: 3;
     background: var(--surface-2); border-bottom-color: transparent; box-shadow: inset 0 -1px var(--border); }
 }
 
