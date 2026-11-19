@@ -58,6 +58,12 @@ func TestExtractPoliciesFromSettings(t *testing.T) {
 		t.Fatalf("cached readings = %d, %v", n, err)
 	}
 
+	// The API shows the same reading, marked as a model's.
+	_, page := e.do(c, http.MethodGet, "/api/v1/programs/fake/acme", nil, nil)
+	if !strings.Contains(page, "ai_rules") || !strings.Contains(page, "Send the header") {
+		t.Errorf("the API does not carry the reading: %.200s", page)
+	}
+
 	// A second press sends nothing: the policy hash is already cached.
 	res2, _ := e.do(c, http.MethodPost, "/settings/ai/extract", nil, nil)
 	if loc := res2.Header.Get("Location"); !strings.Contains(loc, "msg=ai-none") {

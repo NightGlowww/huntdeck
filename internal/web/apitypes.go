@@ -186,7 +186,12 @@ type apiProgramJSON struct {
 	Trends     *apiProgramTrends  `json:"trends"`
 	// Rules are what "before you test" shows: the platform's requirements and
 	// what only the policy text states (a header, a rate, what is forbidden).
-	Rules           []apiTestRule     `json:"rules,omitempty"`
+	Rules []apiTestRule `json:"rules,omitempty"`
+	// AIRules are what a model read out of the same policy, when one ran: a
+	// paraphrase to check against Rules, which quote the policy itself.
+	AIRules         []store.AIRule    `json:"ai_rules,omitempty"`
+	AIModel         string            `json:"ai_model,omitempty"`
+	AIAt            *time.Time        `json:"ai_read_at,omitempty"`
 	Requirements    *apiRequirements  `json:"requirements"`
 	TestCredentials []string          `json:"test_credentials"` // scope the platform hands out test credentials for
 	Testing         *apiTestingRules  `json:"testing_rules"`

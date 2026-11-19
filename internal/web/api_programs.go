@@ -333,6 +333,13 @@ func (s *server) apiProgramDetail(w http.ResponseWriter, r *http.Request, v2 boo
 		for _, r := range beforeYouTest(p) {
 			out.Rules = append(out.Rules, apiTestRule(r))
 		}
+		if pol := strings.TrimSpace(p.Policy); pol != "" {
+			if rd, err := s.Store.AIReading(r.Context(), p.ID, store.PolicyHash(pol)); err == nil && rd != nil {
+				out.AIRules, out.AIModel = rd.Rules, rd.Model
+				at := rd.At
+				out.AIAt = &at
+			}
+		}
 	}
 	if want("facts") {
 		out.Facts = factsJSON(p)
