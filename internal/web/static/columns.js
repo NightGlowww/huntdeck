@@ -118,16 +118,29 @@
     // columns on than there is room for, the table grows wider and scrolls
     // sideways instead of squeezing it away.
     const flex = table.tHead.querySelector("th[data-col-min]");
+    // A table that does not fit its column is clipped by the narrow-width
+    // stylesheet (`overflow-x: clip`) unless it says `is-wide`. That has nothing
+    // to do with the min-width below: the poll history has no flex column and was
+    // clipped with no way to scroll to its right side.
+    const wide = () => {
+      const wrap = table.closest(".table-wrap");
+      if (wrap) {
+        wrap.classList.toggle("is-wide", table.style.minWidth !== "" || table.scrollWidth > wrap.clientWidth + 1);
+      }
+    };
     const fit = () => {
-      if (!flex) return;
       table.style.minWidth = "";
-      if (!flex.getClientRects().length) return; // rows as cards: no headings to keep
+      if (!flex) {
+        wide();
+        return;
+      }
+      if (!flex.getClientRects().length) {
+        wide(); // rows as cards: no headings to keep
+        return;
+      }
       const short = Number(flex.dataset.colMin) - flex.offsetWidth;
       if (short > 0) table.style.minWidth = table.offsetWidth + short + "px";
-      // A table wider than its column needs horizontal scrolling, which costs
-      // the sticky heading: say so, and the stylesheet decides.
-      const wrap = table.closest(".table-wrap");
-      if (wrap) wrap.classList.toggle("is-wide", table.style.minWidth !== "");
+      wide();
     };
     const apply = () => {
       table.dataset.hide = Object.keys(chosen).filter((k) => chosen[k] === "hide").join(" ");
