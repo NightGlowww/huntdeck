@@ -10,7 +10,7 @@
 #
 # Usage:
 #   scripts/deploy.sh --host prod-1 [--dir /opt/huntdeck] [--mode binary|full]
-#                     [--image huntdeck:local] [--dry-run] [--check]
+#                     [--image huntdeck:local] [--base <image>] [--dry-run] [--check]
 #
 # It never reads or prints secrets: .env stays on the host, and the app's access
 # password is set there (HUNTDECK_PASSWORD) rather than passed through here.
@@ -20,6 +20,7 @@ host=""
 dir="/opt/huntdeck"
 mode="binary"
 image="huntdeck:local"
+base_arg=""
 dry=""
 check=""
 expect=""
@@ -32,6 +33,7 @@ while [ $# -gt 0 ]; do
     --dir) dir="${2:?}"; shift 2 ;;
     --mode) mode="${2:?}"; shift 2 ;;
     --image) image="${2:?}"; shift 2 ;;
+    --base) base_arg="${2:?}"; shift 2 ;;
     --dry-run) dry="1"; shift ;;
     --check) check="1"; shift ;;
     --expect) expect="$2"; shift 2 ;;
@@ -119,11 +121,24 @@ else
   run rsync -az scripts/bench.sh "$host:$dir/scripts/bench.sh"
   run rsync -az scripts/perf-snapshot.sh "$host:$dir/scripts/perf-snapshot.sh"
   run rsync -az scripts/perf-diff.py "$host:$dir/scripts/perf-diff.py"
-  echo "==> image ($image, the binary layered onto the published base image)"
+  # The base has to be here already: a host that cannot reach ghcr.io would
+  # otherwise spend half a minute failing to pull it, with docker's message and
+  # no way out. Say what is missing and what to do instead.
+  base="${base_arg:-ghcr.io/mdpsec/huntdeck:latest}"
+  if ! remote "sudo docker image inspect $base >/dev/null 2>&1"; then
+    echo "  $base is not on the host; trying to pull it"
+    if ! remote "timeout 60 sudo docker pull $base >/dev/null 2>&1"; then
+      echo "  cannot pull $base and it is not local." >&2
+      echo "  Either pull it first (docker pull $base), or layer onto an image" >&2
+      echo "  the host already has: scripts/deploy.sh --host … --base <image>" >&2
+      exit 1
+    fi
+  fi
+  echo "==> image ($image, the binary layered onto $base)"
   # BASE defaults to ghcr.io/mdpsec/huntdeck:latest, which the host keeps in
   # its image cache after the first pull; wrapping the running image instead
   # would add a layer on every deploy.
-  remote "cd $dir && sudo docker build -f Dockerfile.prod -t $image ."
+  remote "cd $dir && sudo docker build -f Dockerfile.prod --build-arg BASE=$base -t $image ."
   echo "==> restart"
   remote "cd $dir && sudo docker compose up -d --pull never"
 fi

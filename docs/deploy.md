@@ -391,6 +391,8 @@ The rule that follows: never put `rm` in the same line as a `/dev/...` path, and
 keep the instance id written down somewhere that does not need the host.
 
 
+| `docker build` spends 30 s then fails on the base image | The binary layer needs `ghcr.io/mdpsec/huntdeck:latest` (or whatever `--base` names) to be on the host. `deploy.sh` checks first, tries a pull, and otherwise says what to do: pull it, or `--base <an image the host already has>` |
+
 ## The gates, and how each one fails
 
 A check that cannot fail is worse than no check: it turns "nobody looked" into
