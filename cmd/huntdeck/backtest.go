@@ -122,9 +122,9 @@ func backtestCmd(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stdout, "\nqueue cuts available (days with a queue snapshot): %d\n", len(qd))
 	if len(qd) < 2 {
-		fmt.Fprintln(stdout, "the queue is snapshotted once a day from now on; a comparison needs a few days of it")
+		fmt.Fprintln(stdout, "one day of queue history so far: comparing days needs at least two, and the acceptance line needs eight")
 	} else {
-		fmt.Fprintln(stdout, "the head of each day is stored, so a comparison can be asked for once the cuts line up")
+		fmt.Fprintln(stdout, "a bounty counted after a cut counts for both rankings; the acceptance line is in docs/design/ai-layer.md 3.4")
 	}
 	return 0
 }
