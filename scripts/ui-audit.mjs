@@ -116,7 +116,14 @@ for (const width of sizes) {
     for (const [name, path] of pages) {
       await send('Page.navigate', { url: base + path }, S);
       await sleep(1600);
-      const shot = await send('Page.captureScreenshot', { format: 'png' }, S);
+      // The whole page, not the first screen: the board's table sits below the
+      // fold at phone width, and a screenshot that stops at the viewport hid a
+      // cell that overflowed the panel for weeks. Capped so one very long page
+      // cannot produce an unreadable image.
+      const metrics = await send('Page.getLayoutMetrics', {}, S);
+      const size = metrics.result.cssContentSize || metrics.result.contentSize;
+      const clip = { x: 0, y: 0, width: Math.ceil(size.width), height: Math.min(Math.ceil(size.height), 12000), scale: 1 };
+      const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip }, S);
       const label = sizes.length > 1 ? name + '-' + theme + '-' + width : name + '-' + theme;
       await writeFile(join(out, label + '.png'), Buffer.from(shot.result.data, 'base64'));
       const title = await evaluate('document.title');
