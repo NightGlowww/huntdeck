@@ -1,5 +1,21 @@
 {{define "content"}}
 <p class="lead">这些数字是怎么算出来的：每个数字的来源、各平台的差异、哪些是估算，以及 HuntScore 如何评分。各平台公开的内容不同，所以并非每个数字在每个平台都存在。</p>
+<nav class="page-index" aria-label="本页小节">
+  <a href="#glance">一览</a>
+  <a href="#sources">公开、统计与估算</a>
+  <a href="#total-paid">累计支付</a>
+  <a href="#average-bounty">平均赏金</a>
+  <a href="#paid-90">近 90 天支付</a>
+  <a href="#received-90">收到的报告</a>
+  <a href="#stats">每月有效报告</a>
+  <a href="#resolved-90">近 90 天有效</a>
+  <a href="#huntscore">HuntScore</a>
+  <a href="#huntqueue">HuntQueue</a>
+  <a href="#charts">图表</a>
+  <a href="#scope-changed">范围变更</a>
+  <a href="#api-freshness">接口新鲜度</a>
+</nav>
+
 
 <section class="panel" id="glance">
   <div class="panel-head"><h2>一览</h2><span class="aside"><span class="src good">公开</span> 平台自己给出的数字 <span class="src acc">统计</span> 由 HuntDeck 计算 <span class="src warn">≈ 估算</span> <span class="src none">—</span> 平台不公开</span></div>
@@ -106,6 +122,25 @@
   <p>狩猎面板上的目标按同一思路评分，依据是「有多新」：对项目而言，或对你而言。刚获得访问权的私有项目，其全部范围都以你加入的时间（或 HuntDeck 首次列出的时间）计龄，因此老项目的范围也会显得新鲜；面板列出其中 3 个目标，其余给出链接。</p>
   </div>
 </section>
+  <section class="panel mcard" id="huntqueue">
+  <div class="panel-head"><h2>HuntQueue</h2></div>
+  <div class="panel-body md">
+  <p>HuntScore 评的是<b>项目</b>；HuntQueue 评的是<b>目标</b>，回答一个更窄的问题：我今天能开工吗，它每小时值多少？猎场首页显示前五条，<code>/queue</code> 一次显示五十条，服务端每半小时按已轮询到的数据重建一次。</p>
+  <p>七个输入，相乘而非相加——某个因子归零就把整个分数归零，而不是被平均掉：</p>
+  <ul>
+    <li><b>质量</b>（0.30）：该项目的 HuntScore，去掉其中的新鲜度部分。</li>
+    <li><b>金额</b>（0.25）：最高赏金折美元，10k 封顶。用其他货币支付的项目按固定汇率表换算；表里没有的币种按面值计，页面上的说明也这么写。</li>
+    <li><b>速度</b>（0.15）：从提交到接受的中位天数，两周封顶。</li>
+    <li><b>重复</b>（0.15）：目标的拥挤程度，由该项目按范围规模收到的报告数推算。</li>
+    <li><b>新鲜度</b>（0.10）：目标出现、或变成「可挖」的最近时间。</li>
+    <li><b>就绪度</b>（0.05）：开放 1.0；需要申请测试账号 0.7；禁用自动化工具 0.5；项目反复在暂停与开放之间来回再乘 0.8。</li>
+    <li><b>个人</b>：这是关于「你」而非「目标」的先验，在你还没有自己的报告之前固定为 0.8。</li>
+  </ul>
+  <p>排不进队列的目标不会被藏起来：它会被列出并附上原因（项目已暂停、有邀请待接受、没有范围），所以「为什么它不在队列里」在页面上就能找到答案。</p>
+  <p><b>队列在凑满八个快照之前处于考察期。</b>每天的分数各存一次，回测在每一个过去的切点问：当时队列会让你去挖什么，平台后来实际付了多少。少于八个切点，这个判断就还没发生：页脚显示 <code>N / 8 个快照</code>，在此之前 HuntScore 是有战绩的数字，而队列只是一个论据充分的猜测。分数拆解有四个入口：页面上展开、<code>?explain=1</code>、<code>huntdeck queue --explain</code>、以及 MCP 工具上的 <code>explain: true</code>。</p>
+  </div>
+</section>
+
 <section class="panel mcard" id="charts">
   <div class="panel-head"><h2>图表</h2></div>
   <div class="panel-body md">
@@ -127,7 +162,8 @@
   <p>每个项目另有 <code>updated_at</code>（该项目任何信息最近变化的时间：首次出现、变更记录、某个数字、被移除）与 <code>last_synced_at</code>（最近一次从平台读取的时间，无论是否变化）。程序列表的 <code>since</code> 保留在该时间之后有变化的项目；<code>/api/v1/targets</code> 的 <code>since</code> 保留之后新增或编辑的目标。Program、列表与匹配接口都会返回 <code>ETag</code>：把它作为 <code>If-None-Match</code> 发回，在内容未变时返回 <code>304 Not Modified</code> 且没有响应体。</p>
   <pre><code>HD=http://127.0.0.1:8080   # 这个 HuntDeck
 curl -s -D h.txt "$HD/api/v2/programs?since=2026-11-01T00:00:00Z" -o programs.json
-etag=$(sed -n 's/^[Ee][Tt]ag: //p' h.txt | tr -d '')
+etag=$(sed -n 's/^[Ee][Tt]ag: //p' h.txt | tr -d '
+')
 curl -s -o /dev/null -w '%{http_code}
 ' -H "If-None-Match: $etag" "$HD/api/v2/programs?since=2026-11-01T00:00:00Z"   # 未变化时返回 304</code></pre>
   </div>
