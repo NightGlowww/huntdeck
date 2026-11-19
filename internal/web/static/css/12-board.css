@@ -123,7 +123,11 @@ tr.xl, li.xl, .dcard.xl { display: none; }
 /* Two lines a row: type and bounty under the target, a program's chips (private) under its name. */
 @container (max-width: 1099px) {
   table.surface .c-kind, table.surface .c-pay { display: none; }
-  table.surface .kind-under { display: block; }
+  /* Flex, not a line of inline-blocks: the kind chip and the amount are two
+     boxes on one line, and inline layout put the second five pixels above the
+     first with identical styles on both. A flex row centres them by definition. */
+  table.surface .kind-under { display: flex; align-items: center; gap: 6px; }
+  table.surface .kind-under .lbl { margin-right: 0; }
   table.surface th.c-prog { width: 174px; } table.surface th.c-added { width: 128px; } table.surface th.c-score { width: 108px; }
   table.surface .pn { flex-wrap: wrap; row-gap: 4px; }
   table.surface .pn::before { content: ""; order: 1; flex-basis: 100%; }
