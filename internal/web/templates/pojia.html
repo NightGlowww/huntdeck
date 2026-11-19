@@ -17,7 +17,7 @@
       <input type="text" name="similar" value="{{.Similar}}" placeholder="{{T "or describe a feature: historically similar reports come back"}}">
       <button type="submit" class="small">{{T "Find similar"}}</button>
     </form>
-    {{if .Failed}}<p class="flash warn">{{T "POJIA could not be reached; try again in a moment."}}</p>{{else if .Results}}<pre class="pojia-answer">{{pojiaLinks .Results}}</pre>{{end}}
+    {{if .Failed}}<p class="flash warn">{{T "POJIA could not be reached; try again in a moment."}}</p>{{else if .ResultRows}}<ul class="pojia-results">{{range .ResultRows}}<li><span class="chip sev {{.Severity}}">{{.Severity}}</span> <a class="link" href="/pojia/report?id={{.ID}}">{{.Title}}</a> <span class="muted small">{{.Program}} · {{.Class}}</span>{{if .URL}} <a class="muted small" href="{{.URL}}" target="_blank" rel="noopener noreferrer">↗</a>{{end}}</li>{{end}}</ul>{{else if .Results}}<pre class="pojia-answer">{{pojiaLinks .Results}}</pre>{{end}}
     {{if .Payloads}}
     <h3>{{T "Payloads for this class"}}</h3>
     <pre class="pojia-answer">{{pojiaLinks .Payloads}}</pre>
@@ -28,7 +28,7 @@
 {{if .SimilarAnswer}}
 <section class="panel">
   <div class="panel-head"><h2>{{T "Similar reports"}}</h2><span class="aside">{{T "described features, matched to history"}}</span></div>
-  <div class="panel-body"><pre class="pojia-answer">{{pojiaLinks .SimilarAnswer}}</pre></div>
+  <div class="panel-body">{{if .SimilarRows}}<ul class="pojia-results">{{range .SimilarRows}}<li><span class="chip sev {{.Severity}}">{{.Severity}}</span> <a class="link" href="/pojia/report?id={{.ID}}">{{.Title}}</a> <span class="muted small">{{.Program}} · {{.Class}}</span>{{if .URL}} <a class="muted small" href="{{.URL}}" target="_blank" rel="noopener noreferrer">↗</a>{{end}}</li>{{end}}</ul>{{else}}<pre class="pojia-answer">{{pojiaLinks .SimilarAnswer}}</pre>{{end}}</div>
 </section>
 {{end}}
 

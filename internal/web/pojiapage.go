@@ -37,6 +37,7 @@ func (s *server) pojiaPage(w http.ResponseWriter, r *http.Request) {
 			d.Failed = true
 		} else {
 			d.Results = answer
+			d.ResultRows = parsePojiaResults(d.Results)
 		}
 	}
 	if d.Similar != "" {
@@ -45,6 +46,7 @@ func (s *server) pojiaPage(w http.ResponseWriter, r *http.Request) {
 			d.Failed = true
 		} else {
 			d.SimilarAnswer = answer
+			d.SimilarRows = parsePojiaResults(d.SimilarAnswer)
 		}
 	}
 	if d.CVE != "" {
@@ -153,6 +155,8 @@ type pojiaPageData struct {
 	Failed bool
 	// ClassEntries is the class list parsed, for the chip grid.
 	ClassEntries []pojiaClassEntry
+	ResultRows   []pojiaResultRow
+	SimilarRows  []pojiaResultRow
 }
 
 type pojiaReportData struct {
