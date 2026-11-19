@@ -215,6 +215,12 @@ const MinQueueScore = 10
 
 // RefreshHuntQueue rebuilds the queue from the candidates: it is derived data,
 // recomputed in the same pass that refreshes HuntScore, so both age together.
+//
+// The drop counter is exercised only when a candidate scores under the floor.
+// The test fixture cannot produce one — its programs have no credentials, so
+// every candidate is gated and stored rather than dropped — and the count is
+// therefore covered by its invariant, not by a forced drop. Said out loud
+// because a counter nobody exercises is a counter nobody has checked.
 func (s *Store) RefreshHuntQueue(ctx context.Context, now time.Time) error {
 	cands, err := s.QueueCandidates(ctx, 2000)
 	if err != nil {
