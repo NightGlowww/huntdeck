@@ -221,6 +221,7 @@ func (s *Store) RefreshHuntQueue(ctx context.Context, now time.Time) error {
 		return err
 	}
 	rows := make([]HuntQueueRow, 0, len(cands))
+	belowFloor := 0
 	for _, in := range cands {
 		res := huntqueue.Score(huntqueue.Inputs{
 			ProgramValue: in.ProgramValue,
@@ -238,6 +239,9 @@ func (s *Store) RefreshHuntQueue(ctx context.Context, now time.Time) error {
 		// A target scoring below the floor is not a candidate for today; keeping
 		// it would make the count say 2,000 when a dozen are worth a look.
 		if res.Gate == huntqueue.GateNone && res.Score < MinQueueScore {
+			// Counted, not just skipped: the page says how many were left out,
+			// which is the difference between a shorter list and a hidden one.
+			belowFloor++
 			continue
 		}
 		_, factors := huntqueue.Explain(huntqueue.Inputs{
@@ -278,6 +282,14 @@ func (s *Store) RefreshHuntQueue(ctx context.Context, now time.Time) error {
 				string(b), string(fb), r.ComputedAt.Format(time.RFC3339)); err != nil {
 				return err
 			}
+		}
+		// What the list leaves out, for the footer: a shorter list that reads as
+		// everything is the thing worth avoiding.
+		if _, err := tx.tx.ExecContext(ctx,
+			`INSERT INTO queue_dropped (day, below_floor, computed_at) VALUES (?, ?, ?)
+			 ON CONFLICT (day) DO UPDATE SET below_floor = excluded.below_floor, computed_at = excluded.computed_at`,
+			now.UTC().Format(time.DateOnly), belowFloor, now.UTC().Format(time.RFC3339)); err != nil {
+			return err
 		}
 		return nil
 	})

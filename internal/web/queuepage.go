@@ -25,8 +25,11 @@ type queueData struct {
 	Platforms  []string
 	// Cuts is how many days of HuntScore history exist; the backtest needs
 	// QueueCutsNeeded before it can judge the ranking.
-	Cuts  int
-	Pager pager
+	Cuts int
+	// BelowFloor is how many targets the rebuild left out for scoring under
+	// the floor: the page says so, so a short list does not read as complete.
+	BelowFloor int
+	Pager      pager
 	// Total is every ranked target, not just this page: the heading said "50
 	// targets" when the queue held 207.
 	Total int
@@ -140,6 +143,9 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 			Platform: row.Platform, Handle: row.Handle, Kind: row.Kind, Value: row.Value,
 			Gate: gate,
 		})
+	}
+	if n, err := s.Store.QueueDropped(ctx); err == nil {
+		d.BelowFloor = n
 	}
 	s.render(w, r, http.StatusOK, "queue", pageData{Title: "Hunt queue", Nav: "queue", Data: d})
 }

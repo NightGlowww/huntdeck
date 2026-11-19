@@ -157,6 +157,7 @@ var seedLeftOut = map[string]string{
 	"schema_migrations":  "the seed's own migrations record its version",
 	"count_version":      "kept by triggers",
 	"program_ai_rules":   "a model's reading of the policy; regenerated, never shared",
+	"queue_dropped":      "a count of what this instance left out",
 	"queue_scores":       "what the queue said here; not shared",
 	"api_tokens":         "a secret of the user's; never in a seed",
 	"program_user_stats": "the user's own numbers",

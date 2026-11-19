@@ -5,6 +5,7 @@
   <p class="empty-state">{{T "The queue has not been built yet: it is rebuilt every half hour while HuntDeck runs."}}</p>
 {{else}}
 {{if .IgnoredWindow}}<p class="board-status warn">{{TF "The window %s was ignored: say a number of days, like 7d." .IgnoredWindow}}</p>{{end}}
+{{if .BelowFloor}}<p class="board-status muted">{{TF "Another %s target(s) scored under the floor and are not listed." (num .BelowFloor)}}</p>{{end}}
 <p class="board-status">{{T "Built"}} <span data-ago data-at="{{iso .ComputedAt}}">{{ago .ComputedAt}}</span> · {{T "amounts are converted to US dollars with a fixed table, so programs paying in other currencies compare fairly; a currency the table does not know is compared at face value"}}{{if .Stale}} · <span class="warn">{{T "older than expected: is HuntDeck still running?"}}</span>{{end}}</p>
 
 {{if .Chips}}

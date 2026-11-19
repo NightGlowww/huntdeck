@@ -1615,6 +1615,7 @@
     "renewed": "已续期",
     "Those two variables are all it takes: the same address and password this page uses. docs/mcp.md in the repository lists every tool, its arguments, and what it answers; the queue tool takes explain for the factor breakdown.": "只需要两个变量：本页用的同一个地址和密码。仓库里的 docs/mcp.md 列出每个工具、参数与各自的返回；队列工具传 explain 可拿到因子分解。",
     "No bounties here: the parts weigh to %s, and only %d%% of that counts, so %s.": "该程序无赏金：四部分加权为 %s，其中仅 %d%% 计入评分，因此为 %s。",
-    "The parts are averaged by their weights, and a program that pays no bounties has that average multiplied by 0.75: the four parts of a disclosure-only program weigh to a higher number than the score it shows, and its program page says so under the parts.": "四部分按其权重取平均；无赏金项目再将该平均值乘以 0.75——因此纯披露型项目的四部分加权值会高于它显示的分数，程序页在四部分下方也写明了这一点。"
+    "The parts are averaged by their weights, and a program that pays no bounties has that average multiplied by 0.75: the four parts of a disclosure-only program weigh to a higher number than the score it shows, and its program page says so under the parts.": "四部分按其权重取平均；无赏金项目再将该平均值乘以 0.75——因此纯披露型项目的四部分加权值会高于它显示的分数，程序页在四部分下方也写明了这一点。",
+    "Another %s target(s) scored under the floor and are not listed.": "另有 %s 个目标评分低于门槛，未列入本表。"
   }
 }
