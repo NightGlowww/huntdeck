@@ -80,3 +80,8 @@ col.w-you { width: 112px; }
 @media (max-width: 1100px) {
   table.runs th:nth-child(6), table.runs td:nth-child(6) { display: none; }
 }
+
+/* The platform belongs under the handle, not after it: a handle that wraps to
+   two lines ("vidaxl-services-open-bug-bounty-program") otherwise ends with the
+   platform jammed onto its second line, reading as part of the name. */
+.prog-platform { display: block; margin-top: 1px; }

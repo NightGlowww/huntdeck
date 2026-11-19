@@ -26,7 +26,7 @@
     <tbody>
     {{range .Rows}}
       <tr>
-        <td class="c-prog"><a class="link" href="/programs/{{.Platform}}/{{.Handle}}">{{.Handle}}</a> <span class="muted small">{{.Platform}}</span></td>
+        <td class="c-prog"><a class="link" href="/programs/{{.Platform}}/{{.Handle}}">{{.Handle}}</a><span class="muted small prog-platform">{{platformLabel .Platform}}</span></td>
         <td class="c-target"><code class="mono small">{{.Kind}} {{.Value}}</code></td>
         <td class="c-open num" data-label="{{T "Score"}}">
           {{if .Factors}}
