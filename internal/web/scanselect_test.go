@@ -56,4 +56,11 @@ func TestScanSelectsCloseTheirOptions(t *testing.T) {
 	if got, want := strings.Count(body, "<option"), strings.Count(body, "</option>"); got != want {
 		t.Errorf("%d <option> but %d </option>", got, want)
 	}
+	// The fake scanner offers one template and one node, so the page has two
+	// selects with a placeholder each and one choice apiece. Only counting the
+	// options, and requiring more than the two placeholders, is what catches a
+	// list degrading to plain spans: the names stay in the body either way.
+	if got := strings.Count(body, "<option"); got != 4 {
+		t.Errorf("%d options in all, want 4 (2 placeholders + 1 template + 1 node)", got)
+	}
 }

@@ -16,7 +16,12 @@ import (
 func TestSettingsCopyPointsAtRealPlaces(t *testing.T) {
 	e := newTestEnv(t)
 
-	_, llm := e.do(e.client(), http.MethodGet, "/llm", nil, nil)
+	// The status matters: an empty 500 page contains no stale words either,
+	// and the assertions below would pass on nothing.
+	res, llm := e.do(e.client(), http.MethodGet, "/llm", nil, nil)
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("/llm: %d", res.StatusCode)
+	}
 	for _, stale := range []string{"Accounts › Optional model", "Policy tab"} {
 		if strings.Contains(llm, stale) {
 			t.Errorf("/llm still points at %q", stale)
