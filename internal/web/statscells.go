@@ -15,8 +15,12 @@ import (
 // beside the number, in a smaller type: "+ €12k".
 type ovCell struct {
 	N, Also string
-	Chart   *lineChart
-	Wait    string // "Nov 12"
+	// AlsoKey and NoteKey are translation keys, not text: "since" before the
+	// month in Also, "to decision" after the number. The words used to be
+	// English literals here, which a Chinese page showed untranslated.
+	AlsoKey, NoteKey string
+	Chart            *lineChart
+	Wait             string // "Nov 12"
 }
 
 // lineFrom is when a number saved daily since since gets its line: with
@@ -78,10 +82,10 @@ func (r platformStats) ValidCell() *ovCell {
 	}
 	switch {
 	case r.ValidPart:
-		c.Also = "since " + r.ValidFrom // the month is only partly counted
+		c.AlsoKey, c.Also = "since", r.ValidFrom // the month is only partly counted
 	case r.ValidFrom != "":
 		// last month wasn't counted at all: no number, and no line yet
-		c.N, c.Also, c.Chart = "", "counted from "+r.ValidFrom, nil
+		c.N, c.AlsoKey, c.Also, c.Chart = "", "counted from", r.ValidFrom, nil
 	}
 	return c
 }
@@ -154,7 +158,7 @@ const backlogDays = 180
 func (r platformStats) ResolveCellNoted() *ovCell {
 	c := r.ResolveCell()
 	if c != nil && r.Resolve == nil {
-		c.Also = "to decision"
+		c.NoteKey = "to decision"
 	}
 	return c
 }

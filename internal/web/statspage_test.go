@@ -248,13 +248,13 @@ func TestStatsRecentValidAndDecisions(t *testing.T) {
 	h1, igt := d.Rows[0], d.Rows[1]
 
 	c := igt.ValidCell()
-	if c == nil || c.N != "7" || c.Also != "since Oct 28" || c.Chart == nil || c.Wait != "" {
-		t.Errorf("intigriti valid cell %+v; want 7 since Oct 28 with its line", c)
+	if c == nil || c.N != "7" || c.AlsoKey != "since" || c.Also != "Oct 28" || c.Chart == nil || c.Wait != "" {
+		t.Errorf("intigriti valid cell %+v; want 7 with since Oct 28", c)
 	}
 	ywhSince := time.Date(2026, 11, 5, 21, 0, 0, 0, time.UTC)
 	ywh := buildStats([]store.PlatformOverview{{Platform: "yeswehack", ValidKind: "accepted", ValidSince: &ywhSince,
 		Months: make([]store.PlatformMonth, overviewMonths)}}, []string{"yeswehack"}, nil, nil, start).Rows[0].ValidCell()
-	if ywh == nil || ywh.N != "" || ywh.Also != "counted from Nov 5" || ywh.Chart != nil {
+	if ywh == nil || ywh.N != "" || ywh.AlsoKey != "counted from" || ywh.Also != "Nov 5" || ywh.Chart != nil {
 		t.Errorf("yeswehack valid cell %+v; want no number or line, counted from Nov 5", ywh)
 	}
 	if v := d.All.ValidCell(); v == nil || v.N != "20" {
@@ -264,7 +264,7 @@ func TestStatsRecentValidAndDecisions(t *testing.T) {
 		t.Errorf("AllLeftOut = %q; the total should say what it leaves out", d.AllLeftOut)
 	}
 	r := igt.ResolveCellNoted()
-	if r == nil || r.N != "4d" || r.Also != "to decision" || r.Chart == nil || igt.ResolveCell().Also != "" {
+	if r == nil || r.N != "4d" || r.NoteKey != "to decision" || r.Chart == nil || igt.ResolveCell().NoteKey != "" {
 		t.Errorf("intigriti resolve cell %+v; want 4d to decision with a line (on the Stats page; on its own page, no note)", r)
 	}
 	if h1.Decision != nil || d.All.Decision != nil {

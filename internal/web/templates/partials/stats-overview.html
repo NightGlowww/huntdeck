@@ -17,8 +17,8 @@
     <span class="h">{{T "in"}} {{T $a.Month}}</span>{{template "ov-spark" $a.ScopeAdded}}</div>
   {{with $a.ReceivedCell}}<div class="ov-tile"><span class="l">{{T "Reports received"}} · 90</span><span class="v">{{.N}}</span>
     <span class="h" title="{{T "Every report, duplicates and N/A included"}}">{{T "from"}} {{num $a.ReceivedPrograms}} {{plural $a.ReceivedPrograms "program" "programs"}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
-  {{with $a.ValidCell}}<div class="ov-tile"><span class="l" title="{{validMonthTitle $a.Platform}}">{{T "Valid reports"}}</span><span class="v">{{.N}}</span>
-    <span class="h" title="{{validMonthTitle $a.Platform}}">{{with .Also}}{{.}}{{else}}{{T "in"}} {{T $a.Month}}{{end}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
+  {{with $a.ValidCell}}{{$k := .AlsoKey}}<div class="ov-tile"><span class="l" title="{{validMonthTitle $a.Platform}}">{{T "Valid reports"}}</span><span class="v">{{.N}}</span>
+    <span class="h" title="{{validMonthTitle $a.Platform}}">{{with .Also}}{{with $k}}{{T $k}} {{end}}{{.}}{{else}}{{T "in"}} {{T $a.Month}}{{end}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
   {{with $a.PaidCell}}<div class="ov-tile"><span class="l">{{T "Paid"}} · 90</span><span class="v"{{if $a.PaidEstimated}} title="{{T "Some programs' amounts are estimated, as on the Programs list"}}"{{end}}>{{.N}}{{with .Also}} <span class="ov-also">{{.}}</span>{{end}}</span>
     <span class="h">{{T "from"}} {{num $a.PaidPrograms}} {{plural $a.PaidPrograms "program" "programs"}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
 </section>
@@ -42,7 +42,7 @@
 {{end}}
 
 {{/* A number above its sparkline (or when the line starts). */}}
-{{define "ov-cell"}}<div class="ov-cell"><span class="ov-n">{{.N}}{{with .Also}} <small>{{.}}</small>{{end}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
+{{define "ov-cell"}}<div class="ov-cell"><span class="ov-n">{{.N}}{{with .NoteKey}} <small>{{T .}}</small>{{end}}{{with .Also}} <small>{{with $.AlsoKey}}{{T $.AlsoKey}} {{end}}{{.}}</small>{{end}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
 
 {{/* What a line's colour and dashes mean, under the Stats pages' tables. */}}
 {{define "ov-legend"}}<div class="ov-legend">
