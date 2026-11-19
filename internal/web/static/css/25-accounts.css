@@ -1,138 +1,114 @@
 /* ---------- Settings: Accounts ---------- */
-/* A panel per platform (and the proxy), two a row where there's room: a
-   label, the input and where the value comes from on one line, help under it. */
-.acct-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
-.acct-grid > .panel + .panel { margin-top: 0; }
-.acct-signin { padding: 10px 16px; border-bottom: 1px solid var(--border); }
-.acct-form { display: grid; gap: 12px; padding: 14px 16px; }
-.acct-field { display: grid; grid-template-columns: 190px minmax(0, 1fr) 108px; align-items: center; gap: 4px 12px; }
-.acct-label { display: grid; gap: 1px; color: var(--text-2); font-weight: 500; line-height: 1.35; }
-.acct-label code { justify-self: start; padding: 0; background: none; color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 400; overflow-wrap: anywhere; }
-.acct-input { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.acct-input input[type="text"], .acct-input input[type="password"] { flex: 1; min-width: 0; font-family: var(--mono); font-size: calc(12.5px * var(--fs, 1)); }
-/* The Clear action beside a saved value: a small ghost button, not a bare
-   checkbox. The input stays a checkbox (no script needed) and only its face
-   is drawn; checked shows what the Save will do. */
-.acct-clear { position: relative; display: inline-flex; flex: none; }
-.acct-clear input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
-.acct-clear-face { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 9px; border: 1px solid var(--border-input);
-  border-radius: 8px; color: var(--text-2); font-size: calc(12px * var(--fs, 1)); line-height: 1; white-space: nowrap;
-  transition: color .12s, border-color .12s, background .12s; }
-.acct-clear-face .i { width: 12px; height: 12px; }
-.acct-clear:hover .acct-clear-face { color: var(--text); border-color: var(--muted); }
-.acct-clear input:focus-visible + .acct-clear-face { outline: 2px solid var(--accent); outline-offset: 2px; }
-.acct-clear input:checked + .acct-clear-face { color: var(--bad); border-color: var(--bad); background: var(--bad-weak); }
-.acct-clear input:checked + .acct-clear-face .i { color: var(--bad); }
-.acct-src { display: flex; align-items: center; justify-content: flex-end; gap: 6px; white-space: nowrap; }
-.acct-help { grid-column: 2 / -1; margin: 0; line-height: 1.45; }
-.acct-actions { display: flex; gap: 8px; padding-top: 2px; }
-.acct-foot { margin: 16px 2px 0; line-height: 1.55; }
-.restart-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px; padding: 10px 14px; border: 1px solid var(--border-input);
-  border-radius: var(--radius); background: var(--accent-weak); color: var(--text); }
-.restart-bar .i { color: var(--accent); }
-.restart-bar form { margin-left: auto; }
-@media (max-width: 1500px) { .acct-grid { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 700px) {
-  .acct-field { grid-template-columns: minmax(0, 1fr); }
-  .acct-src { justify-content: flex-start; }
-  .acct-src:empty { display: none; }
-  .acct-help { grid-column: 1; }
-  .restart-bar form { margin-left: 0; }
-}
+/* One card per platform (and the proxy), two to a row where there is room. The
+   tab used to be a grid of eight identical rows per platform, where the token you
+   must set carried the same weight as a concurrency limit; a card now leads with
+   the API section, puts the optional website login under it, folds the tuning
+   away, and marks a saved value with a dot rather than a word.
 
-/* A submit button while its form is on the way: a spinner and no second
-   click. The label stays readable, so the action is not a mystery. */
-.button.is-busy, button.is-busy { pointer-events: none; opacity: .8; }
-.button.is-busy::after, button.is-busy::after { content: ""; display: inline-block; width: 11px; height: 11px; margin-left: 6px;
-  vertical-align: -1px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
-  animation: hd-spin .7s linear infinite; }
-@keyframes hd-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .button.is-busy::after, button.is-busy::after { animation: none; } }
+   Order matters: every @media block sits at the end of this file. A media rule
+   that precedes the base rule it means to override never applies, and this file
+   was written in three passes and had exactly that bug. */
 
-/* Where a saved value comes from: quieter than the field it belongs to. */
-.acct-src .chip { font-size: calc(10px * var(--fs, 1)); letter-spacing: .03em; padding: 1px 7px; opacity: .85; }
-
-/* Where a value comes from, as a quiet note rather than a badge: the field is
-   the thing to read, this only says where it came from. */
-.acct-src .chip { border: 0; background: none; padding: 0; color: var(--muted); font-size: calc(11px * var(--fs, 1)); letter-spacing: 0; opacity: 1; }
-.acct-src .chip.ok { color: var(--good); }
-.acct-src .chip.ok::before { content: "✓"; margin-right: 4px; }
-.acct-src .chip.failed { color: var(--bad); }
-
-/* ---------- Settings › Accounts: one platform per card, grouped by purpose ----------
-   The tab used to be a two-column grid of eight identical rows per platform:
-   the token you must set carried the same weight as a concurrency limit, and
-   every field shouted "saved here" in a chip. Now: full-width cards, an API
-   section first, the optional website login under it, and the tuning folded
-   away — with a dot, not a word, marking a saved value. */
 .acct-grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 1500px) { .acct-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
 .acct { display: flex; flex-direction: column; min-width: 0; }
 .acct .panel-head h2 { font-size: calc(15.5px * var(--fs, 1)); }
 .acct-form { display: flex; flex-direction: column; gap: 18px; padding: 16px 18px 18px; }
+.acct-signin { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+
+/* A section inside a card: API keys, the website login, the tuning. */
 .acct-sec { border: 0; margin: 0; padding: 0; display: grid; gap: 14px; }
 .acct-sec > legend { padding: 0 0 2px; font-size: calc(11px * var(--fs, 1)); font-weight: 700; letter-spacing: .07em;
   text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .acct-sec > legend .muted { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.acct-sec + .acct-sec, .acct-sec + .acct-more { border-top: 1px solid var(--border); padding-top: 16px; }
+.acct-form > .acct-sec:first-of-type { padding-top: 2px; }
 .acct-more { border-top: 1px solid var(--border); padding-top: 12px; }
 .acct-more > summary { cursor: pointer; font-size: calc(12.5px * var(--fs, 1)); color: var(--text-2); padding: 2px 0; }
 .acct-more[open] > summary { margin-bottom: 12px; }
-.acct-field { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr) auto;
-  gap: 10px 14px; align-items: center; }
-.acct-field .acct-help { grid-column: 2 / -1; margin: -4px 0 0; }
-.acct-label { font-size: calc(13px * var(--fs, 1)); font-weight: 550; display: grid; gap: 1px; }
-.acct-label code { font-size: calc(10.5px * var(--fs, 1)); color: var(--muted); font-weight: 400; }
-.acct-input input[type="text"], .acct-input input[type="password"] { width: 100%; }
-.acct-src .src-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--ok, #2e8b57); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok, #2e8b57) 18%, transparent); }
-.acct-actions { display: flex; gap: 10px; padding-top: 2px; }
-@media (max-width: 760px) {
-  .acct-field { grid-template-columns: minmax(0, 1fr) auto; }
-  .acct-label { grid-column: 1 / -1; }
-  .acct-field .acct-help { grid-column: 1 / -1; }
-}
-
-
-/* The platform table's Sign-in column carries a whole sentence, which pushed the
-   table past the panel and gave the page a sideways scroll at laptop widths.
-   Below 1500px that column truncates to one line (the full text stays in the
-   title) so the intervals and the Poll now buttons fit without scrolling. */
-@media (max-width: 1500px) {
-  #platforms .c-wide { max-width: 300px; }
-  #platforms .c-wide .signins > * { display: block; min-width: 0; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap; }
-  #platforms .c-wide .signins .when, #platforms #platforms .c-wide .muted { white-space: nowrap; }
-}
-@media (max-width: 1200px) {
-  #platforms .c-wide { max-width: 220px; }
-}
-
-
 .acct-legend { grid-column: 1 / -1; margin: 0; padding: 0 0 4px; font-size: calc(11px * var(--fs, 1)); font-weight: 700;
   letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: flex; gap: 8px;
   align-items: baseline; flex-wrap: wrap; }
 .acct-legend .muted { text-transform: none; letter-spacing: 0; font-weight: 500; }
-.acct-field { grid-template-columns: minmax(140px, 200px) minmax(0, 1fr) auto; }
+
+/* A field: label, input, where the value came from, help under it. */
+.acct-field { display: grid; grid-template-columns: minmax(140px, 200px) minmax(0, 1fr) auto;
+  gap: 10px 14px; align-items: center; }
 .acct-field .acct-help { grid-column: 1 / -1; margin: 2px 0 0; }
+.acct-label { font-size: calc(13px * var(--fs, 1)); font-weight: 550; display: grid; gap: 1px; color: var(--text-2); line-height: 1.35; }
+.acct-label code { justify-self: start; padding: 0; background: none; color: var(--muted);
+  font-size: calc(10.5px * var(--fs, 1)); font-weight: 400; overflow-wrap: anywhere; }
+.acct-input { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.acct-input input[type="text"], .acct-input input[type="password"] { flex: 1; width: 100%; min-width: 0;
+  font-family: var(--mono); font-size: calc(12.5px * var(--fs, 1)); }
+.acct-help { margin: 0; line-height: 1.45; }
+.acct-actions { display: flex; gap: 10px; padding-top: 2px; }
 
+/* The Clear action beside a saved value: a small ghost button, not a bare
+   checkbox. The input stays a checkbox (no script needed) and only its face is
+   drawn; checked shows what Save will do. */
+.acct-clear { position: relative; display: inline-flex; flex: none; }
+.acct-clear input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.acct-clear-face { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 9px;
+  border: 1px solid var(--border-input); border-radius: 8px; color: var(--text-2);
+  font-size: calc(12px * var(--fs, 1)); line-height: 1; white-space: nowrap;
+  transition: color .12s, border-color .12s, background .12s; }
+.acct-clear:hover .acct-clear-face { color: var(--text); border-color: var(--muted); }
+.acct-clear input:focus-visible + .acct-clear-face { outline: 2px solid var(--accent); outline-offset: 2px; }
+.acct-clear input:checked + .acct-clear-face { color: var(--bad); border-color: var(--bad); background: var(--bad-weak); }
 
-/* Sections are separated by a rule so the website-login heading does not read as
-   a field of the API group above it. */
-.acct-sec + .acct-sec, .acct-sec + .acct-more { border-top: 1px solid var(--border); padding-top: 16px; }
-.acct-form > .acct-sec:first-of-type { padding-top: 2px; }
+/* Where a value comes from, as a quiet note rather than a badge. */
+.acct-src { display: flex; align-items: center; justify-content: flex-end; gap: 6px; white-space: nowrap; }
+.acct-src .chip { border: 0; background: none; padding: 0; color: var(--muted);
+  font-size: calc(11px * var(--fs, 1)); letter-spacing: 0; }
+.acct-src .chip.ok { color: var(--good); }
+.acct-src .chip.ok::before { content: "\2713"; margin-right: 4px; }
+.acct-src .chip.failed { color: var(--bad); }
+.acct-src .src-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ok, #2e8b57); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok, #2e8b57) 18%, transparent); }
 
+.restart-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px;
+  padding: 10px 14px; border: 1px solid var(--border-input); border-radius: var(--radius);
+  background: var(--accent-weak); color: var(--text); }
+.restart-bar .i { color: var(--accent); }
+.restart-bar form { margin-left: auto; }
 
-/* Below 1700px the last-run status beside each interval is what pushed the
-   platform table past its panel (and gave the page a sideways scroll). It stays
-   in the poll history right below; keep the interval itself. */
+/* A submit button while its form is on the way: a spinner and no second click. */
+.button.is-busy, button.is-busy { pointer-events: none; opacity: .8; }
+.button.is-busy::after, button.is-busy::after { content: ""; display: inline-block; width: 11px; height: 11px;
+  margin-left: 6px; vertical-align: -1px; border: 2px solid currentColor;
+  border-right-color: transparent; border-radius: 50%; animation: hd-spin .7s linear infinite; }
+@keyframes hd-spin { to { transform: rotate(360deg); } }
+
+/* A little air between the sign-in badge and its sentence. */
+#platforms .signins .chip { margin-right: 7px; }
+
+/* ---- Layouts: after every base rule, never before ---- */
+@media (min-width: 1500px) {
+  .acct-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+@media (max-width: 760px) {
+  .acct-field { grid-template-columns: minmax(0, 1fr) auto; }
+  .acct-label { grid-column: 1 / -1; }
+  .acct-field .acct-help { grid-column: 1 / -1; }
+  .acct-src { justify-content: flex-start; }
+  .acct-src:empty { display: none; }
+  .restart-bar form { margin-left: 0; }
+}
+/* The Sign-in column carries a whole sentence, which pushed the platform table
+   past the panel. Below 1700px the last-run status goes (it is in the poll
+   history right below) and the line truncates, its text staying in the title. */
 @media (max-width: 1700px) {
   #platforms .pollc > span { display: none; }
   #platforms .c-wide { max-width: 260px; }
-  #platforms .c-wide .signins > * { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #platforms .c-wide .signins > * { display: block; min-width: 0; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; }
 }
-
-
-/* A little air between the sign-in badge and its sentence, which runs together
-   once the line truncates. */
-#platforms .signins .chip { margin-right: 7px; }
-
+@media (max-width: 1500px) {
+  #platforms .c-wide { max-width: 300px; }
+}
+@media (max-width: 1200px) {
+  #platforms .c-wide { max-width: 220px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .button.is-busy::after, button.is-busy::after { animation: none; }
+}

@@ -46,7 +46,7 @@ table.surface .tv-row { display: flex; align-items: baseline; gap: 10px; min-wid
 table.surface .tv-row .tv { min-width: 0; }
 table.surface .tv-row .more { flex: none; color: var(--muted); font-size: calc(12px * var(--fs, 1)); white-space: nowrap; }
 table.surface .tv-row .more:hover { color: var(--accent); }
-.pay { display: flex; align-items: baseline; gap: 8px; overflow: hidden; white-space: nowrap; color: var(--muted); }
+.pay { display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; color: var(--muted); }
 .pay .amt { color: var(--text); font: 600 12.5px var(--mono); }
 .pay .upto { font-size: calc(12px * var(--fs, 1)); }
 .pay .none { color: var(--faint); }
@@ -213,3 +213,8 @@ td.acts .open-ext { width: 28px; height: 28px; }
 @media (max-width: 420px) {
   table.surface .tv { white-space: normal; max-width: none; overflow-wrap: anywhere; }
 }
+
+/* The kind chip is inline-block inside its cell, so it sits on the cell's
+   line box and lands a few pixels below the amount in the next cell, which
+   is a flex block. An explicit line height gives both the same 18px box. */
+table.surface td.c-kind { line-height: 18px; }
