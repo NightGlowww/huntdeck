@@ -119,6 +119,11 @@ What the very first view after a restart costs, measured 3 s in:
 | `/` | up to 225 ms while its week of changes warms | 30 ms |
 
 
+A `--check` run fails in two ways: a route slower than its budget, and a route
+that did not answer at all. It used to fail only on the first, so a check
+aimed at nothing (a stopped instance, the wrong `base`) passed, because a
+connection refused takes no time.
+
 ### Measured 2026-11-19, after the queue and index work
 
 | Route | first hit after a restart | warm |

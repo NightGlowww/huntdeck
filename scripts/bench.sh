@@ -51,6 +51,7 @@ paths=(
   "/api/v1/changes?limit=30" "/api/v1/disclosed?limit=30" "/api/v1/queue?limit=20" "/queue?one=1"
 )
 over=0
+bad=0
 ms_of() { awk -v t="$1" 'BEGIN { printf "%d", t * 1000 }'; }
 if [ "$cold" = 1 ]; then
   echo "== first hit of each route (a restart's cost)"
@@ -59,6 +60,9 @@ if [ "$cold" = 1 ]; then
     out=$(curl -s -o /dev/null -b "$jar" -w "%{http_code} %{time_total}" "$base$p")
     printf "first=%s/%s" "${out% *}" "${out#* }"
     if [ "$check" = 1 ]; then
+      code="${out% *}"
+      # 000 is curl failing to connect: a budget it beats by not answering.
+      case "$code" in 2*|3*) : ;; *) printf "  FAIL (%s)" "$code"; bad=$((bad + 1)) ;; esac
       ms=$(ms_of "${out#* }")
       if [ "$ms" -gt "$max_first" ]; then
         printf "  OVER (%s ms > %s ms)" "$ms" "$max_first"
@@ -78,6 +82,8 @@ for p in "${paths[@]}"; do
     warm="${out#* }"
   done
   if [ "$check" = 1 ]; then
+    code="${out% *}"
+    case "$code" in 2*|3*) : ;; *) printf "  FAIL (%s)" "$code"; bad=$((bad + 1)) ;; esac
     ms=$(ms_of "$warm")
     limit="$max_page"
     case "$p" in /api/*) limit="$max_api" ;; esac
@@ -89,9 +95,13 @@ for p in "${paths[@]}"; do
   echo
 done
 if [ "$check" = 1 ]; then
+  if [ "$bad" -gt 0 ]; then
+    echo "$bad route(s) did not answer: is the instance up, and is $base right?" >&2
+    exit 1
+  fi
   if [ "$over" -gt 0 ]; then
     echo "$over route(s) slower than their budget" >&2
     exit 1
   fi
-  echo "every route inside its budget"
+  echo "every route answered, inside its budget"
 fi

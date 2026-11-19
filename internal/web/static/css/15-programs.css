@@ -64,7 +64,11 @@
 /* The bar heading every list: its count, what it shows, active filters,
    and on some pages quick sorts at the right. */
 .activef .what { color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); }
-.activef .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.activef .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto;
+  /* A link and a button side by side: the button carries 2px of padding for
+     its hit area, which pushed its text two pixels off the link's. Baseline
+     alignment ignores the padding and lines the words up. */
+  align-items: baseline; }
 .activef .qv { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border: 1px solid var(--border); border-radius: 12px;
   color: var(--text-2); font-size: calc(12px * var(--fs, 1)); font-weight: 550; white-space: nowrap; }
 .activef .qv:hover { border-color: var(--accent); color: var(--accent); }
