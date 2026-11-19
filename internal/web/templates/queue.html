@@ -71,6 +71,6 @@
 {{if .CutsUnknown}}
 <p class="acct-foot muted small">{{T "The score history could not be read just now, so how many snapshots exist is unknown."}}</p>
 {{else if lt .Cuts 8}}
-<p class="acct-foot muted small">{{TF "HuntScore history: %d of %d snapshots. The queue is not judged against what the platforms actually paid until there are %d; until then this ranking is untested, not proven." .Cuts 8 8}}</p>
+<p class="acct-foot muted small">{{TF "HuntScore history: %d of %d snapshots. The queue is not judged against what the platforms actually paid until there are %d; until then this ranking is untested, not proven." .Cuts $.Data.Goal $.Data.Goal}}</p>
 {{end}}
 {{end}}{{end}}{{end}}

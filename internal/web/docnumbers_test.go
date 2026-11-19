@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -11,7 +12,9 @@ import (
 // A doc that quotes a number the product changes daily goes stale silently:
 // "2 of 8 snapshots" was still in two files a week after it became 3. Write N.
 func TestDocsDoNotQuoteTheSnapshotCount(t *testing.T) {
-	volatile := regexp.MustCompile(`\d+ of 8 snapshots`)
+	// The number comes from the code: a docs guard that hardcodes 8 stops
+	// guarding anything the day the goal becomes 9.
+	volatile := regexp.MustCompile(`\d+ of ` + strconv.Itoa(QueueCutsNeeded) + ` snapshots`)
 	files := []string{"../../README.md", "../../AGENTS.md"}
 	// Reference docs only: the audit files record what was true on a day,
 	// and a before/after table there is meant to quote the old number.

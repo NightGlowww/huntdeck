@@ -85,3 +85,9 @@ func (s *Store) QueueOn(ctx context.Context, day string) ([]QueueScore, error) {
 	}
 	return out, rows.Err()
 }
+
+// SnapshotGoal is how many days of queue history the backtest needs before its
+// verdict counts as evidence. It lives here so the page, the CLI and the docs
+// guard read one number: the page said 8 in a template, the CLI said "eight" in
+// a sentence, and the docs guard hardcoded 8 in a regexp.
+const SnapshotGoal = 8

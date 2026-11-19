@@ -14,7 +14,9 @@ import (
 // queueData is the page: what to hunt today, and what is blocked and why.
 // QueueCutsNeeded is the number of point-in-time cuts the backtest in
 // docs/design/ai-layer.md asks for before HuntQueue may replace HuntScore.
-const QueueCutsNeeded = 8
+// It is the store's number, so the page, the CLI and the docs guard cannot
+// drift apart again.
+const QueueCutsNeeded = store.SnapshotGoal
 
 type queueData struct {
 	Rows       []queueRowView
@@ -25,6 +27,7 @@ type queueData struct {
 	Platforms  []string
 	// Cuts is how many days of HuntScore history exist; the backtest needs
 	// QueueCutsNeeded before it can judge the ranking.
+	Goal int
 	Cuts int
 	// CutsUnknown says the history could not be read: the page then does
 	// not print "0 of 8 snapshots", which would be a claim about the data.
@@ -122,6 +125,7 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 	d.IgnoredWindow = ignored
 	if days, err := s.Store.ScoreDays(ctx); err == nil {
 		d.Cuts = len(days)
+		d.Goal = QueueCutsNeeded
 	} else {
 		// "0 of 8 snapshots" is a claim about the data; a failed read is not.
 		s.Log.WarnContext(ctx, "queue: cannot read the score history", "error", err)
