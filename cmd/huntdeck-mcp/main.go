@@ -27,6 +27,9 @@ func main() {
 	// that changes the instance.
 	readOnly := os.Getenv("HUNTDECK_MCP_READONLY") == "1"
 	s := mcpserver.New(base, os.Getenv("HUNTDECK_PASSWORD"), version.Version, readOnly)
+	// A token from the API page is the credential for a script: with one set,
+	// the client sends it as a bearer header and never makes a session.
+	s.Token = os.Getenv("HUNTDECK_TOKEN")
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := s.Run(ctx, os.Stdin, os.Stdout); err != nil {

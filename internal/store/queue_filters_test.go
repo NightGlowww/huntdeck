@@ -403,17 +403,33 @@ func TestHuntQueueGatedRows(t *testing.T) {
 		t.Fatalf("gated list has %d rows, want the 3 gated ones", len(gated))
 	}
 
-	// The count takes the same filter as the list: an unfiltered total beside a
-	// filtered list would count rows the reader cannot see.
-	n, err := q.s.HuntQueueGatedCount(q.ctx, QueueFilter{})
-	if err != nil {
-		t.Fatal(err)
+	// The count takes the same filter as the list. An empty filter is not a test:
+	// filtered and unfiltered SQL are then the same statement, so a count that
+	// ignores the filter still matches. The fixture spans two platforms, so a
+	// platform filter has to shrink both.
+	for _, f := range []QueueFilter{{}, {Platform: "hackerone"}, {Platform: "bugcrowd"}} {
+		list, err := q.s.HuntQueueGated(q.ctx, f, 100)
+		if err != nil {
+			t.Fatal(err)
+		}
+		n, err := q.s.HuntQueueGatedCount(q.ctx, f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n != len(list) {
+			t.Errorf("filter %+v: count %d, list %d rows", f, n, len(list))
+		}
 	}
-	if n != len(gated) {
-		t.Errorf("gated count %d, gated list %d rows", n, len(gated))
+	if len(gated) < 2 {
+		t.Fatalf("the fixture needs gated rows on more than one platform")
 	}
 
 	counts, err := q.s.HuntQueueGateCounts(q.ctx, QueueFilter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The unfiltered total, for the breakdown below.
+	n, err := q.s.HuntQueueGatedCount(q.ctx, QueueFilter{})
 	if err != nil {
 		t.Fatal(err)
 	}

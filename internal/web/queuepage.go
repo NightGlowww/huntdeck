@@ -46,7 +46,13 @@ type queueData struct {
 	// GatedTotal is how many targets the queue keeps out, however many this
 	// page lists, and GatedBy breaks that down by gate.
 	GatedTotal int
-	GatedBy    []store.QueueGate
+	// GatedUnknown says the blocked count could not be read, so the page does
+	// not claim that nothing is blocked.
+	GatedUnknown bool
+	// NoFilter says no chip is on: only then can the page speak about the
+	// whole queue rather than the part this filter keeps.
+	NoFilter bool
+	GatedBy  []store.QueueGate
 	// Chips are the filter toggles, each keeping the others.
 	Chips []queueChip
 }
@@ -125,7 +131,11 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 	d.Total = total
 	if n, err := s.Store.HuntQueueGatedCount(ctx, filter); err == nil {
 		d.GatedTotal = n
+	} else {
+		s.Log.WarnContext(ctx, "queue: cannot read the blocked count", "error", err)
+		d.GatedUnknown = true
 	}
+	d.NoFilter = q.Get("platform") == "" && q.Get("kind") == "" && q.Get("paying") == "" && q.Get("added") == "" && q.Get("one") == ""
 	if counts, err := s.Store.HuntQueueGateCounts(ctx, filter); err == nil {
 		for gate, n := range counts {
 			d.GatedBy = append(d.GatedBy, store.QueueGate{Gate: gate, Count: n})

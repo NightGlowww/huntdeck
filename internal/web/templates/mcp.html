@@ -24,7 +24,7 @@
 <section class="panel">
   <div class="panel-head"><h2>{{T "Tools"}}</h2><span class="aside">{{TF "%d in all" (len .Tools)}}</span></div>
   <div class="panel-body">
-    <p class="muted small">{{T "This list comes from the server is own registry, so it cannot list a tool that does not exist or miss one that does."}}</p>
+    <p class="muted small">{{T "This list comes from the same registry the server answers tools/list from, so it cannot list a tool that does not exist or miss one that does. A server started with HUNTDECK_MCP_READONLY=1 leaves out the ones marked as changing data."}}</p>
     {{range .Tools}}
     <div class="mcp-tool" id="{{.Name}}">
       <h3><code>{{.Name}}</code>{{if .Write}} <span class="chip">{{T "changes data"}}</span>{{end}}</h3>

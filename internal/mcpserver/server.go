@@ -27,8 +27,11 @@ const protocolVersion = "2025-06-18"
 // Server is one HuntDeck instance, seen through its API.
 type Server struct {
 	Base     string // https://huntdeck.example, no trailing slash
-	Password string // HUNTDECK_PASSWORD, when the instance has one
-	Version  string // reported in initialize
+	Password string
+	// Token is a bearer token from the API page, for a script that has no
+	// password to give. When it is set, no session is made.
+	Token   string // HUNTDECK_PASSWORD, when the instance has one
+	Version string // reported in initialize
 	// ReadOnly hides the tools that change anything (a poll): an agent
 	// that should only look gets only look-ups.
 	ReadOnly bool
@@ -198,7 +201,7 @@ func (s *Server) postText(ctx context.Context, path, contentType, body string) (
 	return out, err
 }
 
-var errUnauthorized = errors.New("the instance refused the session (is HUNTDECK_PASSWORD right?)")
+var errUnauthorized = errors.New("the instance refused the session (is HUNTDECK_PASSWORD or HUNTDECK_TOKEN right?)")
 
 // do sends a form-encoded request; doRaw is the same for any body.
 func (s *Server) do(ctx context.Context, method, target string, form url.Values, contentType string) (string, error) {
@@ -225,6 +228,9 @@ func (s *Server) doRaw(ctx context.Context, method, target, body, contentType st
 		req.Header.Set("Content-Type", contentType)
 	}
 	req.Header.Set("Accept", "application/json")
+	if s.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+s.Token)
+	}
 	res, err := s.HTTP.Do(req)
 	if err != nil {
 		var ue *url.Error
@@ -286,7 +292,7 @@ func (s *Server) login(ctx context.Context) error {
 	defer func() { _ = res.Body.Close() }()
 	_, _ = io.Copy(io.Discard, io.LimitReader(res.Body, 1<<20))
 	if res.StatusCode >= 400 {
-		return fmt.Errorf("sign in: HTTP %d (is HUNTDECK_PASSWORD right?)", res.StatusCode)
+		return fmt.Errorf("sign in: HTTP %d (is HUNTDECK_PASSWORD or HUNTDECK_TOKEN right?)", res.StatusCode)
 	}
 	if len(s.jar.Cookies(res.Request.URL)) == 0 {
 		return errors.New("sign in: the instance set no session cookie")

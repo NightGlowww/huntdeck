@@ -47,7 +47,7 @@
   {{end}}
 </section>
 
-{{if not .Gated}}<p class="board-status muted small">{{if .GatedTotal}}{{TF "Nothing is blocked among the %d targets this filter keeps." .GatedTotal}}{{else}}{{T "Nothing is blocked right now: every candidate can be started."}}{{end}}</p>{{end}}
+{{if not .Gated}}<p class="board-status muted small">{{if .GatedUnknown}}{{T "How many targets are blocked could not be read just now."}}{{else if .GatedTotal}}{{TF "Nothing is blocked among the %d targets this filter keeps." .GatedTotal}}{{else if .NoFilter}}{{T "Nothing is blocked right now: every candidate can be started."}}{{else}}{{T "Nothing is blocked among the targets this filter keeps."}}{{end}}</p>{{end}}
 {{if .Gated}}
 <section class="panel">
   <div class="panel-head"><h2>{{T "Blocked"}}</h2><span class="sub">{{TF "%d cannot be started today, showing %d" .GatedTotal (len .Gated)}}{{range .GatedBy}} · <span class="chip small" title="{{T "blocked by this gate"}}">{{.Gate}} {{num .Count}}</span>{{end}}</span></div>
