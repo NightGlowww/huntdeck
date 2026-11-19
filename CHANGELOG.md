@@ -58,6 +58,9 @@ start) stay compatible within a major version.
 
 ### Fixed
 
+- A table wider than its column could not be scrolled below 1601 px: the wrap
+  had `overflow-x: clip`, which also removed the overflow from the page, so the
+  poll history was cut off with no way to reach its right side.
 - The queue's second page was unreachable: its pager sat inside a branch that
   is false on every normal day.
 - `/queue?one=1&added=7d` returned 500 after "one per program" moved into
