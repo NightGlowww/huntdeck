@@ -1639,6 +1639,10 @@
     "MCP": "MCP",
     "since restart": "重启后尚未检查",
     "no poll has run yet; it checks at the next one": "还没有轮询跑过，下次轮询时检查",
-    "no run has needed it yet; it signs in at the next one": "还没有需要它的运行，下次运行时登录"
+    "no run has needed it yet; it signs in at the next one": "还没有需要它的运行，下次运行时登录",
+    "Hooking it up": "接入方式",
+    "any MCP client": "任何 MCP 客户端",
+    "Most clients take a command and its environment; this is the shape they ask for:": "多数客户端要一个命令加它的环境变量，形如：",
+    "A token is minted on the API page and revoked there; the password works too, in HUNTDECK_PASSWORD. Nothing else is needed: the tools speak plain JSON-RPC on stdin and stdout, one message a line.": "令牌在 API 页签发与吊销；也可以直接用密码，放在 HUNTDECK_PASSWORD 里。此外无需任何配置：这些工具在 stdin/stdout 上讲纯 JSON-RPC，一行一条消息。"
   }
 }

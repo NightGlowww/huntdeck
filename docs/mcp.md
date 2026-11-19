@@ -4,6 +4,9 @@
 Protocol on stdio: programs, targets, scope checks, changes, disclosed reports
 and a poll trigger, without the agent needing to know the REST API.
 
+The instance lists every tool with its arguments at /mcp, rendered from the
+server's own registry, so the page and the server cannot disagree.
+
 It adds **no accounts** of its own. It signs in with the instance's access
 password the way a browser does (the same `hd_session` cookie), keeps that
 cookie in memory, and signs in again if the session goes away.

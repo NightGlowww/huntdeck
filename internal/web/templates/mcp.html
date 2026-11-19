@@ -10,6 +10,18 @@
 </section>
 
 <section class="panel">
+  <div class="panel-head"><h2>{{T "Hooking it up"}}</h2><span class="aside">{{T "any MCP client"}}</span></div>
+  <div class="panel-body">
+    <p>{{T "Most clients take a command and its environment; this is the shape they ask for:"}}</p>
+    <pre class="code"><code>{"mcpServers": {"huntdeck": {
+  "command": "huntdeck-mcp",
+  "env": {"HUNTDECK_URL": "{{.Base}}", "HUNTDECK_TOKEN": "hs_…"}
+}}}</code></pre>
+    <p class="muted small">{{T "A token is minted on the API page and revoked there; the password works too, in HUNTDECK_PASSWORD. Nothing else is needed: the tools speak plain JSON-RPC on stdin and stdout, one message a line."}}</p>
+  </div>
+</section>
+
+<section class="panel">
   <div class="panel-head"><h2>{{T "Tools"}}</h2><span class="aside">{{TF "%d in all" (len .Tools)}}</span></div>
   <div class="panel-body">
     <p class="muted small">{{T "This list comes from the server is own registry, so it cannot list a tool that does not exist or miss one that does."}}</p>
