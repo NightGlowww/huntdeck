@@ -7,6 +7,10 @@ import "runtime/debug"
 // -ldflags "-X github.com/mdpsec/huntdeck/internal/version.Version=v1.2.3".
 var Version = "dev"
 
+// Pending is how many files had uncommitted changes when the binary was built;
+// 0 means the build matches its commit exactly.
+var Pending = "0"
+
 // String returns the version plus the VCS revision when the binary was built
 // from a git checkout.
 func String() string {
@@ -32,6 +36,9 @@ func String() string {
 	}
 	if dirty {
 		rev += "-dirty"
+		if Pending != "" && Pending != "0" {
+			rev += " " + Pending + " pending"
+		}
 	}
 	return Version + " (" + rev + ")"
 }

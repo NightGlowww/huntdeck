@@ -18,6 +18,7 @@ linters:
     gosec:
       excludes:
         - G304 # file paths come from operator config, not request input
+        - G703 # same: the CLI's --data/--to and the data directory it is given
   exclusions:
     rules:
       - path: _test\.go

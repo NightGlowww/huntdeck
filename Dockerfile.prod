@@ -1,0 +1,18 @@
+# A HuntDeck image built around a binary this machine compiled, for hosts
+# that cannot reach Docker Hub, proxy.golang.org or github.com to build the
+# full image (Dockerfile). It layers the binary onto the host's existing
+# HuntDeck image, so Chrome, the fonts and (if present) noVNC stay as they are.
+#
+#   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o huntdeck ./cmd/huntdeck
+#   docker build -f Dockerfile.prod -t huntdeck:local .
+#
+# Point the service at it with a compose override (image: huntdeck:local) and
+# `docker compose up -d --pull never`.
+ARG BASE=ghcr.io/mdpsec/huntdeck:latest
+FROM ${BASE}
+
+USER root
+COPY huntdeck /huntdeck
+COPY huntdeck-mcp /huntdeck-mcp
+RUN chmod 755 /huntdeck /huntdeck-mcp
+USER 65532:65532

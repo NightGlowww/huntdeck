@@ -6,3 +6,8 @@
 *.db-shm
 .env
 coverage.out
+
+# Cross-compiled binaries land in the tree root when GOOS is set by hand.
+*.exe
+/huntdeck
+/huntdeck-mcp
