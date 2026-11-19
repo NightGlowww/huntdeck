@@ -36,7 +36,7 @@ copy adds yours.
   Burp, ZAP and Caido scope files, CSV, Atom feeds, a scope check for
   subfinder output (`… | curl --data-binary @- …/api/v1/match?format=txt`),
   and a REST API with an OpenAPI description.
-- **Notifications.** Discord, Telegram or webhooks: new invites, launches,
+- **Notifications.** Discord, Telegram, Bark (iOS), ServerChan (WeChat) or webhooks: new invites, launches,
   new scope, bounty raises, as they happen or as a daily digest.
 - **Polite to platforms.** Per-platform rate limits, `Retry-After`, bounded
   retries, and a removal is only recorded from a complete listing, so a
@@ -66,17 +66,22 @@ on an ARM machine (Apple Silicon, Raspberry Pi, ARM servers) use
    `.env`; see [Platforms](#platforms) for what each needs. HuntDeck signs in,
    imports everything within a few minutes and keeps it fresh from then on.
    Settings › Polling shows whether each credential was accepted.
-3. **Optional:** add a Discord or Telegram channel in Settings ›
-   Notifications.
+3. **Optional:** add a Discord, Telegram, Bark (iOS) or ServerChan (WeChat)
+   channel in Settings › Notifications.
 
-HuntDeck has no login: it's published on `127.0.0.1` only. To use it from
-your phone or another computer, reach it over a private network such as
-Tailscale or WireGuard (set `HUNTDECK_PUBLISH` and add the hostname to
-`HUNTDECK_ALLOWED_HOSTS`); never expose it to the internet. See
-[Security](#security).
+HuntDeck has no user accounts, and by default it publishes on `127.0.0.1`
+only. To use it from your phone or another computer, reach it over a private
+network such as Tailscale or WireGuard (set `HUNTDECK_PUBLISH` and add the
+hostname to `HUNTDECK_ALLOWED_HOSTS`). To put a copy on a public address, set
+`HUNTDECK_PASSWORD`: the login page asks for it once and remembers the
+browser, and TLS belongs in front of it. See [Security](#security).
 
 Updating: `docker compose pull && docker compose up -d`. The database is
 upgraded in place, with a backup taken first.
+
+Backups: `docker compose exec huntdeck /huntdeck backup --to /data/backups/manual.tar.gz`
+writes one file with a consistent database snapshot, the settings key and the
+platform sessions — no need to stop the container ([details](docs/deploy.md)).
 
 ## Deploy it with your AI agent
 
@@ -141,14 +146,24 @@ for each platform, including request budgets: [docs/platforms.md](docs/platforms
   `docker run`, data and backups, how polling stays polite
 - [The web UI](docs/web-ui.md): each page, HuntScore, saved views, keyboard
   shortcuts
+- [A day with HuntDeck](docs/daily-use.md): the order to open the pages in,
+  and what to do with what they say
 - [API and command line](docs/api.md): endpoints, exports, piping recon
   output through the scope check
-- [Notifications](docs/notifications.md): Discord, Telegram, webhooks and
-  their rules
+- [MCP](docs/mcp.md): serve a running instance to an agent (programs,
+  targets, scope checks, changes, disclosed reports)
+- [Notifications](docs/notifications.md): Discord, Telegram, Bark (iOS),
+  ServerChan (WeChat), webhooks, and their rules
 - [Platforms](docs/platforms.md): what's read from each platform, and how
 - [Seeds](docs/seeds.md): the starter seed, and sharing your public data
 - [Custom sources](docs/custom-sources.md) and
   [adding a platform](docs/adding-a-platform.md)
+- [What is known to be rough](docs/audit/health-2026-11.md): the two
+  independent reviews of this codebase, what they found, what was fixed and
+  what is still open — including the numbers behind both claims
+- [November 2026 at a glance](docs/audit/timeline-2026-11.md): the four
+  reviews in one page, the five findings worth the exercise, and three claims of
+  ours that were wrong
 
 A taste of the API:
 
@@ -162,12 +177,17 @@ subfinder -d example.com -silent | curl -s --data-binary @- \
 
 ## Security
 
-HuntDeck has **no login** by design. It is meant to be reached only by you:
+HuntDeck has **no user accounts** by design: one operator, one copy. It is
+meant to be reached only by you:
 
 - The compose file publishes the port on `127.0.0.1` only. From other
   devices, use a private network such as Tailscale or WireGuard, and add the
   hostname you open it by to `HUNTDECK_ALLOWED_HOSTS`.
-- **Never expose HuntDeck to the internet.** Anyone who can reach it can read
+- **On a public address, set `HUNTDECK_PASSWORD` and put TLS in front**
+  (a reverse proxy such as Caddy, nginx or your host's panel): the login page
+  asks for the password once, keeps a 30-day signed cookie, and limits one
+  address to 8 tries per 10 minutes. Changing the password signs every
+  browser out. Without a password, anyone who can reach HuntDeck can read
   your private program scope and trigger polls.
 - Requests whose `Host` isn't an IP, `localhost` or an allowed hostname are
   refused (DNS rebinding), and cross-site form posts and API calls are

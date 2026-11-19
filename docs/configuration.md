@@ -25,10 +25,13 @@ stay browsable.
 | `HUNTDECK_LISTEN` | `0.0.0.0:8080` | HTTP listen address inside the container |
 | `HUNTDECK_DATA_DIR` | `/data` | Database and backups |
 | `HUNTDECK_ALLOWED_HOSTS` | — | Extra hostnames you open HuntDeck by, comma-separated (IPs and `localhost` always work) |
+| `HUNTDECK_CLIENT_IP_HEADER` | — | Behind a reverse proxy, the header carrying the visitor's address, so login budgets and rate limits count per person instead of per proxy: `X-Real-IP` (nginx, 1Panel), `CF-Connecting-IP` (Cloudflare). Unset when nothing proxies HuntDeck |
 | `HUNTDECK_SEED_URL` | the public starter seed | Where a new install downloads its starter seed on its first start, once, into an empty database (see [seeds](seeds.md)); `off` to start empty. An https URL, with its SHA-256 at the same URL plus `.sha256` |
 | `HUNTDECK_SOURCES` | — | Platforms HuntDeck has no client for, as custom sources: `name=location` pairs separated by spaces, each location an absolute file path or an http(s) address of a JSON document your own script writes (see [custom sources](custom-sources.md)). Polled like a platform under that name; refused on a read-only copy |
 | `HUNTDECK_SOURCES_INTERVAL` | `1h` | How often each custom source is read in full; new programs every quarter of that |
 | `HUNTDECK_TIMEZONE` | `America/New_York` | Time zone the UI and CLI show dates and times in (an IANA name such as `Australia/Brisbane` or `UTC`), until you pick one in Settings |
+| `HUNTDECK_LANGUAGE` | `auto` | The interface language when a visitor hasn't picked one: `auto` (the browser's `Accept-Language`), `en`, or any language with a catalog such as `zh`. Each visitor's choice in the sidebar's switcher wins over it |
+| `HUNTDECK_PASSWORD` | — | Ask for this password before showing anything (the login page): one password for the whole install, still no user accounts. At least 8 characters; changing it signs every browser out. Put it behind TLS in front of HuntDeck — it travels in a cookie, not in the clear page |
 | `HUNTDECK_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `HUNTDECK_LOG_FORMAT` | `text` | `text` or `json` |
 | `HUNTDECK_PROXY` | — | Proxy for all platform traffic, e.g. Burp on your machine: `http://host.docker.internal:8080` (on Linux, add `extra_hosts: ["host.docker.internal:host-gateway"]` to the compose service; `127.0.0.1` inside the container is HuntDeck itself): every platform's requests, custom sources read over http(s), and the login browser (one Chrome, used by every platform's login). With any platform login set it must be `http://` (`socks5://` works for API tokens only); it may carry credentials (`http://user:password@host:port`). Notifications and the starter seed download don't use it |
@@ -53,7 +56,30 @@ stay browsable.
 | `HUNTDECK_CHROME` | on `PATH` | The Chrome or Chromium for that login (the image includes Google Chrome; Chromium when built for arm64) |
 | `HUNTDECK_CHROME_TIMEZONE` | `HUNTDECK_TIMEZONE` | The browser's clock: match it to the proxy's country |
 | `HUNTDECK_CHROME_HEADLESS` | `false` | Run the browser without a window (login pages trust that less) |
+
+### The login browser and its sandbox
+
+The login browser runs **without Chrome's sandbox** inside the container: measured on this
+image, Chrome aborts (exit 134) when it is on, because a container without user
+namespaces cannot give the renderer the privileges it needs. That is a real
+blast-radius decision, so know it: a renderer bug runs with the same user that
+can read `/data` — the database, `secret.key`, and every platform session.
+
+What limits it: the container is non-root with `cap_drop: ALL` and a read-only
+root filesystem; the profile directory (`<data>/chrome/browser`) is created
+`0700`; the browser only ever opens the platforms' own login pages, and the
+proxy is the same one API calls use. If you run HuntDeck in a setup that does
+provide user namespaces, give the browser its sandbox back by adding
+`--no-sandbox`'s opposite to your deployment (Chrome has no flag for that: it is
+on unless passed).
 | `HUNTDECK_VNC` | `false` | Show the login browser (one Chrome, a tab per platform) live in Settings > Browser and at `/novnc/` (noVNC, in the image), to see a login or a platform's session, or finish a login by hand. The VNC server only listens inside the container; anyone who can reach HuntDeck can watch |
+| `HUNTDECK_NOVNC_DIR` | `/usr/share/novnc` (the image's) | Where the noVNC client for `HUNTDECK_VNC` is served from; only needed outside the image |
+| `HUNTDECK_PUBLIC_URL` | — | Where a **read-only** copy is published, such as `https://huntdeck.example`: with it the copy may be indexed, and its pages carry canonical links, a sitemap and link previews. A full install is never indexed |
+| `HUNTDECK_FEEDBACK_EMAIL` | — | Where the UI's "Send feedback" links mail to; unset hides them |
+| `HUNTDECK_AI_BASE_URL`, `HUNTDECK_AI_MODEL` | — | An OpenAI-compatible endpoint and model for optional AI features (`https://api.deepseek.com/v1` with `deepseek-chat`, an Azure OpenAI base, a local vLLM or Ollama). Set both or neither: with neither, every page works exactly as it does without AI. `huntdeck ai-check` verifies them |
+| `HUNTDECK_AI_KEY` | — | The endpoint's API key. Prompted for a local model with no key, leave it unset |
+| `HUNTDECK_X_ACCOUNT` | — | An X account to follow for news (e.g. `huntdeck`): a read-only copy links to it and its link previews name it |
+| `HUNTDECK_REPO_URL` | the project's | HuntDeck's source repository as the UI links it, for a fork that would rather point home |
 | `YWH_EMAIL`, `YWH_PASSWORD` | — | YesWeHack login. It runs in the login browser (a YesWeHack tab in Settings › Browser); HuntDeck takes the web app's token, saves it in the data directory and renews it as the web app does, signing in again only when it can't |
 | `YWH_TOTP_SECRET` | — | Base32 secret of your YesWeHack authenticator app (if 2FA is on) |
 | `YWH_TOKEN` | — | Alternative: a bearer token from your browser (expires within hours) |

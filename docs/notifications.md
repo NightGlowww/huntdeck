@@ -60,3 +60,30 @@ Setting up a channel:
 
 Channel URLs and tokens are stored in the database (the same place as your
 private program data) and are never shown again or logged.
+
+## Bark (iOS push)
+
+Install [Bark](https://apps.apple.com/app/bark-customed-notifications/id1403753865),
+open it and copy the key from the push address it shows
+(`https://api.day.app/<key>/…`). Paste that key into HuntDeck's Device key field;
+leave Server blank for Bark's cloud, or give your own `bark-server`
+(`https://bark.example.com`). HuntDeck sends a JSON POST to `{server}/push`
+with `device_key`, a `HuntDeck` title and the message body; notifications land
+in a group of their own, `HuntDeck` unless the channel sets another (the form's
+**Group** field), so they don't mix with the rest of your phone. **Sound** picks
+a Bark sound by name, and **Interruption level** chooses how loudly it arrives
+(`active`, `timeSensitive`, or `passive` for a quiet banner); both are optional.
+Messages go as plain text — Bark shows no markup — with a link's address in
+brackets after its title, and the settings preview shows exactly that text.
+
+## ServerChan (WeChat push)
+
+Sign in at [sct.ftqq.com](https://sct.ftqq.com), bind WeChat, create a channel
+and copy its **SendKey** (`SCT…`). HuntDeck POSTs `title` and `desp` (Markdown)
+to `{server}/{SendKey}.send`, tagged `HuntDeck`; leave Server blank for
+`https://sctapi.ftqq.com`.
+Messages arrive from the Server酱 service account in WeChat, with links to
+HuntDeck when Settings › Notifications has the address set.
+
+Both kinds take the same events, filters, digest time and Test button as the
+others; a message too long for one push is split the way Telegram's is.
