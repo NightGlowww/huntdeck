@@ -399,7 +399,7 @@ func (s *server) rotateAPIToken(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	if err := s.Store.ReplaceAPITokenDigest(r.Context(), id, value); err != nil {
+	if err := s.Store.ReplaceAPITokenDigest(r.Context(), "api", id, value); err != nil {
 		s.renderAPIDocs(w, r, "", "token-missing")
 		return
 	}
@@ -415,7 +415,7 @@ func (s *server) deleteAPIToken(w http.ResponseWriter, r *http.Request) {
 		s.renderAPIDocs(w, r, "", "token-missing")
 		return
 	}
-	if err := s.Store.DeleteAPIToken(r.Context(), id); err != nil {
+	if err := s.Store.DeleteAPIToken(r.Context(), "api", id); err != nil {
 		s.renderAPIDocs(w, r, "", "token-not-revoked")
 		return
 	}
@@ -430,7 +430,7 @@ func (s *server) revokeAPIToken(w http.ResponseWriter, r *http.Request) {
 		s.renderAPIDocs(w, r, "", "token-revoked")
 		return
 	}
-	if err := s.Store.RevokeAPIToken(r.Context(), id); err != nil {
+	if err := s.Store.RevokeAPIToken(r.Context(), "api", id); err != nil {
 		s.serverError(w, r, err)
 		return
 	}

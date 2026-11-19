@@ -40,7 +40,7 @@ func TestAPITokens(t *testing.T) {
 		t.Fatal("the token was stored in clear")
 	}
 
-	if err := s.RevokeAPIToken(ctx, id); err != nil {
+	if err := s.RevokeAPIToken(ctx, "api", id); err != nil {
 		t.Fatal(err)
 	}
 	if err := s.CheckAPIToken(ctx, token); !errors.Is(err, ErrTokenUnknown) {

@@ -2,7 +2,6 @@ package mcpserver
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 )
@@ -15,6 +14,7 @@ func (s *Server) HTTPHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", "POST")
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			_ = json.NewEncoder(w).Encode(response{JSONRPC: "2.0", Error: &rpcError{
 				Code: -32000, Message: "Method not allowed (stateless mode: POST only)"}})
@@ -41,12 +41,13 @@ func (s *Server) HTTPHandler() http.HandlerFunc {
 			return
 		}
 		res.JSONRPC = "2.0"
+		if len(req.ID) == 0 {
+			w.WriteHeader(http.StatusAccepted)
+			return // a notification: JSON-RPC forbids answering it
+		}
 		if len(res.ID) == 0 {
 			res.ID = req.ID
 		}
-		if err := json.NewEncoder(w).Encode(res); err != nil {
-			// The header is already sent; the log is all that is left.
-			_ = fmt.Errorf("mcp http: %w", err)
-		}
+		_ = json.NewEncoder(w).Encode(res)
 	}
 }

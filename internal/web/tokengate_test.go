@@ -35,7 +35,7 @@ func TestBearerTokenPassesTheGate(t *testing.T) {
 	if err != nil || len(list) != 1 {
 		t.Fatalf("list: %v %v", list, err)
 	}
-	if err := e.store.RevokeAPIToken(context.Background(), list[0].ID); err != nil {
+	if err := e.store.RevokeAPIToken(context.Background(), "api", list[0].ID); err != nil {
 		t.Fatal(err)
 	}
 	if code := get("Bearer " + token); code != http.StatusUnauthorized {

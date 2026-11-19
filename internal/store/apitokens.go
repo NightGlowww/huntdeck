@@ -115,9 +115,9 @@ func (s *Store) CheckAPIToken(ctx context.Context, token string) error {
 // DeleteAPIToken drops a revoked token's row. A live one has to be revoked
 // first: the two-step keeps a stray click from removing a key something is
 // still using.
-func (s *Store) DeleteAPIToken(ctx context.Context, id int64) error {
+func (s *Store) DeleteAPIToken(ctx context.Context, kind string, id int64) error {
 	res, err := s.db.W.ExecContext(ctx,
-		`DELETE FROM api_tokens WHERE id = ? AND revoked_at IS NOT NULL`, id)
+		`DELETE FROM api_tokens WHERE id = ? AND kind = ? AND revoked_at IS NOT NULL`, id)
 	if err != nil {
 		return fmt.Errorf("delete token: %w", err)
 	}
@@ -130,10 +130,10 @@ func (s *Store) DeleteAPIToken(ctx context.Context, id int64) error {
 // ReplaceAPITokenDigest swaps the digest in place, keeping the name and the
 // created time: that is a rotation, not a new row, so the page's history
 // stays one line per purpose and last_used_at restarts from the swap.
-func (s *Store) ReplaceAPITokenDigest(ctx context.Context, id int64, token string) error {
+func (s *Store) ReplaceAPITokenDigest(ctx context.Context, kind string, id int64, token string) error {
 	res, err := s.db.W.ExecContext(ctx,
-		`UPDATE api_tokens SET digest = ?, created_at = ?, last_used_at = NULL, revoked_at = NULL WHERE id = ?`,
-		tokenDigest(token), s.Now().UTC().Format(time.RFC3339), id)
+		`UPDATE api_tokens SET digest = ?, created_at = ?, last_used_at = NULL, revoked_at = NULL WHERE id = ? AND kind = ? AND revoked_at IS NULL`,
+		tokenDigest(token), s.Now().UTC().Format(time.RFC3339), id, kind)
 	if err != nil {
 		return fmt.Errorf("rotate token: %w", err)
 	}
@@ -144,10 +144,10 @@ func (s *Store) ReplaceAPITokenDigest(ctx context.Context, id int64, token strin
 }
 
 // RevokeAPIToken retires a token; the row stays so the page can say when.
-func (s *Store) RevokeAPIToken(ctx context.Context, id int64) error {
+func (s *Store) RevokeAPIToken(ctx context.Context, kind string, id int64) error {
 	_, err := s.db.W.ExecContext(ctx,
-		`UPDATE api_tokens SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL`,
-		s.Now().UTC().Format(time.RFC3339), id)
+		`UPDATE api_tokens SET revoked_at = ? WHERE id = ? AND kind = ? AND revoked_at IS NULL`,
+		s.Now().UTC().Format(time.RFC3339), id, kind)
 	return err
 }
 

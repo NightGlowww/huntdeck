@@ -109,6 +109,9 @@ func (s *Server) Run(ctx context.Context, in io.Reader, out io.Writer) error {
 		if res == nil {
 			continue // a notification: nothing to answer
 		}
+		if len(req.ID) == 0 {
+			continue // an unanswered method (a notification): JSON-RPC forbids replying
+		}
 		res.JSONRPC = "2.0"
 		if len(res.ID) == 0 {
 			res.ID = req.ID
