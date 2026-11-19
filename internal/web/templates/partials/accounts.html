@@ -39,19 +39,28 @@
 {{range .Groups}}
 <section class="panel acct" id="acct-{{.Key}}">
   <div class="panel-head"><h2>{{if .Platform}}{{template "pf" .Key}}{{else}}{{.Label}}{{end}}</h2>
-    <span class="aside">{{if not .Platform}}{{T "every platform's traffic"}}{{else if .Polled}}{{T "polled"}}{{else}}{{T "not set up"}}{{end}}</span></div>
+    <span class="aside">{{if eq .Key "ai"}}{{T "optional"}}{{else if not .Platform}}{{T "every platform's traffic"}}{{else if .Polled}}{{T "polled"}}{{else}}{{T "not set up"}}{{end}}</span></div>
   {{if .SignIn}}<div class="acct-signin signins">{{range .SignIn}}{{template "signin" .}}{{end}}</div>{{end}}
   <form method="post" action="/settings/accounts" class="acct-form" autocomplete="off">
     <input type="hidden" name="group" value="{{.Key}}">
-    <div class="acct-sec"><h3 class="acct-legend">{{T "API"}}</h3>
+    {{if eq .Key "ai"}}
+    {{/* The model is not a platform: no API section, no website login, no tuning. */}}
+    <div class="acct-sec"><h3 class="acct-legend">{{T "Endpoint and key"}}</h3>
+      {{range .Fields}}{{template "acct-field" .}}{{end}}
+    </div>
+    {{else}}
+    {{$hasAPI := false}}{{$hasWeb := false}}{{$hasAdv := false}}
+    {{range .Fields}}{{if eq (acctSection .Name) "api"}}{{$hasAPI = true}}{{end}}{{if eq (acctSection .Name) "web"}}{{$hasWeb = true}}{{end}}{{if eq (acctSection .Name) "advanced"}}{{$hasAdv = true}}{{end}}{{end}}
+    {{if $hasAPI}}<div class="acct-sec"><h3 class="acct-legend">{{T "API"}}</h3>
       {{range .Fields}}{{if eq (acctSection .Name) "api"}}{{template "acct-field" .}}{{end}}{{end}}
-    </div>
-    <div class="acct-sec"><h3 class="acct-legend">{{T "Website login"}} <span class="muted small">{{T "optional: statistics and invitations the API does not share"}}</span></h3>
+    </div>{{end}}
+    {{if $hasWeb}}<div class="acct-sec"><h3 class="acct-legend">{{T "Website login"}} <span class="muted small">{{T "optional: statistics and invitations the API does not share"}}</span></h3>
       {{range .Fields}}{{if eq (acctSection .Name) "web"}}{{template "acct-field" .}}{{end}}{{end}}
-    </div>
-    <details class="acct-sec acct-more"><summary>{{T "Rate limits and other tuning"}}</summary>
+    </div>{{end}}
+    {{if $hasAdv}}<details class="acct-sec acct-more"><summary>{{T "Rate limits and other tuning"}}</summary>
       {{range .Fields}}{{if eq (acctSection .Name) "advanced"}}{{template "acct-field" .}}{{end}}{{end}}
-    </details>
+    </details>{{end}}
+    {{end}}
     <div class="acct-actions">
       <button type="submit" class="small">{{T "Save"}}</button>
       {{if .Saved}}<button type="submit" formaction="/settings/accounts/reset" class="small secondary" title="{{T "Forget what's saved here and use your environment's (.env) values"}}">{{T "Reset to .env"}}</button>{{end}}

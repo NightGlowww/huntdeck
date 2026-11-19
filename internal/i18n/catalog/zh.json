@@ -1585,7 +1585,6 @@
     "off unless you set them up": "未配置即关闭",
     "AI policy extraction": "AI 政策抽取",
     "the program page shows only the rules quoted from the policy": "程序页只显示取自政策原文的规则",
-    "To turn it on, set HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL to an OpenAI-compatible endpoint, then run huntdeck ai-extract: the model reads each policy once and the result is cached against the policy text.": "启用方式：把 HUNTDECK_AI_BASE_URL 与 HUNTDECK_AI_MODEL 指向 OpenAI 兼容端点，然后运行 huntdeck ai-extract——模型每份政策只读一次，结果按政策文本缓存。",
     "%s, %d cached reading(s)": "%s，已缓存 %d 份读数",
     "Read three policies now": "现在读取三份政策",
     "No model is configured: set HUNTDECK_AI_BASE_URL and HUNTDECK_AI_MODEL first.": "尚未配置模型：请先设置 HUNTDECK_AI_BASE_URL 与 HUNTDECK_AI_MODEL。",
@@ -1649,6 +1648,8 @@
     "This list comes from the same registry the server answers tools/list from, so it cannot list a tool that does not exist or miss one that does. A server started with HUNTDECK_MCP_READONLY=1 leaves out the ones marked as changing data.": "此列表来自服务端回答 tools/list 的同一份注册表，因此既不会列出不存在的工具，也不会漏掉已有的工具。以 HUNTDECK_MCP_READONLY=1 启动的服务会略去标记为「会修改数据」的那些。",
     "Command": "命令",
     "Client configuration": "客户端配置",
-    "Integrations": "集成"
+    "Integrations": "集成",
+    "To turn it on, fill in the endpoint, the model and the key under Accounts › Optional model, then run huntdeck ai-extract (or press Read policies there): the model reads each policy once and the result is cached against the policy text.": "启用方式：在「账户 › 可选模型」里填端点、模型与密钥，然后运行 huntdeck ai-extract（或在同一处点击「读取政策」）：模型会把每份政策读一次，结果按政策文本缓存。",
+    "Endpoint and key": "端点与密钥"
   }
 }
