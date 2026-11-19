@@ -403,7 +403,9 @@ func TestHuntQueueGatedRows(t *testing.T) {
 		t.Fatalf("gated list has %d rows, want the 3 gated ones", len(gated))
 	}
 
-	n, err := q.s.HuntQueueGatedCount(q.ctx)
+	// The count takes the same filter as the list: an unfiltered total beside a
+	// filtered list would count rows the reader cannot see.
+	n, err := q.s.HuntQueueGatedCount(q.ctx, QueueFilter{})
 	if err != nil {
 		t.Fatal(err)
 	}
