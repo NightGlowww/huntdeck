@@ -70,6 +70,10 @@ curl -s -o /dev/null -w '%{http_code}\n' -H "If-None-Match: $(sed -n 's/^[Ee][Tt
 curl -s "http://127.0.0.1:8080/api/v1/targets?kind=wildcards&since=24h&comment=1"
 ```
 
+## Program answers
+
+`GET /api/v1/programs/{platform}/{handle}` returns `rules`: what a tester must do, quoted from the policy where it states it. When a model has read that policy (`huntdeck ai-extract`, or the button in Settings), the same answer carries `ai_rules` with `ai_model` and `ai_read_at`: a paraphrase to check against the quotes, never a replacement for them.
+
 ## Tokens (`POST /api/tokens`, `POST /api/tokens/revoke`)
 
 A script can present a token instead of a browser session:

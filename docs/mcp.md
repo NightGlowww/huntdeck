@@ -90,7 +90,7 @@ own:
 | Step | Call | What comes back |
 |---|---|---|
 | what is worth today | `huntdeck_queue {limit: 5, explain: true}` | five rows with score and reasons; `factors` names what held each one back (`quality x0.78, personal x0.90` on the first) |
-| is it safe to start | `huntdeck_program {platform, handle, parts: "facts,brief,rules"}` | `rules` as structured items — a `header` with the exact string to send, an `email` alias, a `warn` for what the policy forbids; `facts` for triage, safe harbour, industry; `brief` for the policy text |
+| is it safe to start | `huntdeck_program {platform, handle, parts: "facts,brief,rules"}` | `rules` as structured items — a `header` with the exact string to send, an `email` alias, a `warn` for what the policy forbids; when a model has read the policy the answer also carries `ai_rules` (a paraphrase, with `ai_model`); `facts` for triage, safe harbour, industry; `brief` for the policy text |
 | what do I attack | the same answer's `scope` (summary) or `parts: "scope"` with `scope_limit` | in-scope assets, with the program's own notes |
 
 That is enough to go from "which target" to "ready to test" without opening a
