@@ -1,6 +1,28 @@
 {{/* Settings' Accounts tab (accountsData): each platform's credentials and
-   the proxy, saved encrypted over .env's. Secrets are never sent back:
-   their inputs start empty and say whether one is set. */}}
+    the proxy, saved encrypted over .env's. Secrets are never sent back:
+    their inputs start empty and say whether one is set.
+
+    Fields are grouped by what they are for (API / website login / advanced) so
+    the token you must set is not the same weight as a concurrency limit. */}}
+{{define "acct-field"}}
+<div class="acct-field">
+  <label for="acct-{{.Name}}" class="acct-label">{{T .Label}}<code>{{.Name}}</code></label>
+  <div class="acct-input">
+    {{if eq .Kind "bool"}}<label class="toggle"><input type="checkbox" id="acct-{{.Name}}" name="{{.Name}}" value="true"{{if .On}} checked{{end}}> <span class="muted small">{{if .On}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label>
+    {{else if .Secret}}<input type="password" id="acct-{{.Name}}" name="{{.Name}}" autocomplete="new-password" spellcheck="false" maxlength="4096"
+      placeholder="{{if .Unreadable}}{{T "enter it again"}}{{else if .Set}}{{T "set · type to replace"}}{{else}}{{T "not set"}}{{end}}">
+      {{if or .Set .Unreadable}}<label class="acct-clear" title="{{T "Clear what is saved here, so this field falls back to your environment"}}">
+        <input type="checkbox" name="clear_{{.Name}}" value="1">
+        <span class="acct-clear-face"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg>{{T "Clear"}}</span>
+      </label>{{end}}
+    {{else}}<input type="text" id="acct-{{.Name}}" name="{{.Name}}" value="{{.Value}}" spellcheck="false" maxlength="512"{{if eq .Kind "number"}} inputmode="decimal"{{end}}
+      placeholder="{{if .Default}}{{.Default}} {{T "(default)"}}{{else}}{{T "not set"}}{{end}}">{{end}}
+  </div>
+  <span class="acct-src small">{{if .Unreadable}}<span class="chip failed">{{T "can't be decrypted"}}</span>{{else if eq .From "saved"}}<span class="src-dot saved" title="{{T "Saved here, encrypted"}}{{if .EnvSet}}{{T "; it takes precedence over your environment's"}}{{end}}"></span>{{else if eq .From "env"}}<span class="chip" title="{{T "Set in your environment (.env)"}}">.env</span>{{end}}</span>
+  {{with .Help}}<p class="acct-help muted small">{{T .}}</p>{{end}}
+</div>
+{{end}}
+
 {{define "accounts"}}
 {{with .Restart}}
 <div class="restart-bar" data-restart role="status" aria-live="polite">
@@ -21,24 +43,15 @@
   {{if .SignIn}}<div class="acct-signin signins">{{range .SignIn}}{{template "signin" .}}{{end}}</div>{{end}}
   <form method="post" action="/settings/accounts" class="acct-form" autocomplete="off">
     <input type="hidden" name="group" value="{{.Key}}">
-    {{range .Fields}}
-    <div class="acct-field">
-      <label for="acct-{{.Name}}" class="acct-label">{{T .Label}}<code>{{.Name}}</code></label>
-      <div class="acct-input">
-        {{if eq .Kind "bool"}}<label class="toggle"><input type="checkbox" id="acct-{{.Name}}" name="{{.Name}}" value="true"{{if .On}} checked{{end}}> <span class="muted small">{{if .On}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label>
-        {{else if .Secret}}<input type="password" id="acct-{{.Name}}" name="{{.Name}}" autocomplete="new-password" spellcheck="false" maxlength="4096"
-          placeholder="{{if .Unreadable}}{{T "enter it again"}}{{else if .Set}}{{T "set · type to replace"}}{{else}}{{T "not set"}}{{end}}">
-          {{if or .Set .Unreadable}}<label class="acct-clear" title="{{T "Clear what is saved here, so this field falls back to your environment"}}">
-            <input type="checkbox" name="clear_{{.Name}}" value="1">
-            <span class="acct-clear-face"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg>{{T "Clear"}}</span>
-          </label>{{end}}
-        {{else}}<input type="text" id="acct-{{.Name}}" name="{{.Name}}" value="{{.Value}}" spellcheck="false" maxlength="512"{{if eq .Kind "number"}} inputmode="decimal"{{end}}
-          placeholder="{{if .Default}}{{.Default}} {{T "(default)"}}{{else}}{{T "not set"}}{{end}}">{{end}}
-      </div>
-      <span class="acct-src small">{{if .Unreadable}}<span class="chip failed">{{T "can't be decrypted"}}</span>{{else if eq .From "saved"}}<span class="chip ok" title="{{T "Saved here, encrypted"}}{{if .EnvSet}}{{T "; it takes precedence over your environment's"}}{{end}}">{{T "saved here"}}</span>{{else if eq .From "env"}}<span class="chip" title="{{T "Set in your environment (.env)"}}">.env</span>{{end}}</span>
-      {{with .Help}}<p class="acct-help muted small">{{T .}}</p>{{end}}
-    </div>
-    {{end}}
+    <fieldset class="acct-sec"><legend>{{T "API"}}</legend>
+      {{range .Fields}}{{if eq (acctSection .Name) "api"}}{{template "acct-field" .}}{{end}}{{end}}
+    </fieldset>
+    <fieldset class="acct-sec"><legend>{{T "Website login"}} <span class="muted small">{{T "optional: statistics and invitations the API does not share"}}</span></legend>
+      {{range .Fields}}{{if eq (acctSection .Name) "web"}}{{template "acct-field" .}}{{end}}{{end}}
+    </fieldset>
+    <details class="acct-sec acct-more"><summary>{{T "Rate limits and other tuning"}}</summary>
+      {{range .Fields}}{{if eq (acctSection .Name) "advanced"}}{{template "acct-field" .}}{{end}}{{end}}
+    </details>
     <div class="acct-actions">
       <button type="submit" class="small">{{T "Save"}}</button>
       {{if .Saved}}<button type="submit" formaction="/settings/accounts/reset" class="small secondary" title="{{T "Forget what's saved here and use your environment's (.env) values"}}">{{T "Reset to .env"}}</button>{{end}}

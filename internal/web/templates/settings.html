@@ -168,6 +168,7 @@
   <p class="panel-foot">{{T "Data is stored in UTC, and daily charts use UTC days. Notification digests go out at their time in this zone."}}</p>
 </section>
 
+{{template "settings-textsize" .}}
 <section class="panel" id="theme" data-palettes hidden>
   <div class="panel-head"><h2>{{T "Theme"}}</h2><span class="aside">{{T "colours for this browser"}}</span></div>
   <div class="palettes" role="radiogroup" aria-label="{{T "Theme"}}">
@@ -195,3 +196,18 @@
 
 {{define "signin"}}<div class="signin" title="{{.Title}}"><span class="chip {{.State}}">{{.Label}}</span><span class="sn">{{.Name}}</span>{{with .Parts}}<span class="muted small sp">{{range $i, $p := .}}{{if $i}} · {{end}}{{$p.Text}}{{with $p.When}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{with $p.In}} <span title="{{datetime .}}">{{until .}}</span>{{end}}{{with $p.At}} {{datetime .}}{{end}}{{end}}</span>{{end}}{{with .Watch}} <a class="link small" href="{{.}}" title="{{T "See the login browser: watch a login, or finish one by hand"}}">watch</a>{{end}}</div>{{with .Problem}}<div class="signin-why small">{{.}}</div>{{end}}{{end}}
 {{define "lastrun"}}<span class="chip {{.DisplayStatus}}"{{with .Error}} title="{{.}}"{{end}}>{{T .DisplayStatus}}</span> <span class="muted" title="{{datetime .StartedAt}} · took {{runTook .}}">{{ago .StartedAt}}<span class="took"> · {{runTook .}}</span></span>{{end}}
+
+{{define "settings-textsize"}}
+<section class="panel" id="textsize">
+  <div class="panel-head"><h2>{{T "Text size"}}</h2><span class="aside">{{T "for this browser"}}</span></div>
+  <div class="panel-body">
+    <div class="seg" role="radiogroup" aria-label="{{T "Text size"}}" data-fs-group>
+      <button type="button" role="radio" aria-checked="false" data-fs="sm">{{T "Small"}}</button>
+      <button type="button" role="radio" aria-checked="true" data-fs="md">{{T "Standard"}}</button>
+      <button type="button" role="radio" aria-checked="false" data-fs="lg">{{T "Large"}}</button>
+      <button type="button" role="radio" aria-checked="false" data-fs="xl">{{T "Largest"}}</button>
+    </div>
+    <p class="muted small">{{T "Everything scales together — text, controls and columns — and the layout reflows to fit. This browser only."}}</p>
+  </div>
+</section>
+{{end}}

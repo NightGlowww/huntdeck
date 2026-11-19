@@ -58,3 +58,52 @@
 .acct-src .chip.ok { color: var(--good); }
 .acct-src .chip.ok::before { content: "✓"; margin-right: 4px; }
 .acct-src .chip.failed { color: var(--bad); }
+
+/* ---------- Settings › Accounts: one platform per card, grouped by purpose ----------
+   The tab used to be a two-column grid of eight identical rows per platform:
+   the token you must set carried the same weight as a concurrency limit, and
+   every field shouted "saved here" in a chip. Now: full-width cards, an API
+   section first, the optional website login under it, and the tuning folded
+   away — with a dot, not a word, marking a saved value. */
+.acct-grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1500px) { .acct-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+.acct { display: flex; flex-direction: column; min-width: 0; }
+.acct .panel-head h2 { font-size: 15.5px; }
+.acct-form { display: flex; flex-direction: column; gap: 18px; padding: 16px 18px 18px; }
+.acct-sec { border: 0; margin: 0; padding: 0; display: grid; gap: 14px; }
+.acct-sec > legend { padding: 0 0 2px; font-size: 11px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.acct-sec > legend .muted { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.acct-more { border-top: 1px solid var(--border); padding-top: 12px; }
+.acct-more > summary { cursor: pointer; font-size: 12.5px; color: var(--text-2); padding: 2px 0; }
+.acct-more[open] > summary { margin-bottom: 12px; }
+.acct-field { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr) auto;
+  gap: 10px 14px; align-items: center; }
+.acct-field .acct-help { grid-column: 2 / -1; margin: -4px 0 0; }
+.acct-label { font-size: 13px; font-weight: 550; display: grid; gap: 1px; }
+.acct-label code { font-size: 10.5px; color: var(--muted); font-weight: 400; }
+.acct-input input[type="text"], .acct-input input[type="password"] { width: 100%; }
+.acct-src .src-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ok, #2e8b57); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok, #2e8b57) 18%, transparent); }
+.acct-actions { display: flex; gap: 10px; padding-top: 2px; }
+@media (max-width: 760px) {
+  .acct-field { grid-template-columns: minmax(0, 1fr) auto; }
+  .acct-label { grid-column: 1 / -1; }
+  .acct-field .acct-help { grid-column: 1 / -1; }
+}
+
+
+/* The platform table's Sign-in column carries a whole sentence, which pushed the
+   table past the panel and gave the page a sideways scroll at laptop widths.
+   Below 1500px that column truncates to one line (the full text stays in the
+   title) so the intervals and the Poll now buttons fit without scrolling. */
+@media (max-width: 1500px) {
+  #platforms .c-wide { max-width: 300px; }
+  #platforms .c-wide .signins > * { display: block; min-width: 0; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; }
+  #platforms .c-wide .signins .when, #platforms #platforms .c-wide .muted { white-space: nowrap; }
+}
+@media (max-width: 1200px) {
+  #platforms .c-wide { max-width: 220px; }
+}
+

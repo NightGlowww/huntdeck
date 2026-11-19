@@ -15,5 +15,8 @@
     if (localStorage.getItem("huntdeck-demo-banner") === "off") document.documentElement.dataset.demoBanner = "off";
     // The filter rail, left open on a narrower screen, opens again.
     if (localStorage.getItem("huntdeck-filters") === "open") document.documentElement.dataset.filters = "open";
+    // The text size, chosen in Settings › Display.
+    var f = localStorage.getItem("huntdeck-fs");
+    if (f === "sm" || f === "lg" || f === "xl") document.documentElement.dataset.fs = f;
   } catch (e) { /* storage blocked: follow the system */ }
 })();

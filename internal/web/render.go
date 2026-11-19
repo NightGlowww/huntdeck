@@ -121,6 +121,7 @@ var funcs = template.FuncMap{
 		}
 		return s
 	},
+	"acctSection":        acctSection,
 	"platformLabel":      platformLabel,
 	"platformShort":      platformShort,
 	"changeTag":          changeTag,

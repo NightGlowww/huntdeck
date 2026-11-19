@@ -218,3 +218,17 @@ func (s *server) restartStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	_ = json.NewEncoder(w).Encode(map[string]bool{"pending": pending})
 }
+
+// acctSection groups a credential field for the Accounts tab: the token a
+// platform needs first, the optional website login, and the tuning nobody
+// changes twice. The field names are the only signal there is.
+func acctSection(name string) string {
+	switch {
+	case strings.HasSuffix(name, "_TOKEN"), strings.HasSuffix(name, "_USERNAME"):
+		return "api"
+	case strings.HasSuffix(name, "_EMAIL"), strings.HasSuffix(name, "_PASSWORD"),
+		strings.HasSuffix(name, "_TOTP_SECRET"), strings.HasSuffix(name, "_SESSION"):
+		return "web"
+	}
+	return "advanced"
+}

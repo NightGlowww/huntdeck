@@ -70,3 +70,13 @@ pre.code code { padding: 0; background: none; color: var(--text); }
 .verdict.in { background: var(--good-weak); color: var(--good); }
 .verdict.out { background: var(--bad-weak); color: var(--bad); }
 .profile-form input.interval { height: 32px; } /* beside the form's other boxes; a table's stay compact */
+
+/* The text-size control: a segmented row, the current one marked. */
+.seg { display: inline-flex; border: 1px solid var(--border-input); border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+.seg button { appearance: none; border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: 12.5px;
+  padding: 7px 14px; cursor: pointer; border-right: 1px solid var(--border); }
+.seg button:last-child { border-right: 0; }
+.seg button:hover { background: var(--surface-3); color: var(--text); }
+.seg button[aria-checked="true"] { background: var(--accent-weak); color: var(--accent); font-weight: 600; }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+

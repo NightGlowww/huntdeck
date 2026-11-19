@@ -1023,3 +1023,26 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
 		location.assign(to);
 	});
 })();
+
+// Settings › Display: the text size, kept in this browser and applied to the
+// shell (--fs-zoom), so every page scales without a second set of breakpoints.
+(() => {
+	const group = document.querySelector("[data-fs-group]");
+	if (!group) return;
+	const steps = ["sm", "md", "lg", "xl"];
+	const apply = (v) => {
+		if (v === "md") delete document.documentElement.dataset.fs;
+		else document.documentElement.dataset.fs = v;
+		for (const b of group.querySelectorAll("button")) {
+			b.setAttribute("aria-checked", b.dataset.fs === v ? "true" : "false");
+		}
+	};
+	apply(localStorage.getItem("huntdeck-fs") || "md");
+	group.addEventListener("click", (e) => {
+		const b = e.target.closest("button[data-fs]");
+		if (!b || !steps.includes(b.dataset.fs)) return;
+		localStorage.setItem("huntdeck-fs", b.dataset.fs);
+		apply(b.dataset.fs);
+	});
+})();
+

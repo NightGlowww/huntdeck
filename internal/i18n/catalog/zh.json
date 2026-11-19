@@ -1545,6 +1545,16 @@
     "Filter endpoints": "筛选端点",
     "Built": "构建于",
     "The window %s was ignored: say a number of days, like 7d.": "时间窗口 %s 已被忽略：请写天数，例如 7d。",
-    "amounts are converted to US dollars with a fixed table, so programs paying in other currencies compare fairly; a currency the table does not know is compared at face value": "金额按固定汇率表换算为美元，便于跨货币比较；表中没有的货币按面值比较。"
+    "amounts are converted to US dollars with a fixed table, so programs paying in other currencies compare fairly; a currency the table does not know is compared at face value": "金额按固定汇率表换算为美元，便于跨货币比较；表中没有的货币按面值比较。",
+    "Everything scales together — text, controls and columns — and the layout reflows to fit. This browser only.": "文字、控件与列会一起放大，布局自动重排以适应。仅对当前浏览器生效。",
+    "Large": "大",
+    "Largest": "特大",
+    "Small": "小",
+    "Standard": "标准",
+    "Text size": "字号",
+    "for this browser": "仅当前浏览器",
+    "Rate limits and other tuning": "速率限制与其他调整",
+    "Website login": "网站登录",
+    "optional: statistics and invitations the API does not share": "可选：API 不提供的统计与邀请"
   }
 }

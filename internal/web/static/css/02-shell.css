@@ -1,7 +1,9 @@
 /* ---------- shell ---------- */
 .shell { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 100vh; }
 .sidebar {
-  position: sticky; top: var(--db-h); height: calc(100vh - var(--db-h)); display: flex; flex-direction: column; gap: 4px;
+  /* The shell is zoomed by --fs-zoom (Settings › Display), so 100vh inside it
+     is the unzoomed viewport: divide it back to keep the sidebar one screen tall. */
+  position: sticky; top: var(--db-h); height: calc(100vh / var(--fs-zoom) - var(--db-h)); display: flex; flex-direction: column; gap: 4px;
   padding: 14px 10px; border-right: 1px solid var(--border); background: var(--side);
   /* No `overscroll-behavior: contain`: with the pointer over the sidebar, the
      wheel scrolled the sidebar and stopped there, so the page looked stuck (and
@@ -200,3 +202,17 @@
 .keyhelp dt { margin: 0; }
 .keyhelp dd { margin: 0; color: var(--text-2); font-size: 13px; }
 .keyhelp form { margin: 0; text-align: right; }
+
+/* ---------- text size (Settings › Display) ----------
+   The whole shell scales, so every label, control and column grows together
+   and the layout reflows into the space it has, the way browser zoom does —
+   bigger text without a second set of breakpoints. `width` and `min-height`
+   divided by the same factor keep the shell filling the window instead of
+   overflowing it. */
+:root { --fs-zoom: 1; }
+:root[data-fs="sm"] { --fs-zoom: .94; }
+:root[data-fs="lg"] { --fs-zoom: 1.1; }
+:root[data-fs="xl"] { --fs-zoom: 1.22; }
+.shell { zoom: var(--fs-zoom); width: calc(100% / var(--fs-zoom));
+  min-height: calc(100vh / var(--fs-zoom)); }
+
