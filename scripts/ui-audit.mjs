@@ -48,6 +48,13 @@ const defaultPages = [
   ['targets', '/targets'],
   ['disclosed', '/disclosed'],
   ['settings', '/settings'],
+  ['accounts', '/settings?tab=accounts'],
+  ['queue', '/queue'],
+  ['changes', '/changes'],
+  ['api', '/api'],
+  ['program', '/programs/bugcrowd/bitpanda-og-bb'],
+  ['policy', '/programs/bugcrowd/bitpanda-og-bb?tab=policy'],
+  ['scope', '/programs/bugcrowd/bitpanda-og-bb?tab=scope'],
 ];
 const pages = flag('pages', '')
   ? flag('pages', '').split(',').map((p) => {
