@@ -215,8 +215,6 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("GET /.well-known/security.txt", s.securityTxt)
 	s.routeVNC(mux)
 	mux.HandleFunc("GET /api", s.apiDocs)
-	mux.HandleFunc("POST /api/tokens", s.createAPIToken)
-	mux.HandleFunc("POST /api/tokens/revoke", s.revokeAPIToken)
 
 	mux.HandleFunc("GET /login", s.loginPage)
 	mux.HandleFunc("POST /login", s.loginSubmit)
@@ -333,6 +331,9 @@ func (s *server) apiRoutes() []apiRoute {
 		{"GET /api/v1/targets", s.apiTargets},
 		{"GET /api/v1/match", s.conditional(s.apiMatch)},
 		{"POST /api/v1/match", s.apiMatchMany},
+		// Tokens are the one pair that is not /api/vN: they manage the gate itself.
+		{"POST /api/tokens", s.createAPIToken},
+		{"POST /api/tokens/revoke", s.revokeAPIToken},
 		{"GET /api/v1/changes", s.apiChanges},
 		{"GET /api/v1/disclosed", s.apiDisclosed},
 		{"GET /api/v1/stats", s.apiStats},

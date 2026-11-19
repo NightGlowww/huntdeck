@@ -33,6 +33,10 @@
     {
       "name": "HuntDeck",
       "description": "HuntDeck itself: what it holds, polling, and health."
+    },
+    {
+      "name": "Tokens",
+      "description": "Keys for scripts, minted here and revoked here. A token is another key to the same access gate as the password: it carries no identity, and there are no scopes or roles."
     }
   ],
   "paths": {
@@ -3198,6 +3202,75 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/tokens": {
+      "post": {
+        "tags": [
+          "Tokens"
+        ],
+        "operationId": "createToken",
+        "summary": "Mint an API token",
+        "description": "Creates a token and returns the API page with the token itself shown once: only its SHA-256 is stored, so it can never be shown again. Send it as 'Authorization: Bearer <token>'. Without an access password set there is nothing for it to unlock, so this answers 400 there.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "What it is for, e.g. the nightly script.",
+                    "maxLength": 60
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The API page, with the new token shown once."
+          }
+        }
+      }
+    },
+    "/api/tokens/revoke": {
+      "post": {
+        "tags": [
+          "Tokens"
+        ],
+        "operationId": "revokeToken",
+        "summary": "Revoke an API token",
+        "description": "Retires a token: the next request that presents it gets 401. The row stays so the page can say when it was revoked.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The token's id, as the page lists it."
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The API page, with a confirmation."
           }
         }
       }

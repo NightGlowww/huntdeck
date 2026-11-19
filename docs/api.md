@@ -70,7 +70,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -H "If-None-Match: $(sed -n 's/^[Ee][Tt
 curl -s "http://127.0.0.1:8080/api/v1/targets?kind=wildcards&since=24h&comment=1"
 ```
 
-## Tokens (`/api` → API tokens)
+## Tokens (`POST /api/tokens`, `POST /api/tokens/revoke`)
 
 A script can present a token instead of a browser session:
 
@@ -78,7 +78,7 @@ A script can present a token instead of a browser session:
 curl -s -H "Authorization: Bearer $HUNTDECK_TOKEN" https://huntdeck.example/api/v1/status
 ```
 
-Mint one on the API page. Only its SHA-256 is stored, so the token is shown
+Mint one on the API page, or `POST /api/tokens` with `name=`; revoke with `POST /api/tokens/revoke` and the token's `id`. Only its SHA-256 is stored, so the token is shown
 once; revoking it takes effect on the next request and touches nothing else.
 A token grants exactly what the access password grants — it is the same gate,
 not an account, and there are no scopes or roles.
