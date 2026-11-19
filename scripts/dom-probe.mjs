@@ -148,7 +148,10 @@ if (scroll) {
 // it as missing a ring is an artefact of the check, not a defect.
 const FOCUS_CHECK = `(() => {
   const els = [...document.querySelectorAll("a[href], button:not([disabled]), input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])")]
-    .filter((el) => !el.disabled && el.offsetParent !== null);
+    // A closed <details> keeps its content in a hidden subtree: the element still
+    // has computed styles and a layout box, but no user can focus it, so
+    // counting it reports a ring that is missing from nothing.
+    .filter((el) => !el.disabled && el.offsetParent !== null && !el.closest("details:not([open])"));
   const style = (el) => { const s = getComputedStyle(el); return s.outlineStyle + "|" + s.outlineWidth + "|" + s.boxShadow; };
   const missing = [];
   for (const el of els) {
