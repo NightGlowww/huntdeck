@@ -3,6 +3,7 @@ package pojia
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -26,9 +27,13 @@ func (c *Client) SearchReports(ctx context.Context, query, class, program string
 }
 
 // GetReport is one report with its annotation: how it was found, the steps,
-// the payloads, the fix.
+// the payloads, the fix. POJIA wants the id as a number, not a string.
 func (c *Client) GetReport(ctx context.Context, id string) (string, error) {
-	return c.Call(ctx, "get_report", map[string]any{"id": id})
+	n, err := strconv.Atoi(strings.TrimSpace(strings.TrimPrefix(id, "#")))
+	if err != nil {
+		return "", fmt.Errorf("pojia: report id %q is not a number", id)
+	}
+	return c.Call(ctx, "get_report", map[string]any{"id": n})
 }
 
 // GetPayloads is the curated test payloads and bypasses for one class.
