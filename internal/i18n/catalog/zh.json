@@ -1682,6 +1682,11 @@
     "described features, matched to history": "按你描述的功能匹配历史",
     "or describe a feature: historically similar reports come back": "或描述一个功能点：返回历史上相似的报告",
     "Find similar": "找相似",
-    "Endpoint": "端点"
+    "Endpoint": "端点",
+    "A key of its own for this connection, so what the MCP client holds is not whatever else uses the API:": "为这条连接签发一枚专属密钥：客户端持有的不是其他用途的 API key。",
+    "Mint a key for this connection": "为此连接签发密钥",
+    "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it on the API page when this connection retires.": "已为此连接签发。请立即复制：只存摘要，不再显示。连接停用时在 API 页吊销它。",
+    "The .mcp.json shape Claude Code and most clients expect. The key above is this connection's own token (named mcp), minted here and revoked on the API page; the password works too, in HUNTDECK_PASSWORD. The tools speak JSON-RPC on stdin and stdout, one message a line.": "Claude Code 与多数客户端要求的 .mcp.json 格式。上面的 key 是本连接专属令牌（名为 mcp），在此签发、在 API 页吊销；也可以用密码，放在 HUNTDECK_PASSWORD。工具在 stdin/stdout 上讲 JSON-RPC，一行一条消息。",
+    "It talks to the instance over HTTP with that address and key; nothing else is configured.": "它用该地址与密钥通过 HTTP 访问实例；无需其他配置。"
   }
 }

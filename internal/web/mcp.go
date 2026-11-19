@@ -17,4 +17,7 @@ func (s *server) mcpPage(w http.ResponseWriter, r *http.Request) {
 type mcpPageData struct {
 	Base  string
 	Tools []mcpserver.ToolInfo
+	// NewToken is a key just minted for this connection, shown once in the
+	// config blocks.
+	NewToken string
 }
