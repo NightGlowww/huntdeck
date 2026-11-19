@@ -1,6 +1,13 @@
 {{define "content"}}{{with .Data}}
 {{if .Off}}
-<p class="empty-state">{{T "Point HuntDeck at a ScopeSentry instance to scan the targets it finds. Set its endpoint and an ssk_ key under Settings > Accounts > Scan handoff."}}</p>
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Connect a scanner"}}</h2><span class="aside">{{T "not connected"}}</span></div>
+  <div class="panel-body">
+    <p>{{T "HuntDeck can hand the targets it finds to a ScopeSentry instance, which scans them: one scan task per batch of new in-scope targets, each target recorded so a re-poll does not queue it again."}}</p>
+    <p class="muted small">{{T "To connect one, set its endpoint and an ssk_ key in Settings > Accounts > Scan handoff. The key needs task:write, task:read, node:read and template:read, and nothing wider."}}</p>
+    <p><a class="button small" href="/settings?tab=accounts#acct-scan">{{T "Open the scanner settings"}}</a></p>
+  </div>
+</section>
 {{else}}
 <p class="lead">{{T "Targets HuntDeck finds, scanned by ScopeSentry: each new in-scope target is handed over once, as a scan task, and recorded so a re-poll does not queue it again."}}</p>
 

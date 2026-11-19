@@ -1728,6 +1728,12 @@
     "Reading policies. On a program page the rules beside the policy are quoted from the policy text; with the model configured, running huntdeck ai-extract (or the button on a program's Policy tab) asks it for the rules the policy states, cached against the policy's hash so the same text is read once.": "读政策。程序页政策旁的规则是从政策原文摘出的；配置模型后，运行 huntdeck ai-extract（或程序页 Policy 标签上的按钮）会让它列出政策规定的规则，并按政策文本的哈希缓存，同一段文本只读一次。",
     "Nothing else calls the model: no scoring, no summaries, no sending program data anywhere you did not configure.": "除此之外不会调用模型：不参与评分、不做摘要、不把项目数据发往你未配置的地方。",
     "The scanner host has %.0f%% memory free; a handoff is refused below %.0f%%. A scan task is heavy: a full-template run has taken a host down before.": "扫描器主机可用内存 %.0f%%，低于 %.0f%% 时会拒绝派发。扫描任务是重负载：一次全量模板的扫描曾经把主机打挂。",
-    "Scanner host: %.0f%% memory free, which is above the %.0f%% floor.": "扫描器主机可用内存 %.0f%%，高于 %.0f%% 的下限。"
+    "Scanner host: %.0f%% memory free, which is above the %.0f%% floor.": "扫描器主机可用内存 %.0f%%，高于 %.0f%% 的下限。",
+    "one job, nothing else": "只做一件事",
+    "not connected": "未接入",
+    "HuntDeck can hand the targets it finds to a ScopeSentry instance, which scans them: one scan task per batch of new in-scope targets, each target recorded so a re-poll does not queue it again.": "HuntDeck 可以把发现的目标交给一台 ScopeSentry 实例去扫描：每批新的在范围内目标生成一个扫描任务，并逐个记录，重新轮询不会重复排队。",
+    "To connect one, set its endpoint and an ssk_ key in Settings > Accounts > Scan handoff. The key needs task:write, task:read, node:read and template:read, and nothing wider.": "接入方式：在「设置 › 账户 › 扫描派发」填它的端点与 ssk_ 密钥。密钥只需 task:write、task:read、node:read、template:read 四项权限，不要更宽。",
+    "Open the scanner settings": "打开扫描器设置",
+    "Connect a scanner": "接入扫描器"
   }
 }

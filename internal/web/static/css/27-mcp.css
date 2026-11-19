@@ -57,3 +57,12 @@
 .pojia-results .chip.sev.critical, .pojia-results .chip.sev.high { background: var(--bad-weak); color: var(--bad); }
 .pojia-results .chip.sev.medium { background: var(--warn-weak, var(--accent-weak)); color: var(--text); }
 .pojia-results .chip.sev.low, .pojia-results .chip.sev.none { background: var(--surface-3); color: var(--muted); }
+
+/* The model page's two controls sit on one row, the answer beside them: Save
+   is the form's, the test is its own POST, and stacking them read as two
+   unrelated blocks. */
+.llm-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.llm-actions + .llm-actions { margin-top: 10px; }
+.llm-result { font-size: calc(12.5px * var(--fs, 1)); }
+.llm-result.ok { color: var(--ok); }
+.llm-result.bad { color: var(--bad); }
