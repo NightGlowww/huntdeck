@@ -3,7 +3,11 @@
 .sidebar {
   position: sticky; top: var(--db-h); height: calc(100vh - var(--db-h)); display: flex; flex-direction: column; gap: 4px;
   padding: 14px 10px; border-right: 1px solid var(--border); background: var(--side);
-  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; /* a short screen (a phone on its side) scrolls it */
+  /* No `overscroll-behavior: contain`: with the pointer over the sidebar, the
+     wheel scrolled the sidebar and stopped there, so the page looked stuck (and
+     the sidebar's scrollbar is an overlay, invisible until it moves). Scrolling
+     chains to the page again at either end. */
+  overflow-y: auto; scrollbar-width: thin; /* a short screen (a phone on its side) scrolls it */
 }
 .brand { display: flex; align-items: center; gap: 9px; padding: 4px 8px 14px; font-size: 15px; font-weight: 650; letter-spacing: -0.02em; }
 .brand .logo { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; background: var(--accent); color: var(--on-accent); }
