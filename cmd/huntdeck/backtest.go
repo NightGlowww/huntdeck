@@ -87,6 +87,33 @@ func backtestCmd(args []string, stdout, stderr io.Writer) int {
 			share = 100 * captured / total
 		}
 		fmt.Fprintf(stdout, "%s  top-%d by HuntScore captures $%.0f of $%.0f (%.1f%%)\n", day, n, captured, total, share)
+		// The same question for the queue: its targets, mapped to the programs
+		// they belong to, since a bounty is paid to a program, not a target.
+		if qrows, err := s.QueueOn(ctx, day); err == nil && len(qrows) > 0 {
+			seen := map[int64]bool{}
+			var order []int64
+			for _, r := range qrows {
+				if seen[r.ProgramID] {
+					continue
+				}
+				seen[r.ProgramID] = true
+				order = append(order, r.ProgramID)
+				if len(order) == *top {
+					break
+				}
+			}
+			qcap := 0.0
+			for _, id := range order {
+				qcap += paid[id]
+			}
+			qshare := 0.0
+			if total > 0 {
+				qshare = 100 * qcap / total
+			}
+			fmt.Fprintf(stdout, "%s  top-%d by HuntQueue captures $%.0f of $%.0f (%.1f%%)\n", day, len(order), qcap, total, qshare)
+		} else {
+			fmt.Fprintf(stdout, "%s  no queue snapshot for this day\n", day)
+		}
 	}
 	qd, err := s.QueueDays(ctx)
 	if err != nil {

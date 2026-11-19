@@ -57,3 +57,31 @@ func (s *Store) QueueDays(ctx context.Context) ([]string, error) {
 	}
 	return out, rows.Err()
 }
+
+// QueueScore is one target as a day's queue had it.
+type QueueScore struct {
+	ProgramID int64
+	Kind      string
+	Value     string
+	Score     float64
+}
+
+// QueueOn is a day's queue head, best first.
+func (s *Store) QueueOn(ctx context.Context, day string) ([]QueueScore, error) {
+	rows, err := s.db.R.QueryContext(ctx,
+		`SELECT program_id, kind, value, score FROM queue_scores WHERE day = ? ORDER BY score DESC`,
+		day)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var out []QueueScore
+	for rows.Next() {
+		var q QueueScore
+		if err := rows.Scan(&q.ProgramID, &q.Kind, &q.Value, &q.Score); err != nil {
+			return nil, err
+		}
+		out = append(out, q)
+	}
+	return out, rows.Err()
+}
