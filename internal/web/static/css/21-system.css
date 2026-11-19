@@ -149,7 +149,10 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 @media (max-width: 700px) {
   .profile-form .check { height: auto; min-height: 32px; padding-top: 6px; padding-bottom: 6px; white-space: normal; }
 }
-@media (max-width: 700px) { #api pre.code { white-space: pre-wrap; overflow-wrap: anywhere; } }
+/* A code block on a phone wraps instead of scrolling sideways: the JSON a
+   reader is meant to copy was 81px wider than the screen on the MCP page,
+   and the wrap kept the text identical for the copy button. */
+@media (max-width: 700px) { pre.code { white-space: pre-wrap; overflow-wrap: anywhere; } }
 
 /* Phones and narrow windows. */
 @media (max-width: 900px) {
