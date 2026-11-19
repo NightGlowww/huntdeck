@@ -15,7 +15,7 @@ type pojiaClassEntry struct {
 
 // pojiaClassLineRx pulls key, label and count out of POJIA's list, one
 // class per line: "xss — 跨站脚本 (Cross-site Scripting): 2498 reports, …".
-var pojiaClassLineRx = regexp.MustCompile(`(?m)^(\\w+) — (.+?): ([0-9,]+) reports`)
+var pojiaClassLineRx = regexp.MustCompile(`(?m)^(\w+) — (.+?): ([0-9,]+) reports`)
 
 // parsePojiaClasses turns the class list into entries the page can lay out
 // as a grid of chips instead of a wall of text.
