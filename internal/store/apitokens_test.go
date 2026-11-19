@@ -20,7 +20,7 @@ func TestAPITokens(t *testing.T) {
 	}
 	token := hex.EncodeToString(buf)
 
-	id, err := s.CreateAPIToken(ctx, "ci", token)
+	id, err := s.CreateAPIToken(ctx, "api", "ci", token)
 	if err != nil {
 		t.Fatal(err)
 	}

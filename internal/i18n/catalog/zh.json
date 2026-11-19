@@ -1687,6 +1687,8 @@
     "Mint a key for this connection": "为此连接签发密钥",
     "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it on the API page when this connection retires.": "已为此连接签发。请立即复制：只存摘要，不再显示。连接停用时在 API 页吊销它。",
     "The .mcp.json shape Claude Code and most clients expect. The key above is this connection's own token (named mcp), minted here and revoked on the API page; the password works too, in HUNTDECK_PASSWORD. The tools speak JSON-RPC on stdin and stdout, one message a line.": "Claude Code 与多数客户端要求的 .mcp.json 格式。上面的 key 是本连接专属令牌（名为 mcp），在此签发、在 API 页吊销；也可以用密码，放在 HUNTDECK_PASSWORD。工具在 stdin/stdout 上讲 JSON-RPC，一行一条消息。",
-    "It talks to the instance over HTTP with that address and key; nothing else is configured.": "它用该地址与密钥通过 HTTP 访问实例；无需其他配置。"
+    "It talks to the instance over HTTP with that address and key; nothing else is configured.": "它用该地址与密钥通过 HTTP 访问实例；无需其他配置。",
+    "Key": "密钥",
+    "Revoke this key? The client using it gets 401 from now on.": "吊销这枚密钥？使用它的客户端从现在起会收到 401。"
   }
 }

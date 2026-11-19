@@ -14,7 +14,7 @@ import (
 func TestBearerTokenPassesTheGate(t *testing.T) {
 	e := newTestEnv(t, func(d *Deps) { d.Password = "secret" })
 	token := "tok-abc-123"
-	if _, err := e.store.CreateAPIToken(context.Background(), "test", token); err != nil {
+	if _, err := e.store.CreateAPIToken(context.Background(), "api", "test", token); err != nil {
 		t.Fatal(err)
 	}
 	get := func(auth string) int {

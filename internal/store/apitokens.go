@@ -13,7 +13,9 @@ import (
 // APIToken is a token a script presents instead of a login session. Only its
 // digest is kept: the token itself is shown once, when it is created.
 type APIToken struct {
-	ID         int64
+	ID int64
+	// Kind is api or mcp: the MCP page manages its own keys, the API page its own.
+	Kind       string
 	Name       string
 	CreatedAt  time.Time
 	LastUsedAt *time.Time
@@ -30,10 +32,10 @@ func tokenDigest(token string) []byte {
 
 // CreateAPIToken stores a token's digest and returns its id. The caller keeps
 // the plaintext: nothing here could be replayed as the token itself.
-func (s *Store) CreateAPIToken(ctx context.Context, name, token string) (int64, error) {
+func (s *Store) CreateAPIToken(ctx context.Context, kind, name, token string) (int64, error) {
 	res, err := s.db.W.ExecContext(ctx,
-		`INSERT INTO api_tokens (name, digest, created_at) VALUES (?, ?, ?)`,
-		name, tokenDigest(token), s.Now().UTC().Format(time.RFC3339))
+		`INSERT INTO api_tokens (kind, name, digest, created_at) VALUES (?, ?, ?, ?)`,
+		kind, name, tokenDigest(token), s.Now().UTC().Format(time.RFC3339))
 	if err != nil {
 		return 0, fmt.Errorf("create token: %w", err)
 	}
@@ -44,7 +46,7 @@ func (s *Store) CreateAPIToken(ctx context.Context, name, token string) (int64, 
 // can say what was retired.
 func (s *Store) APITokens(ctx context.Context) ([]APIToken, error) {
 	rows, err := s.db.R.QueryContext(ctx,
-		`SELECT id, name, created_at, last_used_at, revoked_at FROM api_tokens ORDER BY id DESC`)
+		`SELECT id, kind, name, created_at, last_used_at, revoked_at FROM api_tokens ORDER BY id DESC`)
 	if err != nil {
 		return nil, fmt.Errorf("list tokens: %w", err)
 	}
@@ -54,7 +56,7 @@ func (s *Store) APITokens(ctx context.Context) ([]APIToken, error) {
 		var t APIToken
 		var created string
 		var last, revoked sql.NullString
-		if err := rows.Scan(&t.ID, &t.Name, &created, &last, &revoked); err != nil {
+		if err := rows.Scan(&t.ID, &t.Kind, &t.Name, &created, &last, &revoked); err != nil {
 			return nil, err
 		}
 		t.CreatedAt, _ = time.Parse(time.RFC3339, created)
@@ -147,4 +149,19 @@ func (s *Store) RevokeAPIToken(ctx context.Context, id int64) error {
 		`UPDATE api_tokens SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL`,
 		s.Now().UTC().Format(time.RFC3339), id)
 	return err
+}
+
+// RevokeAPITokenByKind retires a token of one kind only, so the MCP page
+// cannot revoke an API page token by guessing an id.
+func (s *Store) RevokeAPITokenByKind(ctx context.Context, kind string, id int64) error {
+	res, err := s.db.W.ExecContext(ctx,
+		`UPDATE api_tokens SET revoked_at = ? WHERE id = ? AND kind = ? AND revoked_at IS NULL`,
+		s.Now().UTC().Format(time.RFC3339), id, kind)
+	if err != nil {
+		return fmt.Errorf("revoke token: %w", err)
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }

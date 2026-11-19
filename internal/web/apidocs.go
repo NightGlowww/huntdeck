@@ -341,6 +341,11 @@ type apiTokenRow struct {
 func tokenRows(list []store.APIToken) []apiTokenRow {
 	out := make([]apiTokenRow, 0, len(list))
 	for _, t := range list {
+		if t.Kind == "mcp" {
+			// The MCP page manages its own keys; they do not belong here.
+			continue
+		}
+
 		out = append(out, apiTokenRow{ID: t.ID, Name: t.Name, Created: t.CreatedAt, LastUsed: t.LastUsedAt, Revoked: t.RevokedAt})
 	}
 	return out
@@ -372,7 +377,7 @@ func (s *server) createAPIToken(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	if _, err := s.Store.CreateAPIToken(r.Context(), name, value); err != nil {
+	if _, err := s.Store.CreateAPIToken(r.Context(), "api", name, value); err != nil {
 		s.serverError(w, r, err)
 		return
 	}
