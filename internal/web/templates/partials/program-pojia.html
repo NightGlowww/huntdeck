@@ -1,10 +1,10 @@
 {{/* The program page's POJIA panel: what this program has historically paid
    for, from POJIA's index of disclosed reports. Cached a week; the page
-   never blocks on the fetch. */}}
-{{define "program-pojia"}}{{with $.Data.Pojia}}{{if or .Found $.Data.PojiaStale}}
+   never blocks on the fetch. Called with . = the page's Data. */}}
+{{define "program-pojia"}}{{if .Pojia}}{{if or .Pojia.Found .PojiaStale}}
 <section class="panel pojia" id="pojia">
-  <div class="panel-head"><h2>{{T "What it has paid for"}}</h2><span class="aside">{{T "from POJIA's disclosed reports"}}{{if $.Data.PojiaStale}} · <span class="warn">{{T "cached: POJIA could not be reached"}}</span>{{else}} · <span title="{{datetime .FetchedAt}}">{{ago .FetchedAt}}</span>{{end}}</span></div>
-  <div class="panel-body"><pre class="pojia-profile">{{.Profile}}</pre></div>
+  <div class="panel-head"><h2>{{T "What it has paid for"}}</h2><span class="aside">{{T "from POJIA's disclosed reports"}}{{if .PojiaStale}} &middot; <span class="warn">{{T "cached: POJIA could not be reached"}}</span>{{else}} &middot; <span title="{{datetime .Pojia.FetchedAt}}">{{ago .Pojia.FetchedAt}}</span>{{end}}</span></div>
+  <div class="panel-body"><pre class="pojia-profile">{{.Pojia.Profile}}</pre></div>
 </section>
 {{else}}
 <section class="panel pojia" id="pojia">
