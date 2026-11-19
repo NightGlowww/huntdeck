@@ -47,9 +47,13 @@ func (f *fakePoller) AcceptInvite(p, handle string) error {
 }
 
 type testEnv struct {
-	t      *testing.T
-	srv    *httptest.Server
-	store  *store.Store
+	t     *testing.T
+	srv   *httptest.Server
+	store *store.Store
+	// db is the same database the server reads, so a test can make a read
+	// fail on purpose: a dropped table is the honest way to ask what a page
+	// does when something is unreadable.
+	db     *db.DB
 	poller *fakePoller
 	sched  *scheduler.Schedule
 	fake   *fake.Platform
@@ -154,7 +158,7 @@ func newTestEnv(t *testing.T, with ...func(*Deps)) *testEnv {
 	}
 	srv := httptest.NewServer(h)
 	t.Cleanup(srv.Close)
-	return &testEnv{t: t, srv: srv, store: st, poller: p, sched: sched, fake: f, syncer: sy}
+	return &testEnv{t: t, srv: srv, store: st, db: d, poller: p, sched: sched, fake: f, syncer: sy}
 }
 
 // client returns an HTTP client that doesn't follow redirects.
