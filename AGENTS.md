@@ -260,6 +260,15 @@ disagree in either direction.
   only) or left out (anything of the user's); `TestSeedSpecCoversSchema`
   fails until it is. Timestamps in UTC, RFC 3339. One program's writes in
   one transaction.
+- **A guard carries the way it fails.** For every check meant to catch something,
+  make it fail once on purpose — put the bug back, or point the gate at a world
+  that is wrong — before trusting it. Three tests here were green and could not
+  fail: the queue's gated count was compared with an empty filter, where filtered
+  and unfiltered SQL are the same statement; the MCP page's required-argument
+  check read its expectation from the code under test, so it skipped itself when
+  that code stopped working; and the row that says a column is required was never
+  populated, which nothing noticed. Every guard added since is proved by
+  reverting its fix.
 - Tests are table-driven. Platform clients are tested against `httptest`
   servers replaying fixtures (pagination, 429, 5xx, auth failure, partial
   failure); the sync engine with `internal/platform/fake`, including "a
