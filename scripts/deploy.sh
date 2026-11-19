@@ -83,13 +83,17 @@ if [ "$mode" = "full" ]; then
   remote "cd $dir && sudo docker compose build && sudo docker compose up -d --pull never"
 else
   echo "==> binary (linux/amd64)"
+  # One name for this deploy: it goes into the binaries and is asserted
+  # against the running process afterwards, so a deploy that ships nothing
+  # cannot pass.
+  ver="${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)}"
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' EXIT
   run env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)} -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
+    go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=$ver -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
     -o "$tmp/huntdeck" ./cmd/huntdeck
   run env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)} -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
+    go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=$ver -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
     -o "$tmp/huntdeck-mcp" ./cmd/huntdeck-mcp
   echo "==> ship"
   run rsync -az "$tmp/huntdeck" "$host:$dir/huntdeck"
@@ -147,6 +151,18 @@ else
       echo "  smoke failed after the deploy; the container is up, see the lines above" >&2
       exit 1
     fi
+  fi
+fi
+
+# A deploy that shipped nothing must fail: compare the version this run built
+# with the one the container is actually running.
+if [ -z "$dry" ]; then
+  running=$(remote "cd $dir && sudo docker compose exec -T huntdeck /huntdeck version" | awk '{print $2}') || running=""
+  if [ "$running" = "$ver" ]; then
+    echo "  running $running"
+  else
+    echo "  the container runs ${running:-nothing}, this deploy built $ver" >&2
+    exit 1
   fi
 fi
 
