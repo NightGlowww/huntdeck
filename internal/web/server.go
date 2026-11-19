@@ -233,6 +233,8 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /mcp/token", s.mcpToken)
 	mux.HandleFunc("POST /mcp/revoke", s.mcpRevoke)
 	mux.HandleFunc("/mcp/rpc", s.mcpRPC) // the handler answers 405 + Allow on non-POST itself
+	mux.HandleFunc("GET /llm", s.llmPage)
+	mux.HandleFunc("POST /llm/test", s.llmTest)
 	mux.HandleFunc("GET /scan", s.scanPage)
 	mux.HandleFunc("POST /scan/save", s.scanSave)
 	mux.HandleFunc("POST /scan/now", s.scanNow)

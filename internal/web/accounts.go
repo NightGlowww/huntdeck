@@ -51,7 +51,7 @@ type restartState struct {
 
 // accountGroups are the groups' keys in order, platforms first.
 var accountGroups = []string{config.GroupHackerOne, config.GroupBugcrowd, config.GroupIntigriti,
-	config.GroupYesWeHack, config.GroupNetwork, config.GroupAI, config.GroupPojia, config.GroupScan}
+	config.GroupYesWeHack, config.GroupNetwork, config.GroupPojia, config.GroupScan}
 
 // accountsTab gathers the Accounts tab.
 func (s *server) accountsTab(ctx context.Context, rows []platformRow) (*accountsData, error) {

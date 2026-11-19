@@ -612,7 +612,7 @@
     "last run": "上次运行",
     "disabled": "已停用",
     "on": "开",
-    "off": "关",
+    "off": "未启用",
     "browser": "浏览器",
     "quick": "快速",
     "full": "全量",
@@ -1714,6 +1714,18 @@
     "Hand them over now": "立即派发",
     "Nothing new: every in-scope target has been handed over already.": "没有新目标：所有在范围内的目标都已派发过。",
     "ScopeSentry": "ScopeSentry",
-    "Scan": "扫描"
+    "Scan": "扫描",
+    "Optional model": "可选模型",
+    "LLM": "模型",
+    "An optional OpenAI-compatible model. It has one job here: read each program's policy once and state the rules it sets, instead of leaving you to read them. Off unless you configure it.": "可选的 OpenAI 兼容模型。它在这里只做一件事：把每个项目的政策读一遍并列出其中的规则，省去你自己读。不配置就不启用。",
+    "configured": "已配置",
+    "Model": "模型",
+    "set the endpoint and the model first": "请先填写端点与模型",
+    "Ask it one question": "问它一句",
+    "It did not answer: %s": "它没有应答：%s",
+    "Answered %s in %s.": "回答「%s」，用时 %s。",
+    "What it is used for": "它用在何处",
+    "Reading policies. On a program page the rules beside the policy are quoted from the policy text; with the model configured, running huntdeck ai-extract (or the button on a program's Policy tab) asks it for the rules the policy states, cached against the policy's hash so the same text is read once.": "读政策。程序页政策旁的规则是从政策原文摘出的；配置模型后，运行 huntdeck ai-extract（或程序页 Policy 标签上的按钮）会让它列出政策规定的规则，并按政策文本的哈希缓存，同一段文本只读一次。",
+    "Nothing else calls the model: no scoring, no summaries, no sending program data anywhere you did not configure.": "除此之外不会调用模型：不参与评分、不做摘要、不把项目数据发往你未配置的地方。"
   }
 }

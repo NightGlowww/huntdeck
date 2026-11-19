@@ -1,0 +1,34 @@
+{{define "content"}}{{with .Data}}
+<p class="lead">{{T "An optional OpenAI-compatible model. It has one job here: read each program's policy once and state the rules it sets, instead of leaving you to read them. Off unless you configure it."}}</p>
+
+<section class="panel">
+  <div class="panel-head"><h2>{{T "Endpoint and key"}}</h2>
+    <span class="aside">{{if .Configured}}<span class="chip ok">{{T "configured"}}</span> {{.Model}}{{else}}<span class="chip">{{T "off"}}</span>{{end}}</span></div>
+  <div class="panel-body">
+    <form method="post" action="/settings/accounts" class="acct-form" autocomplete="off">
+      <input type="hidden" name="group" value="ai">
+      <div class="acct-sec"><h3 class="acct-legend">{{T "Model"}}</h3>
+        {{range .Fields}}{{template "acct-field" .}}{{end}}
+      </div>
+      <div class="acct-actions"><button type="submit" class="small">{{T "Save"}}</button></div>
+    </form>
+    <div class="llm-test">
+      <form method="post" action="/llm/test" class="inline">
+        <button type="submit" class="small secondary"{{if not .Configured}} disabled title="{{T "set the endpoint and the model first"}}"{{end}}>{{T "Ask it one question"}}</button>
+      </form>
+      {{if .Checked}}{{if .CheckError}}
+      <p class="flash warn">{{TF "It did not answer: %s" .CheckError}}</p>
+      {{else}}
+      <p class="flash ok">{{TF "Answered %s in %s." .CheckAnswer .CheckMS}}</p>
+      {{end}}{{end}}
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>{{T "What it is used for"}}</h2></div>
+  <div class="panel-body">
+    <p>{{T "Reading policies. On a program page the rules beside the policy are quoted from the policy text; with the model configured, running huntdeck ai-extract (or the button on a program's Policy tab) asks it for the rules the policy states, cached against the policy's hash so the same text is read once."}}</p>
+    <p class="muted small">{{T "Nothing else calls the model: no scoring, no summaries, no sending program data anywhere you did not configure."}}</p>
+  </div>
+</section>{{end}}{{end}}
