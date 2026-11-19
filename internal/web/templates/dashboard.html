@@ -87,7 +87,7 @@
           <td class="c-score num" title="{{join .Reasons " · "}}"><b class="score">{{printf "%.0f" .Score}}</b></td>
           <td class="c-pay" title="{{template "pay-title" .}}"><div class="pay">{{if .PayMax}}{{if not .PayMin}}<span class="upto">{{T "up to"}}</span>{{end}}<span class="amt">{{amountRange .PayMin .PayMax .Currency}}</span>{{else if and .OffersBounty .PayMin}}<span class="upto">{{T "from"}}</span><span class="amt">{{amount .PayMin .Currency}}</span>{{else if not .OffersBounty}}<span class="none" title="{{T "Pays no bounties"}}">—</span>{{else if not .Bounty}}<span class="none">{{T "no bounty"}}</span>{{else}}<span class="none" title="{{TF "%s doesn't share this for the program" (platformLabel .Program.Platform)}}">—</span>{{end}}</div></td>
           <td class="c-ptotal">{{template "m-ptotal" (paidAllOf $t)}}</td>
-          <td class="nowrap c-added">{{if .Joined}}<span class="chip joined" title="{{TF "New to you: in scope when you got access to this private program, %s" (datePtr .AddedAt)}}">{{T "joined"}} {{agoPtr .AddedAt}}</span>{{else}}<span class="when{{if freshPtr .AddedAt}} fresh{{end}}" title="{{datePtr .AddedAt}}">{{agoPtr .AddedAt}}</span>{{end}}</td>
+          <td class="nowrap c-added">{{if .Joined}}<span class="chip joined" title="{{TF "New to you: in scope when you got access to this private program, %s" (datePtr .AddedAt)}}">{{T "joined"}} {{agoPtr .AddedAt}}</span>{{else}}<span class="when{{if freshPtr .AddedAt}} fresh{{end}}" data-ago data-at="{{isoPtr .AddedAt}}" title="{{datePtr .AddedAt}}">{{agoPtr .AddedAt}}</span>{{end}}</td>
           <td class="c-acts acts"><button type="button" class="icon-btn" data-copy-text="{{.Value}}" title="Copy {{.Value}}" aria-label="{{T "Copy"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button>{{template "open-ext" $t.Program}}</td>
         </tr>
       {{end}}{{end}}
@@ -112,7 +112,7 @@
       <div class="dcard{{if ge $i 6}} xl{{else if ge $i 4}} lg{{end}}">
         <div class="dh">{{template "pname" (plink .Program)}}
           <span class="st">{{if .NewProgram}}<b class="add">{{T "new"}}</b>{{end}}{{if .Added}}<b class="add">+{{num .Added}}</b>{{end}}{{if .Removed}}<b class="del">−{{num .Removed}}</b>{{end}}{{if .Edited}}<b class="mod">~{{num .Edited}}</b>{{end}}{{if .Bounty}}<b class="mod">$</b>{{end}}</span>
-          <span class="when" title="{{datetime .Latest}}">{{ago .Latest}}</span></div>
+          <span class="when" data-ago data-at="{{iso .Latest}}" title="{{datetime .Latest}}">{{ago .Latest}}</span></div>
         {{range .Lines}}<div class="dl {{.Class}}"><span class="sign">{{if eq .Class "add"}}+{{else if eq .Class "del"}}−{{else}}~{{end}}</span>{{if .ChangeID}}<a href="/changes/{{.ChangeID}}">{{.Text}}</a>{{else}}<code title="{{.Text}}">{{.Text}}</code>{{end}}</div>{{end}}
         {{if .More}}<a class="dl more" href="/programs/{{.Program.Platform}}/{{.Program.Handle}}?tab=scope&amp;order=added"><span class="sign"></span>… {{num .More}} more</a>{{end}}
       </div>

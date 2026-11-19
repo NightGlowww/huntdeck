@@ -193,6 +193,14 @@ func timeFuncs(zone func() *time.Location) template.FuncMap {
 		"datetime": func(t time.Time) string { return fmtTime(t, zone(), "2006-01-02 15:04 MST") },
 		// iso is a time for scripts (data-at): UTC, RFC 3339.
 		"iso": func(t time.Time) string { return t.UTC().Format(time.RFC3339) },
+		// isoPtr is the same for an optional time: a span that shows "3d ago" needs
+		// the instant to keep saying the truth while the page stays open.
+		"isoPtr": func(t *time.Time) string {
+			if t == nil {
+				return ""
+			}
+			return t.UTC().Format(time.RFC3339)
+		},
 		"datePtr": func(t *time.Time) string {
 			if t == nil {
 				return "—"
