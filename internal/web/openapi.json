@@ -3241,6 +3241,52 @@
         }
       }
     },
+    "/api/tokens/rotate": {
+      "post": {
+        "tags": ["Tokens"],
+        "operationId": "rotateToken",
+        "summary": "Rotate an API token",
+        "description": "Replaces the token's secret in place, keeping the name and the created time. The old value stops working at once; the new one is shown once, in the page body, like a creation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "The token's id, as the page lists it." }
+                },
+                "required": ["id"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "The API page, with the new value shown once." } }
+      }
+    },
+    "/api/tokens/delete": {
+      "post": {
+        "tags": ["Tokens"],
+        "operationId": "deleteToken",
+        "summary": "Delete a revoked API token",
+        "description": "Drops a revoked token's row from the list. A live token is refused: revoke it first, so one click cannot remove something a script is still using.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "description": "The token's id, as the page lists it." }
+                },
+                "required": ["id"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "The API page, with a confirmation." } }
+      }
+    },
     "/api/tokens/revoke": {
       "post": {
         "tags": [

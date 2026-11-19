@@ -74,7 +74,7 @@ curl -s "http://127.0.0.1:8080/api/v1/targets?kind=wildcards&since=24h&comment=1
 
 `GET /api/v1/programs/{platform}/{handle}` returns `rules`: what a tester must do, quoted from the policy where it states it. When a model has read that policy (`huntdeck ai-extract`, or the button in Settings), the same answer carries `ai_rules` with `ai_model` and `ai_read_at`: a paraphrase to check against the quotes, never a replacement for them.
 
-## Tokens (`POST /api/tokens`, `POST /api/tokens/revoke`)
+#
 
 A script can present a token instead of a browser session:
 
@@ -82,7 +82,7 @@ A script can present a token instead of a browser session:
 curl -s -H "Authorization: Bearer $HUNTDECK_TOKEN" https://huntdeck.example/api/v1/status
 ```
 
-Mint one on the API page, or `POST /api/tokens` with `name=`; revoke with `POST /api/tokens/revoke` and the token's `id`. Only its SHA-256 is stored, so the token is shown
+Mint one on the API page, or `POST /api/tokens` with `name=`; revoke with `POST /api/tokens/revoke` and the token's `id`; rotate with `POST /api/tokens/rotate` (same `id`: the secret is replaced in place, keeping the name and history); delete a revoked row with `POST /api/tokens/delete`. Only its SHA-256 is stored, so the token is shown
 once; revoking it takes effect on the next request and touches nothing else.
 A token grants exactly what the access password grants — it is the same gate,
 not an account, and there are no scopes or roles.

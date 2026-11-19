@@ -343,6 +343,8 @@ func (s *server) apiRoutes() []apiRoute {
 		// Tokens are the one pair that is not /api/vN: they manage the gate itself.
 		{"POST /api/tokens", s.createAPIToken},
 		{"POST /api/tokens/revoke", s.revokeAPIToken},
+		{"POST /api/tokens/rotate", s.rotateAPIToken},
+		{"POST /api/tokens/delete", s.deleteAPIToken},
 		{"GET /api/v1/changes", s.apiChanges},
 		{"GET /api/v1/disclosed", s.apiDisclosed},
 		{"GET /api/v1/stats", s.apiStats},

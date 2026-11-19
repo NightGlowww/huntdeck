@@ -379,6 +379,44 @@ func (s *server) createAPIToken(w http.ResponseWriter, r *http.Request) {
 	s.renderAPIDocs(w, r, value, "token-created")
 }
 
+// rotateAPIToken replaces a token's secret in place: same row, same name,
+// same created time. The old value stops working the moment the digest is
+// swapped, and the new one is shown once, like a creation.
+func (s *server) rotateAPIToken(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4<<10)
+	id, err := strconv.ParseInt(r.PostFormValue("id"), 10, 64)
+	if err != nil {
+		s.renderAPIDocs(w, r, "", "token-missing")
+		return
+	}
+	value, err := newTokenValue()
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	if err := s.Store.ReplaceAPITokenDigest(r.Context(), id, value); err != nil {
+		s.renderAPIDocs(w, r, "", "token-missing")
+		return
+	}
+	s.renderAPIDocs(w, r, value, "token-rotated")
+}
+
+// deleteAPIToken drops a revoked row. A live token is refused: revoke first,
+// so one click cannot remove something a script is still sending.
+func (s *server) deleteAPIToken(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4<<10)
+	id, err := strconv.ParseInt(r.PostFormValue("id"), 10, 64)
+	if err != nil {
+		s.renderAPIDocs(w, r, "", "token-missing")
+		return
+	}
+	if err := s.Store.DeleteAPIToken(r.Context(), id); err != nil {
+		s.renderAPIDocs(w, r, "", "token-not-revoked")
+		return
+	}
+	s.renderAPIDocs(w, r, "", "token-deleted")
+}
+
 // revokeAPIToken retires one.
 func (s *server) revokeAPIToken(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 4<<10)

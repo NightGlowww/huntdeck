@@ -1650,6 +1650,11 @@
     "Client configuration": "客户端配置",
     "Integrations": "集成",
     "To turn it on, fill in the endpoint, the model and the key under Accounts › Optional model, then run huntdeck ai-extract (or press Read policies there): the model reads each policy once and the result is cached against the policy text.": "启用方式：在「账户 › 可选模型」里填端点、模型与密钥，然后运行 huntdeck ai-extract（或在同一处点击「读取政策」）：模型会把每份政策读一次，结果按政策文本缓存。",
-    "Endpoint and key": "端点与密钥"
+    "Endpoint and key": "端点与密钥",
+    "Rotated. The old value stops working now; copy the new one: it is shown once, like a creation.": "已轮换。旧值立即失效；请复制新值：与创建一样只显示一次。",
+    "Deleted.": "已删除。",
+    "A live token cannot be deleted: revoke it first, so one click cannot remove something a script still uses.": "有效令牌不能直接删除：请先吊销，避免一次误点删掉仍在使用的密钥。",
+    "No such token.": "没有这个令牌。",
+    "Rotate": "轮换"
   }
 }

@@ -96,3 +96,6 @@
 .token-new { margin: 6px 0 12px; word-break: break-all; }
 table.tokens td, table.tokens th { white-space: nowrap; }
 
+
+/* Two actions beside a live token, one beside a revoked one. */
+.token-acts { display: flex; gap: 6px; justify-content: flex-end; }
