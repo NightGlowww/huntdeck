@@ -36,9 +36,12 @@
 /* The class list as a grid of chips: the key is the action, the label says
    what it is, the count says how much history sits behind it. */
 .pojia-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
-.pojia-chip { display: flex; align-items: baseline; gap: 6px; padding: 8px 12px;
+.pojia-chip { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; padding: 8px 12px;
+  /* The bilingual label sits on its own line and truncates: a long English name */
+  /* must not push the grid around or spill out of its card. */
   border: 1px solid var(--border-input); border-radius: var(--radius); background: var(--surface);
   color: var(--text-2); text-decoration: none; font-size: calc(12.5px * var(--fs, 1)); line-height: 1.35; }
+.pojia-chip .lbl { flex: 1 1 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pojia-chip:hover { border-color: var(--accent); }
 .pojia-chip b { color: var(--accent); font: 650 calc(12.5px * var(--fs, 1)) var(--mono); }
 .pojia-chip .count { margin-left: auto; color: var(--muted); font: calc(11.5px * var(--fs, 1)) var(--mono);

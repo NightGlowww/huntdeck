@@ -42,7 +42,7 @@
 <section class="panel">
   <div class="panel-head"><h2>{{T "Vulnerability classes"}}</h2><span class="aside">{{T "click one to search it"}}</span></div>
   <div class="panel-body">
-    {{if .ClassEntries}}<div class="pojia-grid">{{range .ClassEntries}}<a class="pojia-chip" href="/pojia?class={{.Key}}"><b>{{.Key}}</b> {{.Label}} <span class="count">{{num .Count}}</span></a>{{end}}</div>
+    {{if .ClassEntries}}<div class="pojia-grid">{{range .ClassEntries}}<a class="pojia-chip" href="/pojia?class={{.Key}}"><b>{{.Key}}</b><span class="count">{{num .Count}}</span><span class="lbl" title="{{.Label}}">{{.Label}}</span></a>{{end}}</div>
     {{else}}<pre class="pojia-answer pojia-classes">{{pojiaClasses .Classes}}</pre>{{end}}
   </div>
 </section>

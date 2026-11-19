@@ -76,7 +76,12 @@ func (s *server) pojiaReport(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	client := &pojia.Client{BaseURL: s.PojiaURL, Key: s.PojiaKey.Reveal()}
 	d := pojiaReportData{ID: id}
-	d.Report = s.pojiaCall(ctx, client, "report", map[string]any{"id": id})
+	answer := s.pojiaCall(ctx, client, "report", map[string]any{"id": id})
+	if answer == "" {
+		d.ReportFailed = true
+	} else {
+		d.Report = answer
+	}
 	s.render(w, r, http.StatusOK, "pojia-report", pageData{Title: "POJIA report", Nav: "pojia", Data: d})
 }
 
@@ -160,6 +165,7 @@ type pojiaPageData struct {
 }
 
 type pojiaReportData struct {
-	ID     string
-	Report string
+	ID           string
+	Report       string
+	ReportFailed bool
 }

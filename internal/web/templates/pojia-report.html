@@ -1,6 +1,6 @@
 {{define "content"}}{{with .Data}}
 <section class="panel">
   <div class="panel-head"><h2>{{T "Disclosed report"}}</h2><span class="aside"><a class="link" href="/pojia">{{T "back to search"}}</a></span></div>
-  <div class="panel-body"><pre class="pojia-answer pojia-report">{{pojiaLinks .Report}}</pre></div>
+  <div class="panel-body">{{if .ReportFailed}}<p class="flash warn">{{T "POJIA could not be reached; try again in a moment."}}</p>{{else}}<pre class="pojia-answer pojia-report">{{pojiaLinks .Report}}</pre>{{end}}</div>
 </section>
 {{end}}{{end}}
