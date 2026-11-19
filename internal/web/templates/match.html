@@ -1,10 +1,10 @@
 {{define "content"}}{{with .Data}}
 <section class="panel">
   <form class="toolbar" method="get" action="/match">
-    <label class="search big grow"><svg class="i"><use href="#i-search"/></svg>
-      <input type="search" name="q" value="{{.Query}}" placeholder="app.example.com, 203.0.113.7 or https://…" aria-label="Host" autofocus spellcheck="false"></label>
-    <button type="submit">Check</button>
-    <span class="muted small">Is it in scope, and for which programs? The most specific rule wins.</span>
+    <label class="search big grow"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <input type="search" name="q" value="{{.Query}}" placeholder="app.example.com, 203.0.113.7 {{T "or"}} https://…" aria-label="{{T "Host"}}" autofocus spellcheck="false"></label>
+    <button type="submit">{{T "Check"}}</button>
+    <span class="muted small">{{T "Is it in scope, and for which programs? The most specific rule wins."}}</span>
   </form>
 </section>
 
@@ -14,7 +14,7 @@
   {{if .Results}}
   <div class="table-wrap">
   <table class="cards">
-    <thead><tr><th>Program</th><th class="shrink">Verdict</th><th class="shrink">Type</th><th>Matched rule</th></tr></thead>
+    <thead><tr><th>{{T "Program"}}</th><th class="shrink">{{T "Verdict"}}</th><th class="shrink">{{T "Type"}}</th><th>{{T "Matched rule"}}</th></tr></thead>
     <tbody>
     {{range .Results}}{{template "match-row" .}}{{end}}
     </tbody>
@@ -22,23 +22,23 @@
   </div>
   {{else}}
   <div class="empty-state">
-    <p>No stored program lists <code>{{.Query}}</code>{{if .Past}} any more{{end}}.</p>
-    <p class="small"><code>*.example.com</code> covers subdomains, not <code>example.com</code> itself.
-      Looking for a program by name? <a class="link" href="/programs?state=all&amp;q={{.Query}}">Search programs for “{{.Query}}”</a>.</p>
+    <p>{{T "No stored program lists"}} <code>{{.Query}}</code>{{if .Past}} {{T "any more"}}{{end}}.</p>
+    <p class="small"><code>*.example.com</code> {{T "covers subdomains, not"}} <code>example.com</code> {{T "itself"}}.
+      {{T "Looking for a program by name?"}} <a class="link" href="/programs?state=all&amp;q={{.Query}}">{{T "Search programs for"}} “{{.Query}}”</a>.</p>
   </div>
   {{end}}
 </section>
 {{end}}
 {{if .Under}}
 <section class="panel">
-  <div class="panel-head"><h2>{{if .Mentions}}Mentioning{{else}}Under{{end}} {{.Host}} <span class="count">{{num .UnderTotal}}</span></h2>
-    <a class="link aside" href="/targets?q={{.Host}}">{{if gt .UnderTotal (len .Under)}}All {{num .UnderTotal}}{{else}}See them{{end}} on Targets →</a></div>
-  {{if .Mentions}}<p class="note-bar">No program lists <code>{{.Host}}</code>{{if .Past}} any more{{end}} or anything under it; these rules contain it.</p>
-  {{else if not .Results}}<p class="note-bar">No program lists <code>{{.Host}}</code> itself{{if .Past}} any more{{end}}.
-    {{with .HostWildcard}}<code>{{.}}</code> covers its subdomains, like <code>www.{{$.Data.Host}}</code>, but not the bare domain.{{else}}These are its subdomains that are listed.{{end}}</p>{{end}}
+  <div class="panel-head"><h2>{{if .Mentions}}{{T "Mentioning"}}{{else}}{{T "Under"}}{{end}} {{.Host}} <span class="count">{{num .UnderTotal}}</span></h2>
+    <a class="link aside" href="/targets?q={{.Host}}">{{if gt .UnderTotal (len .Under)}}{{TF "All %s" (num .UnderTotal)}}{{else}}{{T "See them"}}{{end}} {{T "on Targets"}} →</a></div>
+  {{if .Mentions}}<p class="note-bar">{{T "No program lists"}} <code>{{.Host}}</code>{{if .Past}} {{T "any more"}}{{end}} {{T "or anything under it; these rules contain it."}}</p>
+  {{else if not .Results}}<p class="note-bar">{{T "No program lists"}} <code>{{.Host}}</code> {{T "itself"}}{{if .Past}} {{T "any more"}}{{end}}.
+    {{with .HostWildcard}}<code>{{.}}</code> {{T "covers its subdomains, like"}} <code>www.{{$.Data.Host}}</code>{{T ", but not the bare domain."}}{{else}}{{T "These are its subdomains that are listed."}}{{end}}</p>{{end}}
   <div class="table-wrap">
   <table class="cards">
-    <thead><tr><th>Program</th><th class="shrink">Listed</th><th class="shrink">Type</th><th>Rule</th></tr></thead>
+    <thead><tr><th>{{T "Program"}}</th><th class="shrink">{{T "Listed"}}</th><th class="shrink">{{T "Type"}}</th><th>{{T "Rule"}}</th></tr></thead>
     <tbody>
     {{range .Under}}{{template "match-row" .}}{{end}}
     </tbody>
@@ -48,17 +48,17 @@
 {{end}}
 {{with .Past}}
 <section class="panel">
-  <div class="panel-head"><h2>Previously listed <span class="count">{{len .}}</span></h2>
-    <span class="aside">scope programs have since removed, newest first</span></div>
+  <div class="panel-head"><h2>{{T "Previously listed"}} <span class="count">{{len .}}</span></h2>
+    <span class="aside">{{T "scope programs have since removed, newest first"}}</span></div>
   <div class="table-wrap">
   <table class="cards">
-    <thead><tr><th>Program</th><th class="shrink">Was</th><th class="shrink">Type</th><th>Removed entry</th><th class="shrink">Removed</th></tr></thead>
+    <thead><tr><th>{{T "Program"}}</th><th class="shrink">{{T "Was"}}</th><th class="shrink">{{T "Type"}}</th><th>{{T "Removed entry"}}</th><th class="shrink">{{T "Removed"}}</th></tr></thead>
     <tbody>
     {{range .}}
       <tr data-href="/programs/{{.Program.Platform}}/{{.Program.Handle}}">
         <td class="c-prog"><div class="prog">{{template "ptag" .Program.Platform}}<a class="name" href="/programs/{{.Program.Platform}}/{{.Program.Handle}}" title="{{.Program.Name}}">{{.Program.Name}}</a></div></td>
-        <td class="c-side shrink">{{if .InScope}}<span class="verdict in">in scope</span>{{else}}<span class="verdict out">out of scope</span>{{end}}</td>
-        <td class="shrink"><span class="chips">{{with .Via.Kind}}<span class="chip" title="The kind of rule that decided it">{{.}}</span>{{end}}{{if .Program.Private}}<span class="chip private">private</span>{{end}}{{if ne .Program.State "open"}}<span class="chip {{.Program.State}}">{{.Program.State}}</span>{{end}}</span></td>
+        <td class="c-side shrink">{{if .InScope}}<span class="verdict in">{{T "in scope"}}</span>{{else}}<span class="verdict out">{{T "out of scope"}}</span>{{end}}</td>
+        <td class="shrink"><span class="chips">{{with .Via.Kind}}<span class="chip" title="{{T "The kind of rule that decided it"}}">{{.}}</span>{{end}}{{if .Program.Private}}<span class="chip private">private</span>{{end}}{{if ne .Program.State "open"}}<span class="chip {{.Program.State}}">{{.Program.State}}</span>{{end}}</span></td>
         <td class="c-wide asset">{{template "asset" .Identifier}}</td>
         <td class="shrink nowrap" title="{{datetime .RemovedAt}}" data-label="Removed">{{.RemovedAt.Format "2006-01-02"}}</td>
       </tr>
@@ -68,14 +68,14 @@
   </div>
 </section>
 {{end}}
-<p class="note">Always read the program's policy before testing; some rules only exist in prose.</p>
+<p class="note">{{T "Always read the program's policy before testing; some rules only exist in prose."}}</p>
 {{end}}
 {{end}}{{end}}
 
 {{/* One program a scope check found: what decided or lists it. */}}
 {{define "match-row"}}<tr data-href="/programs/{{.Program.Platform}}/{{.Program.Handle}}">
   <td class="c-prog"><div class="prog">{{template "ptag" .Program.Platform}}<a class="name" href="/programs/{{.Program.Platform}}/{{.Program.Handle}}" title="{{.Program.Name}}">{{.Program.Name}}</a></div></td>
-  <td class="c-side shrink">{{if .InScope}}<span class="verdict in">in scope</span>{{else}}<span class="verdict out">out of scope</span>{{end}}</td>
-  <td class="shrink"><span class="chips">{{with .Via.Kind}}<span class="chip" title="The kind of rule that decided it">{{.}}</span>{{end}}{{if .Program.Private}}<span class="chip private">private</span>{{end}}{{if ne .Program.State "open"}}<span class="chip {{.Program.State}}">{{.Program.State}}</span>{{end}}</span></td>
+  <td class="c-side shrink">{{if .InScope}}<span class="verdict in">{{T "in scope"}}</span>{{else}}<span class="verdict out">{{T "out of scope"}}</span>{{end}}</td>
+  <td class="shrink"><span class="chips">{{with .Via.Kind}}<span class="chip" title="{{T "The kind of rule that decided it"}}">{{.}}</span>{{end}}{{if .Program.Private}}<span class="chip private">private</span>{{end}}{{if ne .Program.State "open"}}<span class="chip {{.Program.State}}">{{.Program.State}}</span>{{end}}</span></td>
   <td class="c-wide asset">{{.Via.Value}}</td>
 </tr>{{end}}

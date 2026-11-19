@@ -30,7 +30,7 @@
 /* The top bar's Theme menu: light or dark, then the palettes, each swatch
    in its own palette's colours. */
 .tmenu { position: relative; }
-.tm-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; display: grid; gap: 6px; width: 264px; padding: 8px; border: 1px solid var(--border-2);
+.tm-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; display: grid; gap: 6px; width: 264px; padding: 8px; border: 1px solid var(--border-input);
   border-radius: 10px; background: var(--surface); box-shadow: 0 12px 32px rgb(0 0 0 / .18); }
 .tm-pop[hidden] { display: none; }
 .tm-pop fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
@@ -49,7 +49,7 @@
 .tm-pop label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tm-name { min-width: 0; }
 .tm-name small { display: block; color: var(--muted); font-size: 11.5px; }
-.tm-sw { flex: none; display: flex; width: 34px; height: 22px; overflow: hidden; border: 1px solid var(--border-2); border-radius: 6px; }
+.tm-sw { flex: none; display: flex; width: 34px; height: 22px; overflow: hidden; border: 1px solid var(--border-input); border-radius: 6px; }
 .tm-sw i { flex: 1; }
 .tm-sw i:nth-child(1) { background: var(--bg); }
 .tm-sw i:nth-child(2) { background: var(--accent); }

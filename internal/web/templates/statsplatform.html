@@ -1,47 +1,47 @@
-{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="Back to"><a href="/stats{{.Vis.Query}}">Stats</a><span class="sep">/</span><a href="/stats/{{.Platform.Platform}}{{.Vis.Query}}">{{platformLabel .Platform.Platform}}</a></nav>{{template "vis-toggle" .Vis}}{{end}}{{end}}
+{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="Back to"><a href="/stats{{.Vis.Query}}">{{T "Stats"}}</a><span class="sep">/</span><a href="/stats/{{.Platform.Platform}}{{.Vis.Query}}">{{platformLabel .Platform.Platform}}</a></nav>{{template "vis-toggle" .Vis}}{{end}}{{end}}
 
 {{/* A platform's stats page (statsplatform.go): the Stats page's tiles for
    it, then its open programs with the same numbers and sparklines; only
    the columns the platform publishes. */}}
 {{define "content"}}{{with .Data}}{{$c := .Columns}}{{$p := .Platform.Platform}}{{$m := .Platform.Month}}
-<h1 class="m-heading">{{platformLabel $p}} stats</h1>
+<h1 class="m-heading">{{TF "%s stats" (platformLabel $p)}}</h1>
 {{template "vis-toggle-m" .Vis}}
 {{template "ov-tiles" .Platform}}
 
 <section class="panel">
   <form class="toolbar" method="get" action="/stats/{{$p}}">{{with .Vis.Value}}<input type="hidden" name="visibility" value="{{.}}">{{end}}
-    <label class="search grow"><svg class="i"><use href="#i-search"/></svg>
-      <input type="search" name="q" value="{{.Query}}" placeholder="Filter {{platformLabel $p}} programs" aria-label="Filter programs"></label>
-    <label class="check"><input type="checkbox" name="bounty" value="1"{{if .BountyOnly}} checked{{end}}> Paying only</label>
+    <label class="search grow"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <input type="search" name="q" value="{{.Query}}" placeholder="{{TF "Filter %s programs" (platformLabel $p)}}" aria-label="{{T "Filter programs"}}"></label>
+    <label class="check"><input type="checkbox" name="bounty" value="1"{{if .BountyOnly}} checked{{end}}> {{T "Paying only"}}</label>
     <input type="hidden" name="sort" value="{{.Sort}}">{{if .Reverse}}<input type="hidden" name="rev" value="1">{{end}}
-    <span class="end">{{if or .Query .BountyOnly}}<a class="button ghost" href="/stats/{{$p}}{{.Vis.Query}}">Reset</a>{{end}}<button type="submit">Apply</button></span>
+    <span class="end">{{if or .Query .BountyOnly}}<a class="button ghost" href="/stats/{{$p}}{{.Vis.Query}}">{{T "Reset"}}</a>{{end}}<button type="submit">{{T "Apply"}}</button></span>
   </form>
-  <div class="panel-head"><h2>Open programs <span class="count">{{num .Pager.Total}}</span></h2>
-    <span class="aside"><a class="link" href="/programs?platform={{$p}}{{with .Vis.Value}}&amp;visibility={{.}}{{end}}">Open in Programs list →</a></span></div>
+  <div class="panel-head"><h2>{{T "Open programs"}} <span class="count">{{num .Pager.Total}}</span></h2>
+    <span class="aside"><a class="link" href="/programs?platform={{$p}}{{with .Vis.Value}}&amp;visibility={{.}}{{end}}">{{T "Open in Programs list"}} →</a></span></div>
   {{if .Rows}}
-  <div class="table-wrap">
+  <div class="table-wrap" id="list" tabindex="-1">
   <table class="ov-table ov-programs">
     <thead><tr>
-      <th><a class="{{.SortClass "name"}}" href="{{.SortURL "name"}}">Program</a></th>
-      <th><a class="{{.SortClass "added"}}" href="{{.SortURL "added"}}" title="In-scope assets added, by the date the platform gives">Added to scope</a><small>in {{$m}}</small></th>
-      {{if $c.received}}<th><a class="{{.SortClass "received"}}" href="{{.SortURL "received"}}" title="Every report received in the last 90 days, duplicates and N/A included">Reports received</a><small>last 90 days</small></th>{{end}}
-      {{if $c.valid}}<th><a class="{{.SortClass "valid"}}" href="{{.SortURL "valid"}}" title="{{validMonthTitle $p}}">Valid reports</a><small>in {{$m}}</small></th>{{end}}
-      {{if $c.bounties}}<th><a class="{{.SortClass "bounties"}}" href="{{.SortURL "bounties"}}" title="{{bountiesTitle $p}}. In the currency most is paid in, other currencies beside it">Bounties</a><small>in {{$m}}</small></th>{{end}}
-      {{if $c.paid}}<th><a class="{{.SortClass "paid"}}" href="{{.SortURL "paid"}}">Paid</a><small>last 90 days</small></th>{{end}}
-      {{if $c.resolve}}<th><a class="{{.SortClass "resolve"}}" href="{{.SortURL "resolve"}}" title="Median days from submission to resolution of the month's resolved reports, or (Intigriti) average days to a decision over 90 days; quickest first">Days to resolve</a><small>{{if .Platform.Resolve}}median in {{$m}}{{else}}to a decision, over 90 days{{end}}</small></th>{{end}}
-      <th class="c-open"><span class="sr-only">Open on the platform</span></th>
+      <th><a class="{{.SortClass "name"}}" href="{{.SortURL "name"}}">{{T "Program"}}</a></th>
+      <th><a class="{{.SortClass "added"}}" href="{{.SortURL "added"}}" title="{{T "In-scope assets added, by the date the platform gives"}}">{{T "Added to scope"}}</a><small>{{T "in"}} {{T $m}}</small></th>
+      {{if $c.received}}<th><a class="{{.SortClass "received"}}" href="{{.SortURL "received"}}" title="{{T "Every report received in the last 90 days, duplicates and N/A included"}}">{{T "Reports received"}}</a><small>{{T "last 90 days"}}</small></th>{{end}}
+      {{if $c.valid}}<th><a class="{{.SortClass "valid"}}" href="{{.SortURL "valid"}}" title="{{validMonthTitle $p}}">{{T "Valid reports"}}</a><small>{{T "in"}} {{T $m}}</small></th>{{end}}
+      {{if $c.bounties}}<th><a class="{{.SortClass "bounties"}}" href="{{.SortURL "bounties"}}" title="{{TF "%s. In the currency most is paid in, other currencies beside it" (bountiesTitle $p)}}">{{T "Bounties"}}</a><small>{{T "in"}} {{T $m}}</small></th>{{end}}
+      {{if $c.paid}}<th><a class="{{.SortClass "paid"}}" href="{{.SortURL "paid"}}">{{T "Paid"}}</a><small>{{T "last 90 days"}}</small></th>{{end}}
+      {{if $c.resolve}}<th><a class="{{.SortClass "resolve"}}" href="{{.SortURL "resolve"}}" title="{{T "Median days from submission to resolution of the month's resolved reports, or (Intigriti) average days to a decision over 90 days; quickest first"}}">{{T "Days to resolve"}}</a><small>{{if .Platform.Resolve}}{{T "median in"}} {{T $m}}{{else}}{{T "to a decision, over 90 days"}}{{end}}</small></th>{{end}}
+      <th class="c-open"><span class="sr-only">{{T "Open on the platform"}}</span></th>
     </tr></thead>
     <tbody>
     {{range .Rows}}{{$it := .Item}}
     <tr data-href="/programs/{{$it.Platform}}/{{$it.Handle}}">
       <td>{{template "pname" ((plink $it.ProgramRef).WithoutTag.Marked $it.OffersBounty $it.Ignored)}}
         <div class="muted small">{{num $it.InScope}} {{plural $it.InScope "asset" "assets"}}</div></td>
-      <td data-label="Added to scope · {{$m}}">{{template "ov-cell" .ScopeCell}}</td>
-      {{if $c.received}}<td data-label="Reports received · 90 days">{{with .ReceivedCell}}{{template "ov-cell" .}}{{else}}{{template "nodata" $it}}{{end}}</td>{{end}}
-      {{if $c.valid}}<td data-label="Valid reports · {{$m}}">{{with .ValidCell}}{{template "ov-cell" .}}{{else}}{{template "nodata" $it}}{{end}}</td>{{end}}
-      {{if $c.bounties}}<td data-label="Bounties · {{$m}}">{{with .BountiesCell}}{{template "ov-cell" .}}{{else}}{{template "nomoney" $it}}{{end}}</td>{{end}}
-      {{if $c.paid}}<td data-label="Paid · 90 days">{{with .PaidCell}}{{template "ov-cell" .}}{{else}}{{template "nomoney" $it}}{{end}}</td>{{end}}
-      {{if $c.resolve}}<td data-label="{{if $.Data.Platform.Resolve}}Days to resolve · {{$m}}{{else}}Days to decision · 90 days{{end}}">{{with .ResolveCell}}{{template "ov-cell" .}}{{else}}{{template "nodata" $it}}{{end}}</td>{{end}}
+      <td data-label="{{T "Added to scope"}} · {{T $m}}">{{template "ov-cell" .ScopeCell}}</td>
+      {{if $c.received}}<td data-label="{{T "Reports received"}} · 90">{{with .ReceivedCell}}{{template "ov-cell" .}}{{else}}{{template "nodata" $it}}{{end}}</td>{{end}}
+      {{if $c.valid}}<td data-label="{{T "Valid reports"}} · {{T $m}}">{{with .ValidCell}}{{template "ov-cell" .}}{{else}}{{template "nodata" $it}}{{end}}</td>{{end}}
+      {{if $c.bounties}}<td data-label="{{T "Bounties"}} · {{T $m}}">{{with .BountiesCell}}{{template "ov-cell" .}}{{else}}{{template "nomoney" $it}}{{end}}</td>{{end}}
+      {{if $c.paid}}<td data-label="{{T "Paid"}} · 90">{{with .PaidCell}}{{template "ov-cell" .}}{{else}}{{template "nomoney" $it}}{{end}}</td>{{end}}
+      {{if $c.resolve}}<td data-label="{{if $.Data.Platform.Resolve}}{{T "Days to resolve"}} · {{T $m}}{{else}}{{T "Days to decision"}} · 90{{end}}">{{with .ResolveCell}}{{template "ov-cell" .}}{{else}}{{template "nodata" $it}}{{end}}</td>{{end}}
       <td class="c-open">{{template "open-ext" $it}}</td>
     </tr>
     {{end}}
@@ -53,7 +53,7 @@
   {{else if .Pager.Beyond}}
     {{template "past-end" .Pager}}
   {{else}}
-  <div class="empty-state">No open {{if eq .Vis.Value "private"}}private {{else if eq .Vis.Value "public"}}public {{end}}{{platformLabel $p}} programs match. <a class="link" href="/stats/{{$p}}">Show them all</a>.</div>
+  <div class="empty-state">{{TF "No open %s programs match." (platformLabel $p)}} <a class="link" href="/stats/{{$p}}">{{T "Show them all"}}</a>.</div>
   {{end}}
 </section>
 {{end}}{{template "spark-defs"}}{{end}}

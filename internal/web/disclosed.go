@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -24,6 +25,7 @@ func disclosureFilterFrom(q url.Values, now time.Time) store.DisclosureFilter {
 		Severity: severityChoices[q.Get("severity")],
 		Weakness: q.Get("weakness"),
 		PaidOnly: isTrue(q.Get("paid")),
+		WithCVE:  isTrue(q.Get("cve")),
 		Since:    addedSince(q.Get("since"), now),
 		Sort:     oneOf(q.Get("sort"), "new", "bounty", "votes"),
 	}
@@ -98,6 +100,7 @@ func (d disclosedData) Rail() []railGroup {
 	}
 	return append(groups, weak, railGroup{Title: "Bounty", Options: []railOption{
 		l.option("With a bounty", "Reports whose bounty is public", "paid", "1", fc.Paid, true),
+		l.option("With a CVE", "Reports that name a CVE", "cve", "1", fc.WithCVE, true),
 	}})
 }
 
@@ -127,11 +130,19 @@ func (s *server) disclosed(w http.ResponseWriter, r *http.Request) {
 	now := s.now(r.Context())
 	f := disclosureFilterFrom(q, now)
 	f.Limit, f.Offset = perPage, (pageFrom(r)-1)*perPage
+	// ?format=txt: the reports this filter shows, one URL per line, for the
+	// page's copy and download links.
+	if q.Get("format") == "txt" {
+		s.writeDisclosedText(w, r, f)
+		return
+	}
+	t0 := time.Now()
 	rows, total, err := s.Store.Disclosures(r.Context(), f)
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
+	tRows := time.Since(t0)
 	cutoffs := make([]time.Time, len(disclosedSince))
 	for i, v := range disclosedSince {
 		cutoffs[i] = addedSince(v, now)
@@ -143,10 +154,13 @@ func (s *server) disclosed(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	tData := time.Since(t0)
 	s.render(w, r, http.StatusOK, "disclosed", pageData{Title: "Disclosed reports", Nav: "disclosed", Data: disclosedData{
 		Filter: f, Severity: q.Get("severity"), Since: q.Get("since"), Rows: rows, Pager: newPager(r, perPage, total),
 		Facets: facets, Platforms: s.platformNames(), query: q,
 	}})
+	s.Log.Debug("disclosed served", "rows", tRows.Round(time.Millisecond), "counts", (tData - tRows).Round(time.Millisecond),
+		"render", (time.Since(t0) - tData).Round(time.Millisecond))
 }
 
 // apiDisclosed lists disclosed reports across programs, newest first by
@@ -172,3 +186,37 @@ func (s *server) apiDisclosed(w http.ResponseWriter, r *http.Request) {
 
 // WeaknessURL is the list filtered to weakness w, keeping the other filters.
 func (d disclosedData) WeaknessURL(w string) string { return d.list().with("weakness", w) }
+
+// SortAria is a disclosed report heading's aria-sort: newest, highest
+// bounty or most votes first, all descending.
+func (d disclosedData) SortAria(key string) string {
+	sort := d.Filter.Sort
+	if sort == "" {
+		sort = "new"
+	}
+	if sort != key {
+		return ""
+	}
+	return "descending"
+}
+
+// writeDisclosedText answers the page's copy and download links: the
+// reports the filter shows, one URL per line (the whole filter, not the
+// page of it).
+func (s *server) writeDisclosedText(w http.ResponseWriter, r *http.Request, f store.DisclosureFilter) {
+	f.Limit, f.Offset = 5000, 0
+	rows, _, err := s.Store.Disclosures(r.Context(), f)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	for _, d := range rows {
+		_, _ = fmt.Fprintln(w, d.URL)
+	}
+}
+
+// ExportURL is this list as plain text, one report URL per line, with the
+// filters the page has.
+func (d disclosedData) ExportURL() string { return d.list().with("format", "txt") }

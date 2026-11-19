@@ -32,7 +32,7 @@ func TestInvites(t *testing.T) {
 	for _, want := range []string{
 		`<a href="/invites" aria-current="page">`, "1 open invite</span>", "&lt;script&gt;", `<span class="chip waiting" title="Invited 2026-10-06`,
 		`<span class="fl">Not accepted yet</span><em>1</em>`, `<form class="fsearch" method="get" action="/invites">`,
-		`<table class="fixed plist-table cards has-accept"`, `<form class="accept-form" method="post" action="/invites/fake/evil/accept" data-confirm="Accept the invitation to &lt;script&gt;`,
+		`<table class="fixed plist-table cards has-accept"`, `<form class="accept-form" method="post" action="/invites/fake/evil/accept" data-busy="Accepting…" data-stay-busy data-confirm="Accept the invitation to &lt;script&gt;`,
 		`<input type="hidden" name="back" value="/invites">`,
 	} {
 		if !strings.Contains(body, want) {

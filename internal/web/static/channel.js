@@ -32,7 +32,7 @@
   if (!test || !out) return;
   test.addEventListener("click", (e) => {
     e.preventDefault();
-    out.textContent = "Sending…";
+    out.textContent = t("Sending…");
     delete out.dataset.state;
     test.disabled = true;
     fetch(test.formAction + "?inline=1", { method: "POST", body: new URLSearchParams(new FormData(form)) })
@@ -41,7 +41,7 @@
         out.dataset.state = r.ok ? "ok" : "err";
       })
       .catch(() => {
-        out.textContent = "Couldn't reach HuntDeck.";
+        out.textContent = t("Couldn't reach HuntDeck.");
         out.dataset.state = "err";
       })
       .finally(() => { test.disabled = false; });

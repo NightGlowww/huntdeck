@@ -2,12 +2,12 @@
    list; beside them the bounty table, if it has one (Before you test is on
    the Overview and Scope). */}}
 {{define "program-policy"}}{{with .Data}}{{$bounty := and .P.PublicStats (or .P.OffersBounty .P.PublicStats.Rewards)}}
-<div class="polgrid{{if not $bounty}} wide{{end}}">
-  <nav class="panel toc" aria-label="Contents">
-    <div class="panel-head"><h2>Contents</h2></div>
+{{if .Docs}}<div class="polgrid{{if not $bounty}} wide{{end}}">
+  <nav class="panel toc" aria-label="{{T "Contents"}}">
+    <div class="panel-head"><h2>{{T "Contents"}}</h2></div>
     <div class="toc-list" data-toc>
     {{range .Docs}}
-      <a class="t1" href="#{{.ID}}">{{.Title}}</a>
+      <a class="t1" href="#{{.ID}}">{{T .Title}}</a>
       {{range .TOC}}<a class="{{if le .Level 2}}t2{{else}}t3{{end}}" href="#{{.ID}}">{{.Text}}</a>{{end}}
     {{end}}
     </div>
@@ -15,7 +15,7 @@
   <div class="stack">
   {{range .Docs}}
     <section class="panel prose" id="{{.ID}}">
-      <div class="panel-head"><h2>{{.Title}}</h2>{{if eq .ID "excluded"}}<span class="aside">on top of the platform's standard ineligible list</span>{{end}}</div>
+      <div class="panel-head"><h2>{{T .Title}}</h2>{{if eq .ID "excluded"}}<span class="aside">{{T "on top of the platform's standard ineligible list"}}</span>{{end}}</div>
       {{if .Items}}<ul class="exclusions">{{range .Items}}<li><b>{{.Name}}</b>{{with .Details}}<div class="md">{{markdown .}}</div>{{end}}</li>{{end}}</ul>
       {{else}}<div class="md">{{.Body}}</div>{{end}}
     </section>
@@ -24,5 +24,5 @@
   {{if $bounty}}<aside class="stack">
     {{template "program-bounty" .}}
   </aside>{{end}}
-</div>
+</div>{{else}}<section class="panel"><div class="empty-state">{{T "This program publishes no policy text."}}</div></section>{{end}}
 {{end}}{{end}}

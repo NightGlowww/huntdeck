@@ -106,6 +106,25 @@
   <p>Targets on the hunt board are scored the same way, by how new they are: to the program, or to you. A private program you just got access to has its whole scope dated when you joined (or when HuntDeck first listed it), so an old program's scope still shows as fresh; the board lists 3 of its targets and links the rest.</p>
   </div>
 </section>
+<section class="panel mcard" id="huntqueue">
+  <div class="panel-head"><h2>HuntQueue</h2></div>
+  <div class="panel-body md">
+  <p>HuntScore rates <b>programs</b>; HuntQueue rates <b>targets</b>, and answers a narrower question: can I start on this today, and what is it worth per hour? The hunt board shows its first five, <code>/queue</code> shows fifty at a time, and the server rebuilds it every half hour from what was polled.</p>
+  <p>Seven inputs, multiplied rather than added, so a factor at zero zeroes the score instead of being averaged away:</p>
+  <ul>
+    <li><b>Quality</b> (0.30): the program's HuntScore without its freshness part.</li>
+    <li><b>Money</b> (0.25): the top bounty in US dollars, saturating at $10k. Programs paying in another currency are converted with a fixed table; a currency the table does not know is taken at face value, and the note on the page says so.</li>
+    <li><b>Speed</b> (0.15): the median days from submission to acceptance, saturating at two weeks.</li>
+    <li><b>Duplicates</b> (0.15): how crowded the target looks, from the reports the program receives for the size of its scope.</li>
+    <li><b>Freshness</b> (0.10): how recently the target appeared, or became yours to hunt.</li>
+    <li><b>Readiness</b> (0.05): 1.0 open, 0.7 when test credentials have to be requested, 0.5 when the program bans automated tools, and a further 0.8 when a program keeps flipping between paused and open.</li>
+    <li><b>Personal</b>: a prior on you rather than on the target, 0.8 until you have reports of your own.</li>
+  </ul>
+  <p>A target the queue cannot rank is not hidden: it is listed with its reason (the program is paused, an invite is waiting, there is no scope), so "why is this not in the queue" has an answer on the page.</p>
+  <p><b>The queue is on trial until it has eight snapshots.</b> A day's scores are saved once a day, and at each past day the backtest asks what the queue would have told you to hunt and what the platforms then paid. Fewer than eight cuts means that judgement has not happened: the footer says <code>N of 8 snapshots</code>, and until then HuntScore is the number with a track record while the queue is a well-argued guess. The breakdown is visible four ways: the score on the page unfolds, <code>?explain=1</code>, <code>huntdeck queue --explain</code>, and <code>explain: true</code> on the MCP tool.</p>
+  </div>
+</section>
+
 <section class="panel mcard" id="charts">
   <div class="panel-head"><h2>The charts</h2></div>
   <div class="panel-body md">

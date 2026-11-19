@@ -60,7 +60,9 @@ func (p pager) url(page int) string {
 		q[k] = v
 	}
 	q.Set("page", strconv.Itoa(page))
-	return p.path + "?" + q.Encode()
+	// Back to the list itself: the anchor puts the scroll and the keyboard focus
+	// at its top, not at the top of the page above the filters.
+	return p.path + "?" + q.Encode() + "#list"
 }
 
 // facetKey is a list's query for memoising its facet counts (store.Memo):

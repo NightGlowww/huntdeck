@@ -164,8 +164,9 @@ func TestOwnPrograms(t *testing.T) {
 		t.Errorf("edit of a platform's program = %d", res.StatusCode)
 	}
 	// Independent isn't a platform to poll, show stats for, or alert on.
+	// Quoted through T, the note's apostrophe is escaped; match its opening.
 	if _, body = e.do(c, http.MethodGet, "/stats", nil, nil); strings.Contains(body, "pf-independent") || !strings.Contains(body, "Public <em>1</em>") ||
-		!strings.Contains(body, "Programs added by hand aren't counted here") {
+		!strings.Contains(body, "Programs added by hand") {
 		t.Error("Stats shows Independent, or counts it among public programs")
 	}
 	if res, _ = e.do(c, http.MethodGet, "/stats/independent", nil, nil); res.StatusCode != http.StatusNotFound {

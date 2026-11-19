@@ -12,6 +12,7 @@ import (
 
 	"github.com/mdpsec/huntdeck/internal/humanize"
 	"github.com/mdpsec/huntdeck/internal/huntscore"
+	"github.com/mdpsec/huntdeck/internal/i18n"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
 	"github.com/mdpsec/huntdeck/internal/scope"
 	"github.com/mdpsec/huntdeck/internal/store"
@@ -191,8 +192,17 @@ func timeFuncs(zone func() *time.Location) template.FuncMap {
 	}
 }
 
+// fileExists reports whether a template file is embedded.
+func fileExists(fsys fs.FS, name string) bool {
+	info, err := fs.Stat(fsys, name)
+	return err == nil && !info.IsDir()
+}
+
 // loadTemplates parses each page together with the shared layout, with
-// times shown in the zone zone returns.
+// times shown in the zone zone returns. It returns one set of templates per
+// language: every page is parsed once per language with that language's
+// translation function, so rendering picks a set and stays allocation-free.
+//
 // readOnlyLinks are the links a read-only copy shows its visitors; a full
 // install shows none.
 type readOnlyLinks struct {
@@ -200,7 +210,7 @@ type readOnlyLinks struct {
 	RepoURL  string // HuntDeck's source repository, to run your own (Deps.RepoURL)
 }
 
-func loadTemplates(zone func() *time.Location, version string, readOnly bool, links readOnlyLinks) (map[string]*template.Template, error) {
+func loadTemplates(zone func() *time.Location, version string, readOnly bool, links readOnlyLinks, langs []string, messages *i18n.Bundle) (map[string]map[string]*template.Template, error) {
 	if !readOnly {
 		links = readOnlyLinks{}
 	}
@@ -225,17 +235,86 @@ func loadTemplates(zone func() *time.Location, version string, readOnly bool, li
 		// github.com/mdpsec/huntdeck.
 		"repoName": func() string { return strings.TrimPrefix(strings.TrimPrefix(links.RepoURL, "https://"), "www.") },
 	}
-	out := map[string]*template.Template{}
-	for _, p := range pages {
-		name := strings.TrimSuffix(strings.TrimPrefix(p, "templates/"), ".html")
-		if name == "layout" {
-			continue
+	out := map[string]map[string]*template.Template{}
+	for _, lang := range langs {
+		localized := template.FuncMap{
+			"T":    func(msg string) string { return messages.T(lang, msg) },
+			"TF":   func(msg string, args ...any) string { return messages.TF(lang, msg, args...) },
+			"Lang": func() string { return lang },
+			// plural picks the singular or the plural message and translates
+			// it: a language without plural forms holds the same words in both.
+			"plural": func(n int, one, many string) string {
+				if n == 1 {
+					return messages.T(lang, one)
+				}
+				return messages.T(lang, many)
+			},
+			// HuntScore's reasons are stored in English when a score is
+			// computed; they read in the page's language here.
+			"huntReason": func(r string) template.HTML { return reasonHTML(lang, messages, r) },
+			// A target's reasons, joined for a tooltip.
+			"reasons": func(rs []string) string { return reasonsText(lang, messages, rs) },
+			// Requirement chips' tooltips.
+			"reqTitle": func(s string) string { return reqTitle(lang, s) },
+			// The column tooltips' fixed sentences (programcells.go,
+			// statsbounties.go) read in the page's language too.
+			"validMonthTitle": func(p string) string { return messages.T(lang, validMonthTitle(p)) },
+			"bountiesTitle":   func(p string) string { return messages.T(lang, bountiesTitle(p)) },
+			// How a counted figure was worked out, in the page's language.
+			"countedTitle": func(p store.ProgramListItem, what string) string {
+				return countedTitleLang(lang, messages, p, what)
+			},
+			// A chart's own labels: "Jan", "Jan 2", "9mo 1w". A duration
+			// ("9mo 1w", "132d") reads in the page's language too.
+			"fig": func(s string) string { return figText(lang, s) },
+			"days": func(v *float64) string {
+				if v == nil {
+					return ""
+				}
+				return figText(lang, humanize.Days(*v))
+			},
+			// Changes read in the page's language too: "+ scope" / "+ 范围",
+			// "Scope added: x" / "范围新增：x".
+			"change":    func(c store.ChangeView) string { return describeChangeLang(lang, messages, c) },
+			"changeTag": func(k string) string { return changeTagLang(lang, messages, k) },
+			// Times read in the page's language: "3d ago" / "3 天前".
+			"ago":    func(t time.Time) string { return agoLang(lang, messages, t) },
+			"agoPtr": func(t *time.Time) string { return agoPtrLang(lang, messages, t) },
+			"until":  func(t time.Time) string { return untilLang(lang, messages, t) },
 		}
-		t, err := template.New("layout.html").Funcs(funcs).Funcs(timeFuncs(zone)).Funcs(static).ParseFS(templateFS, "templates/layout.html", "templates/partials/*.html", p)
+		set := map[string]*template.Template{}
+		for _, p := range pages {
+			name := strings.TrimSuffix(strings.TrimPrefix(p, "templates/"), ".html")
+			if name == "layout" || name == "login" {
+				continue
+			}
+			if strings.Contains(name, ".") { // a page's translation, templates/<page>.<lang>.html
+				continue
+			}
+			// A long page written out in full (Methodology) has a file per
+			// language rather than a message per sentence: the translation is
+			// the page, with the same markup.
+			src := p
+			if lang != i18n.English {
+				if translated := "templates/" + name + "." + lang + ".html"; fileExists(templateFS, translated) {
+					src = translated
+				}
+			}
+			t, err := template.New("layout.html").Funcs(funcs).Funcs(timeFuncs(zone)).Funcs(static).Funcs(localized).
+				ParseFS(templateFS, "templates/layout.html", "templates/partials/*.html", src)
+			if err != nil {
+				return nil, fmt.Errorf("template %s (%s): %w", name, lang, err)
+			}
+			set[name] = t
+		}
+		// The login page stands alone: no sidebar, no top bar, no data.
+		t, err := template.New("login.html").Funcs(funcs).Funcs(timeFuncs(zone)).Funcs(static).Funcs(localized).
+			ParseFS(templateFS, "templates/login.html")
 		if err != nil {
-			return nil, fmt.Errorf("template %s: %w", name, err)
+			return nil, fmt.Errorf("template login (%s): %w", lang, err)
 		}
-		out[name] = t
+		set["login"] = t
+		out[lang] = set
 	}
 	return out, nil
 }

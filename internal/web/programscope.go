@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -18,15 +19,25 @@ type scopeView struct {
 	Type  string // an asset type, or "" for all
 	Query string
 	Order string // "added" lists newest first; removed entries always are
+	// Since keeps entries added in the last 7, 30 or 90 days ("" for any
+	// age); it doesn't apply to removed entries, which are dated by their
+	// removal.
+	Since string
 	// Segments switch between in, out and removed; Types narrow to an
 	// asset type, "All" first.
-	Segments []scopeLink
-	Types    []scopeLink
-	Rows     []store.EntryView
-	Total    int  // rows matching, before the limit
-	Limited  bool // Rows stops at scopeRowsShown
-	AllURL   string
-	OrderURL string
+	Segments   []scopeLink
+	Types      []scopeLink
+	SinceLinks []scopeLink
+	Rows       []store.EntryView
+	Total      int  // rows matching, before the limit
+	Limited    bool // Rows stops at scopeRowsShown
+	// Truncated means even "show all" was capped: the page says so and points at
+	// the export instead of offering a link that would not change anything.
+	Truncated bool
+	AllURL    string
+	OrderURL  string
+	// CopyURL gives these rows as plain text, one identifier per line.
+	CopyURL  string
 	ClearURL string // without the type and search
 	// Bounty and Severity show those columns; a column whose rows all say
 	// the same is left out and Same says what that is ("All
@@ -43,6 +54,21 @@ type scopeLink struct {
 	Count           int
 	On              bool
 }
+
+// scopeSince is the Scope tab's "added in the last" windows, and their
+// chips' order and labels.
+var scopeSince = map[string]time.Duration{
+	"7d":  7 * 24 * time.Hour,
+	"30d": 30 * 24 * time.Hour,
+	"90d": 90 * 24 * time.Hour,
+}
+
+var scopeSinceOrder = []string{"7d", "30d", "90d"}
+
+var scopeSinceLabel = map[string]string{"7d": "Last 7 days", "30d": "Last 30 days", "90d": "Last 90 days"}
+
+// scopeRowsAll bounds even the "show all" view: the export carries the rest.
+const scopeRowsAll = 2000
 
 // scopeRowsShown is how many rows the Scope tab shows before "show all".
 const scopeRowsShown = 1000
@@ -66,12 +92,13 @@ func (d *programData) scopeView(r *http.Request) scopeView {
 		Show:  oneOf(q.Get("show"), "in", "out", "removed"),
 		Query: strings.TrimSpace(q.Get("q")),
 		Order: oneOf(q.Get("order"), "", "added"),
+		Since: oneOf(q.Get("since"), "", "7d", "30d", "90d"),
 	}
 	all := isTrue(q.Get("all"))
 	lists := map[string][]store.EntryView{"in": d.InScope, "out": d.OutOfScope, "removed": d.Removed}
 	for _, s := range []struct{ key, label string }{{"in", "In scope"}, {"out", "Out of scope"}, {"removed", "Removed"}} {
 		v.Segments = append(v.Segments, scopeLink{Key: s.key, Label: s.label, Count: len(lists[s.key]), On: s.key == v.Show,
-			URL: scopeURL(s.key, "", v.Query, v.Order, false)})
+			URL: scopeURL(s.key, "", v.Query, v.Order, v.Since, false)})
 	}
 	list := slices.Clone(lists[v.Show])
 	if v.Order == "added" && v.Show != "removed" {
@@ -99,12 +126,42 @@ func (d *programData) scopeView(r *http.Request) scopeView {
 		return strings.Compare(a, b)
 	})
 	if len(types) > 1 {
-		v.Types = append(v.Types, scopeLink{Label: "All", Count: len(list), On: v.Type == "", URL: scopeURL(v.Show, "", v.Query, v.Order, false)})
+		v.Types = append(v.Types, scopeLink{Label: "All", Count: len(list), On: v.Type == "", URL: scopeURL(v.Show, "", v.Query, v.Order, v.Since, false)})
 		for _, t := range types {
 			v.Types = append(v.Types, scopeLink{Key: t, Label: assetTypeLabel(t), Count: counts[t], On: t == v.Type,
-				URL: scopeURL(v.Show, t, v.Query, v.Order, false)})
+				URL: scopeURL(v.Show, t, v.Query, v.Order, v.Since, false)})
 		}
 	}
+	// How much of the list is new, for the window chips. Counted over the
+	// whole list (like the type chips), so they don't move as the search
+	// narrows; removed entries are dated by their removal and keep none.
+	now := time.Now()
+	if v.Show != "removed" {
+		counted := map[string]int{}
+		for _, e := range list {
+			if e.AddedAt == nil {
+				continue
+			}
+			for key, span := range scopeSince {
+				if now.Sub(*e.AddedAt) <= span {
+					counted[key]++
+				}
+			}
+		}
+		v.SinceLinks = append(v.SinceLinks, scopeLink{Label: "All time", Count: len(list), On: v.Since == "",
+			URL: scopeURL(v.Show, v.Type, v.Query, v.Order, "", false)})
+		for _, w := range scopeSinceOrder {
+			// Picking a window usually means "what is new": land on newest
+			// first unless the list is already in a chosen order.
+			order := v.Order
+			if order == "" {
+				order = "added"
+			}
+			v.SinceLinks = append(v.SinceLinks, scopeLink{Key: w, Label: scopeSinceLabel[w], Count: counted[w], On: v.Since == w,
+				URL: scopeURL(v.Show, v.Type, v.Query, order, w, false)})
+		}
+	}
+
 	v.Bounty, v.Severity, v.Same = sameColumns(list)
 
 	needle := strings.ToLower(v.Query)
@@ -115,18 +172,29 @@ func (d *programData) scopeView(r *http.Request) scopeView {
 		if needle != "" && !strings.Contains(strings.ToLower(e.Identifier), needle) && !strings.Contains(strings.ToLower(e.Instruction), needle) {
 			continue
 		}
+		if v.Since != "" && v.Show != "removed" {
+			if e.AddedAt == nil || now.Sub(*e.AddedAt) > scopeSince[v.Since] {
+				continue
+			}
+		}
 		v.Rows = append(v.Rows, e)
 	}
 	v.Total = len(v.Rows)
-	if !all && len(v.Rows) > scopeRowsShown {
+	switch {
+	case all && len(v.Rows) > scopeRowsAll:
+		// "Show all" is still a page, and a program can carry thousands of
+		// entries: the export is the tool for the rest.
+		v.Rows, v.Limited, v.Truncated = v.Rows[:scopeRowsAll], true, true
+	case !all && len(v.Rows) > scopeRowsShown:
 		v.Rows, v.Limited = v.Rows[:scopeRowsShown], true
 	}
-	v.AllURL = scopeURL(v.Show, v.Type, v.Query, v.Order, true)
-	v.ClearURL = scopeURL(v.Show, "", "", v.Order, false)
+	v.AllURL = scopeURL(v.Show, v.Type, v.Query, v.Order, v.Since, true)
+	v.CopyURL = scopeURL(v.Show, v.Type, v.Query, v.Order, v.Since, false) + "&format=txt"
+	v.ClearURL = scopeURL(v.Show, "", "", v.Order, "", false)
 	other := map[string]string{"": "added", "added": ""}[v.Order]
-	v.OrderURL = scopeURL(v.Show, v.Type, v.Query, other, all)
+	v.OrderURL = scopeURL(v.Show, v.Type, v.Query, other, v.Since, all)
 	v.Hidden = []param{{Name: "tab", Value: "scope"}}
-	for _, f := range []param{{"show", v.Show}, {"type", v.Type}, {"order", v.Order}} {
+	for _, f := range []param{{"show", v.Show}, {"type", v.Type}, {"order", v.Order}, {"since", v.Since}} {
 		if f.Value != "" && f.Value != "in" {
 			v.Hidden = append(v.Hidden, f)
 		}
@@ -175,7 +243,7 @@ func sameColumns(list []store.EntryView) (bounty, severity bool, same string) {
 }
 
 // scopeURL links to the Scope tab with these choices.
-func scopeURL(show, typ, query, order string, all bool) string {
+func scopeURL(show, typ, query, order, since string, all bool) string {
 	v := url.Values{"tab": {"scope"}}
 	if show != "in" {
 		v.Set("show", show)
@@ -188,6 +256,9 @@ func scopeURL(show, typ, query, order string, all bool) string {
 	}
 	if order != "" {
 		v.Set("order", order)
+	}
+	if since != "" {
+		v.Set("since", since)
 	}
 	if all {
 		v.Set("all", "1")
@@ -238,4 +309,14 @@ func expandsTo(e store.EntryView) *expansion {
 		x.Text += " · +" + strconv.Itoa(n) + " more"
 	}
 	return x
+}
+
+// writeScopeText answers the Scope tab's copy link: one identifier per line,
+// as the view shows them (every row, past the page's limit).
+func (s *server) writeScopeText(w http.ResponseWriter, v scopeView) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	for _, e := range v.Rows {
+		_, _ = fmt.Fprintln(w, e.Identifier)
+	}
 }

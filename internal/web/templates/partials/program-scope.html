@@ -5,39 +5,42 @@
 <div class="ov frozen">
   <section class="panel scope-panel" id="scope">
     <div class="scope-bar">
-      <nav class="seg" aria-label="Which entries">{{range $s.Segments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}">{{.Label}} <em>{{num .Count}}</em></a>{{end}}</nav>
+      <nav class="seg" aria-label="{{T "Which entries"}}">{{range $s.Segments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}">{{T .Label}} <em>{{num .Count}}</em></a>{{end}}</nav>
       <form class="scope-search" method="get" role="search">
         {{range $s.Hidden}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-        <label class="search sm"><svg class="i"><use href="#i-search"/></svg>
-          <input type="search" name="q" value="{{$s.Query}}" placeholder="Filter assets and notes" aria-label="Filter assets and notes" data-filter-rows="#scope-rows"></label>
+        <label class="search sm"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+          <input type="search" name="q" value="{{$s.Query}}" placeholder="{{T "Filter assets and notes"}}" aria-label="{{T "Filter assets and notes"}}" data-filter-rows="#scope-rows"></label>
       </form>
       <span class="grow"></span>
       {{with $s.Same}}<span class="muted small">{{.}}</span>{{end}}
-      {{if ne $s.Show "removed"}}<a class="link small" href="{{$s.OrderURL}}" title="Switch the order">{{if eq $s.Order "added"}}newest first{{else}}platform order{{end}}</a>{{else}}<span class="muted small">newest first</span>{{end}}
+      <button type="button" class="link small" data-copy-url="{{$s.CopyURL}}" title="{{T "These rows as plain text, one per line"}}">{{T "Copy targets"}}</button>
+      <a class="link small" href="{{$s.CopyURL}}" download="scope.txt" data-export title="{{T "These rows as a .txt file"}}">{{T "Download .txt"}}</a>
+      {{if ne $s.Show "removed"}}<a class="link small" href="{{$s.OrderURL}}" title="{{T "Switch the order"}}">{{if eq $s.Order "added"}}{{T "newest first"}}{{else}}{{T "platform order"}}{{end}}</a>{{else}}<span class="muted small">{{T "newest first"}}</span>{{end}}
     </div>
-    {{with $s.Types}}<div class="chipbar">{{range .}}<a class="fchip{{if .On}} on{{end}}" href="{{.URL}}"{{if .On}} aria-current="true"{{end}}>{{.Label}} <em>{{num .Count}}</em></a>{{end}}</div>{{end}}
-    {{if eq $s.Show "removed"}}{{if eq $p.Platform "hackerone"}}<div class="note-bar">Including removals before HuntDeck tracked the program, from HackerOne's scope history.</div>{{end}}{{end}}
+    {{with $s.Types}}<div class="chipbar">{{range .}}<a class="fchip{{if .On}} on{{end}}" href="{{.URL}}"{{if .On}} aria-current="true"{{end}}>{{T .Label}} <em>{{num .Count}}</em></a>{{end}}</div>{{end}}
+    {{with $s.SinceLinks}}<div class="chipbar" aria-label="{{T "Added in the last"}}"><span class="chipbar-label">{{T "Added"}}</span>{{range .}}<a class="fchip{{if .On}} on{{end}}" href="{{.URL}}"{{if .On}} aria-current="true"{{end}}>{{T .Label}} <em>{{num .Count}}</em></a>{{end}}</div>{{end}}
+    {{if eq $s.Show "removed"}}{{if eq $p.Platform "hackerone"}}<div class="note-bar">{{T "Including removals before HuntDeck tracked the program, from HackerOne's scope history."}}</div>{{end}}{{end}}
     {{if $s.Rows}}
     <div class="scope-scroll">
     <table class="fixed scope-table" id="scope-rows">
-      <thead><tr><th class="sc-asset">Asset</th><th class="sc-type">Type</th>{{if $s.Bounty}}<th class="sc-bounty">Bounty</th>{{end}}{{if $s.Severity}}<th class="sc-sev">Severity</th>{{end}}
-        <th class="sc-added">{{if eq $s.Show "removed"}}Removed{{else}}Added{{end}}</th><th class="sc-notes">Notes</th></tr></thead>
+      <thead><tr><th class="sc-asset">{{T "Asset"}}</th><th class="sc-type">{{T "Type"}}</th>{{if $s.Bounty}}<th class="sc-bounty">{{T "Bounty"}}</th>{{end}}{{if $s.Severity}}<th class="sc-sev">{{T "Severity"}}</th>{{end}}
+        <th class="sc-added">{{if eq $s.Show "removed"}}{{T "Removed"}}{{else}}{{T "Added"}}{{end}}</th><th class="sc-notes">{{T "Notes"}}</th></tr></thead>
       <tbody>
       {{range $s.Rows}}
         <tr>
-          <td class="asset">{{template "asset" .Identifier}}{{if newEntry . $p}} <span class="chip new" title="Added {{with .AddedAt}}{{datetime .}}{{else}}{{datetime .FirstSeenAt}}{{end}}">new</span>{{end}}{{if .Credentials}} <span class="chip creds" title="Test credentials available from the platform for this asset">creds</span>{{end}}{{with expandsTo .}}<div class="expands" title="{{.Title}}"><span class="muted">covers</span> {{.Text}}</div>{{end}}</td>
-          <td><span class="chip" title="{{.PlatformAssetType}}">{{.AssetType}}</span></td>
-          {{if $s.Bounty}}<td class="sc-bounty">{{if .BountyEligible}}<span class="chip yes">bounty</span>{{else}}<span class="zero" title="Not bounty-eligible">no bounty</span>{{end}}</td>{{end}}
-          {{if $s.Severity}}<td class="sc-sev">{{with .MaxSeverity}}{{if ne . "none"}}<span class="sev {{.}}">{{.}}</span>{{else}}<span class="zero" title="No maximum severity">—</span>{{end}}{{else}}<span class="zero" title="No maximum severity given">—</span>{{end}}</td>{{end}}
-          <td class="sc-added nowrap">{{if eq $s.Show "removed"}}{{with .RemovedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{end}}{{else}}{{$byPlatform := .AddedByPlatform}}{{$bound := .AddedBound}}{{with .AddedAt}}<span class="when{{if and (recent .) (not $bound)}} fresh{{end}}" title="{{if $byPlatform}}Added to the program {{datetime .}}{{template "age-ago" .}}{{else if $bound}}In scope by {{datetime .}}{{template "age-ago" .}}, where the platform's history starts{{else}}Added {{datetime .}}{{template "age-ago" .}} (from the platform's scope history, or when HuntDeck saw it appear){{end}}">{{if $bound}}≤ {{end}}{{date .}}</span>{{else}}<span class="zero" title="Already in scope when HuntDeck started tracking; the platform doesn't date its assets">—</span>{{end}}{{end}}</td>
+          <td class="asset">{{template "asset" .Identifier}}{{if newEntry . $p}} <span class="chip new" title="{{TF "Added %s" (datetime (or .AddedAt .FirstSeenAt))}}">{{T "new"}}</span>{{end}}{{if .Credentials}} <span class="chip creds" title="{{T "Test credentials available from the platform for this asset"}}">{{T "creds"}}</span>{{end}}{{with expandsTo .}}<div class="expands" title="{{.Title}}"><span class="muted">{{T "covers"}}</span> {{.Text}}</div>{{end}}</td>
+          <td><span class="chip" title="{{.PlatformAssetType}}">{{T .AssetType}}</span></td>
+          {{if $s.Bounty}}<td class="sc-bounty">{{if .BountyEligible}}<span class="chip yes">{{T "bounty"}}</span>{{else}}<span class="zero" title="{{T "Not bounty-eligible"}}">{{T "no bounty"}}</span>{{end}}</td>{{end}}
+          {{if $s.Severity}}<td class="sc-sev">{{with .MaxSeverity}}{{if ne . "none"}}<span class="sev {{.}}">{{.}}</span>{{else}}<span class="zero" title="{{T "No maximum severity"}}">—</span>{{end}}{{else}}<span class="zero" title="{{T "No maximum severity given"}}">—</span>{{end}}</td>{{end}}
+          <td class="sc-added nowrap">{{if eq $s.Show "removed"}}{{with .RemovedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{end}}{{else}}{{$byPlatform := .AddedByPlatform}}{{$bound := .AddedBound}}{{with .AddedAt}}<span class="when{{if and (recent .) (not $bound)}} fresh{{end}}" title="{{if $byPlatform}}{{TF "Added to the program %s" (datetime .)}}{{template "age-ago" .}}{{else if $bound}}{{TF "In scope by %s" (datetime .)}}{{template "age-ago" .}}{{T ", where the platform's history starts"}}{{else}}{{TF "Added %s" (datetime .)}}{{template "age-ago" .}} {{T "(from the platform's scope history, or when HuntDeck saw it appear)"}}{{end}}">{{if $bound}}≤ {{end}}{{date .}}</span>{{else}}<span class="zero" title="{{T "Already in scope when HuntDeck started tracking; the platform doesn't date its assets"}}">—</span>{{end}}{{end}}</td>
           <td class="sc-notes notes">{{with .Instruction}}{{$note := .}}{{with notePreview .}}<details class="note"><summary>{{.}}</summary>{{with noteRest $note}}<div class="pre">{{.}}</div>{{end}}</details>{{else}}<span class="note1">{{$note}}</span>{{end}}{{end}}</td>
         </tr>
       {{end}}
       </tbody>
     </table>
     </div>
-    {{if $s.Limited}}<div class="more-rows"><span class="muted small">Showing {{num (len $s.Rows)}} of {{num $s.Total}}</span> <a class="link" href="{{$s.AllURL}}">Show all →</a></div>{{end}}
-    {{else}}<div class="empty-state small">{{if or $s.Query $s.Type}}Nothing matches. <a class="link" href="{{$s.ClearURL}}">Clear</a>{{else}}None listed.{{end}}</div>{{end}}
+    {{if $s.Limited}}<div class="more-rows"><span class="muted small">{{TF "Showing %s of %s" (num (len $s.Rows)) (num $s.Total)}}</span> {{if $s.Truncated}}{{T "the export has every row"}}{{else}}<a class="link" href="{{$s.AllURL}}">{{T "Show all"}} →</a>{{end}}</div>{{end}}
+    {{else}}<div class="empty-state small">{{if or $s.Query $s.Type}}{{T "Nothing matches."}} <a class="link" href="{{$s.ClearURL}}">{{T "Clear"}}</a>{{else}}{{T "None listed."}}{{end}}</div>{{end}}
   </section>
   <aside class="stack">
     {{template "program-before" .}}
@@ -46,4 +49,4 @@
 {{end}}{{end}}
 
 {{/* ", 7y 3mo ago" (or ", today") after a date in a tooltip. */}}
-{{define "age-ago"}}, {{age .}}{{if ne (age .) "today"}} ago{{end}}{{end}}
+{{define "age-ago"}}, {{age .}}{{if ne (age .) "today"}} {{T "ago"}}{{end}}{{end}}

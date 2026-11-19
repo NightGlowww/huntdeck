@@ -193,3 +193,22 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 .own-form input.amount { width: 120px; }
 .own-note { margin: 12px 0 0; }
 @media (max-width: 700px) { .own-scope { grid-template-columns: minmax(0, 1fr); } }
+/* The delivery history's filters: status chips and a channel select. */
+.nfilters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+.nfilters .nfchan { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.nfilters select { height: 30px; padding: 0 8px; border: 1px solid var(--border-input); border-radius: 7px; background: var(--surface); color: var(--text); font: inherit; font-size: 12.5px; }
+/* The channel card's lines: what it sends, its delivery counts, then its
+   schedule — each with a little room, so three short lines don't read as
+   one block. */
+.ncounts { margin-top: 4px; }
+.nwhen { margin-top: 6px; line-height: 1.5; }
+
+/* Bark and ServerChan join the channel logos: a letter on the kind's colour. */
+.nlogo.bark { background: color-mix(in srgb, var(--info) 18%, transparent); color: var(--info); }
+.nlogo.serverchan { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
+
+/* The message as the channel will show it (Bark's line, ServerChan's
+   article), for kinds where the cards would hide its shape. */
+.pv-text { margin: 0 0 10px; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font: 12.5px/1.55 var(--sans); }

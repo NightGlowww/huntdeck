@@ -38,3 +38,8 @@ col.w-hunt { width: 108px; }
 col.w-type-s { width: 122px; }
 col.w-num-m { width: 90px; }
 col.w-name { width: 200px; }
+
+/* The one chip that is an action rather than a filter: it undoes the others.
+   Dashed edge and muted text say "not a state, a reset". */
+.queue-filters .chip.clear { border-style: dashed; color: var(--muted); }
+.queue-filters .chip.clear:hover { color: var(--text); border-color: var(--border-input); }

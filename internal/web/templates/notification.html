@@ -1,82 +1,102 @@
-{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="Back to"><a href="/settings/notifications">Notifications</a><span class="sep">/</span><span class="here" title="{{.Title}}">{{.Title}}</span></nav>{{end}}{{end}}
+{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="Back to"><a href="/settings/notifications">{{T "Notifications"}}</a><span class="sep">/</span><span class="here" title="{{T .Title}}">{{T .Title}}</span></nav>{{end}}{{end}}
 
 {{define "content"}}{{with .Data}}
-<h1 class="m-heading">{{.Title}}</h1>
+<h1 class="m-heading">{{T .Title}}</h1>
 <div class="fgrid">
 <form method="post" action="/settings/notifications{{if .ID}}/{{.ID}}{{end}}" class="channel-form" id="channel" data-preview="/settings/notifications/preview">
   {{if not .ID}}<input type="hidden" name="kind" value="{{.Kind}}">{{end}}
   <div class="pair2">
   <section class="panel">
-    <div class="panel-head"><h2>Where</h2>{{with .Where}}<span class="aside mono">{{.}}</span>{{else}}<span class="aside">{{channelKind $.Data.Kind}}</span>{{end}}</div>
+    <div class="panel-head"><h2>{{T "Where"}}</h2>{{with .Where}}<span class="aside mono">{{.}}</span>{{else}}<span class="aside">{{channelKind $.Data.Kind}}</span>{{end}}</div>
     <div class="panel-body profile-form">
-      <label class="wide"><span>Name</span><input type="text" name="name" value="{{.Name}}" maxlength="60" required placeholder="e.g. Phone"></label>
+      <label class="wide"><span>{{T "Name"}}</span><input type="text" name="name" value="{{.Name}}" maxlength="60" required placeholder="{{T "e.g. Phone"}}"></label>
       {{if eq .Kind "discord"}}
-      <label class="wide"><span>Webhook URL</span><input type="password" name="url" autocomplete="off" spellcheck="false" maxlength="300" {{if .ID}}placeholder="saved; paste a new one to replace it"{{else}}required placeholder="https://discord.com/api/webhooks/…"{{end}}>
-        <span class="muted small">In Discord: channel settings › Integrations › Webhooks › New Webhook › Copy Webhook URL.</span></label>
+      <label class="wide"><span>{{T "Webhook URL"}}</span><input type="password" name="url" autocomplete="off" spellcheck="false" maxlength="300" {{if .ID}}placeholder="{{T "saved; paste a new one to replace it"}}"{{else}}required placeholder="https://discord.com/api/webhooks/…"{{end}}>
+        <span class="muted small">{{T "In Discord: channel settings › Integrations › Webhooks › New Webhook › Copy Webhook URL."}}</span></label>
       {{else if eq .Kind "telegram"}}
-      <label class="wide"><span>Bot token</span><input type="password" name="token" autocomplete="off" spellcheck="false" maxlength="200" {{if .ID}}placeholder="saved; paste a new one to replace it"{{else}}required placeholder="123456:ABC…"{{end}}>
-        <span class="muted small">Message @BotFather, send /newbot, and copy the token. Then send your bot any message.</span></label>
-      <label class="wide"><span>Chat ID</span><input type="text" name="chat_id" value="{{.ChatID}}" maxlength="40" required placeholder="e.g. 123456789">
-        <span class="muted small">Your user ID (ask @userinfobot), a group's (negative), or @channelname.</span></label>
+      <label class="wide"><span>{{T "Bot token"}}</span><input type="password" name="token" autocomplete="off" spellcheck="false" maxlength="200" {{if .ID}}placeholder="{{T "saved; paste a new one to replace it"}}"{{else}}required placeholder="123456:ABC…"{{end}}>
+        <span class="muted small">{{T "Message @BotFather, send /newbot, and copy the token. Then send your bot any message."}}</span></label>
+      <label class="wide"><span>{{T "Chat ID"}}</span><input type="text" name="chat_id" value="{{.ChatID}}" maxlength="40" required placeholder="{{T "e.g. 123456789"}}">
+        <span class="muted small">{{T "Your user ID (ask @userinfobot), a group's (negative), or @channelname."}}</span></label>
+      {{else if eq .Kind "bark"}}
+      <label class="wide"><span>{{T "Device key"}}</span><input type="password" name="device_key" autocomplete="off" spellcheck="false" maxlength="120" {{if .ID}}placeholder="{{T "saved; paste a new one to replace it"}}"{{else}}required placeholder="aBcDeF123456"{{end}}>
+        <span class="muted small">{{T "The last part of the push address Bark shows you: https://api.day.app/<key>/…"}}</span></label>
+      <label class="wide"><span>{{T "Group"}}</span><input type="text" name="group" value="{{.Group}}" autocomplete="off" spellcheck="false" maxlength="40" placeholder="{{T "optional; HuntDeck"}}">
+        <span class="muted small">{{T "Bark groups notifications by this name, so they don't mix with other apps."}}</span></label>
+      <label class="wide"><span>{{T "Sound"}}</span><input type="text" name="sound" value="{{.Sound}}" autocomplete="off" spellcheck="false" maxlength="40" placeholder="{{T "optional; the phone's default"}}">
+        <span class="muted small">{{T "A sound Bark knows, by name; leave it blank for the usual one."}}</span></label>
+      <label class="wide"><span>{{T "Interruption level"}}</span><select name="level">
+        <option value="">{{T "the phone's default"}}</option>
+        <option value="active"{{if eq .Level "active"}} selected{{end}}>{{T "active"}}</option>
+        <option value="timeSensitive"{{if eq .Level "timeSensitive"}} selected{{end}}>{{T "time sensitive"}}</option>
+        <option value="passive"{{if eq .Level "passive"}} selected{{end}}>{{T "passive (quiet)"}}</option>
+      </select></label>
+      <label class="wide"><span>{{T "Server"}}</span><input type="text" name="server" autocomplete="off" spellcheck="false" maxlength="200" placeholder="{{T "optional; https://api.day.app"}}">
+        <span class="muted small">{{T "Leave blank for Bark cloud, or give your own bark-server, like https://bark.example.com."}}</span></label>
+      {{else if eq .Kind "serverchan"}}
+      <label class="wide"><span>{{T "SendKey"}}</span><input type="password" name="send_key" autocomplete="off" spellcheck="false" maxlength="120" {{if .ID}}placeholder="{{T "saved; paste a new one to replace it"}}"{{else}}required placeholder="SCT123456T…"{{end}}>
+        <span class="muted small">{{T "From sct.ftqq.com: copy the SendKey of your channel (Server酱). Messages arrive in WeChat."}}</span></label>
+      <label class="wide"><span>{{T "Server"}}</span><input type="text" name="server" autocomplete="off" spellcheck="false" maxlength="200" placeholder="{{T "optional; https://sctapi.ftqq.com"}}">
+        <span class="muted small">{{T "Leave blank for ServerChan, or give a different address."}}</span></label>
       {{else}}
-      <label class="wide"><span>URL</span><input type="password" name="url" autocomplete="off" spellcheck="false" maxlength="500" {{if .ID}}placeholder="saved; enter a new one to replace it"{{else}}required placeholder="https://example.com/hooks/huntdeck"{{end}}>
-        <span class="muted small">Gets a JSON POST per message (see the README for the format).</span></label>
-      <label class="wide"><span>Signing secret</span><input type="password" name="secret" autocomplete="off" maxlength="200" placeholder="{{if .HasSecret}}saved; enter a new one to replace it{{else}}optional{{end}}">
-        <span class="muted small">Signs each request: <code>X-HuntDeck-Signature: sha256=…</code> (HMAC of the body).</span></label>
-      {{if .HasSecret}}<label class="check"><input type="checkbox" name="clear_secret" value="1"> Remove the secret</label>{{end}}
+      <label class="wide"><span>{{T "URL"}}</span><input type="password" name="url" autocomplete="off" spellcheck="false" maxlength="500" {{if .ID}}placeholder="{{T "saved; enter a new one to replace it"}}"{{else}}required placeholder="https://example.com/hooks/huntdeck"{{end}}>
+        <span class="muted small">{{T "Gets a JSON POST per message (see the README for the format)."}}</span></label>
+      <label class="wide"><span>{{T "Signing secret"}}</span><input type="password" name="secret" autocomplete="off" maxlength="200" placeholder="{{if .HasSecret}}{{T "saved; enter a new one to replace it"}}{{else}}{{T "optional"}}{{end}}">
+        <span class="muted small">{{T "Signs each request:"}} <code>X-HuntDeck-Signature: sha256=…</code> {{T "(HMAC of the body)."}}</span></label>
+      {{if .HasSecret}}<label class="check"><input type="checkbox" name="clear_secret" value="1"> {{T "Remove the secret"}}</label>{{end}}
       {{end}}
     </div>
   </section>
 
   <section class="panel">
-    <div class="panel-head"><h2>When</h2><span class="aside">{{if readOnly}}digest times in {{.Timezone}}, as the server sends them{{else}}times in {{.Timezone}}{{end}}</span></div>
+    <div class="panel-head"><h2>{{T "When"}}</h2><span class="aside">{{if readOnly}}{{TF "digest times in %s, as the server sends them" .Timezone}}{{else}}{{TF "times in %s" .Timezone}}{{end}}</span></div>
     <div class="panel-body profile-form column">
-      <label class="check"><input type="checkbox" name="instant" value="1"{{if .Instant}} checked{{end}}> After each poll</label>
-      <label><span>Daily digest at</span><input type="time" name="digest_at" value="{{.DigestAt}}" class="digest-at">
-        <span class="muted small">Empty: no digest. A digest sums up everything since the last one.</span></label>
-      <label class="check"><input type="checkbox" name="enabled" value="1"{{if .Enabled}} checked{{end}}> Enabled</label>
+      <label class="check"><input type="checkbox" name="instant" value="1"{{if .Instant}} checked{{end}}> {{T "After each poll"}}</label>
+      <label><span>{{T "Daily digest at"}}</span><input type="time" name="digest_at" value="{{.DigestAt}}" class="digest-at">
+        <span class="muted small">{{T "Empty: no digest. A digest sums up everything since the last one."}}</span></label>
+      <label class="check"><input type="checkbox" name="enabled" value="1"{{if .Enabled}} checked{{end}}> {{T "Enabled"}}</label>
     </div>
   </section>
   </div>
 
   <section class="panel">
-    <div class="panel-head"><h2>What</h2><span class="aside">events to send</span></div>
+    <div class="panel-head"><h2>{{T "What"}}</h2><span class="aside">{{T "events to send"}}</span></div>
     <div class="panel-body evgroups">
-      {{range .Groups}}<fieldset class="evg"><legend>{{.Title}}</legend><div class="events-grid">
-        {{range .Kinds}}<label class="check"{{with .Hint}} title="{{.}}"{{end}}><input type="checkbox" name="event_{{.Key}}" value="1"{{if $.Data.HasEvent .Key}} checked{{end}}> <span>{{.Label}}{{with .Hint}}<span class="hint muted small">{{.}}</span>{{end}}</span></label>{{end}}
+      {{range .Groups}}<fieldset class="evg"><legend>{{T .Title}}</legend><div class="events-grid">
+        {{range .Kinds}}<label class="check"{{with .Hint}} title="{{.}}"{{end}}><input type="checkbox" name="event_{{.Key}}" value="1"{{if $.Data.HasEvent .Key}} checked{{end}}> <span>{{T .Label}}{{with .Hint}}<span class="hint muted small">{{T .}}</span>{{end}}</span></label>{{end}}
       </div></fieldset>{{end}}
     </div>
   </section>
 
   <section class="panel">
-    <div class="panel-head"><h2>Which programs</h2><span class="aside">ignored programs are always left out</span></div>
+    <div class="panel-head"><h2>{{T "Which programs it covers"}}</h2><span class="aside">{{T "ignored programs are always left out"}}</span></div>
     <div class="panel-body profile-form">
-      {{if gt (len .Platforms) 1}}<fieldset><legend>Platforms (none ticked: all)</legend>
+      {{if gt (len .Platforms) 1}}<fieldset><legend>{{T "Platforms (none ticked: all)"}}</legend>
         {{range .Platforms}}<label class="check"><input type="checkbox" name="platform_{{.}}" value="1"{{if $.Data.HasPlatform .}} checked{{end}}> {{platformLabel .}}</label>{{end}}</fieldset>{{end}}
-      <fieldset><legend>Only</legend>
-        <label class="check"><input type="checkbox" name="bounty_only" value="1"{{if .Rules.BountyOnly}} checked{{end}}> Paying programs</label>
-        <label class="check"><input type="checkbox" name="private_only" value="1"{{if .Rules.PrivateOnly}} checked{{end}}> Private programs</label>
-        <label class="check" title="New scope: only wildcards and root domains new to the program"><input type="checkbox" name="major_scope_only" value="1"{{if .Rules.MajorScopeOnly}} checked{{end}}> Wildcards and new root domains</label></fieldset>
-      <label><span>Minimum top bounty</span><input type="text" name="min_bounty" value="{{if .Rules.MinBounty}}{{printf "%.0f" .Rules.MinBounty}}{{end}}" inputmode="numeric" class="interval" placeholder="any">
-        <span class="muted small">Programs whose top bounty isn't known still count.</span></label>
-      <label><span>Only programs tagged</span><input type="text" name="tags" value="{{.TagsText}}" placeholder="any" maxlength="700"></label>
-      <label><span>Never programs tagged</span><input type="text" name="exclude_tags" value="{{.ExcludeText}}" placeholder="none" maxlength="700"></label>
+      <fieldset><legend>{{T "Only"}}</legend>
+        <label class="check"><input type="checkbox" name="bounty_only" value="1"{{if .Rules.BountyOnly}} checked{{end}}> {{T "Paying programs"}}</label>
+        <label class="check"><input type="checkbox" name="private_only" value="1"{{if .Rules.PrivateOnly}} checked{{end}}> {{T "Private programs"}}</label>
+        <label class="check" title="{{T "New scope: only wildcards and root domains new to the program"}}"><input type="checkbox" name="major_scope_only" value="1"{{if .Rules.MajorScopeOnly}} checked{{end}}> {{T "Wildcards and new root domains"}}</label></fieldset>
+      <label><span>{{T "Minimum top bounty"}}</span><input type="text" name="min_bounty" value="{{if .Rules.MinBounty}}{{printf "%.0f" .Rules.MinBounty}}{{end}}" inputmode="numeric" class="interval" placeholder="{{T "any"}}">
+        <span class="muted small">{{T "Programs whose top bounty isn't known still count."}}</span></label>
+      <label><span>{{T "Only programs tagged"}}</span><input type="text" name="tags" value="{{.TagsText}}" placeholder="{{T "any"}}" maxlength="700"></label>
+      <label><span>{{T "Never programs tagged"}}</span><input type="text" name="exclude_tags" value="{{.ExcludeText}}" placeholder="{{T "comma separated, e.g. staging, test"}}" maxlength="700"></label>
     </div>
   </section>
 
   <div class="actbar">
-    <button type="submit" class="act-save">{{if .ID}}Save{{else}}Add channel{{end}}</button>
-    <a class="button ghost act-cancel" href="/settings/notifications">Cancel</a>
-    <button type="submit" class="secondary act-test" formaction="/settings/notifications{{if .ID}}/{{.ID}}{{end}}/test" formnovalidate data-test>Send a test</button>
+    <button type="submit" class="act-save">{{if .ID}}{{T "Save"}}{{else}}{{T "Add channel"}}{{end}}</button>
+    <a class="button ghost act-cancel" href="/settings/notifications">{{T "Cancel"}}</a>
+    <button type="submit" class="secondary act-test" formaction="/settings/notifications{{if .ID}}/{{.ID}}{{end}}/test" formnovalidate data-test>{{T "Send a test"}}</button>
     <span class="act-result muted small" data-test-result role="status"></span>
-    {{if .ID}}<button type="submit" form="delete-channel" class="ghost act-delete">Delete</button>{{end}}
+    {{if .ID}}<button type="submit" form="delete-channel" class="ghost act-delete">{{T "Delete"}}</button>{{end}}
   </div>
 </form>
 
 <aside class="panel cpreview">
-  <div class="panel-head"><h2>Preview</h2><span class="aside">what it would have sent in the last week</span></div>
+  <div class="panel-head"><h2>{{T "Preview"}}</h2><span class="aside">{{T "what it would have sent in the last week"}}</span></div>
   <div class="panel-body msgs" data-preview-body aria-live="polite">{{template "channel-preview" .Preview}}</div>
-  <p class="panel-foot">Change what's ticked and this follows. Digests count as one message each.</p>
+  <p class="panel-foot">{{T "Change what's ticked and this follows. Digests count as one message each."}}</p>
 </aside>
 </div>
 {{if .ID}}<form method="post" action="/settings/notifications/{{.ID}}/delete" id="delete-channel"></form>{{end}}

@@ -10,12 +10,24 @@
 .acct-label code { justify-self: start; padding: 0; background: none; color: var(--muted); font-size: 10.5px; font-weight: 400; overflow-wrap: anywhere; }
 .acct-input { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .acct-input input[type="text"], .acct-input input[type="password"] { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12.5px; }
-.acct-clear { display: inline-flex; align-items: center; gap: 5px; color: var(--text-2); white-space: nowrap; cursor: pointer; }
+/* The Clear action beside a saved value: a small ghost button, not a bare
+   checkbox. The input stays a checkbox (no script needed) and only its face
+   is drawn; checked shows what the Save will do. */
+.acct-clear { position: relative; display: inline-flex; flex: none; }
+.acct-clear input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.acct-clear-face { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 9px; border: 1px solid var(--border-input);
+  border-radius: 8px; color: var(--text-2); font-size: 12px; line-height: 1; white-space: nowrap;
+  transition: color .12s, border-color .12s, background .12s; }
+.acct-clear-face .i { width: 12px; height: 12px; }
+.acct-clear:hover .acct-clear-face { color: var(--text); border-color: var(--muted); }
+.acct-clear input:focus-visible + .acct-clear-face { outline: 2px solid var(--accent); outline-offset: 2px; }
+.acct-clear input:checked + .acct-clear-face { color: var(--bad); border-color: var(--bad); background: var(--bad-weak); }
+.acct-clear input:checked + .acct-clear-face .i { color: var(--bad); }
 .acct-src { display: flex; align-items: center; justify-content: flex-end; gap: 6px; white-space: nowrap; }
 .acct-help { grid-column: 2 / -1; margin: 0; line-height: 1.45; }
 .acct-actions { display: flex; gap: 8px; padding-top: 2px; }
 .acct-foot { margin: 16px 2px 0; line-height: 1.55; }
-.restart-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px; padding: 10px 14px; border: 1px solid var(--border-2);
+.restart-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px; padding: 10px 14px; border: 1px solid var(--border-input);
   border-radius: var(--radius); background: var(--accent-weak); color: var(--text); }
 .restart-bar .i { color: var(--accent); }
 .restart-bar form { margin-left: auto; }
@@ -27,3 +39,22 @@
   .acct-help { grid-column: 1; }
   .restart-bar form { margin-left: 0; }
 }
+
+/* A submit button while its form is on the way: a spinner and no second
+   click. The label stays readable, so the action is not a mystery. */
+.button.is-busy, button.is-busy { pointer-events: none; opacity: .8; }
+.button.is-busy::after, button.is-busy::after { content: ""; display: inline-block; width: 11px; height: 11px; margin-left: 6px;
+  vertical-align: -1px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  animation: hd-spin .7s linear infinite; }
+@keyframes hd-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .button.is-busy::after, button.is-busy::after { animation: none; } }
+
+/* Where a saved value comes from: quieter than the field it belongs to. */
+.acct-src .chip { font-size: 10px; letter-spacing: .03em; padding: 1px 7px; opacity: .85; }
+
+/* Where a value comes from, as a quiet note rather than a badge: the field is
+   the thing to read, this only says where it came from. */
+.acct-src .chip { border: 0; background: none; padding: 0; color: var(--muted); font-size: 11px; letter-spacing: 0; opacity: 1; }
+.acct-src .chip.ok { color: var(--good); }
+.acct-src .chip.ok::before { content: "✓"; margin-right: 4px; }
+.acct-src .chip.failed { color: var(--bad); }

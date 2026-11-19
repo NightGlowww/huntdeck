@@ -1,0 +1,174 @@
+{
+  "info": "HuntDeck 的全部数据，以 JSON 或纯文本提供。无需登录，也没有令牌：HuntDeck 只应从你自己的机器或私有网络访问。列表分页返回（limit 与 offset），并给出 total；错误为带 error 说明的 JSON。",
+  "tags": {
+    "Hunt board": {
+      "name": "狩猎面板",
+      "description": "狩猎面板的汇总：HuntDeck 存了什么、本周动态，以及当下最值得挖的项目。"
+    },
+    "Programs": {
+      "name": "项目",
+      "description": "项目列表、单个项目的完整信息，以及供 Burp Suite / ZAP / Caido 使用的范围。"
+    },
+    "Targets": {
+      "name": "目标",
+      "description": "跨项目的范围内目标，可直接管道给侦察工具。"
+    },
+    "Scope check": {
+      "name": "范围检查",
+      "description": "某个主机、IP、URL（或一整份清单）属于哪些项目的范围内 / 范围外。"
+    },
+    "Activity": {
+      "name": "变更与披露",
+      "description": "平台上的变更，以及已披露报告。"
+    },
+    "Stats": {
+      "name": "统计",
+      "description": "统计页的数字：各平台与合计、单平台的项目、以及项目的公开数据。"
+    },
+    "HuntDeck": {
+      "name": "HuntDeck",
+      "description": "HuntDeck 本身：存量、轮询与健康检查。"
+    }
+  },
+  "ops": {
+    "board": {
+      "summary": "汇总",
+      "description": "狩猎面板的核心数字（项目、私有、在架、付费、范围内条目、通配符、域名；24 小时与 7 天变更）、本周计数（新增范围及涉及项目数、其中的通配符与域名、新项目与邀请、赏金变更）、重新开放 / 暂停 / 反复停开的项目，以及精选推荐：当前评分最高的项目及其原因。"
+    },
+    "listPrograms": {
+      "summary": "列出项目",
+      "description": "按项目页的筛选与排序返回项目，含 HuntScore、赏金区间、范围计数与门槛；未指定 sort 时按名称排序。每个项目带数字（近 90 天已付与收到、累计支付、平均赏金、近 90 天已解决、响应时间），以及平台公开的统计。"
+    },
+    "listProgramsV2": {
+      "summary": "列出项目（每个数字带新鲜度）",
+      "description": "同「列出项目」，但每个可估算或被轮询刷新的数字是对象：value、estimated、source、updated_at。"
+    },
+    "listInvites": {
+      "summary": "列出邀请",
+      "description": "邀请页：你受邀的私有项目，字段与筛选同「列出项目」，另带邀请信息：在平台上接受前为待处理（平台列出待处理邀请时为 Intigriti）、发出与接受时间（已知时）。待处理的排在前面。"
+    },
+    "listInvitesV2": {
+      "summary": "列出私有项目（每个数字带新鲜度）",
+      "description": "同「列出邀请」，数字为对象：value、estimated、source、updated_at。"
+    },
+    "acceptInvite": {
+      "summary": "接受邀请",
+      "description": "在平台上接受私有项目的邀请（HackerOne 需网站登录，Bugcrowd 或 Intigriti），必要时先登录，随后在后台刷新该项目的列表、范围与统计。平台接受后返回；若平台较慢则返回 202（仍在继续）。"
+    },
+    "getProgram": {
+      "summary": "获取单个项目",
+      "description": "单个项目的完整信息，与项目页一致：赏金区间与 HuntScore、范围条目及其目标、公开统计（响应 / 分诊 / 发放 / 解决时间、按危害的数量、赏金表）、门槛、测试凭据与测试流量规则，以及平台对项目运营的说明。"
+    },
+    "getProgramV2": {
+      "summary": "获取单个项目（每个数字带新鲜度）",
+      "description": "同「获取单个项目」，数字为对象：value、estimated、source、updated_at；另含 updated_at 与 last_synced_at。"
+    },
+    "burpScope": {
+      "summary": "Burp Suite 范围",
+      "description": "项目的当前范围，导出为 Burp Suite 高级范围规则（包含范围内目标、排除范围外目标）：在 Settings › Project › Scope 中加载。通配符只覆盖子域。响应头 X-HuntDeck-Generated-At 表示生成时间。"
+    },
+    "zapContext": {
+      "summary": "ZAP 上下文",
+      "description": "同一范围的 ZAP 上下文（File › Import Context）。ZAP 的正则无法表达 IP 段，因此 CIDR 只写在注释里。"
+    },
+    "caidoScope": {
+      "summary": "Caido 范围",
+      "description": "项目的当前范围，导出为 Caido 配置文件中的一个范围预设：范围内主机进允许列表，范围外进拒绝列表，使用 Caido 的主机通配（*.example.com 只覆盖子域）。"
+    },
+    "listTargets": {
+      "summary": "列出目标",
+      "description": "跨在架项目的某类范围内目标，每行一个、已去重并流式输出，可直接管道；format=json 时分页返回并附带项目。暂停与已忽略的项目默认排除，除非显式要求。"
+    },
+    "checkHost": {
+      "summary": "检查单个主机",
+      "description": "某个主机、IP 或 URL 属于哪些项目的范围内 / 范围外（最具体的规则优先；通配符覆盖子域，不含域名本身），曾经覆盖它的已移除范围，它下面的现有范围，以及在其他都不匹配时提到它的范围。响应带 ETag 与 Last-Modified。"
+    },
+    "checkHosts": {
+      "summary": "检查一份清单",
+      "description": "请求体是一份主机、IP 或 URL 清单，每行一个（跳过空行、# 注释与重复项；最多 20,000 行 / 4 MB；只读演示为 2,000 行）。每项给出判定：in（属于某个项目的范围内）、out（仅被排除）或 none。format=txt 只返回在范围内的行。"
+    },
+    "listChanges": {
+      "summary": "列出变更",
+      "description": "平台上的变更：项目新增、下架、暂停与重开，范围新增、移除与编辑，赏金与政策变化，公告。默认最早在前，order=newest 时最新在前。"
+    },
+    "listDisclosed": {
+      "summary": "列出已披露报告",
+      "description": "跨项目的已披露报告（HackerOne Hacktivity），筛选同已披露页，最新在前。"
+    },
+    "listStats": {
+      "summary": "项目统计",
+      "description": "项目的公开数字（近 90 天支出与报告数、平均与最高赏金、响应）以及按币种汇总的合计。支持项目筛选；合计覆盖筛选命中的全部项目（不止本页），口径与统计页一致。"
+    },
+    "statsPlatforms": {
+      "summary": "全部平台",
+      "description": "统计页：各平台及合计。包含在架 / 付费 / 免费项目数、范围内资产与通配符、近 30 天新增与移除范围、近 90 天收到报告与支出，以及一年的逐月数据。"
+    },
+    "statsPlatform": {
+      "summary": "单个平台",
+      "description": "单平台统计页：数字同「全部平台」，随后是它的在架项目（含已忽略并标记），每个项目带相同数字与月份。默认按近 90 天支出排序，其次收到报告，再次有效报告，从大到小。"
+    },
+    "status": {
+      "summary": "状态",
+      "description": "HuntDeck 的版本、各平台的存量，以及每个平台最近一次轮询。"
+    },
+    "poll": {
+      "summary": "开始轮询",
+      "description": "立即在后台轮询某个平台；结果可在状态接口查看。快速轮询读取项目列表与有变化的项目；全量轮询读取每个项目。"
+    },
+    "openapi": {
+      "summary": "OpenAPI 描述",
+      "description": "本 API 的 OpenAPI 3.1 描述，可用于 Postman、Insomnia、Bruno、客户端生成器或 AI 工具；其中的 server 为你的访问地址。"
+    },
+    "health": {
+      "summary": "健康检查",
+      "description": "数据库可用时返回 ok，用于容器健康检查；失败时不说明原因。"
+    }
+  },
+  "params": {
+    "added": "新增于（7d、30d、90d、365d，或任意天数），或某日期之后（2026-10-01）。",
+    "api": "1：范围内含 API。",
+    "apps": "1：范围内含安卓或 iOS 应用。",
+    "bounty": "1：仅付费项目；vdp：不付费的项目。",
+    "comment": "1：在 XML 声明后添加 <!-- generated_at=<RFC 3339 时间> -->。响应头 X-HuntDeck-Generated-At 始终携带该时间。",
+    "creds": "1：提供测试凭据。",
+    "download": "1：作为文件下载（纯文本）。",
+    "format": "纯文本（每行一个）或 JSON。",
+    "handle": "项目在平台上的 handle，与 /api/v1/invites 给出的一致。",
+    "host": "主机、IP 或 URL，也可以是主机名的一部分。",
+    "ignored": "已忽略的项目默认排除，除非 include（与其余一起）或 only。",
+    "include_ignored": "1：也包含已忽略项目的目标。",
+    "include_paused": "1：也包含已暂停项目的目标。",
+    "invite": "邀请状态：pending（尚未接受；列出待处理邀请的平台为 Intigriti）或 joined（已接受）。",
+    "kind": "要列出的类型：roots 为范围内的可注册域名；all 为除 roots 外的全部地址类型。非地址类资产列出其范围条目：apps（安卓与 iOS）、android、ios、windows、executable、source_code、hardware、smart_contract、ai_model 或 other。",
+    "launched": "上线于……之内。",
+    "limit": "返回条数，最多 1,000。",
+    "mode": "轮询的彻底程度。",
+    "new": "新增范围内资产于……之内。",
+    "noreq": "1：已知除账户外无其他门槛。",
+    "not": "排除名称或 handle 含这些词的项目，用空格或逗号分隔。q 中以 - 开头的词等效。",
+    "offset": "跳过多少条，用于下一页。",
+    "order": "newest：最新在前。",
+    "paid": "1：有公开赏金。",
+    "platform": "仅这些平台的项目：一个或多个，逗号分隔，如 hackerone,bugcrowd（hackerone、bugcrowd、intigriti、yeswehack；independent 为手工添加的项目）。",
+    "private": "1：仅私有项目。",
+    "program": "仅该项目的变更，格式 platform/handle，与其变更标签页一致。",
+    "q": "名称或 handle 包含该词；以 - 开头的词表示排除含它的项目（acme -staging）。",
+    "resumed": "暂停后在……之内重新开放。",
+    "rev": "1：反转排序。",
+    "scope": "范围内或范围外。",
+    "severity": "危害等级；high+ 表示严重或高危，none 为未评级。",
+    "since": "仅 updated_at 晚于该时间的项目：RFC 3339 时间，或距今的时长（24h、7d）。项目的 updated_at 会在首次出现、记录到变更、其数字变化或被标记移除时更新。",
+    "sort": "排序，与项目页的列一致：默认从大到小（rev=1 反转）；缺失值始终在后，并列按名称 A–Z；金额类（paid90、paidall、avgbounty、bounty）在各币种内排序，最常见币种优先；invited 先列待处理邀请，再按最近邀请或加入时间。",
+    "state": "按状态筛选：open（默认）、paused 或 closed、all，或不复存在。",
+    "tag": "仅带该标签的项目。",
+    "top": "最高赏金至少为该值，按项目币种：上限 10,000,000（页面上的选项为 1000、5000、20000）。",
+    "trends": "1：附带每个项目的 90 天线（收到、已付、已解决），每天一个点，与项目页一致。",
+    "visibility": "私有（受邀）或公开项目。",
+    "watch": "仅这些项目，格式 platform/handle，逗号分隔（最多 200 个）：浏览器中保存的关注列表。",
+    "weakness": "仅该弱点（CWE 名称）。",
+    "wild": "1：范围内含通配符。"
+  },
+  "bodies": {
+    "checkHosts": "每行一个主机、IP 或 URL。"
+  }
+}

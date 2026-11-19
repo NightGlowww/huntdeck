@@ -1,4 +1,4 @@
-{{define "topbar-title"}}<h1>Stats</h1>{{template "vis-toggle" .Data.Vis}}{{end}}
+{{define "topbar-title"}}<h1>{{T "Stats"}}</h1>{{template "vis-toggle" .Data.Vis}}{{end}}
 
 {{/* The Stats page: every platform at a glance (statspage.go). Headline
    tiles for all platforms, then a row per platform and one for all: each
@@ -10,29 +10,30 @@
 {{template "ov-highlights" $a}}
 
 <section class="panel">
-  <div class="panel-head"><h2>By platform</h2></div>
+  <div class="panel-head"><h2>{{T "By platform"}}</h2></div>
   <div class="table-wrap">
   <table class="ov-table">
     <thead><tr>
-      <th>Platform</th>
-      <th>Open programs<small>now</small></th>
-      <th>Assets in scope<small>now</small></th>
-      <th title="In-scope assets added, by the date the platform gives">Added to scope<small>in {{$m}}</small></th>
-      <th title="Programs launched, by the date the platform gives; YesWeHack gives none, so its programs' first version">Launched<small>in {{$m}}</small></th>
-      <th title="Every report received, duplicates and N/A included">Reports received<small>last 90 days</small></th>
-      <th title="{{validMonthTitle ""}}. Monthly numbers include paused programs (they describe the platform); 90-day figures count open programs only">Valid reports<small>in {{$m}}</small></th>
-      <th title="{{bountiesTitle ""}}. In the currency most is paid in, other currencies beside it. Monthly numbers include paused programs (they describe the platform); 90-day figures count open programs only">Bounties<small>in {{$m}}</small></th>
-      <th>Paid<small>last 90 days</small></th>
-      <th title="Median days from submission to resolution of the month's resolved reports; Intigriti gives no resolutions, so the median of its programs' average days to a decision over 90 days, now">Days to resolve<small>median in {{$m}}</small></th>
+      <th>{{T "Platform"}}</th>
+      <th>{{T "Open programs"}}<small>{{T "now"}}</small></th>
+      <th>{{T "Assets in scope"}}<small>{{T "now"}}</small></th>
+      <th title="{{T "In-scope assets added, by the date the platform gives"}}">{{T "Added to scope"}}<small>{{T "in"}} {{T $m}}</small></th>
+      <th title="{{T "Programs launched, by the date the platform gives; YesWeHack gives none, so its programs' first version"}}">{{T "Launched"}}<small>{{T "in"}} {{T $m}}</small></th>
+      <th title="{{T "Every report received, duplicates and N/A included"}}">{{T "Reports received"}}<small>{{T "last 90 days"}}</small></th>
+      <th title="{{validMonthTitle ""}}{{T ". Monthly numbers include paused programs (they describe the platform); 90-day figures count open programs only"}}">{{T "Valid reports"}}<small>{{T "in"}} {{T $m}}</small></th>
+      <th title="{{TF "%s. In the currency most is paid in, other currencies beside it%s" (bountiesTitle "") (T ". Monthly numbers include paused programs (they describe the platform); 90-day figures count open programs only")}}">{{T "Bounties"}}<small>{{T "in"}} {{T $m}}</small></th>
+      <th>{{T "Paid"}}<small>{{T "last 90 days"}}</small></th>
+      <th title="{{T "Median days from submission to resolution of the month's resolved reports; Intigriti gives no resolutions, so the median of its programs' average days to a decision over 90 days, now"}}">{{T "Days to resolve"}}<small>{{T "median in"}} {{T $m}}</small></th>
     </tr></thead>
     <tbody>
+    {{if not .Rows}}<tr><td colspan="10"><div class="empty-state">{{T "No platform numbers yet: they appear after the first poll, and a platform that publishes nothing shows dashes rather than zeroes."}} <a class="link" href="/settings">{{T "Check the accounts"}}</a></div></td></tr>{{end}}
     {{range .Rows}}{{template "ov-row" .}}{{end}}
     {{template "ov-row" $a}}
     </tbody>
   </table>
   </div>
-  {{with .AllLeftOut}}<p class="panel-foot">All platforms' valid reports, bounties and days to resolve leave out {{.}}: a line that short would cut the others'.</p>{{end}}
-  {{if .OwnLeftOut}}<p class="panel-foot">Programs added by hand aren't counted here: they're on no platform to compare.</p>{{end}}
+  {{with .AllLeftOut}}<p class="panel-foot">{{TF "All platforms' valid reports, bounties and days to resolve leave out %s: a line that short would cut the others'." .}}</p>{{end}}
+  {{if .OwnLeftOut}}<p class="panel-foot">{{T "Programs added by hand aren't counted here: they're on no platform to compare."}}</p>{{end}}
   {{template "ov-legend"}}
 </section>
 {{end}}{{template "spark-defs"}}{{end}}
@@ -40,15 +41,15 @@
 {{/* One platform's row, or all platforms' (Platform ""). */}}
 {{define "ov-row"}}{{$p := .Platform}}{{$m := .Month}}
 <tr{{if not $p}} class="ov-all"{{end}}>
-  <td>{{if $p}}<a class="ov-plat" href="/stats/{{$p}}{{.VisQuery}}" title="{{platformLabel $p}}'s programs, each with these numbers">{{template "ptag" $p}} {{platformLabel $p}} <span class="ov-go">→</span></a>{{else}}<span class="ov-plat">All platforms</span>{{end}}</td>
-  <td data-label="Open programs · now">{{with .OpenCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
-  <td data-label="Assets in scope · now">{{with .AssetsCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
-  <td data-label="Added to scope · {{$m}}">{{with .ScopeCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
-  <td data-label="Launched · {{$m}}">{{with .LaunchCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
-  <td data-label="Reports received · 90 days">{{with .ReceivedCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
-  <td data-label="Valid reports · {{$m}}">{{with .ValidCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
-  <td data-label="Bounties · {{$m}}">{{with .BountiesCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
-  <td data-label="Paid · 90 days">{{with .PaidCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
-  <td data-label="Days to resolve · {{$m}}">{{with .ResolveCellNoted}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td>{{if $p}}<a class="ov-plat" href="/stats/{{$p}}{{.VisQuery}}" title="{{TF "%s's programs, each with these numbers" (platformLabel $p)}}">{{template "ptag" $p}} {{platformLabel $p}} <span class="ov-go">→</span></a>{{else}}<span class="ov-plat">{{T "All platforms"}}</span>{{end}}</td>
+  <td data-label="{{T "Open programs"}} · {{T "now"}}">{{with .OpenCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td data-label="{{T "Assets in scope"}} · {{T "now"}}">{{with .AssetsCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td data-label="{{T "Added to scope"}} · {{T $m}}">{{with .ScopeCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td data-label="{{T "Launched"}} · {{T $m}}">{{with .LaunchCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td data-label="{{T "Reports received"}} · 90">{{with .ReceivedCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td data-label="{{T "Valid reports"}} · {{T $m}}">{{with .ValidCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td data-label="{{T "Bounties"}} · {{T $m}}">{{with .BountiesCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td data-label="{{T "Paid"}} · 90">{{with .PaidCell}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
+  <td data-label="{{T "Days to resolve"}} · {{T $m}}">{{with .ResolveCellNoted}}{{template "ov-cell" .}}{{else}}{{template "ov-none" $p}}{{end}}</td>
 </tr>
 {{end}}

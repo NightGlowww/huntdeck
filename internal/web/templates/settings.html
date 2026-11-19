@@ -1,55 +1,55 @@
 {{define "content"}}{{with .Data}}
-<nav class="ptabs" aria-label="Settings sections">
-  {{range .Tabs}}<a href="{{.URL}}"{{if .On}} class="on" aria-current="page"{{end}}>{{.Label}}{{with .Count}} <span class="count">{{.}}</span>{{end}}</a>{{end}}
+<nav class="ptabs" aria-label="{{T "Settings sections"}}">
+  {{range .Tabs}}<a href="{{.URL}}"{{if .On}} class="on" aria-current="page"{{end}}>{{T .Label}}{{with .Count}} <span class="count">{{.}}</span>{{end}}</a>{{end}}
 </nav>
 
 {{if eq .Tab "polling"}}
 <div class="stack">
 <section class="panel" id="platforms">
-  <div class="panel-head"><h2>Platforms <span class="count">{{len .Platforms}}</span></h2><span class="aside"><span>credentials come from {{if .CanSave}}<a href="/settings?tab=accounts">Accounts</a> or {{end}}<code>.env</code>; intervals start in <code>.env</code> too, and ones saved here take precedence</span></span></div>
+  <div class="panel-head"><h2>{{T "Platforms"}}<span class="count">{{len .Platforms}}</span></h2><span class="aside"><span>{{T "credentials come from"}} {{if .CanSave}}<a href="/settings?tab=accounts">{{T "Accounts"}}</a> {{T "or"}} {{end}}<code>.env</code>{{T ";"}} {{T "intervals start in"}} <code>.env</code> {{T "too, and ones saved here take precedence"}}</span></span></div>
   {{if .Platforms}}
   <form method="post" action="/settings/platform" id="sched">{{range .Platforms}}<input type="hidden" name="platform" value="{{.Name}}">{{with .Web}}<input type="hidden" name="web" value="{{.Name}}">{{end}}{{end}}</form>
   <div class="table-wrap">
   <table class="schedule cards">
-    <thead><tr><th>Platform</th><th>Enabled</th><th>Sign-in</th><th>Quick poll</th><th>Full poll</th><th class="num">Poll now</th></tr></thead>
+    <thead><tr><th>{{T "Platform"}}</th><th>{{T "Enabled"}}</th><th>{{T "Sign-in"}}</th><th>{{T "Quick poll"}}</th><th>{{T "Full poll"}}</th><th class="num">{{T "Poll now"}}</th></tr></thead>
     <tbody>
     {{range $p := .Platforms}}
       <tr class="{{if not $p.Enabled}}off{{end}}{{if $p.Web}} has-sub{{end}}">
-        <td class="c-name nowrap">{{template "pf" $p.Name}}{{if not $p.Enabled}} <span class="chip disabled">disabled</span>{{end}}
+        <td class="c-name nowrap">{{template "pf" $p.Name}}{{if not $p.Enabled}} <span class="chip disabled">{{T "disabled"}}</span>{{end}}
           {{if $p.Overridden}}<form method="post" action="/settings/platform/reset" class="inline">
             <input type="hidden" name="platform" value="{{$p.Name}}">
-            <button type="submit" class="ghost small" title="Use the intervals from .env (quick {{interval $p.Default.Quick}}, full {{interval $p.Default.Full}}) and enable the platform">Reset</button>
+            <button type="submit" class="ghost small" title="{{TF "Use the intervals from .env (quick %s, full %s) and enable the platform" (interval $p.Default.Quick) (interval $p.Default.Full)}}">{{T "Reset"}}</button>
           </form>{{end}}</td>
-        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="enabled_{{$p.Name}}" value="1" form="sched" aria-label="Enable {{$p.Name}}"{{if $p.Enabled}} checked{{end}}> <span class="muted small">{{if $p.Enabled}}on{{else}}off{{end}}</span></label></td>
+        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="enabled_{{$p.Name}}" value="1" form="sched" aria-label="Enable {{$p.Name}}"{{if $p.Enabled}} checked{{end}}> <span class="muted small">{{if $p.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
         <td class="c-wide">{{if $p.SignIn}}<div class="signins">{{range $p.SignIn}}{{template "signin" .}}{{end}}</div>{{else}}<span class="zero">—</span>{{end}}</td>
-        <td data-label="Quick poll"><div class="pollc"><input type="text" class="interval" name="quick_{{$p.Name}}" value="{{interval $p.Quick}}" form="sched" aria-label="{{$p.Name}} quick poll interval" spellcheck="false" autocomplete="off" maxlength="12"
-          title="every{{if $p.Overridden}}; default {{interval $p.Default.Quick}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "quick")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}</div></td>
-        <td data-label="Full poll"><div class="pollc"><input type="text" class="interval" name="full_{{$p.Name}}" value="{{interval $p.Full}}" form="sched" aria-label="{{$p.Name}} full poll interval" spellcheck="false" autocomplete="off" maxlength="12"
-          title="every{{if $p.Overridden}}; default {{interval $p.Default.Full}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "full")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}</div></td>
+        <td data-label="Quick poll"><div class="pollc"><input type="text" class="interval" name="quick_{{$p.Name}}" value="{{interval $p.Quick}}" form="sched" aria-label="{{TF "%s quick poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
+          title="{{T "every"}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Quick)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "quick")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}</div></td>
+        <td data-label="Full poll"><div class="pollc"><input type="text" class="interval" name="full_{{$p.Name}}" value="{{interval $p.Full}}" form="sched" aria-label="{{TF "%s full poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
+          title="{{T "every"}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Full)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "full")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}</div></td>
         <td class="c-side num">
-          {{if $p.Enabled}}<form method="post" action="/settings/poll" class="inline">
+          {{if $p.Enabled}}<form method="post" action="/settings/poll" class="inline" data-busy="{{T "Polling…"}}">
             <input type="hidden" name="platform" value="{{$p.Name}}">
-            <button name="mode" value="quick" type="submit" class="secondary small" title="Quick poll now"><svg class="i"><use href="#i-refresh"/></svg><span class="bl">Quick</span></button>
-            <button name="mode" value="full" type="submit" class="secondary small">Full</button>
-          </form>{{else}}<span class="zero" title="Not configured">—</span>{{end}}
+            <button name="mode" value="quick" type="submit" class="secondary small" title="{{T "Quick poll now"}}"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg><span class="bl">{{T "Quick"}}</span></button>
+            <button name="mode" value="full" type="submit" class="secondary small">{{T "Full"}}</button>
+          </form>{{else}}<span class="zero" title="{{T "Not configured"}}">—</span>{{end}}
         </td>
       </tr>
       {{with $w := $p.Web}}
-      <tr class="sub{{if not (and $w.Enabled $w.Running)}} off{{end}}" id="websync">
-        <td class="c-name nowrap"><span class="subl">Browser sync</span>
+      <tr class="sub{{if not (and $w.Enabled $w.Running)}} off{{end}}" id="websync-{{$w.Name}}">
+        <td class="c-name nowrap"><span class="subl">{{T "Browser sync"}}</span>
           {{if $w.Overridden}}<form method="post" action="/settings/websync/reset" class="inline">
             <input type="hidden" name="platform" value="{{$w.Name}}">
-            <button type="submit" class="ghost small" title="Back to on, once a day">Reset</button>
+            <button type="submit" class="ghost small" title="{{T "Back to on, once a day"}}">{{T "Reset"}}</button>
           </form>{{end}}</td>
-        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="web_enabled_{{$w.Name}}" value="1" form="sched" aria-label="Enable the {{$w.Name}} browser sync"{{if $w.Enabled}} checked{{end}}> <span class="muted small">{{if $w.Enabled}}on{{else}}off{{end}}</span></label></td>
-        <td colspan="3" class="c-wide"><div class="pollc subc"><span class="muted small" title="Reads for each program: {{$w.PullsText}}">uses the website login, every</span>
-          <input type="text" class="interval" name="web_interval_{{$w.Name}}" value="{{interval $w.Interval}}" form="sched" aria-label="{{$w.Name}} browser sync interval" spellcheck="false" autocomplete="off" maxlength="12">
-          <span class="muted small">last run</span>{{with $w.Last}}<span>{{template "lastrun" .}}</span>{{else}}<span class="zero">never</span>{{end}}</div></td>
+        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="web_enabled_{{$w.Name}}" value="1" form="sched" aria-label="{{TF "Enable the %s browser sync" $w.Name}}"{{if $w.Enabled}} checked{{end}}> <span class="muted small">{{if $w.Enabled}}on{{else}}off{{end}}</span></label></td>
+        <td colspan="3" class="c-wide"><div class="pollc subc"><span class="muted small" title="{{TF "Reads for each program: %s" $w.PullsText}}">{{T "uses the website login, every"}}</span>
+          <input type="text" class="interval" name="web_interval_{{$w.Name}}" value="{{interval $w.Interval}}" form="sched" aria-label="{{TF "%s browser sync interval" $w.Name}}" spellcheck="false" autocomplete="off" maxlength="12">
+          <span class="muted small">{{T "last run"}}</span>{{with $w.Last}}<span>{{template "lastrun" .}}</span>{{else}}<span class="zero">{{T "never"}}</span>{{end}}</div></td>
         <td class="c-side num">
-          {{if $w.Running}}<form method="post" action="/settings/poll" class="inline">
+          {{if $w.Running}}<form method="post" action="/settings/poll" class="inline" data-busy="{{T "Polling…"}}">
             <input type="hidden" name="platform" value="{{$w.Name}}">
-            <button name="mode" value="web" type="submit" class="secondary small"><svg class="i"><use href="#i-refresh"/></svg>Run</button>
-          </form>{{else}}<span class="zero" title="The platform is off">—</span>{{end}}
+            <button name="mode" value="web" type="submit" class="secondary small"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>{{T "Run"}}</button>
+          </form>{{else}}<span class="zero" title="{{T "The platform is off"}}">—</span>{{end}}
         </td>
       </tr>
       {{end}}
@@ -57,40 +57,40 @@
     </tbody>
   </table>
   </div>
-  <div class="savebar"><span class="muted small">Change any interval or switch, then</span><button type="submit" form="sched" class="small">Save intervals</button></div>
+  <div class="savebar"><span class="muted small">{{T "Change any interval or switch, then"}}</span><button type="submit" form="sched" class="small">{{T "Save intervals"}}</button></div>
   {{else}}
   <div class="empty-state">
-    <h2>No platforms configured</h2>
-    <p>Add credentials for at least one platform {{if .CanSave}}in <a class="link" href="/settings?tab=accounts">Accounts</a>, or {{end}}to your <code>.env</code> (see <code>.env.example</code>) and restart.</p>
+    <h2>{{T "No platforms configured"}}</h2>
+    <p>{{T "Add credentials for at least one platform"}} {{if .CanSave}}{{T "in"}} <a class="link" href="/settings?tab=accounts">{{T "Accounts"}}</a>{{T ","}} {{T "or"}}{{end}} {{T "to your"}} <code>.env</code> ({{T "see"}} <code>.env.example</code>) {{T "and restart."}}</p>
   </div>
   {{end}}
-  <p class="panel-foot">Intervals take a number and a unit, such as <code>30m</code>, <code>6h</code> or <code>1d</code>; <code>off</code> stops that kind of scheduled poll. Quick polls run every 5m or slower, full polls every 1h or slower, and quick must be more frequent than full.
-  A quick poll lists programs and fetches scope for new ones (a few requests). A full poll refreshes every program's scope (about one request per program).
-  A disabled platform isn't polled or logged in to; its stored programs stay browsable.
-  <b>Sign-in</b> says whether the platform accepted each credential the last time it was used; a rejected one says why (fix it in {{if .CanSave}}<a class="link" href="/settings?tab=accounts">Accounts</a>{{else}}<code>.env</code> and restart{{end}}).
-  A <b>browser sync</b> reads what only the logged-in website shows (Intigriti's API leaves it out), every 6h or slower, once a day by default; it reuses its saved session and opens Chrome only when the platform asks for the password again, and if that login fails it tries again after 1h, then 2h, 4h… While it's on, full polls leave the program stats to it.</p>
+  <p class="panel-foot">{{T "Intervals take a number and a unit, such as"}} <code>30m</code>, <code>6h</code> {{T "or"}} <code>1d</code>{{T ";"}} <code>off</code> {{T "stops that kind of scheduled poll. Quick polls run every 5m or slower, full polls every 1h or slower, and quick must be more frequent than full."}}
+  {{T "A quick poll lists programs and fetches scope for new ones (a few requests). A full poll refreshes every program's scope (about one request per program)."}}
+  {{T "A disabled platform isn't polled or logged in to; its stored programs stay browsable."}}
+  <b>{{T "Sign-in"}}</b> {{T "says whether the platform accepted each credential the last time it was used; a rejected one says why"}} ({{if .CanSave}}{{T "fix it in"}} <a class="link" href="/settings?tab=accounts">{{T "Accounts"}}</a>{{else}}<code>.env</code> {{T "and restart"}}{{end}}).
+  {{T "A browser sync reads what only the logged-in website shows (Intigriti's API leaves it out), every 6h or slower, once a day by default; it reuses its saved session and opens Chrome only when the platform asks for the password again, and if that login fails it tries again after 1h, then 2h, 4h… While it's on, full polls leave the program stats to it."}}</p>
 </section>
 
 {{if .Runs}}
 {{with .DemoSeed}}{{template "demo-seed" .}}{{end}}
 <section class="panel" id="history"{{if .Live}} data-live-refresh="10"{{end}}>
-  <div class="panel-head"><h2>Poll history</h2></div>
+  <div class="panel-head"><h2>{{T "Poll history"}}</h2></div>
   <div class="table-wrap">
   <table class="runs">
-    <thead><tr><th>Started</th><th>Platform</th><th>Mode</th><th>Trigger</th><th>Status</th><th class="num">Took</th>
-      <th class="num">Programs</th><th class="num">Scopes</th><th class="num">Changes</th><th class="num">Requests</th></tr></thead>
+    <thead><tr><th>{{T "Started"}}</th><th>{{T "Platform"}}</th><th>{{T "Mode"}}</th><th>{{T "Trigger"}}</th><th>{{T "Status"}}</th><th class="num">{{T "Took"}}</th>
+      <th class="num">{{T "Programs"}}</th><th class="num">{{T "Scopes"}}</th><th class="num">{{T "Changes"}}</th><th class="num">{{T "Requests"}}</th></tr></thead>
     <tbody>
     {{$lives := .Live}}{{range .Runs}}{{$live := index $lives .ID}}
       <tr{{if eq .Status "running"}} data-live{{end}}>
         <td><span class="when" title="{{datetime .StartedAt}}">{{ago .StartedAt}}</span></td>
         <td class="shrink">{{template "ptag" .Platform}}</td>
-        <td class="muted">{{if eq .Mode "web"}}browser{{else}}{{.Mode}}{{end}}</td><td class="muted">{{.Trigger}}</td>
-        <td class="run-status"><span class="chips"><span class="chip {{.DisplayStatus}}"{{if eq .DisplayStatus "interrupted"}} title="Stopped by a restart or shutdown"{{end}}>{{.DisplayStatus}}</span>{{if .ListingRecent}}<span class="chip" title="Quick poll that read only the newest programs; the complete listing, which finds invites and removals, runs every two hours">newest only</span>{{else if and (not .ListingComplete) (ne .Status "running") (ne .Trigger "program")}}<span class="chip" title="Programs aren't marked removed when the listing is incomplete">partial list</span>{{end}}{{if and (eq .Status "running") $live.Stalled}}<span class="chip stalled" title="No request answered and no program done for {{$live.Idle}}: it may be stuck. Restart now (Accounts) stops it; it keeps what it saved">no activity {{$live.Idle}}</span>{{end}}</span>
-          {{if eq .Status "running"}}<span class="run-prog small">{{if $live.Known}}<b>{{$live.Step}}</b>{{with $live.Left}} · {{.}}{{end}}{{if not $live.Stalled}} · <span class="muted" title="When it last had a request answered or a program done">last activity {{$live.Idle}} ago</span>{{end}}{{else}}<span class="muted">Running in another process: no progress to show</span>{{end}}</span>{{end}}
+        <td class="muted">{{if eq .Mode "web"}}{{T "browser"}}{{else}}{{T .Mode}}{{end}}</td><td class="muted">{{.Trigger}}</td>
+        <td class="run-status"><span class="chips"><span class="chip {{.DisplayStatus}}"{{if eq .DisplayStatus "interrupted"}} title="{{T "Stopped by a restart or shutdown"}}"{{end}}>{{T .DisplayStatus}}</span>{{if .ListingRecent}}<span class="chip" title="{{T "Quick poll that read only the newest programs; the complete listing, which finds invites and removals, runs every two hours"}}">{{T "newest only"}}</span>{{else if and (not .ListingComplete) (ne .Status "running") (ne .Trigger "program")}}<span class="chip" title="{{T "Programs aren't marked removed when the listing is incomplete"}}">{{T "partial list"}}</span>{{end}}{{if and (eq .Status "running") $live.Stalled}}<span class="chip stalled" title="{{TF "No request answered and no program done for %s: it may be stuck. Restart now (Accounts) stops it; it keeps what it saved" $live.Idle}}">{{TF "no activity %s" $live.Idle}}</span>{{end}}</span>
+          {{if eq .Status "running"}}<span class="run-prog small">{{if $live.Known}}<b>{{$live.Step}}</b>{{with $live.Left}} · {{.}}{{end}}{{if not $live.Stalled}} · <span class="muted" title="{{T "When it last had a request answered or a program done"}}">{{TF "last activity %s ago" $live.Idle}}</span>{{end}}{{else}}<span class="muted">{{T "Running in another process: no progress to show"}}</span>{{end}}</span>{{end}}
           {{if ne .DisplayStatus "interrupted"}}{{with .Error}}<span class="muted small run-err" title="{{.}}">{{.}}</span>{{end}}{{end}}</td>
         <td class="num">{{if eq .Status "running"}}{{$live.Running}} so far{{with $live.Usually}}<span class="muted small run-usual">{{.}}</span>{{end}}{{else}}{{runTook .}}{{end}}</td>
         <td class="num">{{num .ProgramsSeen}}</td>
-        <td class="num">{{num .ScopesFetched}}{{if .ScopesFailed}} <span class="chip failed">{{.ScopesFailed}} failed</span>{{end}}<span class="muted small">{{if .ScopesUnchanged}}<span title="Not downloaded: the platform says these haven't changed since the last download"> · {{num .ScopesUnchanged}} unchanged</span>{{end}}{{if .DisclosuresNew}} · {{num .DisclosuresNew}} new disclosed{{end}}{{if .ResolutionsNew}} · {{num .ResolutionsNew}} new resolved{{end}}{{if .StatsFetched}} · {{num .StatsFetched}} program stats{{end}}</span>{{if .StatsFailed}} <span class="chip failed">{{.StatsFailed}} stats failed</span>{{end}}</td>
+        <td class="num">{{num .ScopesFetched}}{{if .ScopesFailed}} <span class="chip failed">{{.ScopesFailed}} failed</span>{{end}}<span class="muted small">{{if .ScopesUnchanged}}<span title="{{T "Not downloaded: the platform says these haven't changed since the last download"}}"> · {{num .ScopesUnchanged}} unchanged</span>{{end}}{{if .DisclosuresNew}} · {{num .DisclosuresNew}} new disclosed{{end}}{{if .ResolutionsNew}} · {{num .ResolutionsNew}} new resolved{{end}}{{if .StatsFetched}} · {{num .StatsFetched}} program stats{{end}}</span>{{if .StatsFailed}} <span class="chip failed">{{.StatsFailed}} stats failed</span>{{end}}</td>
         <td class="num">{{if .Changes}}{{num .Changes}}{{else}}<span class="zero">0</span>{{end}}</td>
         <td class="num">{{if and (eq .Status "running") $live.Known}}{{num $live.Requests}}{{else}}{{num .Requests}}{{end}}{{if .RateLimited}} <span class="muted small">({{.RateLimited}} × 429)</span>{{end}}</td>
       </tr>
@@ -98,7 +98,7 @@
     </tbody>
   </table>
   </div>
-  <p class="panel-foot">The latest {{len .Runs}} polls{{with .MoreRuns}} · <a class="link" href="{{.}}">show more</a>{{end}}</p>
+  <p class="panel-foot">{{TF "The latest %d polls" (len .Runs)}}{{with .MoreRuns}} · <a class="link" href="{{.}}">{{T "show more"}}</a>{{end}}</p>
 </section>
 {{end}}
 </div>
@@ -107,18 +107,18 @@
 
 {{else if eq .Tab "browser"}}{{with .Browser}}
 <section class="panel bwr" id="browser">
-  <div class="panel-head"><h2>Browser</h2><span class="aside"><span>one Chrome for every website login, a tab per platform; its profile remembers each login</span></span></div>
+  <div class="panel-head"><h2>{{T "Browser"}}</h2><span class="aside"><span>{{T "one Chrome for every website login, a tab per platform; its profile remembers each login"}}</span></span></div>
   <div class="bwr-bar">
     {{range .Tabs}}
     <form method="post" action="/settings/browser/show" class="bwr-tab" data-browser>
       <input type="hidden" name="platform" value="{{.Name}}">
-      <button type="submit" class="secondary small" title="Bring its tab to the front, opening the browser if it's closed">{{template "pf" .Name}}</button>
+      <button type="submit" class="secondary small" title="{{T "Bring its tab to the front, opening the browser if it's closed"}}">{{template "pf" .Name}}</button>
       {{with .Login}}{{template "signin" .}}{{end}}
     </form>
     {{end}}
     <span class="grow"></span>
     <form method="post" action="/settings/browser/close" data-browser>
-      <button type="submit" class="ghost small" title="Close Chrome. It opens again for the next login, or a platform's tab above">Close browser</button>
+      <button type="submit" class="ghost small" title="{{T "Close Chrome. It opens again for the next login, or a platform's tab above"}}">{{T "Close browser"}}</button>
     </form>
   </div>
   <p class="bwr-err" role="alert" hidden></p>
@@ -129,48 +129,48 @@
   </div>
   <script type="module" src="{{static "vncview.js"}}"></script>
   {{else}}
-  <p class="bwr-note muted">The browser runs on a screen of its own. Set <code>HUNTDECK_VNC=1</code> and restart to see it here.</p>
+  <p class="bwr-note muted">{{T "The browser runs on a screen of its own. Set"}} <code>HUNTDECK_VNC=1</code> {{T "and restart to see it here."}}</p>
   {{end}}
 </section>
 {{end}}
 
 {{else if eq .Tab "you"}}
 <section class="panel" id="huntscore">
-  <div class="panel-head"><h2>HuntScore weighting</h2><span class="aside">how much each part counts towards a program's HuntScore</span></div>
+  <div class="panel-head"><h2>{{T "HuntScore weighting"}}</h2><span class="aside">{{T "how much each part counts towards a program's HuntScore"}}</span></div>
   <form method="post" action="/settings/huntscore" class="panel-body profile-form">
-    <fieldset><legend>Weighting</legend>
-      {{range huntPresets}}<label class="check" title="{{huntWeights .}}"><input type="radio" name="preset" value="{{.Key}}"{{if eq .Key $.Data.HuntPreset}} checked{{end}}> {{.Label}}</label>{{end}}</fieldset>
-    <button type="submit" class="small">Save and rescore</button>
+    <fieldset><legend>{{T "Weighting"}}</legend>
+      {{range huntPresets}}<label class="check" title="{{huntWeights .}}"><input type="radio" name="preset" value="{{.Key}}"{{if eq .Key $.Data.HuntPreset}} checked{{end}}> {{T .Label}}</label>{{end}}</fieldset>
+    <button type="submit" class="small">{{T "Save and rescore"}}</button>
   </form>
   <ul class="panel-body presets muted small">
-    {{range huntPresets}}<li><b>{{.Label}}</b>: {{huntWeights .}}</li>{{end}}
+    {{range huntPresets}}<li><b>{{T .Label}}</b>: {{huntWeights .}}</li>{{end}}
   </ul>
-  <p class="panel-foot">Saving rescores every program at once. <a class="link" href="/methodology#huntscore">How HuntScore is scored</a></p>
+  <p class="panel-foot">{{T "Saving rescores every program at once."}} <a class="link" href="/methodology#huntscore">{{T "How HuntScore is scored"}}</a></p>
 </section>
 
 {{else}}
 <div class="pair2">
 <section class="panel" id="timezone">
-  <div class="panel-head"><h2>Time zone</h2><span class="aside">dates and times show in it</span></div>
+  <div class="panel-head"><h2>{{T "Time zone"}}</h2><span class="aside">{{T "dates and times show in it"}}</span></div>
   <form method="post" action="/settings/timezone" class="panel-body zone-form">
     <div class="zone-field">
-      <label for="timezone-input"><span>Time zone</span></label>
+      <label for="timezone-input"><span>{{T "Time zone"}}</span></label>
       {{template "zone-picker" .Zone}}
       <span class="muted small" id="timezone-now">Now {{.Zone.Now}}.{{if .Zone.Overrode}} Default: {{.Zone.Default}}.{{else}} The default, from <code>HUNTDECK_TIMEZONE</code>.{{end}}
-        <button type="button" class="linkish" data-combo-fill-tz="timezone-input" hidden>Use this browser's: <b></b></button></span>
+        <button type="button" class="linkish" data-combo-fill-tz="timezone-input" hidden>{{T "Use this browser's:"}} <b></b></button></span>
     </div>
     <div class="zone-actions">
-      <button type="submit" class="small">Save time zone</button>
+      <button type="submit" class="small">{{T "Save time zone"}}</button>
       {{if .Zone.Overrode}}<button type="submit" name="reset" value="1" class="small secondary" formnovalidate>Reset to {{.Zone.Default}}</button>{{end}}
     </div>
   </form>
   <script src="{{static "combo.js"}}" defer></script>
-  <p class="panel-foot">Data is stored in UTC, and daily charts use UTC days. Notification digests go out at their time in this zone.</p>
+  <p class="panel-foot">{{T "Data is stored in UTC, and daily charts use UTC days. Notification digests go out at their time in this zone."}}</p>
 </section>
 
 <section class="panel" id="theme" data-palettes hidden>
-  <div class="panel-head"><h2>Theme</h2><span class="aside">colours for this browser</span></div>
-  <div class="palettes" role="radiogroup" aria-label="Theme">
+  <div class="panel-head"><h2>{{T "Theme"}}</h2><span class="aside">{{T "colours for this browser"}}</span></div>
+  <div class="palettes" role="radiogroup" aria-label="{{T "Theme"}}">
     {{range palettes}}
     <label class="palette" data-palette="{{.Key}}">
       <input type="radio" name="palette" value="{{.Key}}" data-palette-pick>
@@ -186,12 +186,12 @@
     </label>
     {{end}}
   </div>
-  <p class="panel-foot">Light or dark, and these colours too, are also in the Theme menu in the top bar.</p>
+  <p class="panel-foot">{{T "Light or dark, and these colours too, are also in the Theme menu in the top bar."}}</p>
 </section>
 </div>
 
 {{end}}
 {{end}}{{end}}
 
-{{define "signin"}}<div class="signin" title="{{.Title}}"><span class="chip {{.State}}">{{.Label}}</span><span class="sn">{{.Name}}</span>{{with .Parts}}<span class="muted small sp">{{range $i, $p := .}}{{if $i}} · {{end}}{{$p.Text}}{{with $p.When}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{with $p.In}} <span title="{{datetime .}}">{{until .}}</span>{{end}}{{with $p.At}} {{datetime .}}{{end}}{{end}}</span>{{end}}{{with .Watch}} <a class="link small" href="{{.}}" title="See the login browser: watch a login, or finish one by hand">watch</a>{{end}}</div>{{with .Problem}}<div class="signin-why small">{{.}}</div>{{end}}{{end}}
-{{define "lastrun"}}<span class="chip {{.DisplayStatus}}"{{with .Error}} title="{{.}}"{{end}}>{{.DisplayStatus}}</span> <span class="muted" title="{{datetime .StartedAt}} · took {{runTook .}}">{{ago .StartedAt}}<span class="took"> · {{runTook .}}</span></span>{{end}}
+{{define "signin"}}<div class="signin" title="{{.Title}}"><span class="chip {{.State}}">{{.Label}}</span><span class="sn">{{.Name}}</span>{{with .Parts}}<span class="muted small sp">{{range $i, $p := .}}{{if $i}} · {{end}}{{$p.Text}}{{with $p.When}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{with $p.In}} <span title="{{datetime .}}">{{until .}}</span>{{end}}{{with $p.At}} {{datetime .}}{{end}}{{end}}</span>{{end}}{{with .Watch}} <a class="link small" href="{{.}}" title="{{T "See the login browser: watch a login, or finish one by hand"}}">watch</a>{{end}}</div>{{with .Problem}}<div class="signin-why small">{{.}}</div>{{end}}{{end}}
+{{define "lastrun"}}<span class="chip {{.DisplayStatus}}"{{with .Error}} title="{{.}}"{{end}}>{{T .DisplayStatus}}</span> <span class="muted" title="{{datetime .StartedAt}} · took {{runTook .}}">{{ago .StartedAt}}<span class="took"> · {{runTook .}}</span></span>{{end}}

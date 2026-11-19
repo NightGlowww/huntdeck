@@ -1,22 +1,18 @@
 {{/* The program page's Notes tab: the hunter's own notes on the program,
-   which notes.js keeps in this browser (localStorage) and never sends
-   anywhere. Without scripts there's nothing to keep them in, so it says
-   so. */}}
+   kept by HuntDeck (program_notes) so they survive a browser, a cache clear
+   or a second device. Saving is a plain POST: no script needed. */}}
 {{define "program-notes"}}{{with .Data.P}}
-<section class="panel pnotes" data-notes="{{.Platform}}/{{.Handle}}" data-notes-name="{{.Name}}">
-  <div class="panel-head"><h2><label for="notes-text">Notes</label></h2>
-    <span class="aside"><span class="notes-status" data-notes-status role="status" aria-live="polite"></span></span></div>
-  <p class="notes-local"><svg class="i"><use href="#i-info"/></svg><span><b>Only on this device.</b> Notes are kept in this browser, never sent to this HuntDeck or anywhere else, and don't follow you to another browser. Clearing the site's data deletes them: export them to keep a copy.</span></p>
-  <textarea id="notes-text" class="notes-text" rows="18" maxlength="100000" spellcheck="false" disabled
-    placeholder="Endpoints, ideas, credentials to try, what you've already tested…"></textarea>
-  <noscript><p class="muted small">Notes need JavaScript: they're kept by your browser, not by HuntDeck.</p></noscript>
+<section class="panel pnotes">
+  <form method="post" action="/programs/{{.Platform}}/{{.Handle}}/note">
+  <div class="panel-head"><h2><label for="notes-text">{{T "Notes"}}</label></h2>
+    <span class="aside">{{with $.Data.NoteAt}}<span class="muted small">{{TF "saved %s" (ago .)}}</span>{{else}}<span class="muted small">{{T "not written yet"}}</span>{{end}}</span></div>
+  <textarea id="notes-text" name="note" class="notes-text" rows="18" maxlength="100000" spellcheck="false"
+    placeholder="{{T "Endpoints, ideas, credentials to try, what you've already tested…"}}">{{$.Data.Note}}</textarea>
   <div class="notes-foot">
-    <span class="muted small" data-notes-meta></span>
+    <span class="muted small">{{T "Kept in HuntDeck: it follows you to another browser, and an export or a backup carries it."}}</span>
     <span class="grow"></span>
-    <button type="button" class="button secondary small" data-notes-export title="Download every program's notes from this browser as a JSON file"><svg class="i"><use href="#i-download"/></svg>Export all notes</button>
-    <button type="button" class="button secondary small" data-notes-import title="Add notes from an exported file: a program's note replaces this browser's only if it's newer"><svg class="i"><use href="#i-plus"/></svg>Import</button>
-    <input type="file" accept="application/json,.json" data-notes-file hidden>
-    <a class="button secondary small" href="/programs" data-notes-all hidden title="Every program you have notes on">All programs with notes</a>
+    <button type="submit" class="button small">{{T "Save note"}}</button>
   </div>
+  </form>
 </section>
 {{end}}{{end}}

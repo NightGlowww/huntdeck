@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/mdpsec/huntdeck/internal/store"
 )
@@ -151,6 +153,9 @@ func policyRules(text string) []testRule {
 		}
 		out = append(out, testRule{Kind: "rate", Title: fmt.Sprintf("At most %s requests a %s", m[1], unit), Detail: "For automated tools.", FromPolicy: true})
 	}
+	out = append(out, policyProhibitionReports(text)...)
+	out = append(out, policyDeadline(text)...)
+	out = append(out, policyAccounts(text)...)
 	return out
 }
 
@@ -159,5 +164,104 @@ func upperFirst(s string) string {
 	if s == "" {
 		return s
 	}
-	return strings.ToUpper(s[:1]) + s[1:]
+	r, size := utf8.DecodeRuneInString(s)
+	// Byte-slicing here would cut a multi-byte rune in half (é, ö, İ).
+	return string(unicode.ToUpper(r)) + s[size:]
+}
+
+var (
+	// Things a policy forbids outright: the expensive mistakes.
+	policyProhibitedRE = regexp.MustCompile(`(?i)\b(?:do not|don't|never|must not|not allowed to|prohibited)[^.]{0,80}?\b(denial[- ]of[- ]service|dos attacks?|social engineering|phishing|physical (?:access|testing|attacks?)|automated (?:scanners?|scanning|tools?)|brute[- ]forc(?:e|ing)|spam|spoofing|malware|non-public (?:systems?|data)|internal (?:systems?|networks?|services?)|leaked (?:credentials?|data|tokens?)|(?:customer|third[- ]party|other)[^.]{0,24}(?:systems?|data|accounts?)|customers?\b|\bpii\b|personal (?:data|information)|destructive (?:actions?|testing)|state[- ]changing)\b`)
+	// The same nouns with the prohibition after them: "denial of service is
+	// prohibited" is as common as "do not run denial of service".
+	policyProhibitedAfterRE = regexp.MustCompile(`(?i)\b(denial[- ]of[- ]service|dos attacks?|social engineering|phishing|physical (?:access|testing|attacks?)|automated (?:scanners?|scanning|tools?)|brute[- ]forc(?:e|ing)|spam|spoofing|malware|non-public (?:systems?|data)|internal (?:systems?|networks?)|leaked (?:credentials?|data))\b[^.]{0,40}?\b(?:is |are )?(?:prohibited|forbidden|not allowed|not permitted)\b`)
+	// A deadline to report, or the window after which a report may be disclosed.
+	// "within 15 days" on its own is usually a response-time promise, not a
+	// deadline to report: the sentence has to be about reporting or disclosure.
+	policyDeadlineRE = regexp.MustCompile(`(?i)(?:report|submit|submission|disclos)[^.]{0,40}?\bwithin\s+\d{1,3}\s*(?:day|days|hour|hours|week|weeks)\b|\b\d{1,3}[- ]day\s+disclosure\b|\bdisclos(?:e|ure)[^.]{0,40}?after\s+\d{1,3}\s*days?\b`)
+	// Accounts: what a test account may be, and whose data it may touch.
+	policyAccountRE = regexp.MustCompile(`(?i)\b(?:use|create|register)[^.]{0,40}?\b(test|testing|separate|dedicated)\s+(account|accounts|user|users)\b|\b(?:do not|never|must not)[^.]{0,60}?\b(real users?|production data|customer data|personal data)\b`)
+)
+
+// policyProhibitionReports turns "do not ..." sentences into alert rules.
+func policyProhibitionReports(text string) []testRule {
+	seen := map[string]bool{}
+	var out []testRule
+	matches := policyProhibitedRE.FindAllStringSubmatch(text, -1)
+	matches = append(matches, policyProhibitedAfterRE.FindAllStringSubmatch(text, -1)...)
+	for _, m := range matches {
+		what := strings.ToLower(strings.TrimSpace(m[1]))
+		if seen[what] {
+			continue
+		}
+		seen[what] = true
+		out = append(out, testRule{Kind: "warn", Title: "Policy forbids: " + what,
+			Detail: excerptAround(text, m[0]), Alert: true, FromPolicy: true})
+		if len(out) == 3 {
+			break
+		}
+	}
+	return out
+}
+
+// policyDeadline is the reporting window, when the text states one.
+func policyDeadline(text string) []testRule {
+	// Every match is considered: a policy usually promises a response time
+	// before it states a reporting deadline, and the promise must not shadow it.
+	for _, m := range policyDeadlineRE.FindAllString(text, -1) {
+		phrase := strings.TrimSpace(m)
+		// "Reports are reviewed within 15 days" is the program's response
+		// promise, not a deadline for the reporter.
+		low := strings.ToLower(phrase)
+		var skip bool
+		for _, verb := range []string{"review", "respond", "triage", "acknowledg"} {
+			if strings.Contains(low, verb) {
+				skip = true
+				break
+			}
+		}
+		if skip {
+			continue
+		}
+		return []testRule{{Kind: "req", Title: upperFirst(phrase), Detail: excerptAround(text, phrase), FromPolicy: true}}
+	}
+	return nil
+}
+
+// policyAccounts says what a test account must be.
+func policyAccounts(text string) []testRule {
+	if m := policyAccountRE.FindStringSubmatch(text); m != nil {
+		phrase := strings.TrimSpace(m[0])
+		return []testRule{{Kind: "creds", Title: upperFirst(phrase), Detail: excerptAround(text, phrase), FromPolicy: true}}
+	}
+	return nil
+}
+
+// excerptAround returns the sentence the match sits in, trimmed to a readable
+// length: the reader wants the program's own words, not the parser's summary.
+func excerptAround(text, match string) string {
+	i := strings.Index(text, match)
+	if i < 0 {
+		// The match came from a case-insensitive regex: find it by its
+		// lowercased position, which is the same length in ASCII policies.
+		i = strings.Index(strings.ToLower(text), strings.ToLower(match))
+	}
+	if i < 0 {
+		return ""
+	}
+	start := strings.LastIndexAny(text[:i], ".\n")
+	if start < 0 {
+		start = 0
+	} else {
+		start++
+	}
+	end := i + len(match)
+	for end < len(text) && !strings.ContainsRune(".\n", rune(text[end])) {
+		end++
+	}
+	s := strings.Join(strings.Fields(text[start:end]), " ")
+	if len(s) > 160 {
+		s = s[:157] + "…"
+	}
+	return s
 }

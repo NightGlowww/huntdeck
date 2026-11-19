@@ -30,7 +30,7 @@
 .chipbar .grow { flex: 1; }
 .chipbar .fnot { width: 210px; }
 .chipbar .fnot input { height: 28px; font-size: 12.5px; }
-.fchip { padding: 3px 11px; border: 1px solid var(--border-2); border-radius: 13px; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+.fchip { padding: 3px 11px; border: 1px solid var(--border-input); border-radius: 13px; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
 .fchip:hover { border-color: var(--accent); color: var(--text); }
 .fchip.on { border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: var(--accent-weak); color: var(--accent); font-weight: 600; }
 
@@ -165,3 +165,40 @@ td.acts .open-ext { width: 28px; height: 28px; }
 .board-status { margin: 0; padding: 7px 18px 8px; border: 1px solid var(--border); border-top: 0;
   border-radius: 0 0 var(--radius) var(--radius); background: var(--surface); color: var(--muted); font-size: 12.5px; line-height: 1.6; }
 .board-status .sep { color: var(--faint); }
+/* The selection bar stays in view while the list scrolls: it is the only
+   place the ticks and their actions show. */
+.selbar { position: sticky; bottom: 0; z-index: 4; box-shadow: 0 -8px 20px -12px rgb(0 0 0 / .35); border-radius: 0 0 var(--radius) var(--radius); }
+/* The selection bar sits over the list: it reads as one solid strip, not a
+   tint you can see the cards through. */
+.selbar { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); padding-bottom: calc(9px + env(safe-area-inset-bottom, 0px)); }
+/* Phones: the count and the buttons on one line; the note would crowd
+   them out. */
+@media (max-width: 700px) {
+  .selbar { flex-wrap: wrap; row-gap: 6px; }
+  .selbar [data-selcount] { white-space: nowrap; }
+  .selbar > .muted.small, .selbar .grow { display: none; }
+}
+/* Arranging the board with a finger: the handle, the eye and Fit need
+   bigger targets, and the resize edges a wider grip. */
+@media (pointer: coarse) {
+  .bx-grip, .bx-eye, .bx-fit { min-width: 40px; min-height: 40px; }
+  .bx-edge.l, .bx-edge.r { width: 14px; }
+  .bx-edge.b { height: 14px; }
+  .bx-edge.br { width: 22px; height: 22px; }
+}
+
+/* HuntQueue on the board: five rows, above the configurable grid, so the
+   first screen answers "what now" without a click. */
+.queue-strip { margin: 0 0 16px; }
+.qstrip { display: grid; gap: 6px; margin: 0; padding: 10px 16px 14px; list-style: none; }
+.qstrip li { display: grid; grid-template-columns: 56px minmax(120px, 200px) minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; align-items: baseline; }
+.qstrip .qs-score { font-variant-numeric: tabular-nums; font-weight: 650; color: var(--accent); }
+.qstrip code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qstrip .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 900px) {
+  .qstrip li { grid-template-columns: 48px minmax(0, 1fr); }
+  .qstrip code, .qstrip .muted { grid-column: 2; }
+  /* A phone has no hover and no second look: let the reasons wrap instead of
+     ending in an ellipsis the reader cannot open. */
+  .qstrip .muted { white-space: normal; overflow: visible; }
+}

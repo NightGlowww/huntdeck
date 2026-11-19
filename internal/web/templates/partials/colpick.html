@@ -1,16 +1,16 @@
 {{/* A table's column picker (columns.go, static/columns.js). */}}
 {{define "colpick"}}<div class="colpick" data-colpick="{{.Name}}" hidden>
-  <button type="button" class="tb-btn" aria-expanded="false" aria-controls="colpick-{{.Name}}" data-colpick-toggle><svg class="i"><use href="#i-{{.Icon}}"/></svg><span class="label">{{.Label}}</span></button>
+  <button type="button" class="tb-btn" aria-expanded="false" aria-controls="colpick-{{.Name}}" data-colpick-toggle><svg class="i" aria-hidden="true"><use href="#i-{{.Icon}}"/></svg><span class="label">{{T .Label}}</span></button>
   <div class="menu" id="colpick-{{.Name}}" hidden>
-    <div class="menu-title">Columns <span>drag to reorder</span></div>
-    <div class="crow fixed"><span class="grip"></span><span class="cl">{{.Fixed}}</span><span class="pin">always first</span></div>
+    <div class="menu-title">{{T "Columns"}} <span>{{T "drag to reorder"}}</span></div>
+    <div class="crow fixed"><span class="grip"></span><span class="cl">{{T .Fixed}}</span><span class="pin">{{T "always first"}}</span></div>
     <ol class="corder" data-corder>
-    {{range .Columns}}{{if .Group}}<li class="cgroup" data-key="{{.Key}}"><div class="crow">{{template "grip" .Label}}<span class="cl gl">{{.Label}}</span></div>
+    {{range .Columns}}{{if .Group}}<li class="cgroup" data-key="{{.Key}}"><div class="crow">{{template "grip" .Label}}<span class="cl gl">{{T .Label}}</span></div>
       <ol class="corder" data-corder>{{range .Group}}<li data-key="{{.Key}}"><div class="crow">{{template "grip" .Label}}<label class="check"><input type="checkbox" value="{{.Key}}"> {{.Label}}</label></div></li>{{end}}</ol></li>
     {{else}}<li data-key="{{.Key}}"><div class="crow">{{template "grip" .Label}}<label class="check"><input type="checkbox" value="{{.Key}}"> {{.Label}}</label></div></li>
     {{end}}{{end}}</ol>
-    <button type="button" class="menu-reset" data-colpick-reset>Reset to the defaults</button>
+    <button type="button" class="menu-reset" data-colpick-reset>{{T "Reset to the defaults"}}</button>
   </div>
 </div>{{end}}
 
-{{define "grip"}}<button type="button" class="grip" title="Drag to move, or use the arrow keys" aria-label="Move {{.}}"><svg class="i"><use href="#i-grip"/></svg></button>{{end}}
+{{define "grip"}}<button type="button" class="grip" title="{{T "Drag to move, or use the arrow keys"}}" aria-label="Move {{.}}"><svg class="i" aria-hidden="true"><use href="#i-grip"/></svg></button>{{end}}

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"{{if readOnly}} data-read-only{{end}}>
+<html lang="{{.Lang}}"{{if readOnly}} data-read-only{{end}}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,6 +32,8 @@
 <title>{{or .SearchTitle (print .Title " · HuntDeck")}}</title>{{with .JSONLD}}
 <script type="application/ld+json">{{.}}</script>{{end}}
 <script src="{{static "theme.js"}}"></script>
+<script src="/i18n.js"></script>
+<script src="{{static "i18n.js"}}"></script>
 <link rel="stylesheet" href="{{static "styles.css"}}">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="{{static "favicon.svg"}}" type="image/svg+xml">
@@ -40,10 +42,11 @@
 <script src="{{static "app.js"}}" defer></script>
 <script src="{{static "keys.js"}}" defer></script>
 <script src="{{static "watch.js"}}" defer></script>
-<script src="{{static "notes.js"}}" defer></script>
 <script src="{{static "views.js"}}" defer></script>
 </head>
 <body>
+<a class="skip-link" href="#main">{{T "Skip to the main content"}}</a>
+<button type="button" class="to-top" data-to-top hidden aria-label="{{T "Back to the top"}}" title="{{T "Back to the top"}}"><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
 <svg class="sprite" aria-hidden="true">
   <symbol id="i-logo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
   <symbol id="i-grip" viewBox="0 0 24 24"><circle cx="9" cy="6" r=".9"/><circle cx="15" cy="6" r=".9"/><circle cx="9" cy="12" r=".9"/><circle cx="15" cy="12" r=".9"/><circle cx="9" cy="18" r=".9"/><circle cx="15" cy="18" r=".9"/></symbol>
@@ -60,6 +63,8 @@
   <symbol id="i-rss" viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.4"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.1"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4.5h3.5a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H15"/><path d="M10 8l-4 4 4 4M6 12h9"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.3 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.3-3.6-8.5S9.6 5.9 12 3.5Z"/></symbol>
   <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></symbol>
@@ -80,52 +85,67 @@
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17h-8l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5Z"/></symbol>
 </svg>
 {{- if readOnly}}
-<div class="demo-banner" role="note"><span class="db-in"><b>HuntDeck Public</b><span class="db-text"><span class="db-long">Every public program on all four platforms, {{if .Updated.IsZero}}refreshed regularly{{else}}updated {{ago .Updated}}{{end}}. {{if repoURL}}HuntDeck is free to self-host: your own copy adds your private programs and invites.{{else}}Public programs only: your own HuntDeck adds your private programs and invites.{{end}}</span><span class="db-short">Public programs, {{if .Updated.IsZero}}refreshed regularly{{else}}updated {{ago .Updated}}{{end}}. Your private ones stay in your own copy.</span></span>{{with repoURL}}<a class="db-fb db-follow" href="{{.}}" target="_blank" rel="noopener noreferrer" title="HuntDeck's source: run your own copy, with your private programs and invites"><svg class="i"><use href="#i-github"/></svg><span class="db-long">{{repoName}}</span><span class="db-short">Self-host HuntDeck</span></a>{{end}}{{with .Feedback}}<a class="db-fb" href="{{.}}"{{if $.FeedbackOut}} target="_blank" rel="noopener noreferrer" title="Found a bug, or have an idea? Open an issue on GitHub"{{end}}>Send feedback</a>{{end}}{{with xAccount}}<a class="db-fb db-follow" href="https://x.com/{{.}}" target="_blank" rel="noopener noreferrer" title="News and launch updates on X"><svg class="i"><use href="#i-x"/></svg>Follow @{{.}}</a>{{end}}</span><button type="button" class="db-x" data-demo-banner-hide aria-label="Hide this note" title="Hide this note">×</button></div>
+<div class="demo-banner" role="note"><span class="db-in"><b>HuntDeck Public</b><span class="db-text"><span class="db-long">Every public program on all four platforms, {{if .Updated.IsZero}}refreshed regularly{{else}}updated {{ago .Updated}}{{end}}. {{if repoURL}}HuntDeck is free to self-host: your own copy adds your private programs and invites.{{else}}Public programs only: your own HuntDeck adds your private programs and invites.{{end}}</span><span class="db-short">Public programs, {{if .Updated.IsZero}}refreshed regularly{{else}}updated {{ago .Updated}}{{end}}. Your private ones stay in your own copy.</span></span>{{with repoURL}}<a class="db-fb db-follow" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "HuntDeck's source: run your own copy, with your private programs and invites"}}"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span class="db-long">{{repoName}}</span><span class="db-short">Self-host HuntDeck</span></a>{{end}}{{with .Feedback}}<a class="db-fb" href="{{.}}"{{if $.FeedbackOut}} target="_blank" rel="noopener noreferrer" title="{{T "Found a bug, or have an idea? Open an issue on GitHub"}}"{{end}}>{{T "Send feedback"}}</a>{{end}}{{with xAccount}}<a class="db-fb db-follow" href="https://x.com/{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "News and launch updates on X"}}"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg>Follow @{{.}}</a>{{end}}</span><button type="button" class="db-x" data-demo-banner-hide aria-label="{{T "Hide this note"}}" title="{{T "Hide this note"}}">×</button></div>
 {{- end}}
 <div class="shell">
   <aside class="sidebar">
-    <a class="brand" href="/"><span class="logo"><svg class="i"><use href="#i-logo"/></svg></span><span class="word">Hunt<b>Deck</b></span></a>
-    <button type="button" class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="main-nav" hidden><svg class="i"><use href="#i-menu"/></svg><span>Menu</span></button>
-    <nav class="nav" id="main-nav" aria-label="Main">
-      <div class="group">Hunt</div>
-      <a href="/"{{if eq .Nav "dashboard"}} aria-current="page"{{end}}><svg class="i"><use href="#i-grid"/></svg><span class="label">Hunt board</span></a>
-      <a href="/programs"{{if eq .Nav "programs"}} aria-current="page"{{end}}><svg class="i"><use href="#i-list"/></svg><span class="label">Programs</span></a>
-            <a href="/invites"{{if eq .Nav "invites"}} aria-current="page"{{end}}><svg class="i"><use href="#i-mail"/></svg><span class="label">Invites</span></a>
-      <a href="/stats"{{if eq .Nav "stats"}} aria-current="page"{{end}}><svg class="i"><use href="#i-chart"/></svg><span class="label">Stats</span></a>
-      <a href="/targets"{{if eq .Nav "targets"}} aria-current="page"{{end}}><svg class="i"><use href="#i-target"/></svg><span class="label">Targets</span></a>
-      <a href="/changes"{{if eq .Nav "changes"}} aria-current="page"{{end}}><svg class="i"><use href="#i-activity"/></svg><span class="label">Changes</span></a>
-      <a href="/disclosed"{{if eq .Nav "disclosed"}} aria-current="page"{{end}}><svg class="i"><use href="#i-file"/></svg><span class="label">Disclosed</span></a>
-      <div class="group">System</div>
-      <a href="/methodology"{{if eq .Nav "methodology"}} aria-current="page"{{end}}><svg class="i"><use href="#i-info"/></svg><span class="label">Methodology</span></a>
-            <a href="/settings/notifications"{{if eq .Nav "notifications"}} aria-current="page"{{end}}><svg class="i"><use href="#i-bell"/></svg><span class="label">Notifications</span></a>
-      <a href="/api"{{if eq .Nav "api"}} aria-current="page"{{end}}><svg class="i"><use href="#i-code"/></svg><span class="label">API</span></a>
-            <a href="/settings"{{if eq .Nav "settings"}} aria-current="page"{{end}}><svg class="i"><use href="#i-sliders"/></svg><span class="label">Settings</span></a>
+    <a class="brand" href="/" aria-label="HuntDeck"><span class="logo"><svg class="i" aria-hidden="true"><use href="#i-logo"/></svg></span><span class="word" aria-hidden="true">Hunt<b>Deck</b></span></a>
+    <button type="button" class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="main-nav" hidden><svg class="i" aria-hidden="true"><use href="#i-menu"/></svg><span>{{T "Menu"}}</span></button>
+    <nav class="nav" id="main-nav" aria-label="{{T "Main"}}">
+      <div class="group">{{T "Hunt"}}</div>
+      <a href="/"{{if eq .Nav "dashboard"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-grid"/></svg><span class="label">{{T "Hunt board"}}</span></a>
+      <a href="/programs"{{if eq .Nav "programs"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-list"/></svg><span class="label">{{T "Programs"}}</span></a>
+            <a href="/invites"{{if eq .Nav "invites"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span class="label">{{T "Invites"}}</span></a>
+      <a href="/stats"{{if eq .Nav "stats"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg><span class="label">{{T "Stats"}}</span></a>
+      <a href="/targets"{{if eq .Nav "targets"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-target"/></svg><span class="label">{{T "Targets"}}</span></a>
+      <a href="/queue"{{if eq .Nav "queue"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span class="label">{{T "Hunt queue"}}</span></a>
+      <a href="/changes"{{if eq .Nav "changes"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-activity"/></svg><span class="label">{{T "Changes"}}</span></a>
+      <a href="/disclosed"{{if eq .Nav "disclosed"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="label">{{T "Disclosed"}}</span></a>
+      <div class="group">{{T "System"}}</div>
+      <a href="/methodology"{{if eq .Nav "methodology"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span class="label">{{T "Methodology"}}</span></a>
+            <a href="/settings/notifications"{{if eq .Nav "notifications"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg><span class="label">{{T "Notifications"}}</span></a>
+      <a href="/api"{{if eq .Nav "api"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-code"/></svg><span class="label">{{T "API"}}</span></a>
+            <a href="/settings"{{if eq .Nav "settings"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">{{T "Settings"}}</span></a>
       {{- with .Feedback}}
-      <a href="{{.}}"{{if $.FeedbackOut}} target="_blank" rel="noopener noreferrer" title="Found a bug, or have an idea? Open an issue on GitHub"{{else}}{{if eq $.Nav "feedback"}} aria-current="page"{{end}} title="Found a bug, or have an idea? Write to us"{{end}}><svg class="i"><use href="#i-chat"/></svg><span class="label">Feedback</span></a>{{end}}
+      <a href="{{.}}"{{if $.FeedbackOut}} target="_blank" rel="noopener noreferrer" title="{{T "Found a bug, or have an idea? Open an issue on GitHub"}}"{{else}}{{if eq $.Nav "feedback"}} aria-current="page"{{end}} title="{{T "Found a bug, or have an idea? Write to us"}}"{{end}}><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg><span class="label">{{T "Feedback"}}</span></a>{{end}}
     </nav>
     <div class="spacer"></div>
     <div class="foot">
-      {{if readOnly}}<div class="demo-note" title="HuntDeck Public: a read-only HuntDeck with live public platform data{{if not .Updated.IsZero}}, last refreshed from the platforms {{datetime .Updated}}{{end}}: nothing private, nothing of anyone's account, and nothing can be changed"><b>Public</b><span class="dn-more"> · live data</span>{{with repoURL}}<a class="dn-get" href="{{.}}" target="_blank" rel="noopener noreferrer" title="HuntDeck's source: run your own copy, with your private programs and invites"><svg class="i"><use href="#i-github"/></svg><span class="dn-more">Get HuntDeck</span></a>{{end}}</div>{{end}}
+      {{if readOnly}}<div class="demo-note" title="{{T "HuntDeck Public: a read-only HuntDeck with live public platform data"}}{{if not .Updated.IsZero}}{{TF ", last refreshed from the platforms %s" (datetime .Updated)}}{{end}}{{T ": nothing private, nothing of anyone's account, and nothing can be changed"}}"><b>Public</b><span class="dn-more"> · {{T "live data"}}</span>{{with repoURL}}<a class="dn-get" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "HuntDeck's source: run your own copy, with your private programs and invites"}}"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span class="dn-more">Get HuntDeck</span></a>{{end}}</div>{{end}}
+      {{- if gt (len .Langs) 1}}
+      <form class="lang-switch" method="post" action="/settings/language" aria-label="{{T "Language"}}">
+        <input type="hidden" name="next" value="{{.Path}}">
+        <svg class="i" aria-hidden="true"><use href="#i-globe"/></svg>
+        {{- range .Langs}}
+        <button type="submit" name="lang" value="{{.Code}}"{{if .Current}} aria-current="true" disabled title="{{T "Language"}}: {{.Name}}"{{end}}><span class="full">{{.Name}}</span><span class="short" aria-hidden="true">{{.Short}}</span></button>
+        {{- end}}
+      </form>
+      {{- end}}
+      {{- if .Auth}}
+      <form class="sign-out" method="post" action="/logout"><button type="submit" title="{{T "Sign out"}}"><svg class="i" aria-hidden="true"><use href="#i-logout"/></svg><span class="label">{{T "Sign out"}}</span></button></form>
+      {{- end}}
       <div class="version">HuntDeck {{.Version}}</div>
     </div>
   </aside>
-  <main class="content">
+  <main class="content" id="main" tabindex="-1">
     <div class="topbar">
       <div class="tb-title">{{block "topbar-title" .}}<h1>{{.Title}}</h1>{{end}}</div>
       <form class="omni" method="get" action="/search" role="search">
-        <svg class="i"><use href="#i-search"/></svg>
-        <input type="search" name="q" id="omni" placeholder="Search programs and scope, or paste a host or URL" aria-label="Search programs and scope, or check a host" autocomplete="off" spellcheck="false">
-        <kbd title="Press / to search, ? for every shortcut">/</kbd>
+        <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" id="omni" placeholder="{{T "Search programs and scope, or paste a host or URL"}}" aria-label="{{T "Search programs and scope, or check a host"}}" autocomplete="off" spellcheck="false">
+        <kbd title="{{T "Press / to search, ? for every shortcut"}}">/</kbd>
       </form>
       <div class="tb-right">
-        {{- if not .Updated.IsZero}}<span class="updated" title="{{if readOnly}}HuntDeck Public's data was last refreshed from the platforms {{else}}The latest poll finished {{end}}{{datetime .Updated}}">Updated {{ago .Updated}}</span>{{end}}
+        <span class="poll-run" data-poll-watch hidden title="{{T "A poll is running: the numbers below move when it finishes"}}"><span class="dot"></span><span class="poll-run-label">{{T "Polling"}}</span></span>
+        <a class="poll-run" data-reload-hint hidden href="{{.Path}}"><span class="dot"></span><span class="poll-run-label">{{T "New data: reload"}}</span></a>
+        {{- if not .Updated.IsZero}}<span class="updated" title="{{if readOnly}}{{TF "HuntDeck Public's data was last refreshed from the platforms %s" (datetime .Updated)}}{{else}}{{TF "The latest poll finished %s" (datetime .Updated)}}{{end}}">{{T "Updated"}} <span data-ago data-at="{{iso .Updated}}">{{ago .Updated}}</span></span>{{end}}
         {{- block "topbar-actions" .}}{{end}}
         {{template "theme-menu"}}
       </div>
     </div>
     <div class="page">
-    {{- with .Flash}}<p class="flash ok" role="status">{{.}}</p>{{end}}
-    {{- with .FlashErr}}<p class="flash err" role="alert">{{.}}</p>{{end}}
+    {{- with .Flash}}<p class="flash ok" role="status">{{T .}}</p>{{end}}
+    {{- with .FlashErr}}<p class="flash err" role="alert">{{T .}}</p>{{end}}
     {{- with .Tour}}<p class="demo-tour" role="note"><b>Self-hosted</b><span>{{.}}{{with repoURL}} <a class="link" href="{{.}}" target="_blank" rel="noopener noreferrer">Self-host HuntDeck</a>{{end}}</span></p>{{end}}
     {{template "content" .}}
     </div>
@@ -135,17 +155,17 @@
 </html>
 
 {{define "pager"}}{{if gt .Pages 1}}
-<nav class="pager" aria-label="Pages">
-  <span>{{num .First}}–{{num .Last}} of {{num .Total}}</span>
+<nav class="pager" aria-label="{{T "Pages"}}">
+  <span>{{num .First}}–{{num .Last}} / {{num .Total}}</span>
   <span class="buttons">
-    {{with .PrevURL}}<a class="button secondary small" href="{{.}}" rel="prev">← Previous</a>{{else}}<span class="button secondary small disabled">← Previous</span>{{end}}
-    {{with .NextURL}}<a class="button secondary small" href="{{.}}" rel="next">Next →</a>{{else}}<span class="button secondary small disabled">Next →</span>{{end}}
+    {{with .PrevURL}}<a class="button secondary small" href="{{.}}" rel="prev">{{T "← Previous"}}</a>{{else}}<span class="button secondary small disabled">{{T "← Previous"}}</span>{{end}}
+    {{with .NextURL}}<a class="button secondary small" href="{{.}}" rel="next">{{T "Next →"}}</a>{{else}}<span class="button secondary small disabled">{{T "Next →"}}</span>{{end}}
   </span>
 </nav>
 {{end}}{{end}}
 
 {{/* past-end stands in for a list on a page past its end. */}}
-{{define "past-end"}}<div class="empty-state">No more results: this list ends on page {{num .Pages}}. <a class="link" href="{{.LastURL}}">Go to the last page</a></div>{{end}}
+{{define "past-end"}}<div class="empty-state">{{TF "No more results: this list ends on page %s." (num .Pages)}} <a class="link" href="{{.LastURL}}">{{T "Go to the last page"}}</a></div>{{end}}
 
 {{define "pf"}}<span class="pf pf-{{.}}"><span class="dot"></span>{{platformLabel .}}</span>{{end}}
 
@@ -153,14 +173,14 @@
 
 {{/* Opens a program's own page on its platform (anything with URL, Platform
    and Name): always a new tab, sending nothing about HuntDeck. */}}
-{{define "open-ext"}}<a class="open-ext" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow" title="{{if eq .Platform "independent"}}Open the program's page{{else}}Open on {{platformLabel .Platform}}{{end}}" aria-label="Open {{.Name}}{{if ne .Platform "independent"}} on {{platformLabel .Platform}}{{end}}"><svg class="i"><use href="#i-external"/></svg></a>{{end}}
+{{define "open-ext"}}<a class="open-ext" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow" title="{{if eq .Platform "independent"}}{{T "Open the program's page"}}{{else}}{{TF "Open on %s" (platformLabel .Platform)}}{{end}}" aria-label="{{if eq .Platform "independent"}}{{TF "Open %s" .Name}}{{else}}{{TF "Open %s on %s" .Name (platformLabel .Platform)}}{{end}}"><svg class="i" aria-hidden="true"><use href="#i-external"/></svg></a>{{end}}
 
 {{/* An asset's identifier; one the platform blacked out says so. */}}
-{{define "asset"}}{{if hiddenName .}}<span class="hidden-name" title="The platform shows this asset's name blacked out: {{.}}">{{hiddenLabel}}</span>{{else}}{{.}}{{end}}{{end}}
+{{define "asset"}}{{if hiddenName .}}<span class="hidden-name" title="{{TF "The platform shows this asset's name blacked out: %s" .}}">{{hiddenLabel}}</span>{{else}}{{.}}{{end}}{{end}}
 
-{{define "kind"}}{{if .OffersBounty}}<span class="chip bbp" title="Pays bounties">BBP</span>{{else}}<span class="chip vdp" title="Vulnerability disclosure, no bounties">VDP</span>{{end}}{{if .Private}}<span class="chip private">private</span>{{end}}{{if ne .State "open"}}<span class="chip {{.State}}">{{.State}}</span>{{end}}{{if .RemovedAt}}<span class="chip removed">gone</span>{{end}}{{end}}
+{{define "kind"}}{{if .OffersBounty}}<span class="chip bbp" title="{{T "Pays bounties"}}">BBP</span>{{else}}<span class="chip vdp" title="{{T "Vulnerability disclosure, no bounties"}}">VDP</span>{{end}}{{if .Private}}<span class="chip private">{{T "private"}}</span>{{end}}{{if ne .State "open"}}<span class="chip {{.State}}">{{T .State}}</span>{{end}}{{if .RemovedAt}}<span class="chip removed">{{T "gone"}}</span>{{end}}{{end}}
 
-{{define "hunt"}}{{with .}}<span class="hunt {{huntBand .Score}}{{if .Gate}} gated{{end}}" title="{{huntTitle .}}"><b>{{printf "%.0f" .Score}}</b><svg class="huntbars" viewBox="0 0 28 14" aria-hidden="true">{{range huntBars .}}<rect class="{{.Key}}" x="{{.X}}" y="{{.Y}}" width="5.5" height="{{.H}}" rx="1"/>{{end}}</svg></span>{{else}}<span class="zero" title="Scored after the next poll">Pending</span>{{end}}{{end}}
+{{define "hunt"}}{{with .}}<span class="hunt {{huntBand .Score}}{{if .Gate}} gated{{end}}" title="{{huntTitle .}}"><b>{{printf "%.0f" .Score}}</b><svg class="huntbars" viewBox="0 0 28 14" aria-hidden="true">{{range huntBars .}}<rect class="{{.Key}}" x="{{.X}}" y="{{.Y}}" width="5.5" height="{{.H}}" rx="1"/>{{end}}</svg></span>{{else}}<span class="zero" title="{{T "Scored after the next poll"}}">Pending</span>{{end}}{{end}}
 
 {{define "feed"}}<ul class="feed">
   {{range .}}

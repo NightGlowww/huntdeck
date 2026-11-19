@@ -19,6 +19,7 @@ type Notifier interface {
 // channelKinds are the channel kinds, in display order.
 var channelKinds = []struct{ Key, Label string }{
 	{store.NotifyDiscord, "Discord"}, {store.NotifyTelegram, "Telegram"}, {store.NotifyWebhook, "Webhook"},
+	{store.NotifyBark, "Bark"}, {store.NotifyServerChan, "ServerChan"},
 }
 
 func channelKindLabel(k string) string {
@@ -33,10 +34,14 @@ func channelKindLabel(k string) string {
 type notificationsData struct {
 	Channels   []channelRow
 	Deliveries []store.Delivery
-	BaseURL    string // saved address for links
-	Suggested  string // how this browser reached HuntDeck
-	Timezone   string
-	Examples   previewView // this week's messages, every kind
+	// DeliveryFilter is what narrowed the history, and Channels names it
+	// offers in the channel select.
+	DeliveryChannel string
+	DeliveryStatus  string
+	BaseURL         string // saved address for links
+	Suggested       string // how this browser reached HuntDeck
+	Timezone        string
+	Examples        previewView // this week's messages, every kind
 }
 
 type channelRow struct {
@@ -44,6 +49,8 @@ type channelRow struct {
 	Where   string // address without secrets
 	Events  string // what it sends, in words
 	Filters string // and for which programs
+	// Sent, Failed and Waiting count this channel's deliveries.
+	Sent, Failed, Waiting int
 }
 
 // examplesShown is how many example messages the Notifications page shows.
@@ -62,12 +69,22 @@ func (s *server) renderNotifications(w http.ResponseWriter, r *http.Request, sta
 		return
 	}
 	d := notificationsData{Suggested: baseURL(r), Timezone: s.location(ctx).String()}
-	for _, c := range chans {
-		rules := notify.ParseRules(c.Rules)
-		d.Channels = append(d.Channels, channelRow{NotifyChannel: c, Where: notify.ParseConfig(c.Config).Masked(c.Kind),
-			Events: eventsText(rules), Filters: filtersText(rules)})
+	stats, err := s.Store.DeliveryStats(ctx)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
 	}
-	if d.Deliveries, err = s.Store.RecentDeliveries(ctx, 20); err != nil {
+	for _, c := range chans {
+		st := stats[c.ID]
+		rules := notify.ParseRules(c.Rules)
+		lang := s.langOf(r)
+		d.Channels = append(d.Channels, channelRow{NotifyChannel: c, Where: notify.ParseConfig(c.Config).Masked(c.Kind),
+			Events: eventsTextLang(lang, s.messages, rules), Filters: filtersTextLang(lang, s.messages, rules),
+			Sent: st.Sent, Failed: st.Failed, Waiting: st.Waiting})
+	}
+	d.DeliveryChannel = r.URL.Query().Get("channel")
+	d.DeliveryStatus = r.URL.Query().Get("status")
+	if d.Deliveries, err = s.Store.Deliveries(ctx, store.DeliveryFilter{Channel: d.DeliveryChannel, Status: d.DeliveryStatus, Limit: 50}); err != nil {
 		s.serverError(w, r, err)
 		return
 	}
@@ -75,7 +92,7 @@ func (s *server) renderNotifications(w http.ResponseWriter, r *http.Request, sta
 	for _, k := range notify.EventKinds {
 		every.Events = append(every.Events, k.Key)
 	}
-	if d.Examples, err = s.preview(ctx, every, true, "", examplesShown); err != nil {
+	if d.Examples, err = s.preview(ctx, s.langOf(r), "", every, true, "", examplesShown); err != nil {
 		s.serverError(w, r, err)
 		return
 	}

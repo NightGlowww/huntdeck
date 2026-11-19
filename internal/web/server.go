@@ -16,6 +16,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/i18n"
 	"github.com/mdpsec/huntdeck/internal/overrides"
 	"github.com/mdpsec/huntdeck/internal/platform"
 	"github.com/mdpsec/huntdeck/internal/platform/independent"
@@ -83,7 +84,9 @@ type Schedule interface {
 
 // Deps are the server's dependencies.
 type Deps struct {
-	Log       *slog.Logger
+	Log *slog.Logger
+	// Metrics is this process's request counters; /metrics renders them.
+	Metrics   *metrics
 	DB        Pinger
 	Store     *store.Store
 	Poller    Poller
@@ -132,6 +135,14 @@ type Deps struct {
 	ClientIPHeader string
 	// Restart restarts the server to apply them; nil where it can't.
 	Restart Restarter
+	// Password, from HUNTDECK_PASSWORD, guards the whole install behind a
+	// login page when set (auth.go). It adds no user accounts: one password,
+	// one session cookie. Empty leaves HuntDeck open, as it has always been.
+	Password string
+	// Language is the interface language when a visitor has no preference
+	// of their own: "auto" (the browser's), or a language with a catalog
+	// such as "zh" (Deps.Language, from HUNTDECK_LANGUAGE).
+	Language string
 	// SaveOwn saves the programs added by hand, the whole listing with an
 	// edit applied (ownprograms.go); nil where they can't be changed.
 	SaveOwn func(ctx context.Context, programs []independent.Program) error
@@ -139,7 +150,13 @@ type Deps struct {
 
 type server struct {
 	Deps
-	pages map[string]*template.Template
+	// pages holds one template set per language: pages[lang][page].
+	pages map[string]map[string]*template.Template
+	// messages are the interface's translations (i18n).
+	messages *i18n.Bundle
+	// auth checks HUNTDECK_PASSWORD and the sessions it hands out; nil when
+	// the install is open.
+	auth *auth
 	// openapi is the API's description, served and shown as the API page.
 	openapi *openAPI
 	zone    atomic.Pointer[time.Location] // nil until first read; see location
@@ -157,6 +174,14 @@ func NewHandler(d Deps) (http.Handler, error) {
 		d.Accounts, d.Restart, d.Browser, d.VNC, d.DemoSeed, d.WebSyncs = nil, nil, nil, nil, nil, nil
 	}
 	s := &server{Deps: d}
+	messages, err := i18n.Load()
+	if err != nil {
+		return nil, err
+	}
+	s.messages = messages
+	if d.Password != "" {
+		s.auth = newAuth(d.Password)
+	}
 	if _, err := fs.Stat(staticFS, "static/og.png"); err == nil {
 		s.ogImage = true
 	}
@@ -164,7 +189,8 @@ func NewHandler(d Deps) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	pages, err := loadTemplates(s.shownZone, assets.Version, d.ReadOnly, readOnlyLinks{XAccount: d.XAccount, RepoURL: d.RepoURL})
+	pages, err := loadTemplates(s.shownZone, assets.Version, d.ReadOnly, readOnlyLinks{XAccount: d.XAccount, RepoURL: d.RepoURL},
+		s.languages(), s.messages)
 	if err != nil {
 		return nil, err
 	}
@@ -178,6 +204,7 @@ func NewHandler(d Deps) (http.Handler, error) {
 		mux.HandleFunc(rt.Pattern, rt.Handler)
 	}
 	mux.Handle("GET /static/", staticHandler(assets))
+	mux.HandleFunc("GET /i18n.js", s.i18nScript)
 	mux.HandleFunc("GET /robots.txt", s.robots)
 	mux.HandleFunc("GET /sitemap.xml", s.sitemap)
 	mux.HandleFunc("GET /sitemaps/{file}", s.sitemapFile)
@@ -188,6 +215,11 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("GET /.well-known/security.txt", s.securityTxt)
 	s.routeVNC(mux)
 	mux.HandleFunc("GET /api", s.apiDocs)
+
+	mux.HandleFunc("GET /login", s.loginPage)
+	mux.HandleFunc("POST /login", s.loginSubmit)
+	mux.HandleFunc("POST /logout", s.logout)
+	mux.HandleFunc("POST /settings/language", s.languageSwitch)
 
 	mux.HandleFunc("GET /{$}", s.dashboard)
 	mux.HandleFunc("GET /programs", s.programs)
@@ -205,6 +237,8 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("GET /stats", s.stats)
 	mux.HandleFunc("GET /stats/{platform}", s.statsPlatform)
 	mux.HandleFunc("GET /targets", s.targets)
+	mux.HandleFunc("GET /queue", s.queuePage)
+	mux.HandleFunc("GET /metrics", s.metricsPage)
 	mux.HandleFunc("GET /changes", s.changes)
 	mux.HandleFunc("GET /changes.atom", s.changesFeed)
 	mux.HandleFunc("GET /programs/{platform}/{handle}/changes.atom", s.programChangesFeed)
@@ -230,6 +264,10 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /settings/browser/show", s.browserShow)
 	mux.HandleFunc("POST /settings/browser/close", s.browserClose)
 	mux.HandleFunc("GET /settings/notifications", s.notifications)
+	// The nav says "Notifications"; people type /notifications. It used to 404.
+	mux.HandleFunc("GET /notifications", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/settings/notifications", http.StatusFound)
+	})
 	mux.HandleFunc("GET /settings/notifications/new", s.newChannel)
 	mux.HandleFunc("GET /settings/notifications/preview", s.channelPreview)
 	mux.HandleFunc("GET /settings/notifications/{id}", s.editChannel)
@@ -240,6 +278,8 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /settings/notifications/{id}/delete", s.deleteChannel)
 	mux.HandleFunc("POST /settings/notifications/{id}/test", s.testChannel)
 	mux.HandleFunc("POST /programs/{platform}/{handle}/ignore", s.setIgnored)
+	mux.HandleFunc("POST /programs/{platform}/{handle}/note", s.setProgramNote)
+	mux.HandleFunc("POST /programs/ignore", s.ignoreMany)
 	mux.HandleFunc("POST /programs/{platform}/{handle}/tags", s.setTags)
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSONError(w, http.StatusNotFound, "no such endpoint")
@@ -252,7 +292,16 @@ func NewHandler(d Deps) (http.Handler, error) {
 	// browser's Sec-Fetch-Site/Origin headers. curl and scripts send
 	// neither, so they pass.
 	csrf := http.NewCrossOriginProtection()
-	return securityHeaders(s.indexable(), compress(hostGuard(d.AllowedHosts, csrf.Handler(s.readOnly(mux))))), nil
+	inner := http.Handler(s.readOnly(mux))
+	if s.Metrics != nil {
+		inner = s.Metrics.middleware(s.Log, inner)
+	}
+	if s.auth != nil { // the access password, when one is set (auth.go)
+		inner = s.auth.middleware(inner)
+	}
+	// A panic becomes a logged 500 rather than a dropped connection; the
+	// recoverer sits inside the security headers so its error page carries them.
+	return securityHeaders(s.indexable(), s.recoverer(compress(hostGuard(d.AllowedHosts, csrf.Handler(inner))))), nil
 }
 
 // apiRoute is one of the API's endpoints.
@@ -266,6 +315,7 @@ type apiRoute struct {
 func (s *server) apiRoutes() []apiRoute {
 	return []apiRoute{
 		{"GET /api/v1/board", s.apiBoard},
+		{"GET /api/v1/queue", s.apiQueue},
 		{"GET /api/v1/programs", s.conditional(s.apiPrograms)},
 		{"GET /api/v2/programs", s.conditional(s.apiProgramsV2)},
 		{"GET /api/v1/invites", s.conditional(s.apiInvites)},
@@ -394,15 +444,40 @@ type pageData struct {
 	FlashErr    string
 	Updated     time.Time // when the latest successful poll finished, for the top bar
 	Data        any
+	// Lang is the page's language ("zh"), Langs the languages a visitor can
+	// switch to (the sidebar's switcher), Current marking the page's own.
+	Lang  string
+	Langs []langLink
+	// Auth says the install asks for an access password (auth.go), so pages
+	// offer a way to sign out; Path is the page's own address, to come back
+	// to after switching language or signing in.
+	Auth bool
+	Path string
 }
 
 func (s *server) render(w http.ResponseWriter, r *http.Request, status int, page string, pd pageData) {
-	t, ok := s.pages[page]
+	lang := s.langOf(r)
+	t, ok := s.pages[lang][page]
+	if !ok {
+		// A page missing from a language's set falls back to English, which
+		// has every page: a translator can land pages one at a time.
+		lang = i18n.English
+		t, ok = s.pages[lang][page]
+	}
 	if !ok {
 		s.Log.Error("missing template", "page", page)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
+	pd.Lang = lang
+	// Page titles are messages too ("Hunt board", "Settings"), but only the
+	// fixed ones: a page named after a program keeps the program's name.
+	if pageTitleKeys[pd.Title] {
+		pd.Title = s.messages.T(lang, pd.Title)
+	}
+	pd.Langs = s.langLinks(lang)
+	pd.Auth = s.auth != nil
+	pd.Path = r.URL.Path // the page itself: a language switch comes back here, without another page's filters
 	pd.Version = s.Version
 	if s.ReadOnly {
 		pd.Tour = demoTour(pd.Nav, r.URL.Query().Get("visibility"))
@@ -449,7 +524,11 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, status int, page
 		pd.FlashErr = flashErrors[r.URL.Query().Get("err")]
 	}
 	var buf bytes.Buffer
-	if err := t.ExecuteTemplate(&buf, "layout.html", pd); err != nil {
+	root := "layout.html"
+	if page == "login" { // a page of its own, without the shell
+		root = "login.html"
+	}
+	if err := t.ExecuteTemplate(&buf, root, pd); err != nil {
 		s.Log.Error("render page", "page", page, "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
@@ -463,7 +542,10 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, status int, page
 // fragment renders one of a page's templates on its own, for a script to
 // swap into the page.
 func (s *server) fragment(w http.ResponseWriter, r *http.Request, page, name string, data any) {
-	t, ok := s.pages[page]
+	t, ok := s.pages[s.langOf(r)][page]
+	if !ok {
+		t, ok = s.pages[i18n.English][page]
+	}
 	if !ok {
 		s.Log.Error("missing template", "page", page)
 		http.Error(w, "internal error", http.StatusInternalServerError)
@@ -494,6 +576,8 @@ func (s *server) serverError(w http.ResponseWriter, r *http.Request, err error) 
 var flashMessages = map[string]string{
 	"program-saved":      "Saved.",
 	"program-removed":    "Program removed. Its history stays: choose Status › Removed to see it.",
+	"program-ignored":    "Ignored. It leaves lists, exports, picks and alerts; its page stays.",
+	"program-unignored":  "Back in your lists and picks.",
 	"poll-started":       "Poll started. Refresh in a minute to see the results.",
 	"settings-saved":     "Saved. The new schedule applies now; no restart needed.",
 	"settings-reset":     "Back to the defaults from your environment.",

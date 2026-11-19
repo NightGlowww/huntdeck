@@ -1,62 +1,62 @@
 {{/* The program page, on every tab: the name, its labels and actions, the
    headline numbers and the tabs. */}}
 {{define "program-head"}}{{with .Data}}{{$p := .P}}{{$own := eq $p.Platform "independent"}}
-{{if and $p.RemovedAt $own}}<div class="state-banner removed" role="status"><b>Removed</b><span>You removed this program {{agoPtr $p.RemovedAt}}. What's here is how it last looked.</span></div>
-{{else if $p.RemovedAt}}<div class="state-banner removed" role="status"><b>No longer listed</b><span>{{platformLabel $p.Platform}} stopped listing this program {{agoPtr $p.RemovedAt}}. What's here is how it last looked.</span></div>
-{{else if eq $p.State "paused"}}<div class="state-banner paused" role="status"><b>Paused</b><span>{{if $own}}Marked{{else}}{{platformLabel $p.Platform}} shows this program{{end}} as paused{{if not .StateSince.IsZero}} since <span title="{{datetime .StateSince}}">{{date .StateSince}}</span>{{end}}: stop testing until it reopens.</span></div>
-{{else if eq $p.State "closed"}}<div class="state-banner closed" role="status"><b>Closed</b><span>{{if $own}}Marked{{else}}{{platformLabel $p.Platform}} shows this program{{end}} as closed{{if not .StateSince.IsZero}} since <span title="{{datetime .StateSince}}">{{date .StateSince}}</span>{{end}}: it isn't taking reports.</span></div>{{end}}
+{{if and $p.RemovedAt $own}}<div class="state-banner removed" role="status"><b>{{T "Removed"}}</b><span>{{TF "You removed this program %s. What's here is how it last looked." (agoPtr $p.RemovedAt)}}</span></div>
+{{else if $p.RemovedAt}}<div class="state-banner removed" role="status"><b>{{T "No longer listed"}}</b><span>{{TF "%s stopped listing this program %s. What's here is how it last looked." (platformLabel $p.Platform) (agoPtr $p.RemovedAt)}}</span></div>
+{{else if eq $p.State "paused"}}<div class="state-banner paused" role="status"><b>{{T "Paused"}}</b><span>{{if $own}}{{T "Marked"}}{{else}}{{TF "%s shows this program" (platformLabel $p.Platform)}}{{end}} {{T "as paused"}}{{if not .StateSince.IsZero}} {{T "since"}} <span title="{{datetime .StateSince}}">{{date .StateSince}}</span>{{end}}{{T ": stop testing until it reopens."}}</span></div>
+{{else if eq $p.State "closed"}}<div class="state-banner closed" role="status"><b>{{T "Closed"}}</b><span>{{if $own}}{{T "Marked"}}{{else}}{{TF "%s shows this program" (platformLabel $p.Platform)}}{{end}} {{T "as closed"}}{{if not .StateSince.IsZero}} {{T "since"}} <span title="{{datetime .StateSince}}">{{date .StateSince}}</span>{{end}}{{T ": it isn't taking reports."}}</span></div>{{end}}
 <header class="ph">
   <div class="ph-main">
     <div class="title-row">
       <h1>{{$p.Name}}</h1>
-      <span class="chips">{{template "kind" $p}}{{if $p.Ignored}}<span class="chip ignored" title="Left out of lists, exports, picks and alerts">ignored</span>{{end}}{{range $p.Tags}}<a class="chip tag" href="/programs?tag={{.}}">{{.}}</a>{{end}}</span>
+      <span class="chips">{{template "kind" $p}}{{if $p.Ignored}}<span class="chip ignored" title="{{T "Left out of lists, exports, picks and alerts"}}">{{T "ignored"}}</span>{{end}}{{range $p.Tags}}<a class="chip tag" href="/programs?tag={{.}}">{{.}}</a>{{end}}</span>
     </div>
     <div class="sub metaline">
       {{template "pf" $p.Platform}}
       {{with shortHandle $p.Handle}}<span class="mono">{{.}}</span>{{end}}
-      {{with $p.StartedAt}}<span>launched <b title="{{datetime .}}">{{date .}}</b></span>{{end}}
-      {{if $own}}<span title="Added by hand: HuntDeck only knows what you enter">added by hand · saved {{agoPtr $p.ScopeCheckedAt}}</span>
-      {{else}}<span{{with $p.ScopeSyncedAt}} title="last downloaded {{datetime .}}"{{end}}>scope checked {{agoPtr $p.ScopeCheckedAt}}</span>{{end}}
+      {{with $p.StartedAt}}<span>{{T "launched"}} <b title="{{datetime .}}">{{date .}}</b></span>{{end}}
+      {{if $own}}<span title="{{T "Added by hand: HuntDeck only knows what you enter"}}">{{T "added by hand"}} · {{T "saved"}} {{agoPtr $p.ScopeCheckedAt}}</span>
+      {{else}}<span{{with $p.ScopeSyncedAt}} title="{{TF "last downloaded %s" (datetime .)}}"{{end}}>{{T "scope checked"}} {{agoPtr $p.ScopeCheckedAt}}</span>{{end}}
       <details class="tb-menu addtag" data-menu>
-        <summary><svg class="i"><use href="#i-list"/></svg>{{if $p.Tags}}Edit tags{{else}}Add tag{{end}}</summary>
+        <summary><svg class="i" aria-hidden="true"><use href="#i-list"/></svg>{{if $p.Tags}}{{T "Edit tags"}}{{else}}{{T "Add tag"}}{{end}}</summary>
         <form class="menu tags-form" method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/tags">
-          <label class="small muted" for="tags">Tags, separated by commas</label>
-          <input id="tags" type="text" name="tags" value="{{join $p.Tags ", "}}" placeholder="focus, api" maxlength="700" autocomplete="off" spellcheck="false">
-          <button type="submit" class="small">Save tags</button>
+          <label class="small muted" for="tags">{{T "Tags, separated by commas"}}</label>
+          <input id="tags" type="text" name="tags" value="{{join $p.Tags ", "}}" placeholder="{{T "focus, api"}}" maxlength="700" autocomplete="off" spellcheck="false">
+          <button type="submit" class="small">{{T "Save tags"}}</button>
         </form>
       </details>
     </div>
   </div>
   <div class="ph-actions">
-    <button type="button" class="button secondary" data-watch="{{$p.Platform}}/{{$p.Handle}}" aria-pressed="false" title="Keep it on your watchlist, saved in this browser: Programs and Changes can then show only the programs you watch" hidden><svg class="i"><use href="#i-star"/></svg><span class="label">Watch</span></button>
+    <button type="button" class="button secondary" data-watch="{{$p.Platform}}/{{$p.Handle}}" aria-pressed="false" title="{{T "Keep it on your watchlist, saved in this browser: Programs and Changes can then show only the programs you watch"}}" hidden><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span class="label">{{T "Watch"}}</span></button>
     {{if or .Identifiers .OutTargets}}
     <details class="tb-menu" data-menu>
-      <summary class="button secondary"><svg class="i"><use href="#i-copy"/></svg>Copy targets<svg class="i chev-d"><use href="#i-chev"/></svg></summary>
+      <summary class="button secondary"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>{{T "Copy targets"}}<svg class="i chev-d"><use href="#i-chev"/></svg></summary>
       <div class="menu">
-        {{if .Wildcards}}<button type="button" data-copy="#copy-wildcards"><svg class="i"><use href="#i-copy"/></svg><span class="label">{{num (len .Wildcards)}} {{plural (len .Wildcards) "wildcard" "wildcards"}}</span></button>{{end}}
-        {{if .Domains}}<button type="button" data-copy="#copy-domains"><svg class="i"><use href="#i-copy"/></svg><span class="label">{{num (len .Domains)}} {{plural (len .Domains) "domain" "domains"}}</span></button>{{end}}
-        {{if .Identifiers}}<button type="button" data-copy="#copy-all" title="Every in-scope host, URL, IP and range: apps and other assets left out"><svg class="i"><use href="#i-copy"/></svg><span class="label">All {{num (len .Identifiers)}} {{plural (len .Identifiers) "target" "targets"}}</span></button>{{end}}
-        {{if .Roots}}<button type="button" data-copy="#copy-roots" title="Root domains of the in-scope wildcards, domains and URLs, for recon: a root often isn't in scope itself"><svg class="i"><use href="#i-copy"/></svg><span class="label">{{num (len .Roots)}} root {{plural (len .Roots) "domain" "domains"}}</span></button>{{end}}
-        {{if .OutTargets}}<button type="button" data-copy="#copy-out" title="Every out-of-scope host, URL, IP and range: to keep your tools away from"><svg class="i"><use href="#i-copy"/></svg><span class="label">{{num (len .OutTargets)}} out of scope</span></button>{{end}}
+        {{if .Wildcards}}<button type="button" data-copy="#copy-wildcards"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{num (len .Wildcards)}} {{plural (len .Wildcards) "wildcard" "wildcards"}}</span></button>{{end}}
+        {{if .Domains}}<button type="button" data-copy="#copy-domains"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{num (len .Domains)}} {{plural (len .Domains) "domain" "domains"}}</span></button>{{end}}
+        {{if .Identifiers}}<button type="button" data-copy="#copy-all" title="{{T "Every in-scope host, URL, IP and range: apps and other assets left out"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{TF "All %s %s" (num (len .Identifiers)) (plural (len .Identifiers) "target" "targets")}}</span></button>{{end}}
+        {{if .Roots}}<button type="button" data-copy="#copy-roots" title="{{T "Root domains of the in-scope wildcards, domains and URLs, for recon: a root often isn't in scope itself"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{num (len .Roots)}} {{T "root"}} {{plural (len .Roots) "domain" "domains"}}</span></button>{{end}}
+        {{if .OutTargets}}<button type="button" data-copy="#copy-out" title="{{T "Every out-of-scope host, URL, IP and range: to keep your tools away from"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{num (len .OutTargets)}} {{T "out of scope"}}</span></button>{{end}}
       </div>
     </details>
     {{template "program-copylists" .}}
     {{end}}
     <details class="tb-menu" data-menu>
-      <summary class="button secondary"><svg class="i"><use href="#i-download"/></svg>Burp / ZAP / Caido<svg class="i chev-d"><use href="#i-chev"/></svg></summary>
+      <summary class="button secondary"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Burp / ZAP / Caido<svg class="i chev-d"><use href="#i-chev"/></svg></summary>
       <div class="menu">
-        <a href="/api/v1/programs/{{$p.Platform}}/{{$p.Handle}}/scope.burp.json" title="Settings › Project › Scope, or Project options › Load"><svg class="i"><use href="#i-download"/></svg>Burp scope</a>
-        <a href="/api/v1/programs/{{$p.Platform}}/{{$p.Handle}}/scope.zap.context" title="File › Import Context"><svg class="i"><use href="#i-download"/></svg>ZAP context</a>
-        <a href="/api/v1/programs/{{$p.Platform}}/{{$p.Handle}}/scope.caido.json" title="A Caido configuration file with the scope as a preset: in scope allowed, out of scope denied. Start Caido with caido-cli --config on it (Caido's Scope page can't import files yet)"><svg class="i"><use href="#i-download"/></svg>Caido scope</a>
-        {{with .CaidoSkipped}}<div class="menu-note" role="note"><b>Left out of Caido’s file</b>{{range .Shown}}<span title="{{.Why}}">{{if not .InScope}}out of scope: {{end}}{{.Value}} <i>{{.Why}}</i></span>{{end}}{{with .More}}<span>and {{.}} more</span>{{end}}</div>{{end}}
+        <a href="/api/v1/programs/{{$p.Platform}}/{{$p.Handle}}/scope.burp.json" title="{{T "Settings › Project › Scope, or Project options › Load"}}"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>{{T "Burp scope"}}</a>
+        <a href="/api/v1/programs/{{$p.Platform}}/{{$p.Handle}}/scope.zap.context" title="{{T "File › Import Context"}}"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>{{T "ZAP context"}}</a>
+        <a href="/api/v1/programs/{{$p.Platform}}/{{$p.Handle}}/scope.caido.json" title="{{T "A Caido configuration file with the scope as a preset: in scope allowed, out of scope denied. Start Caido with caido-cli --config on it (Caido's Scope page can't import files yet)"}}"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>{{T "Caido scope"}}</a>
+        {{with .CaidoSkipped}}<div class="menu-note" role="note"><b>{{T "Left out of Caido’s file"}}</b>{{range .Shown}}<span title="{{.Why}}">{{if not .InScope}}{{T "out of scope"}}: {{end}}{{.Value}} <i>{{.Why}}</i></span>{{end}}{{with .More}}<span>{{TF "and %d more" .}}</span>{{end}}</div>{{end}}
       </div>
     </details>
     <form method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/ignore">
-      {{if $p.Ignored}}<button type="submit" name="ignored" value="0" class="secondary">Stop ignoring</button>
-      {{else}}<button type="submit" name="ignored" value="1" class="ghost" title="Leave it out of lists, target exports, HuntScore picks and alerts">Ignore</button>{{end}}
+      {{if $p.Ignored}}<button type="submit" name="ignored" value="0" class="secondary">{{T "Stop ignoring"}}</button>
+      {{else}}<button type="submit" name="ignored" value="1" class="ghost" title="{{T "Leave it out of lists, target exports, HuntScore picks and alerts"}}">{{T "Ignore"}}</button>{{end}}
     </form>
-    {{if and $own (not $p.RemovedAt)}}<a class="button secondary" href="/programs/independent/{{$p.Handle}}/edit"><svg class="i"><use href="#i-edit"/></svg>Edit</a>{{end}}
-    <a class="button" href="{{$p.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{if $own}}Open program page{{else}}Open on {{platformLabel $p.Platform}}{{end}}<svg class="i"><use href="#i-external"/></svg></a>
+    {{if and $own (not $p.RemovedAt)}}<a class="button secondary" href="/programs/independent/{{$p.Handle}}/edit"><svg class="i" aria-hidden="true"><use href="#i-edit"/></svg>{{T "Edit"}}</a>{{end}}
+    <a class="button" href="{{$p.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{if $own}}{{T "Open program page"}}{{else}}{{TF "Open on %s" (platformLabel $p.Platform)}}{{end}}<svg class="i" aria-hidden="true"><use href="#i-external"/></svg></a>
   </div>
 </header>
 {{with $p.ScopeUnavailableAt}}<p class="flash err" role="status">{{platformLabel $p.Platform}} wouldn't show this program's scope when last checked ({{ago .}}){{if $.Data.InScope}}, so this is the last scope HuntDeck saw{{end}}.
@@ -80,29 +80,29 @@
 {{/* The headline numbers: the Programs list's columns, in its order;
    programs that don't pay leave out the money ones. */}}
 {{define "program-kpis"}}{{with .Data}}{{$p := .P}}{{$r := .Row}}
-<section class="panel kpis{{if not $p.OffersBounty}} six{{end}}" aria-label="Headline numbers">
-  <div class="kpi"><span class="l">HuntScore</span><span class="v">{{template "m-hunt" $r}}</span>
-    <span class="h">{{with $p.Hunt}}{{.Confidence}} confidence{{end}}{{with $.Data.HuntChange}} · <span title="{{$.Data.HuntSince}}">{{.}}</span>{{end}}</span></div>
+<section class="panel kpis{{if not $p.OffersBounty}} six{{end}}" aria-label="{{T "Headline numbers"}}">
+  <div class="kpi"><span class="l">{{T "HuntScore"}}</span><span class="v">{{template "m-hunt" $r}}</span>
+    <span class="h">{{with $p.Hunt}}{{TF "%s confidence" (T .Confidence)}}{{end}}{{with $.Data.HuntChange}} · <span title="{{$.Data.HuntSince}}">{{.}}</span>{{end}}</span></div>
   {{if $p.OffersBounty}}
-  <div class="kpi"><span class="l">Bounty</span><span class="v">{{template "m-bounty" $r}}</span>
-    <span class="h">{{with avgBounty $r.ProgramListItem}}<span title="{{avgBountyTitle $r.ProgramListItem}}">avg {{.}}</span>{{else}}bounty program{{end}}</span></div>
-  <div class="kpi"><span class="l">Total paid</span><span class="v">{{template "m-ptotal" $r}}</span><span class="h">all time</span></div>
-  <div class="kpi"><span class="l">Paid · 90 days</span><span class="v">{{template "m-paid" $r}}</span>{{template "trend" $r.Trends.Paid}}</div>
+  <div class="kpi"><span class="l">{{T "Bounty"}}</span><span class="v">{{template "m-bounty" $r}}</span>
+    <span class="h">{{with avgBounty $r.ProgramListItem}}<span title="{{avgBountyTitle $r.ProgramListItem}}">{{T "avg"}} {{.}}</span>{{else}}{{T "bounty program"}}{{end}}</span></div>
+  <div class="kpi"><span class="l">{{T "Total paid"}}</span><span class="v">{{template "m-ptotal" $r}}</span><span class="h">{{T "all time"}}</span></div>
+  <div class="kpi"><span class="l">{{T "Paid · 90 days"}}</span><span class="v">{{template "m-paid" $r}}</span>{{template "trend" $r.Trends.Paid}}</div>
   {{else}}
-  <div class="kpi"><span class="l">Bounty</span><span class="v">None</span><span class="h">disclosure only</span></div>
+  <div class="kpi"><span class="l">{{T "Bounty"}}</span><span class="v">{{T "None"}}</span><span class="h">{{T "disclosure only"}}</span></div>
   {{end}}
-  <div class="kpi"><span class="l">Received · 90 days</span><span class="v">{{template "m-comp" $r}}</span>{{template "trend" $r.Trends.Received}}</div>
-  <div class="kpi"><span class="l">Valid · 90 days</span><span class="v">{{template "m-resolved" $r}}</span>{{template "trend" $r.Trends.Resolved}}</div>
-  <div class="kpi"><span class="l">Response</span><span class="v">{{template "m-resp" $r}}</span>
-    <span class="h">{{$kind := responseKind $r.ProgramListItem}}{{$kind}}{{with $p.PublicStats}}{{with .ResponseEfficiency}}{{if $kind}} · {{end}}<span title="Reports answered within the program's response targets">{{.}}% on time</span>{{end}}{{end}}</span></div>
-  <div class="kpi"><span class="l">Assets in scope</span><span class="v">{{template "m-scope" $r}}</span>
-    <span class="h">{{if $r.Fresh}}<span class="fresh">+{{num $r.Fresh}}</span> in 30 days{{if .Wildcards}} · {{end}}{{end}}<span title="{{assetsTitle $r.ProgramListItem}}">{{with .Wildcards}}{{num (len .)}} {{plural (len .) "wildcard" "wildcards"}}{{else}}{{if not $r.Fresh}}{{with .Domains}}{{num (len .)}} {{plural (len .) "domain" "domains"}}{{end}}{{end}}{{end}}</span></span></div>
+  <div class="kpi"><span class="l">{{T "Received · 90 days"}}</span><span class="v">{{template "m-comp" $r}}</span>{{template "trend" $r.Trends.Received}}</div>
+  <div class="kpi"><span class="l">{{T "Valid · 90 days"}}</span><span class="v">{{template "m-resolved" $r}}</span>{{template "trend" $r.Trends.Resolved}}</div>
+  <div class="kpi"><span class="l">{{T "Response"}}</span><span class="v">{{template "m-resp" $r}}</span>
+    <span class="h">{{$kind := responseKind $r.ProgramListItem}}{{$kind}}{{with $p.PublicStats}}{{with .ResponseEfficiency}}{{if $kind}} · {{end}}<span title="{{T "Reports answered within the program's response targets"}}">{{intv .}}% {{T "on time"}}</span>{{end}}{{end}}</span></div>
+  <div class="kpi"><span class="l">{{T "Assets in scope"}}</span><span class="v">{{template "m-scope" $r}}</span>
+    <span class="h">{{if $r.Fresh}}<span class="fresh">+{{num $r.Fresh}}</span> {{T "in 30 days"}}{{if .Wildcards}} · {{end}}{{end}}<span title="{{assetsTitle $r.ProgramListItem}}">{{with .Wildcards}}{{num (len .)}} {{plural (len .) "wildcard" "wildcards"}}{{else}}{{if not $r.Fresh}}{{with .Domains}}{{num (len .)}} {{plural (len .) "domain" "domains"}}{{end}}{{end}}{{end}}</span></span></div>
 </section>
 {{end}}{{end}}
 
 {{/* The tabs; each is a link, so the page works without scripts. */}}
 {{define "program-tabs"}}{{with .Data}}
-<nav class="ptabs" aria-label="Program sections">
-  {{range .Tabs}}<a{{if .On}} class="on" aria-current="page"{{end}} href="?{{if ne .Key "overview"}}tab={{.Key}}{{end}}"{{if .Notes}} data-notes-tab="{{$.Data.P.Platform}}/{{$.Data.P.Handle}}" title="Your notes on this program, kept in this browser (n)"{{end}}>{{.Label}}{{if .Counted}} <span class="count">{{num .Count}}</span>{{end}}</a>{{end}}
+<nav class="ptabs" aria-label="{{T "Program sections"}}">
+  {{range .Tabs}}<a{{if .On}} class="on" aria-current="page"{{end}} href="?{{if ne .Key "overview"}}tab={{.Key}}{{end}}"{{if .Notes}} data-notes-tab="{{$.Data.P.Platform}}/{{$.Data.P.Handle}}" title="{{T "Your notes on this program, kept in this browser (n)"}}"{{end}}>{{T .Label}}{{if .Counted}} <span class="count">{{num .Count}}</span>{{end}}</a>{{end}}
 </nav>
 {{end}}{{end}}

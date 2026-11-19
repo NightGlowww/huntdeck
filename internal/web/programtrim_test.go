@@ -102,3 +102,33 @@ func TestProgramFeed(t *testing.T) {
 		t.Errorf("changes tab doesn't start on all changes")
 	}
 }
+
+// The Scope changes segment keeps only the entries added, removed or
+// edited: the changes a hunter opens the tab for.
+func TestProgramFeedScopeSegment(t *testing.T) {
+	e := newTestEnv(t)
+	c := e.client()
+	ctx := context.Background()
+	p, err := e.store.Program(ctx, "fake", "acme")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := e.store.Write(ctx, func(tx *store.Tx) error {
+		a := platform.Announcement{ID: "freeze", Title: "Holiday freeze", Body: "x", PublishedAt: time.Now()}
+		_, err := tx.AddAnnouncement(ctx, p.ID, 0, a, true)
+		return err
+	}); err != nil {
+		t.Fatal(err)
+	}
+	_, body := e.do(c, http.MethodGet, "/programs/fake/acme?tab=changes", nil, nil)
+	if !strings.Contains(body, "feed=scope") {
+		t.Fatalf("the changes tab offers no scope segment")
+	}
+	_, body = e.do(c, http.MethodGet, "/programs/fake/acme?tab=changes&feed=scope", nil, nil)
+	if !strings.Contains(body, `<span class="tag add">`) {
+		t.Errorf("the scope segment shows no scope changes")
+	}
+	if strings.Contains(body, "Holiday freeze") {
+		t.Errorf("the scope segment shows an announcement")
+	}
+}

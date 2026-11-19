@@ -74,7 +74,7 @@ type railOption struct {
 	Default  bool // the list's default: on without a filter, so never a pill
 	View     bool // a saved view (a round box), not a filter
 	Watch    bool // links to the browser's watchlist (watch.js sets the link)
-	Noted    bool // links to the programs with notes (notes.js sets the link)
+	Noted    bool // the programs with notes (?noted=), kept by the server since notes left the browser
 }
 
 // pill is an active filter, with a link that drops it. Search marks the

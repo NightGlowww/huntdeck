@@ -26,13 +26,13 @@ func TestProgramsPage(t *testing.T) {
 			`<a class="fc" href="/programs?bounty=vdp" title="Programs that don&#39;t pay bounties"><span class="box" aria-hidden="true"></span><span class="fl">VDP only</span><em>1</em></a>`,
 			// Columns, with nothing to expand.
 			"$100 – $15,000", `<td class="c-comp num nowrap firstday" data-label="Received · 90d"><span class="v">340</span>`, `<span title="First response: 5h">5h</span>`, `<td class="c-scope num" data-label="Assets"><span title="2 in-scope entries; they name 1 wildcard">2</span></td>`, `<span title="$1,250,000 paid in bounties all time">$1.3M</span>`, `<span class="fresh-badge">+1</span>`,
-			`<span class="total">2 open programs</span>`, `<th class="c-resolved num">`, `<linearGradient id="spark-good"`,
+			`class="total" role="status" aria-live="polite">2 open programs</span>`, `<th class="c-resolved num">`, `<linearGradient id="spark-good"`,
 			// Paid, reports received and reports resolved share a heading.
 			`<th class="c-grp" colspan="3"`, `>Reports received</a></th>`, `>Valid reports</a></th>`,
 			// Notes hold requirements and test credentials.
 			`>Requirements</th>`,
 			// A platform without the number says so, rather than showing a stand-in.
-			`doesn't share this for the program">—</span>`,
+			`share this for the program">—</span>`,
 			// With one day saved the numbers show, a dotted line under them
 			// until the next day's starts the chart.
 			`<td class="c-paid num nowrap firstday" data-label="Paid · 90d"><span class="v"><span title="$41,500 paid in bounties in the last 90 days">$42k</span></span><span class="tchart flat collecting" title="Bounties paid · 90 days: $41,500, saved `,
@@ -40,9 +40,9 @@ func TestProgramsPage(t *testing.T) {
 			// The last column opens the program on its platform.
 			`<td class="c-open"><a class="open-ext" href="https://platform.example/acme" target="_blank" rel="noopener noreferrer nofollow" title="Open on Fake"`,
 			// Customize, top right, shows or hides any column, wide-screen ones too.
-			`data-colpick-toggle><svg class="i"><use href="#i-grid"/></svg><span class="label">Customize</span></button>`,
+			`data-colpick-toggle><svg class="i" aria-hidden="true"><use href="#i-grid"/></svg><span class="label">Customize</span></button>`,
 			`<input type="checkbox" value="launched"> Launched</label>`, `<input type="checkbox" value="open"> Open on the platform</label>`,
-			`<table class="fixed plist-table cards" data-cols="program">`, `data-colpick="program"`, `data-grp="paid comp resolved"`,
+			`<table class="fixed plist-table cards" data-cols="program" id="programs-list">`, `data-colpick="program"`, `data-grp="paid comp resolved"`,
 			// ... and reorders them; the 90-day columns move as a group.
 			`<li class="cgroup" data-key="grp">`, `aria-label="Move Last 90 days"`,
 			`<li data-key="comp"><div class="crow"><button type="button" class="grip"`,

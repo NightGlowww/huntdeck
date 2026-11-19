@@ -23,6 +23,13 @@ import (
 //go:embed openapi.json
 var openapiJSON []byte
 
+// openapi.zh.json holds the API page's Chinese text, keyed by the English
+// it translates: the spec stays one machine-readable document, and the page
+// looks its own words up (openapiZh).
+//
+//go:embed openapi.zh.json
+var openapiZhJSON []byte
+
 // apiSchemaRoots are the response bodies the operations refer to; their
 // schema names come from schemaName ("apiProgramListJSON" is
 // "ProgramList").
@@ -129,8 +136,29 @@ func loadOpenAPI() (*openAPI, error) {
 	}
 	comps["schemas"] = g.defs
 	o.order = g.order
+	if err := json.Unmarshal(openapiZhJSON, &openapiZh); err != nil {
+		return nil, fmt.Errorf("openapi.zh.json: %w", err)
+	}
 	return o, nil
 }
+
+// openapiZh is the API page's Chinese, keyed by operation id, tag and
+// parameter name: the spec itself stays English for machines.
+type openapiZhSpec struct {
+	Info string `json:"info"`
+	Tags map[string]struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	} `json:"tags"`
+	Ops map[string]struct {
+		Summary     string `json:"summary"`
+		Description string `json:"description"`
+	} `json:"ops"`
+	Params map[string]string `json:"params"`
+	Bodies map[string]string `json:"bodies"`
+}
+
+var openapiZh openapiZhSpec
 
 // schemas are the generated schemas, by name.
 func (o *openAPI) schemas() map[string]any {

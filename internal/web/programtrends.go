@@ -89,21 +89,14 @@ func (s *server) programRows(ctx context.Context, items []store.ProgramListItem,
 	if err != nil {
 		return nil, err
 	}
-	var received, paid, avgs map[int64][]store.DayValue
-	for _, h := range []struct {
-		into  *map[int64][]store.DayValue
-		fetch func(context.Context, []int64, time.Time) (map[int64][]store.DayValue, error)
-	}{
-		{&received, s.Store.ReportsReceivedHistory}, {&paid, s.Store.PaidHistory}, {&avgs, s.Store.AvgPayoutHistory},
-	} {
-		if *h.into, err = h.fetch(ctx, ids, from); err != nil {
-			return nil, err
-		}
-	}
-	totals, err := s.Store.TotalsHistory(ctx, ids, from)
+	// One scan for every daily column: the page draws a line per program, and
+	// reading each column separately meant seven passes over the same rows.
+	snap, err := s.Store.SnapshotsFor(ctx, ids, from)
 	if err != nil {
 		return nil, err
 	}
+	received, paid, avgs := snap.Reports90d, snap.Paid90d, snap.AvgPayout
+	totals := store.TotalsHistory{Reports: snap.Reports, Paid: snap.Paid, Rewarded: snap.Rewarded, Accepted: snap.Accepted}
 	out := make([]programRow, len(items))
 	for i, it := range items {
 		out[i] = programRow{ProgramListItem: it, Discloses: s.discloses(it.Platform)}

@@ -1,4 +1,4 @@
-{{define "topbar-actions"}}<a class="tb-btn" href="{{.Data.FeedURL}}" title="These changes in a feed reader (Atom), as filtered here"><svg class="i"><use href="#i-rss"/></svg><span class="label">Feed</span></a>{{end}}
+{{define "topbar-actions"}}<a class="tb-btn" href="{{.Data.FeedURL}}" data-export title="{{T "These changes in a feed reader (Atom), as filtered here"}}"><svg class="i" aria-hidden="true"><use href="#i-rss"/></svg><span class="label">{{T "Feed"}}</span></a>{{end}}
 
 {{define "content"}}{{with .Data}}
 <div class="plist">
@@ -7,28 +7,32 @@
 <section class="panel ptable">
   <div class="activef">
     <span class="total">{{num .Pager.Total}} {{plural .Pager.Total "change" "changes"}}</span>
-    <span class="what">{{if eq .Since "all"}}since HuntDeck started tracking{{else}}in the {{.Period}}{{end}}</span>
+    <span class="what">{{if eq .Since "all"}}{{T "since HuntDeck started tracking"}}{{else}}{{TF "in the %s" (T .Period)}}{{end}}</span>
     {{template "pills" .}}
+    <a class="qv{{if .ShowingScope}} on{{end}}" href="{{.ScopeURL}}" title="{{T "Only entries added, removed or edited in a program's scope"}}">{{T "Scope changes"}} <small>{{num .ScopeCount}}</small></a>
+
     <span class="since-note" data-since-note hidden></span>
-    <span class="sorts">Sort by {{range .Sorts}}<a class="sortopt{{if .On}} on{{end}}" href="{{.URL}}" title="{{.Title}}"{{if .On}} aria-current="true"{{end}}>{{.Label}}{{with .Dir}} <small>{{.}}</small>{{end}}</a>{{end}}</span>
+    <span class="sorts">{{T "Sort by"}} {{range .Sorts}}<a class="sortopt{{if .On}} on{{end}}" href="{{.URL}}" title="{{T .Title}}"{{if .On}} aria-current="true"{{end}}>{{T .Label}}{{with .Dir}} <small>{{T .}}</small>{{end}}</a>{{end}}</span>
+    <span class="quick"><button type="button" class="link small" data-copy-url="{{.ExportURL}}" title="{{T "These changes as text, one a line"}}">{{T "Copy changes"}}</button>
+      <a class="link small" href="{{.ExportURL}}" download="changes.txt" data-export title="{{T "These changes as a .txt file"}}">{{T "Download .txt"}}</a></span>
   </div>
 {{if .Changes}}
-  <div class="table-wrap">
+  <div class="table-wrap" id="list" tabindex="-1">
   <table class="fixed flist clist cards">
     <thead><tr>
-      <th class="c-prog">Program</th>
-      <th class="c-tag">Change</th>
-      <th class="c-detail">Detail</th>
-      <th class="c-when">When</th>
-      <th class="c-open"><span class="sr-only">Open on the platform</span></th>
+      <th class="c-prog">{{T "Program"}}</th>
+      <th class="c-tag">{{T "Change"}}</th>
+      <th class="c-detail">{{T "Detail"}}</th>
+      <th class="c-when">{{T "When"}}</th>
+      <th class="c-open"><span class="sr-only">{{T "Open on the platform"}}</span></th>
     </tr></thead>
     <tbody>
     {{range .Changes}}
       <tr data-at="{{iso .OccurredAt}}" data-href="{{if hasDetail .Kind}}/changes/{{.ID}}{{else}}/programs/{{.Program.Platform}}/{{.Program.Handle}}?tab=changes{{end}}">
         <td class="c-prog">{{template "pname" (plink .Program)}}</td>
         <td class="c-tag"><span class="tag {{changeClass .Kind}}">{{changeTag .Kind}}</span></td>
-        {{$d := change .}}<td class="c-detail" title="{{$d}}">{{with changeSubject .}}<span class="asset">{{.}}</span>{{else}}<span class="muted">{{truncate $d 200}}</span>{{end}}{{if hasDetail .Kind}}<a class="view" href="/changes/{{.ID}}">{{if eq .Kind "announcement"}}read{{else}}view diff{{end}}</a>{{end}}</td>
-        <td class="c-when"><span class="when{{if fresh .OccurredAt}} fresh{{end}}" title="{{datetime .OccurredAt}}">{{ago .OccurredAt}}</span></td>
+        {{$d := change .}}<td class="c-detail" title="{{$d}}">{{with changeSubject .}}<span class="asset">{{.}}</span>{{else}}<span class="muted">{{truncate $d 200}}</span>{{end}}{{if hasDetail .Kind}}<a class="view" href="/changes/{{.ID}}">{{if eq .Kind "announcement"}}{{T "read"}}{{else}}{{T "view diff"}}{{end}}</a>{{end}}</td>
+        <td class="c-when"><span class="when{{if fresh .OccurredAt}} fresh{{end}}" data-ago data-at="{{iso .OccurredAt}}" title="{{datetime .OccurredAt}}">{{ago .OccurredAt}}</span></td>
         <td class="c-open">{{template "open-ext" .Program}}</td>
       </tr>
     {{end}}
@@ -39,7 +43,7 @@
 {{else if .Pager.Beyond}}
   {{template "past-end" .Pager}}
 {{else}}
-  <div class="empty-state">No changes match these filters. A platform's first import is a baseline, so changes appear from the next poll onwards.{{if hasFilters .Pills}} <a class="link" href="{{.ClearURL}}">Clear filters</a>{{end}}</div>
+  <div class="empty-state">{{T "No changes match these filters. A platform's first import is a baseline, so changes appear from the next poll onwards."}}{{if hasFilters .Pills}} <a class="link" href="{{.ClearURL}}">{{T "Clear filters"}}</a>{{end}}</div>
 {{end}}
 </section>
 </div>

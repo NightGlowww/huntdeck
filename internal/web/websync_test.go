@@ -16,7 +16,7 @@ func TestBrowserSyncSettings(t *testing.T) {
 	e := newTestEnv(t)
 	c := e.client()
 	_, body := e.do(c, http.MethodGet, "/settings", nil, nil)
-	for _, want := range []string{`<tr class="sub" id="websync">`, `<input type="hidden" name="web" value="fake">`, `name="web_interval_fake" value="1d" form="sched"`,
+	for _, want := range []string{`id="websync-`, `<input type="hidden" name="web" value="fake">`, `name="web_interval_fake" value="1d" form="sched"`,
 		`<span class="sn">Website login</span>`, "signed in", `title="Reads for each program: Logged-in stats`, "uses the website login, every", `name="mode" value="web"`,
 		"<span class=\"zero\">never</span>", `<span class="sn">API token</span>`} {
 		if !strings.Contains(body, want) {

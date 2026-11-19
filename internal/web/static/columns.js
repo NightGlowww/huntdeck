@@ -124,6 +124,10 @@
       if (!flex.getClientRects().length) return; // rows as cards: no headings to keep
       const short = Number(flex.dataset.colMin) - flex.offsetWidth;
       if (short > 0) table.style.minWidth = table.offsetWidth + short + "px";
+      // A table wider than its column needs horizontal scrolling, which costs
+      // the sticky heading: say so, and the stylesheet decides.
+      const wrap = table.closest(".table-wrap");
+      if (wrap) wrap.classList.toggle("is-wide", table.style.minWidth !== "");
     };
     const apply = () => {
       table.dataset.hide = Object.keys(chosen).filter((k) => chosen[k] === "hide").join(" ");

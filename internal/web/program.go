@@ -74,6 +74,10 @@ type programData struct {
 	// History charts the platform's own numbers over every day saved (the
 	// Stats tab).
 	History []historyChart
+	// Note is the hunter's own note on this program (the Notes tab), and
+	// NoteAt when it was last saved: HuntDeck keeps it, not the browser.
+	Note   string
+	NoteAt time.Time
 }
 
 // programTab is one of a program page's tabs.
@@ -82,7 +86,7 @@ type programTab struct {
 	Count      int
 	Counted    bool // show Count
 	On         bool
-	Notes      bool // the notes tab, which notes.js marks
+	Notes      bool // the notes tab
 }
 
 // programTabs are a program page's tabs, in order.
@@ -145,6 +149,22 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	d.splitEntries()
+	// The Notes tab's text and when it was last saved: kept by HuntDeck, so it
+	// survives a browser or a second device.
+	if note, at, err := s.Store.ProgramNote(ctx, p.ID); err == nil {
+		d.Note, d.NoteAt = note, at
+	}
+	// The Scope tab's copy link: these rows as plain text, before anything
+	// else is loaded.
+	if r.URL.Query().Get("format") == "txt" && oneOf(tab, programTabs...) == "scope" {
+		// The page shows the first screenful; the export is everything the
+		// filter matches.
+		q := r.URL.Query()
+		q.Set("all", "1")
+		r.URL.RawQuery = q.Encode()
+		s.writeScopeText(w, d.scopeView(r))
+		return
+	}
 	if n := len(p.Stats); n > 0 {
 		d.Latest = &p.Stats[n-1]
 	}
@@ -288,7 +308,7 @@ func (d *programData) tabs() []programTab {
 		out = append(out, programTab{Key: "stats", Label: "Stats"})
 	}
 	out = append(out, programTab{Key: "changes", Label: "Changes", Count: d.Feed.AllTotal, Counted: true},
-		programTab{Key: "notes", Label: "Notes", Notes: true}) // notes.js marks it when there are some
+		programTab{Key: "notes", Label: "Notes", Notes: true}) // always has a box: HuntDeck keeps the notes
 	for i := range out {
 		out[i].On = out[i].Key == d.Tab
 	}
@@ -317,4 +337,30 @@ func huntChange(days []store.HuntDay) (short, long string) {
 		return fmt.Sprintf("▼ %.0f", -diff), fmt.Sprintf("down %.0f", -diff) + since
 	}
 	return "no change", "no change" + since
+}
+
+// setProgramNote saves the Notes tab: the hunter's own notes on a program,
+// kept in HuntDeck now rather than in one browser.
+func (s *server) setProgramNote(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	p, err := s.Store.Program(ctx, canonicalPlatform(r.PathValue("platform")), r.PathValue("handle"))
+	if errors.Is(err, store.ErrNotFound) {
+		s.renderError(w, r, http.StatusNotFound, "No such program.")
+		return
+	}
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, 256<<10)
+	if err := r.ParseForm(); err != nil {
+		s.renderError(w, r, http.StatusBadRequest, "Bad request.")
+		return
+	}
+	if err := s.Store.SetProgramNote(ctx, p.ID, r.PostFormValue("note")); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	//nolint:gosec // the path the request already reached, plus a tab and a flash
+	http.Redirect(w, r, r.URL.Path+"?tab=notes&msg=note-saved", http.StatusSeeOther)
 }

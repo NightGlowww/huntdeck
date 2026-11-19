@@ -58,8 +58,8 @@
       dlg = document.createElement("dialog");
       dlg.className = "vdialog";
       dlg.innerHTML = `<form method="dialog"><h2></h2><p class="muted small"></p>
-        <input type="text" maxlength="${NAME_MAX}" autocomplete="off" spellcheck="false" aria-label="View name">
-        <div class="vdialog-acts"><button type="button" class="button secondary small" data-cancel>Cancel</button>
+        <input type="text" maxlength="${NAME_MAX}" autocomplete="off" spellcheck="false" aria-label="${t("View name")}">
+        <div class="vdialog-acts"><button type="button" class="button secondary small" data-cancel>${t("Cancel")}</button>
         <button type="submit" value="ok" class="button small"></button></div></form>`;
       document.body.append(dlg);
       dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close("cancel"); }); // the backdrop
@@ -104,7 +104,7 @@
     if (!views.length) {
       const p = document.createElement("p");
       p.className = "menu-note";
-      p.textContent = "No saved views yet. Set your filters and hit Save view.";
+      p.textContent = t("No saved views yet. Set your filters and hit Save view.");
       list.append(p);
       return;
     }
@@ -127,7 +127,7 @@
         b.addEventListener("click", act);
         return b;
       };
-      row.append(a, btn("Rename", "rename", () => rename(v.name)), btn("Delete", "delete", () => remove(v.name)));
+      row.append(a, btn(t("Rename"), "rename", () => rename(v.name)), btn(t("Delete"), "delete", () => remove(v.name)));
       list.append(row);
     }
   };
@@ -157,7 +157,7 @@
     if (out === null) return false;
     all[page] = out;
     if (!write(all)) {
-      say("Not saved: this browser's storage is full or turned off");
+      say(t("Not saved: this browser's storage is full or turned off"));
       return false;
     }
     render();
@@ -166,7 +166,7 @@
   const same = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
   box.querySelector("[data-view-save]").addEventListener("click", async () => {
-    const name = await ask({ title: "Save view", text: "These filters, sort and columns, kept in this browser. A view with the same name is replaced.", value: "", ok: "Save" });
+    const name = await ask({ title: t("Save view"), text: t("These filters, sort and columns, kept in this browser. A view with the same name is replaced."), value: "", ok: t("Save") });
     if (!name) return;
     const v = { name, query: here(), cols: columnsNow(), saved: new Date().toISOString() };
     if (update((views) => {
@@ -177,7 +177,7 @@
   });
   const rename = async (old) => {
     menu.open = false;
-    const name = await ask({ title: "Rename view", value: old, ok: "Rename" });
+    const name = await ask({ title: t("Rename view"), value: old, ok: t("Rename") });
     if (!name || name === old) return;
     if (update((views) => {
       const rest = views.filter((x) => same(x.name, old) || !same(x.name, name)); // a view already called that is replaced
@@ -186,7 +186,7 @@
   };
   const remove = async (name) => {
     menu.open = false;
-    if (!(await ask({ title: "Delete view", text: `Delete “${name}”? Its filters stay as they are on the page.`, ok: "Delete" }))) return;
+    if (!(await ask({ title: t("Delete view"), text: t("Delete “%s”? Its filters stay as they are on the page.", name), ok: t("Delete") }))) return;
     if (update((views) => views.filter((x) => !same(x.name, name)))) say(`Deleted “${name}”`);
   };
 
@@ -221,7 +221,7 @@
       doc = JSON.parse(await f.text());
       if (doc?.format !== FORMAT || !doc.views || typeof doc.views !== "object") throw new Error("not a views file");
     } catch {
-      say("Not imported: that isn't a HuntDeck views export");
+      say(t("Not imported: that isn't a HuntDeck views export"));
       return;
     }
     const all = read();
@@ -243,7 +243,7 @@
       }
       all[p] = mine.sort((a, b) => a.name.localeCompare(b.name));
     }
-    if (!write(all)) { say("Not imported: this browser's storage is full or turned off"); return; }
+    if (!write(all)) { say(t("Not imported: this browser's storage is full or turned off")); return; }
     render();
     say(`Imported ${added}${kept ? `, kept ${kept} newer here` : ""}${bad ? `, skipped ${bad}` : ""}`);
   });

@@ -1,26 +1,26 @@
 {{/* The filter rail beside a list (a railView): a search box, then groups
 of choices, each a link that turns it on or off, with its count. On
 narrower screens the groups fold away behind the Filters button. */}}
-{{define "rail"}}<aside class="facets panel" aria-label="Filters">
+{{define "rail"}}<aside class="facets panel" aria-label="{{T "Filters"}}">
   <div class="fhead">
   {{if .Placeholder}}<form class="fsearch" method="get" action="{{.Path}}">
     {{range .Hidden}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-    <label class="search"><svg class="i"><use href="#i-search"/></svg>
-      <input type="search" name="q" value="{{.Search}}" placeholder="{{.Placeholder}}" aria-label="{{.Label}}"{{if .Exclude}} title="A word starting with - leaves out what contains it: acme -staging"{{end}}></label>
-    {{if .Exclude}}<label class="search fnot"><svg class="i"><use href="#i-eye-off"/></svg>
-      <input type="search" name="not" value="{{.Not}}" placeholder="Exclude: test, sandbox" aria-label="Leave out names containing" title="Leave out programs whose name or handle contains any of these words (separated by spaces or commas)"></label>{{end}}
+    <label class="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <input type="search" name="q" value="{{.Search}}" placeholder="{{T .Placeholder}}" aria-label="{{T .Label}}"{{if .Exclude}} title="{{T "A word starting with - leaves out what contains it: acme -staging"}}"{{end}}></label>
+    {{if .Exclude}}<label class="search fnot"><svg class="i" aria-hidden="true"><use href="#i-eye-off"/></svg>
+      <input type="search" name="not" value="{{.Not}}" placeholder="{{T "Exclude: test, sandbox"}}" aria-label="{{T "Leave out names containing"}}" title="{{T "Leave out programs whose name or handle contains any of these words (separated by spaces or commas)"}}"></label>{{end}}
   </form>{{end}}
-  <button type="button" class="tb-btn ffold" aria-controls="fgroups" aria-expanded="false" data-filters-toggle><svg class="i"><use href="#i-sliders"/></svg><span class="show">Filters</span><span class="hide">Hide filters</span>{{with .Active}}<b title="{{.}} {{if eq . 1}}filter{{else}}filters{{end}} on">{{.}}</b>{{end}}<svg class="i chev"><use href="#i-chev"/></svg></button>
+  <button type="button" class="tb-btn ffold" aria-controls="fgroups" aria-expanded="false" data-filters-toggle><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="show">{{T "Filters"}}</span><span class="hide">{{T "Hide filters"}}</span>{{with .Active}}<b title="{{if eq . 1}}{{TF "%s filter on" (num .)}}{{else}}{{TF "%s filters on" (num .)}}{{end}}">{{.}}</b>{{end}}<svg class="i chev"><use href="#i-chev"/></svg></button>
   </div>
   <div class="fgroups" id="fgroups">
   {{with .Views}}{{template "myviews" .}}{{end}}
   {{range .Groups}}{{if .Options}}
   <div class="facet{{if .Long}} long{{end}}"{{if .Watch}} data-watch-group{{if not .On}} hidden{{end}}{{end}}>
-    <div class="ft">{{.Title}}</div>
-    {{range .Options}}<a class="fc{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .On}} aria-current="{{if .View}}page{{else}}true{{end}}"{{end}}{{if .Watch}} data-watch-link{{if .On}}="on"{{end}}{{end}}{{if .Noted}} data-notes-link{{if .On}}="on"{{end}}{{end}}{{if and (or .Watch .Noted) (not .On)}} hidden{{end}}><span class="box{{if .View}} round{{end}}" aria-hidden="true"></span><span class="fl">{{with .Platform}}{{template "ptag" .}}{{end}}{{.Label}}</span>{{if .Counted}}<em>{{num .Count}}</em>{{else if or .Watch .Noted}}<em></em>{{end}}</a>{{end}}
+    <div class="ft">{{T .Title}}</div>
+    {{range .Options}}<a class="fc{{if .On}} on{{end}}" href="{{.URL}}"{{with .Title}} title="{{.}}"{{end}}{{if .On}} aria-current="{{if .View}}page{{else}}true{{end}}"{{end}}{{if .Watch}} data-watch-link{{if .On}}="on"{{end}}{{end}}{{if .Noted}} data-notes-link{{if .On}}="on"{{end}}{{end}}{{if and (or .Watch .Noted) (not .On)}} hidden{{end}}><span class="box{{if .View}} round{{end}}" aria-hidden="true"></span><span class="fl">{{with .Platform}}{{template "ptag" .}}{{end}}{{T .Label}}</span>{{if .Counted}}<em>{{num .Count}}</em>{{else if or .Watch .Noted}}<em></em>{{end}}</a>{{end}}
     {{with .Form}}<form class="fform" method="get" action="{{.Path}}">{{range .Hidden}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
-      <input type="text" name="{{.Name}}" value="{{.Value}}" placeholder="{{.Placeholder}}" aria-label="{{.Label}}" title="{{.Title}}" inputmode="decimal" autocomplete="off" spellcheck="false">
-      <button type="submit" class="button secondary small">Set</button></form>{{end}}
+      <input type="text" name="{{.Name}}" value="{{.Value}}" placeholder="{{T .Placeholder}}" aria-label="{{T .Label}}" title="{{T .Title}}" inputmode="decimal" autocomplete="off" spellcheck="false">
+      <button type="submit" class="button secondary small">{{T "Set"}}</button></form>{{end}}
   </div>
   {{end}}{{end}}
   </div>
@@ -28,5 +28,5 @@ narrower screens the groups fold away behind the Filters button. */}}
 
 {{/* The active filters above a list, each dropping itself, and a link
 that drops all but the search. */}}
-{{define "pills"}}{{range .Pills}}<a class="af" href="{{.URL}}" title="Remove this filter">{{.Label}} <span aria-hidden="true">×</span></a>{{end}}
-    {{if hasFilters .Pills}}<a class="link small" href="{{.ClearURL}}">Clear filters</a>{{end}}{{end}}
+{{define "pills"}}{{range .Pills}}<a class="af" href="{{.URL}}" title="{{T "Remove this filter"}}">{{T .Label}} <span aria-hidden="true">×</span></a>{{end}}
+    {{if hasFilters .Pills}}<a class="link small" href="{{.ClearURL}}">{{T "Clear filters"}}</a>{{end}}{{end}}

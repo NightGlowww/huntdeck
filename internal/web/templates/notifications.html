@@ -2,11 +2,13 @@
 <div class="ngrid">
 <div class="stack">
 <section class="panel" id="channels">
-  <div class="panel-head"><h2>Channels{{with .Channels}} <span class="count">{{len .}}</span>{{end}}</h2>
+  <div class="panel-head"><h2>{{T "Channels"}}{{with .Channels}} <span class="count">{{len .}}</span>{{end}}</h2>
     <span class="actions">
-      <a class="button small" href="/settings/notifications/new?kind=discord">Add Discord</a>
-      <a class="button secondary small" href="/settings/notifications/new?kind=telegram">Add Telegram</a>
-      <a class="button secondary small" href="/settings/notifications/new?kind=webhook">Add webhook</a>
+      <a class="button small" href="/settings/notifications/new?kind=discord">{{T "Add Discord"}}</a>
+      <a class="button secondary small" href="/settings/notifications/new?kind=telegram">{{T "Add Telegram"}}</a>
+      <a class="button secondary small" href="/settings/notifications/new?kind=bark">{{T "Add Bark"}}</a>
+      <a class="button secondary small" href="/settings/notifications/new?kind=serverchan">{{T "Add ServerChan"}}</a>
+      <a class="button secondary small" href="/settings/notifications/new?kind=webhook">{{T "Add webhook"}}</a>
     </span></div>
   {{if .Channels}}
   <div class="nlist">
@@ -14,50 +16,68 @@
     <div class="nrow{{if not .Enabled}} off{{end}}" data-href="/settings/notifications/{{.ID}}">
       <span class="nlogo {{.Kind}}" aria-hidden="true">{{slice (channelKind .Kind) 0 1}}</span>
       <div class="nmain">
-        <div class="nname"><a class="name" href="/settings/notifications/{{.ID}}">{{.Name}}</a> <span class="chip">{{channelKind .Kind}}</span>{{if not .Enabled}} <span class="chip ignored">off</span>{{end}}<span class="mono small muted nwhere">{{.Where}}</span></div>
+        <div class="nname"><a class="name" href="/settings/notifications/{{.ID}}">{{.Name}}</a> <span class="chip">{{channelKind .Kind}}</span>{{if not .Enabled}} <span class="chip ignored">{{T "off"}}</span>{{end}}<span class="mono small muted nwhere">{{.Where}}</span></div>
         <div class="muted small ntext" title="{{.Events}} · {{.Filters}}">{{.Events}} · {{.Filters}}</div>
+        <div class="muted small ncounts">{{if or .Sent .Failed .Waiting}}<a class="link" href="?channel={{urlquery .Name}}&amp;status=sent">{{T "Sent"}} {{num .Sent}}</a> · <a class="link" href="?channel={{urlquery .Name}}&amp;status=failed">{{T "Failed"}} {{num .Failed}}</a> · <a class="link" href="?channel={{urlquery .Name}}&amp;status=waiting">{{T "Waiting"}} {{num .Waiting}}</a>{{else}}{{T "No messages yet"}}{{end}}</div>
       </div>
       <div class="muted small nwhen">
-        <div>{{if .Instant}}after each poll{{end}}{{if and .Instant .DigestAt}} · {{end}}{{with .DigestAt}}digest {{.}}{{end}}</div>
-        <div>{{if .Queued}}<span class="chip">{{.Queued}} queued</span> {{end}}{{if .Pending}}<span class="chip">{{.Pending}} for digest</span> {{end}}{{with .LastError}}<span class="chip unmet" title="{{.}}">last error</span> {{end}}{{with .LastSentAt}}<span title="{{datetime .}}">last sent {{ago .}}</span>{{else}}never sent{{end}}</div>
+        <div>{{if .Instant}}{{T "after each poll"}}{{end}}{{if and .Instant .DigestAt}} · {{end}}{{with .DigestAt}}{{T "digest"}} {{.}}{{end}}</div>
+        <div>{{if .Queued}}<span class="chip">{{TF "%d queued" .Queued}}</span> {{end}}{{if .Pending}}<span class="chip">{{TF "%d for digest" .Pending}}</span> {{end}}{{with .LastError}}<span class="chip unmet" title="{{.}}">{{T "last error"}}</span> {{end}}{{with .LastSentAt}}<span title="{{datetime .}}">{{T "last sent"}} {{ago .}}</span>{{else}}{{T "never sent"}}{{end}}</div>
       </div>
       <span class="nacts">
-        <form method="post" action="/settings/notifications/{{.ID}}/test" class="inline"><button type="submit" class="small secondary">Test</button></form>
-        <a class="button small secondary" href="/settings/notifications/{{.ID}}">Edit</a>
+        <form method="post" action="/settings/notifications/{{.ID}}/test" class="inline" data-busy="{{T "Sending…"}}"><button type="submit" class="small secondary">{{T "Test"}}</button></form>
+        <a class="button small secondary" href="/settings/notifications/{{.ID}}">{{T "Edit"}}</a>
       </span>
     </div>
     {{end}}
   </div>
   {{else}}
-  <div class="empty-state small">No channels yet. Add Discord, Telegram or a webhook above.</div>
+  <div class="empty-state small">{{T "No channels yet. Add Discord, Telegram, Bark, ServerChan or a webhook above."}}</div>
   {{end}}
-  <p class="panel-foot">A new channel sends invites, new programs, scope added, reopened programs, raised bounties and platform problems; its form adds more and filters by program. Ignored programs never notify, and programs that pause and reopen again and again (Intigriti's report limits) are sent once a pause has lasted a day. {{if readOnly}}Digest times are set in {{.Timezone}}, as the server sends them; other dates and times here show in your own time zone.{{else}}Digest times are in {{.Timezone}}.{{end}}</p>
+  <p class="panel-foot">{{T "A new channel sends invites, new programs, scope added, reopened programs, raised bounties and platform problems; its form adds more and filters by program. Ignored programs never notify, and programs that pause and reopen again and again are sent once a pause has lasted a day."}} {{if readOnly}}{{TF "Digest times are set in %s, as the server sends them; other dates and times here show in your own time zone." .Timezone}}{{else}}{{TF "Digest times are in %s." .Timezone}}{{end}}</p>
 </section>
 
 <section class="panel" id="address">
-  <div class="panel-head"><h2>Links in messages</h2><span class="aside">messages link to programs here; without an address they link to the platform</span></div>
+  <div class="panel-head"><h2>{{T "Links in messages"}}</h2><span class="aside">{{T "messages link to programs here; without an address they link to the platform"}}</span></div>
   <form method="post" action="/settings/notifications/address" class="panel-body profile-form">
-    <label><span>HuntDeck address</span>
+    <label><span>{{T "HuntDeck address"}}</span>
       <input type="url" name="base_url" value="{{.BaseURL}}" placeholder="{{.Suggested}}" class="zone" autocomplete="off" spellcheck="false" maxlength="200">
-      <span class="muted small">How you open HuntDeck, e.g. your tailnet name. {{if not .BaseURL}}This browser uses {{.Suggested}}.{{end}}</span></label>
-    <button type="submit" class="small">Save address</button>
+      <span class="muted small">{{T "How you open HuntDeck, e.g. your tailnet name."}} {{if not .BaseURL}}{{T "This browser uses"}} {{.Suggested}}.{{end}}</span></label>
+    <button type="submit" class="small">{{T "Save address"}}</button>
   </form>
 </section>
 
-{{if .Deliveries}}
+{{if .Channels}}
 <section class="panel">
-  <div class="panel-head"><h2>Recent messages</h2></div>
-  <div class="table-wrap">
+  <div class="panel-head"><h2>{{T "Recent messages"}}</h2></div>
+  <div class="activef nfilters">
+    <span class="quick">
+      <a class="qv{{if not .DeliveryStatus}} on{{end}}" href="?channel={{urlquery .DeliveryChannel}}">{{T "All"}}</a>
+      <a class="qv{{if eq .DeliveryStatus "sent"}} on{{end}}" href="?channel={{urlquery .DeliveryChannel}}&amp;status=sent">{{T "sent"}}</a>
+      <a class="qv{{if eq .DeliveryStatus "failed"}} on{{end}}" href="?channel={{urlquery .DeliveryChannel}}&amp;status=failed">{{T "gave up"}}</a>
+      <a class="qv{{if eq .DeliveryStatus "waiting"}} on{{end}}" href="?channel={{urlquery .DeliveryChannel}}&amp;status=waiting">{{T "waiting"}}</a>
+    </span>
+    <form method="get" action="/settings/notifications" class="nfchan">
+      <input type="hidden" name="status" value="{{.DeliveryStatus}}">
+      <select name="channel" data-autosubmit aria-label="{{T "Channel"}}">
+        <option value="">{{T "All channels"}}</option>
+        {{range .Channels}}<option value="{{.Name}}"{{if eq .Name $.Data.DeliveryChannel}} selected{{end}}>{{.Name}}</option>{{end}}
+      </select>
+      <button type="submit" class="small" data-autosubmit-button>{{T "Apply"}}</button>
+    </form>
+  </div>
+  <div class="table-wrap" id="deliveries" data-refresh="30">
   <table>
-    <thead><tr><th>Queued</th><th>Channel</th><th>Kind</th><th class="num">Events</th><th>Status</th></tr></thead>
+    <thead><tr><th>{{T "Queued"}}</th><th>{{T "Channel"}}</th><th>{{T "Kind"}}</th><th class="num">{{T "Events"}}</th><th>{{T "Status"}}</th></tr></thead>
     <tbody>
+    {{if not .Deliveries}}<tr><td colspan="5"><div class="empty-state">{{T "Nothing has been queued yet: a message is queued when a watched program changes."}}</div></td></tr>{{end}}
     {{range .Deliveries}}
       <tr>
         <td class="nowrap"><span class="when" title="{{datetime .CreatedAt}}">{{ago .CreatedAt}}</span></td>
         <td>{{.ChannelName}}</td>
-        <td>{{.Kind}}</td>
+        <td>{{T .Kind}}</td>
         <td class="num">{{.Events}}</td>
-        <td>{{if .SentAt}}<span class="chip ok">sent</span>{{else if .FailedAt}}<span class="chip unmet" title="{{.LastError}}">gave up</span> <span class="muted small">{{.LastError}}</span>{{else}}<span class="chip">waiting</span>{{with .LastError}} <span class="muted small">{{.}}</span>{{end}}{{end}}</td>
+        <td>{{if .SentAt}}<span class="chip ok">{{T "sent"}}</span>{{else if .FailedAt}}<span class="chip unmet" title="{{.LastError}}">{{T "gave up"}}</span> <span class="muted small">{{.LastError}}</span>{{else}}<span class="chip">{{T "waiting"}}</span>{{with .LastError}} <span class="muted small">{{.}}</span>{{end}}{{end}}</td>
       </tr>
     {{end}}
     </tbody>
@@ -68,11 +88,11 @@
 </div>
 
 <aside class="panel nexamples">
-  <div class="panel-head"><h2>What a message looks like</h2><span class="aside">from the last week's changes</span></div>
+  <div class="panel-head"><h2>{{T "What a message looks like"}}</h2><span class="aside">{{T "from the last week's changes"}}</span></div>
   <div class="panel-body msgs">
-    {{range .Examples.Cards}}{{template "message" .}}{{else}}<p class="muted">Nothing has changed in the last week, so there's nothing to show yet.</p>{{end}}
+    {{range .Examples.Cards}}{{template "message" .}}{{else}}<p class="muted">{{T "Nothing has changed in the last week, so there's nothing to show yet."}}</p>{{end}}
   </div>
-  {{with .Examples}}{{if .Events}}<p class="panel-foot">{{num .Events}} {{plural .Events "event" "events"}} across every program in the last week. Each channel's form previews what its choices would have sent.</p>{{end}}{{end}}
+  {{with .Examples}}{{if .Events}}<p class="panel-foot">{{TF "%s %s across every program in the last week." (num .Events) (plural .Events "event" "events")}} {{T "Each channel's form previews what its choices would have sent."}}</p>{{end}}{{end}}
 </aside>
 </div>
 {{end}}{{end}}

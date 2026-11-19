@@ -359,6 +359,17 @@
               "default": 0,
               "minimum": 0
             }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "csv hands back the list as the page's spreadsheet export does: every matching program, the same columns, instead of a page of JSON.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv"
+              ]
+            }
           }
         ],
         "responses": {
@@ -677,6 +688,17 @@
               "type": "integer",
               "default": 0,
               "minimum": 0
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "csv hands back the list as the page's spreadsheet export does: every matching program, the same columns, instead of a page of JSON.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "csv"
+              ]
             }
           }
         ],
@@ -1419,6 +1441,33 @@
               "type": "string"
             },
             "example": "acme"
+          },
+          {
+            "name": "parts",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma separated projection: scope, disclosed, facts, brief, announcements, rules, numbers. Default: everything. An unknown part is a 400."
+          },
+          {
+            "name": "scope_limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5000
+            },
+            "description": "With parts=scope: entries per answer (default 500)."
+          },
+          {
+            "name": "scope_offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "With parts=scope: entries to skip; scope_total in the answer says how many exist."
           }
         ],
         "responses": {
@@ -2992,6 +3041,160 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OK"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/queue": {
+      "get": {
+        "tags": [
+          "Hunt board"
+        ],
+        "operationId": "queue",
+        "summary": "Hunt queue",
+        "description": "Targets ranked by whether you can start today and what the work is worth per hour: a hard gate for what cannot be started (an invitation to accept, requirements, paused, ignored), then a weighted geometric mean of the program's value, the best-case payout, how fast the program accepts (median, not mean), how crowded it is, how fresh the target is and how much arranging it needs. Built every half hour. rows are the ranked ones; gated are the ones the gate kept out, each with its gate reason.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "How many rows (default 20)."
+          },
+          {
+            "name": "explain",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            },
+            "description": "With 1, each row carries its factor breakdown: name, the value it took, its weight, and the multiplier it applied (the multipliers multiply back to the score)."
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only this platform, as the platform slug (hackerone, bugcrowd, intigriti, yeswehack)."
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only this kind of asset (wildcard, domain, url, ip, cidr, android, ios); an unknown kind matches nothing."
+          },
+          {
+            "name": "added",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only targets added within N days, written 7d. Anything else is a 400."
+          },
+          {
+            "name": "paying",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "1/true/yes: only programs that pay bounties."
+          },
+          {
+            "name": "one",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "1/true/yes: one row per program, its best target only."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ranked targets.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "computed_at": {
+                      "type": "string"
+                    },
+                    "rows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "platform": {
+                            "type": "string"
+                          },
+                          "handle": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "apex": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "number"
+                          },
+                          "reasons": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "gated": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "platform": {
+                            "type": "string"
+                          },
+                          "handle": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "number"
+                          },
+                          "gate": {
+                            "type": "string"
+                          },
+                          "reasons": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }

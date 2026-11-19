@@ -2,17 +2,17 @@
    to load, rename or delete them, kept in this browser. Hidden until the
    script, which keeps them, shows it. */}}
 {{define "myviews"}}<div class="myviews" data-views="{{.Page}}" data-view-keys="{{.Keys}}"{{with .Cols}} data-view-cols="{{.}}"{{end}} hidden>
-  <button type="button" class="button secondary small" data-view-save title="Save these filters, sort and columns under a name, in this browser"><svg class="i"><use href="#i-plus"/></svg><span class="label">Save view</span></button>
+  <button type="button" class="button secondary small" data-view-save title="{{T "Save these filters, sort and columns under a name, in this browser"}}"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg><span class="label">{{T "Save view"}}</span></button>
   <details class="tb-menu" data-menu>
-    <summary class="button secondary small" data-view-menu title="Your saved views of this page (v)"><svg class="i"><use href="#i-star"/></svg><span class="label">My views</span> <b class="vcount" data-view-count></b><svg class="i chev-d"><use href="#i-chev"/></svg></summary>
+    <summary class="button secondary small" data-view-menu title="{{T "Your saved views of this page (v)"}}"><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span class="label">{{T "My views"}}</span> <b class="vcount" data-view-count></b><svg class="i chev-d"><use href="#i-chev"/></svg></summary>
     <div class="menu views-menu">
-      <div data-view-list><p class="menu-note">No saved views yet. Set your filters and hit Save view.</p></div>
+      <div data-view-list><p class="menu-note">{{T "No saved views yet. Set your filters and hit Save view."}}</p></div>
       <div class="views-tools">
-        <button type="button" data-view-export title="Download every page's saved views from this browser as a JSON file"><svg class="i"><use href="#i-download"/></svg>Export views</button>
-        <button type="button" data-view-import title="Add views from an exported file: a view replaces one of the same name only if it's newer"><svg class="i"><use href="#i-plus"/></svg>Import views</button>
+        <button type="button" data-view-export title="{{T "Download every page's saved views from this browser as a JSON file"}}"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>{{T "Export views"}}</button>
+        <button type="button" data-view-import title="{{T "Add views from an exported file: a view replaces one of the same name only if it's newer"}}"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>{{T "Import views"}}</button>
         <input type="file" accept="application/json,.json" data-view-file hidden>
       </div>
-      <p class="menu-note">Kept in this browser only.</p>
+      <p class="menu-note">{{T "Kept in this browser only."}}</p>
     </div>
   </details>
 </div>{{end}}

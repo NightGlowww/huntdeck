@@ -6,15 +6,15 @@
     <svg class="i" data-icon="system"><use href="#i-monitor"/></svg>
     <svg class="i" data-icon="light" hidden><use href="#i-sun"/></svg>
     <svg class="i" data-icon="dark" hidden><use href="#i-moon"/></svg>
-    <span class="label">Theme</span>
+    <span class="label">{{T "Theme"}}</span>
   </button>
   <div class="tm-pop" id="theme-pop" hidden>
-    <fieldset class="tm-modes"><legend>Mode</legend>
-      <label><input type="radio" name="tm-mode" value="system"><svg class="i"><use href="#i-monitor"/></svg>System</label>
-      <label><input type="radio" name="tm-mode" value="light"><svg class="i"><use href="#i-sun"/></svg>Light</label>
-      <label><input type="radio" name="tm-mode" value="dark"><svg class="i"><use href="#i-moon"/></svg>Dark</label>
+    <fieldset class="tm-modes"><legend>{{T "Mode"}}</legend>
+      <label><input type="radio" name="tm-mode" value="system"><svg class="i" aria-hidden="true"><use href="#i-monitor"/></svg>{{T "System"}}</label>
+      <label><input type="radio" name="tm-mode" value="light"><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg>{{T "Light"}}</label>
+      <label><input type="radio" name="tm-mode" value="dark"><svg class="i" aria-hidden="true"><use href="#i-moon"/></svg>{{T "Dark"}}</label>
     </fieldset>
-    <fieldset class="tm-pals"><legend>Colours</legend>
+    <fieldset class="tm-pals"><legend>{{T "Colours"}}</legend>
       {{- range palettes}}
       <label><input type="radio" name="tm-palette" value="{{.Key}}"><span class="tm-sw" data-palette="{{.Key}}" aria-hidden="true"><i></i><i></i><i></i></span><span class="tm-name">{{.Name}}<small>{{.Short}}</small></span><svg class="i tm-tick" aria-hidden="true"><use href="#i-check"/></svg></label>
       {{- end}}

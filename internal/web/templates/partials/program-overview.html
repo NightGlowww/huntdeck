@@ -8,18 +8,18 @@
   <div class="stack">
     {{with $p.Hunt}}
     <section class="panel huntscore" id="huntscore">
-      <div class="panel-head"><h2 title="Scored {{datetime .At}}, {{huntPreset .Preset}} weighting">Why it scores <b class="score{{if .Gate}} gated{{end}}">{{printf "%.0f" .Score}}</b></h2></div>
-      {{with huntGate .Gate}}<div class="note-bar">{{.}}, so it isn't among the picks.</div>{{end}}
+      <div class="panel-head"><h2 title="{{TF "Scored %s, %s weighting" (datetime .At) (T (huntPreset .Preset))}}">{{T "Why it scores"}} <b class="score{{if .Gate}} gated{{end}}">{{printf "%.0f" .Score}}</b></h2></div>
+      {{with huntGate .Gate}}<div class="note-bar">{{TF "%s, so it isn't among the picks." (T .)}}</div>{{end}}
       <div class="huntparts">
       {{range .Parts}}
         <div class="hp">
           <div class="hp-head">
-            <span class="hp-name" title="{{huntHint .Key}}">{{huntLabel .Key}}</span>
-            <svg class="hp-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="{{huntLabel .Key}} {{printf "%.0f" .Score}} of 100"><rect class="track" width="100" height="6" rx="3"/><rect class="fill" width="{{.Score}}" height="6" rx="3"/></svg>
+            <span class="hp-name" title="{{huntHint .Key}}">{{T (huntLabel .Key)}}</span>
+            <svg class="hp-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="{{T (huntLabel .Key)}} {{printf "%.0f" .Score}} / 100"><rect class="track" width="100" height="6" rx="3"/><rect class="fill" width="{{.Score}}" height="6" rx="3"/></svg>
             <span class="hp-score">{{printf "%.0f" .Score}}</span>
-            <span class="hp-weight" title="Share of the HuntScore">× {{percent .Weight}}</span>
+            <span class="hp-weight" title="{{T "Share of the HuntScore"}}">× {{percent .Weight}}</span>
           </div>
-          <p class="hp-why">{{range $i, $r := .Reasons}}{{if $i}} · {{end}}{{huntReason $r}}{{end}}{{if not .Known}}<span class="muted">Nothing to judge by, so it counts as a bit below average</span>{{end}}</p>
+          <p class="hp-why">{{range $i, $r := .Reasons}}{{if $i}} · {{end}}{{huntReason $r}}{{end}}{{if not .Known}}<span class="muted">{{T "Nothing to judge by, so it counts as a bit below average"}}</span>{{end}}</p>
         </div>
       {{end}}
       </div>
@@ -56,11 +56,11 @@
         {{end}}
         </tbody>
       </table>
-      {{else}}<div class="empty-state small">No scope entered yet.{{if not readOnly}} <a class="link" href="/programs/independent/{{$p.Handle}}/edit">Add some</a>{{end}}</div>{{end}}
+      {{else}}<div class="empty-state small">No scope entered yet.{{if not readOnly}} <a class="link" href="/programs/independent/{{$p.Handle}}/edit">{{T "Add some"}}</a>{{end}}</div>{{end}}
     </section>
     {{with .Rules}}
     <section class="panel prose">
-      <div class="panel-head"><h2>Rules and notes</h2><span class="aside"><a class="link" href="?tab=policy">Policy tab →</a></span></div>
+      <div class="panel-head"><h2>{{T "Rules and notes"}}</h2><span class="aside"><a class="link" href="?tab=policy">{{T "Policy tab →"}}</a></span></div>
       <div class="md">{{.Body}}</div>
     </section>
     {{end}}
@@ -68,16 +68,16 @@
   </div>
   <aside class="stack">
     <section class="panel">
-      <div class="panel-head"><h2>Program</h2><span class="aside">added by hand</span></div>
+      <div class="panel-head"><h2>{{T "Program"}}</h2><span class="aside">{{T "added by hand"}}</span></div>
       <div class="panel-body">
         <dl class="facts">
-          {{with website $p.URL}}<dt>Page</dt><dd><a class="link" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{.Label}}</a></dd>{{end}}
-          <dt>Bounty</dt><dd>{{if $p.OffersBounty}}{{template "m-bounty" .Row}}{{else}}VDP: no bounties{{end}}</dd>
-          <dt>Scope</dt><dd title="{{assetsTitle .Row.ProgramListItem}}">{{num (len .InScope)}} in scope{{with .Wildcards}} · {{num (len .)}} {{plural (len .) "wildcard" "wildcards"}}{{end}}{{with .Domains}} · {{num (len .)}} {{plural (len .) "domain" "domains"}}{{end}}{{with .OutOfScope}}<span class="muted"> · {{num (len .)}} out</span>{{end}}</dd>
-          <dt>Added</dt><dd><span title="{{datetime $p.FirstSeenAt}}">{{date $p.FirstSeenAt}}</span></dd>
-          {{with $p.ScopeCheckedAt}}<dt>Saved</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd>{{end}}
+          {{with website $p.URL}}<dt>{{T "Page"}}</dt><dd><a class="link" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{.Label}}</a></dd>{{end}}
+          <dt>{{T "Bounty"}}</dt><dd>{{if $p.OffersBounty}}{{template "m-bounty" .Row}}{{else}}VDP: no bounties{{end}}</dd>
+          <dt>{{T "Scope"}}</dt><dd title="{{assetsTitle .Row.ProgramListItem}}">{{num (len .InScope)}} in scope{{with .Wildcards}} · {{num (len .)}} {{plural (len .) "wildcard" "wildcards"}}{{end}}{{with .Domains}} · {{num (len .)}} {{plural (len .) "domain" "domains"}}{{end}}{{with .OutOfScope}}<span class="muted"> · {{num (len .)}} out</span>{{end}}</dd>
+          <dt>{{T "Added"}}</dt><dd><span title="{{datetime $p.FirstSeenAt}}">{{date $p.FirstSeenAt}}</span></dd>
+          {{with $p.ScopeCheckedAt}}<dt>{{T "Saved"}}</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd>{{end}}
         </dl>
-        <p class="muted small own-note">HuntDeck knows only what's entered here: it doesn't fetch the program's page or poll it.{{if not readOnly}} <a class="link" href="/programs/independent/{{$p.Handle}}/edit">Edit</a>{{end}}</p>
+        <p class="muted small own-note">HuntDeck knows only what's entered here: it doesn't fetch the program's page or poll it.{{if not readOnly}} <a class="link" href="/programs/independent/{{$p.Handle}}/edit">{{T "Edit"}}</a>{{end}}</p>
       </div>
     </section>
     {{template "program-before" .}}
@@ -91,30 +91,30 @@
    Stats lists them. Only the numbers the platform gave. */}}
 {{define "program-platform-stats"}}{{$p := .P}}{{with $p.PublicStats}}{{$c := .Currency}}
 <section class="panel pstats">
-  <div class="panel-head"><h2>Platform stats</h2>
-    <span class="aside" title="{{datetime .CapturedAt}}">from {{platformLabel $p.Platform}} · {{ago .CapturedAt}}</span></div>
+  <div class="panel-head"><h2>{{T "Platform stats"}}</h2>
+    <span class="aside" title="{{datetime .CapturedAt}}">{{TF "from %s" (platformLabel $p.Platform)}} · {{ago .CapturedAt}}</span></div>
   <dl class="kv">
-    {{if $p.OffersBounty}}{{with amount .PaidPerReport $c}}<div><dt>Paid per report</dt><dd title="{{amountFull $p.PublicStats.PaidPerReport $c}}">{{.}}</dd></div>{{end}}
-    {{if topBeyondTable .}}<div><dt title="More than its bounty table pays">Top bounty</dt><dd title="{{amountRangeFull .TopBountyLow .TopBountyHigh $c}}">{{amountRange .TopBountyLow .TopBountyHigh $c}}</dd></div>{{end}}{{end}}
-    {{if $p.OffersBounty}}{{with count .RewardedReports}}<div><dt>Rewarded reports</dt><dd>{{.}}</dd></div>{{end}}{{end}}
+    {{if $p.OffersBounty}}{{with amount .PaidPerReport $c}}<div><dt>{{T "Paid per report"}}</dt><dd title="{{amountFull $p.PublicStats.PaidPerReport $c}}">{{.}}</dd></div>{{end}}
+    {{if topBeyondTable .}}<div><dt title="{{T "More than its bounty table pays"}}">{{T "Top bounty"}}</dt><dd title="{{amountRangeFull .TopBountyLow .TopBountyHigh $c}}">{{amountRange .TopBountyLow .TopBountyHigh $c}}</dd></div>{{end}}{{end}}
+    {{if $p.OffersBounty}}{{with count .RewardedReports}}<div><dt>{{T "Rewarded reports"}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}
     {{if not (or $.Resolved.Total $.Accepted.Total)}}{{with count .ResolvedReports}}<div><dt>{{if eq $p.Platform "bugcrowd"}}Valid submissions{{else}}Reports resolved{{end}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}
-    {{with count .TotalReports}}<div><dt title="Every report submitted, valid or not">Reports submitted</dt><dd>{{.}}</dd></div>{{end}}
-    {{with count .AcceptedReports}}<div><dt title="Reports accepted as valid, all time">Reports accepted</dt><dd>{{.}}</dd></div>{{end}}
-    {{with .AcceptedShare}}<div><dt title="Reports accepted out of every report submitted, all time: the rest were duplicates, out of scope or invalid">Accepted share</dt><dd>{{.}}</dd></div>{{end}}
-    {{with count .ReportsLast7d}}<div><dt>Reports · 7 days</dt><dd>{{.}}</dd></div>{{end}}
-    {{with .LastResolvedAt}}<div><dt>Last resolved</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd></div>{{end}}
-    {{with count .HackersThanked}}<div><dt>Hackers thanked</dt><dd>{{.}}</dd></div>{{end}}
+    {{with count .TotalReports}}<div><dt title="{{T "Every report submitted, valid or not"}}">{{T "Reports submitted"}}</dt><dd>{{.}}</dd></div>{{end}}
+    {{with count .AcceptedReports}}<div><dt title="{{T "Reports accepted as valid, all time"}}">{{T "Reports accepted"}}</dt><dd>{{.}}</dd></div>{{end}}
+    {{with .AcceptedShare}}<div><dt title="{{T "Reports accepted out of every report submitted, all time: the rest were duplicates, out of scope or invalid"}}">{{T "Accepted share"}}</dt><dd>{{.}}</dd></div>{{end}}
+    {{with count .ReportsLast7d}}<div><dt>{{T "Reports · 7 days"}}</dt><dd>{{.}}</dd></div>{{end}}
+    {{with .LastResolvedAt}}<div><dt>{{T "Last resolved"}}</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd></div>{{end}}
+    {{with count .HackersThanked}}<div><dt>{{T "Hackers thanked"}}</dt><dd>{{.}}</dd></div>{{end}}
     {{with count .Hunters}}<div><dt title="{{huntersHint $p.Platform}}">{{huntersLabel $p.Platform}}</dt><dd>{{.}}</dd></div>{{end}}
-    {{with .Hunters90d}}<div><dt title="Researchers who earned points on the program's leaderboard in the last 90 days: accepted reports or duplicates of them">Hunters · 90 days</dt><dd>{{hunters90 .}}</dd></div>{{end}}
-    {{if and .Points90d .PointsAll}}<div><dt title="Reputation points researchers earned on the program in the last 90 days, of all they have earned on it: a fixed number per accepted report by severity, a fifth of it for a duplicate. HuntDeck estimates the 90-day figures from this share until it has saved 90 days of totals">Leaderboard · 90 days</dt><dd>{{count .Points90d}} of {{count .PointsAll}} points</dd></div>{{end}}
-    {{with .LastSubmissionAt}}<div><dt title="The latest report anyone sent the program">Last report</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd></div>{{end}}
-    {{with .LastAcceptedAt}}<div><dt title="The latest report the program accepted, from its recent activity">Last accepted</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd></div>{{end}}
-    {{with .ScopeRank}}<div><dt title="Bugcrowd's own rating of how much the scope offers, 1 to 4">Scope rank</dt><dd>{{.}} of 4</dd></div>{{end}}
-    {{with count .KnownIssues}}<div><dt title="Findings already reported to the program, listed on its Known issues page: a report matching one is a duplicate">Known issues</dt><dd>{{.}}{{with count $p.PublicStats.KnownIssuesUnique}} · {{.}} distinct{{end}}</dd></div>{{end}}
-    {{if .FirstResponseHours}}{{with hours .ValidationHours}}{{if eq $p.Platform "intigriti"}}<div><dt title="Average time for the company to accept or reject a report, over the last 90 days">Time to decide</dt><dd>{{.}}</dd></div>{{else}}<div><dt title="75% of submissions are accepted or rejected within this time">Validation within</dt><dd>{{.}}</dd></div>{{end}}{{end}}{{end}}
-    {{with hours .TriageHours}}<div><dt title="Average time to triage">Time to triage</dt><dd>{{.}}</dd></div>{{end}}
-    {{if $p.OffersBounty}}{{with hours .BountyHours}}<div><dt title="Average time to bounty">Time to bounty</dt><dd>{{.}}</dd></div>{{end}}{{end}}
-    {{with hours .ResolutionHours}}<div><dt title="Average time to resolution">Time to resolve</dt><dd>{{.}}</dd></div>{{end}}
+    {{with .Hunters90d}}<div><dt title="{{T "Researchers who earned points on the program's leaderboard in the last 90 days: accepted reports or duplicates of them"}}">{{T "Hunters · 90 days"}}</dt><dd>{{hunters90 .}}</dd></div>{{end}}
+    {{if and .Points90d .PointsAll}}<div><dt title="{{T "Reputation points researchers earned on the program in the last 90 days, of all they have earned on it: a fixed number per accepted report by severity, a fifth of it for a duplicate. HuntDeck estimates the 90-day figures from this share until it has saved 90 days of totals"}}">{{T "Leaderboard · 90 days"}}</dt><dd>{{count .Points90d}} of {{count .PointsAll}} points</dd></div>{{end}}
+    {{with .LastSubmissionAt}}<div><dt title="{{T "The latest report anyone sent the program"}}">{{T "Last report"}}</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd></div>{{end}}
+    {{with .LastAcceptedAt}}<div><dt title="{{T "The latest report the program accepted, from its recent activity"}}">{{T "Last accepted"}}</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd></div>{{end}}
+    {{with .ScopeRank}}<div><dt title="{{T "Bugcrowd's own rating of how much the scope offers, 1 to 4"}}">{{T "Scope rank"}}</dt><dd>{{.}} of 4</dd></div>{{end}}
+    {{with count .KnownIssues}}<div><dt title="{{T "Findings already reported to the program, listed on its Known issues page: a report matching one is a duplicate"}}">{{T "Known issues"}}</dt><dd>{{.}}{{with count $p.PublicStats.KnownIssuesUnique}} · {{.}} distinct{{end}}</dd></div>{{end}}
+    {{if .FirstResponseHours}}{{with hours .ValidationHours}}{{if eq $p.Platform "intigriti"}}<div><dt title="{{T "Average time for the company to accept or reject a report, over the last 90 days"}}">{{T "Time to decide"}}</dt><dd>{{.}}</dd></div>{{else}}<div><dt title="{{T "75% of submissions are accepted or rejected within this time"}}">{{T "Validation within"}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}{{end}}
+    {{with hours .TriageHours}}<div><dt title="{{T "Average time to triage"}}">{{T "Time to triage"}}</dt><dd>{{.}}</dd></div>{{end}}
+    {{if $p.OffersBounty}}{{with hours .BountyHours}}<div><dt title="{{T "Average time to bounty"}}">{{T "Time to bounty"}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}
+    {{with hours .ResolutionHours}}<div><dt title="{{T "Average time to resolution"}}">{{T "Time to resolve"}}</dt><dd>{{.}}</dd></div>{{end}}
   </dl>
 </section>
 {{end}}{{end}}
@@ -122,12 +122,12 @@
 {{/* The newest assets added to the scope, linking to the rest. */}}
 {{define "program-fresh"}}{{$p := .P}}{{with .Fresh}}
 <section class="panel fresh-list">
-  <div class="panel-head"><h2>New in scope <span class="count">{{num $.FreshTotal}}</span></h2>
+  <div class="panel-head"><h2>{{T "New in scope"}} <span class="count">{{num $.FreshTotal}}</span></h2>
     <span class="aside">added in the last 30 days{{if gt $.FreshTotal (len .)}} · <a class="link" href="?tab=scope&amp;order=added">All {{num $.FreshTotal}}, newest first →</a>{{end}}</span></div>
   <table class="fixed">
     <tbody>
     {{range .}}
-      <tr><td class="asset">{{template "asset" .Identifier}}{{if .Credentials}} <span class="chip creds" title="Test credentials available from the platform for this asset">creds</span>{{end}}</td>
+      <tr><td class="asset">{{template "asset" .Identifier}}{{if .Credentials}} <span class="chip creds" title="{{T "Test credentials available from the platform for this asset"}}">{{T "creds"}}</span>{{end}}</td>
         <td class="fl-type"><span class="chip" title="{{.PlatformAssetType}}">{{.AssetType}}</span></td>
         <td class="fl-when nowrap">{{with .AddedAt}}<span class="when{{if recent .}} fresh{{end}}" title="Added {{datetime .}}">{{date .}}</span> <span class="muted small">{{age .}}</span>{{end}}</td></tr>
     {{end}}
@@ -139,13 +139,13 @@
 {{/* The latest publicly disclosed reports, linking to the rest. */}}
 {{define "program-latest-disclosed"}}{{$p := .P}}{{with .Disclosed}}
 <section class="panel latest-disclosed">
-  <div class="panel-head"><h2>Latest disclosed <span class="count">{{num $.DisclosedSum.Total}}</span></h2>
-    <span class="aside"><a class="link" href="?tab=stats#disclosed">All, with the most common weaknesses →</a></span></div>
+  <div class="panel-head"><h2>{{T "Latest disclosed"}} <span class="count">{{num $.DisclosedSum.Total}}</span></h2>
+    <span class="aside"><a class="link" href="?tab=stats#disclosed">{{T "All, with the most common weaknesses"}} →</a></span></div>
   <table class="fixed">
     <tbody>
     {{range .}}
       <tr><td class="ld-when nowrap"><span class="when" title="disclosed {{datetime .DisclosedAt}}">{{date .DisclosedAt}}</span></td>
-        <td class="ld-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{.Severity}}</span>{{else}}<span class="zero" title="Not rated">—</span>{{end}}</td>
+        <td class="ld-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{.Severity}}</span>{{else}}<span class="zero" title="{{T "Not rated"}}">—</span>{{end}}</td>
         <td class="ld-title"><a class="link" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow"{{with .Summary}} title="{{.}}"{{end}}>{{.Title}}</a></td>
         {{if $p.OffersBounty}}<td class="ld-bounty num nowrap">{{with .Bounty}}<span title="{{amountFull . $p.Currency}}">{{amount . $p.Currency}}</span>{{end}}</td>{{end}}</tr>
     {{end}}

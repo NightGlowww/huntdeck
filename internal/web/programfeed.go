@@ -23,7 +23,11 @@ type changeFeed struct {
 }
 
 // feedShows are the feed's segments, in order.
-var feedShows = []struct{ key, label string }{{"all", "All"}, {"program", "Scope & program"}, {"announcements", "Announcements"}}
+var feedShows = []struct{ key, label string }{{"all", "All"}, {"scope", "Scope changes"}, {"program", "Scope & program"}, {"announcements", "Announcements"}}
+
+// scopeKinds are the changes to a program's scope itself: the entries added,
+// removed or edited — what a hunter usually opens the Changes tab for.
+var scopeChangeKinds = []string{store.ChangeScopeAdded, store.ChangeScopeRemoved, store.ChangeScopeUpdated}
 
 // programFeed lists up to limit of a program's newest changes for the
 // tab, showing show ("" for the tab's default).
@@ -41,11 +45,17 @@ func (s *server) programFeed(ctx context.Context, programID int64, tab, show str
 	if err != nil {
 		return f, err
 	}
-	counts := map[string]int{"all": f.AllTotal, "program": f.AllTotal - announcements, "announcements": announcements}
+	scope := all
+	scope.Kinds, scope.Limit = scopeChangeKinds, 1
+	_, scoped, err := s.Store.Changes(ctx, scope)
+	if err != nil {
+		return f, err
+	}
+	counts := map[string]int{"all": f.AllTotal, "scope": scoped, "program": f.AllTotal - announcements, "announcements": announcements}
 	if counts["program"] == 0 || announcements == 0 {
 		return f, nil
 	}
-	f.Show = oneOf(show, "", "all", "program", "announcements")
+	f.Show = oneOf(show, "", "all", "scope", "program", "announcements")
 	if f.Show == "" {
 		f.Show = "all"
 		if tab == "overview" {
@@ -57,10 +67,15 @@ func (s *server) programFeed(ctx context.Context, programID int64, tab, show str
 		prefix = "?tab=" + tab + "&"
 	}
 	for _, s := range feedShows {
+		if s.key == "scope" && counts["scope"] == 0 {
+			continue // nothing scope-shaped to switch to
+		}
 		f.Segments = append(f.Segments, scopeLink{Key: s.key, Label: s.label, Count: counts[s.key], On: s.key == f.Show,
 			URL: prefix + "feed=" + s.key})
 	}
 	switch f.Show {
+	case "scope":
+		all.Kinds = scopeChangeKinds
 	case "program":
 		all.NotKinds = []string{store.ChangeAnnouncement}
 	case "announcements":

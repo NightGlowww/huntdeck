@@ -4,46 +4,49 @@
 {{define "accounts"}}
 {{with .Restart}}
 <div class="restart-bar" data-restart role="status" aria-live="polite">
-  <svg class="i"><use href="#i-refresh"/></svg>
-  <span>{{if .Waiting}}HuntDeck restarts to use the saved settings once {{range $i, $r := .Waiting}}{{if $i}} and {{end}}the {{platformLabel $r.Platform}} {{if eq $r.Mode "web"}}browser sync{{else}}{{$r.Mode}} poll{{end}} (started <span title="{{datetime $r.StartedAt}}">{{ago $r.StartedAt}}</span>){{end}} {{if gt (len .Waiting) 1}}finish{{else}}finishes{{end}}.{{else}}Restarting HuntDeck to use the saved settings…{{end}}</span>
+  <svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>
+  <span>{{if .Waiting}}{{T "HuntDeck restarts to use the saved settings once these finish:"}} {{range $i, $r := .Waiting}}{{if $i}}{{T "and"}} {{end}}{{platformLabel $r.Platform}} {{if eq $r.Mode "web"}}{{T "browser sync"}}{{else}}{{T .Mode}} {{T "poll"}}{{end}} ({{T "started"}} <span title="{{datetime $r.StartedAt}}">{{ago $r.StartedAt}}</span>){{end}}.{{else}}{{T "Restarting HuntDeck to use the saved settings…"}}{{end}}</span>
   {{if .Waiting}}<form method="post" action="/settings/restart" class="inline">
-    <button type="submit" class="secondary small" title="Stop the running poll now. It shows as interrupted, keeps what it had saved, and the next one picks up from there">Restart now</button>
+    <button type="submit" class="secondary small" title="{{T "Stop the running poll now. It shows as interrupted, keeps what it had saved, and the next one picks up from there"}}">{{T "Restart now"}}</button>
   </form>{{end}}
 </div>
 <script src="{{static "restart.js"}}" defer></script>
 {{end}}
-{{if .Unreadable}}<p class="flash err">Some saved settings can't be decrypted: the key file <code>secret.key</code> in the data directory was lost or replaced. Until they're entered again (or reset), the values in your environment are used.</p>{{end}}
+{{if .Unreadable}}<p class="flash err">{{T "Some saved settings can't be decrypted: the key file"}} <code>secret.key</code> {{T "in the data directory was lost or replaced. Until they're entered again (or reset), the values in your environment are used."}}</p>{{end}}
 <div class="acct-grid">
 {{range .Groups}}
 <section class="panel acct" id="acct-{{.Key}}">
   <div class="panel-head"><h2>{{if .Platform}}{{template "pf" .Key}}{{else}}{{.Label}}{{end}}</h2>
-    <span class="aside">{{if not .Platform}}every platform's traffic{{else if .Polled}}polled{{else}}not set up{{end}}</span></div>
+    <span class="aside">{{if not .Platform}}{{T "every platform's traffic"}}{{else if .Polled}}{{T "polled"}}{{else}}{{T "not set up"}}{{end}}</span></div>
   {{if .SignIn}}<div class="acct-signin signins">{{range .SignIn}}{{template "signin" .}}{{end}}</div>{{end}}
   <form method="post" action="/settings/accounts" class="acct-form" autocomplete="off">
     <input type="hidden" name="group" value="{{.Key}}">
     {{range .Fields}}
     <div class="acct-field">
-      <label for="acct-{{.Name}}" class="acct-label">{{.Label}}<code>{{.Name}}</code></label>
+      <label for="acct-{{.Name}}" class="acct-label">{{T .Label}}<code>{{.Name}}</code></label>
       <div class="acct-input">
-        {{if eq .Kind "bool"}}<label class="toggle"><input type="checkbox" id="acct-{{.Name}}" name="{{.Name}}" value="true"{{if .On}} checked{{end}}> <span class="muted small">{{if .On}}on{{else}}off{{end}}</span></label>
+        {{if eq .Kind "bool"}}<label class="toggle"><input type="checkbox" id="acct-{{.Name}}" name="{{.Name}}" value="true"{{if .On}} checked{{end}}> <span class="muted small">{{if .On}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label>
         {{else if .Secret}}<input type="password" id="acct-{{.Name}}" name="{{.Name}}" autocomplete="new-password" spellcheck="false" maxlength="4096"
-          placeholder="{{if .Unreadable}}enter it again{{else if .Set}}set · type to replace{{else}}not set{{end}}">
-          {{if or .Set .Unreadable}}<label class="acct-clear small"><input type="checkbox" name="clear_{{.Name}}" value="1"> Clear</label>{{end}}
+          placeholder="{{if .Unreadable}}{{T "enter it again"}}{{else if .Set}}{{T "set · type to replace"}}{{else}}{{T "not set"}}{{end}}">
+          {{if or .Set .Unreadable}}<label class="acct-clear" title="{{T "Clear what is saved here, so this field falls back to your environment"}}">
+            <input type="checkbox" name="clear_{{.Name}}" value="1">
+            <span class="acct-clear-face"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg>{{T "Clear"}}</span>
+          </label>{{end}}
         {{else}}<input type="text" id="acct-{{.Name}}" name="{{.Name}}" value="{{.Value}}" spellcheck="false" maxlength="512"{{if eq .Kind "number"}} inputmode="decimal"{{end}}
-          placeholder="{{if .Default}}{{.Default}} (default){{else}}not set{{end}}">{{end}}
+          placeholder="{{if .Default}}{{.Default}} {{T "(default)"}}{{else}}{{T "not set"}}{{end}}">{{end}}
       </div>
-      <span class="acct-src small">{{if .Unreadable}}<span class="chip failed">can't be decrypted</span>{{else if eq .From "saved"}}<span class="chip ok" title="Saved here, encrypted{{if .EnvSet}}; it takes precedence over your environment's{{end}}">saved here</span>{{else if eq .From "env"}}<span class="chip" title="Set in your environment (.env)">.env</span>{{end}}</span>
-      {{with .Help}}<p class="acct-help muted small">{{.}}</p>{{end}}
+      <span class="acct-src small">{{if .Unreadable}}<span class="chip failed">{{T "can't be decrypted"}}</span>{{else if eq .From "saved"}}<span class="chip ok" title="{{T "Saved here, encrypted"}}{{if .EnvSet}}{{T "; it takes precedence over your environment's"}}{{end}}">{{T "saved here"}}</span>{{else if eq .From "env"}}<span class="chip" title="{{T "Set in your environment (.env)"}}">.env</span>{{end}}</span>
+      {{with .Help}}<p class="acct-help muted small">{{T .}}</p>{{end}}
     </div>
     {{end}}
     <div class="acct-actions">
-      <button type="submit" class="small">Save</button>
-      {{if .Saved}}<button type="submit" formaction="/settings/accounts/reset" class="small secondary" title="Forget what's saved here and use your environment's (.env) values">Reset to .env</button>{{end}}
+      <button type="submit" class="small">{{T "Save"}}</button>
+      {{if .Saved}}<button type="submit" formaction="/settings/accounts/reset" class="small secondary" title="{{T "Forget what's saved here and use your environment's (.env) values"}}">{{T "Reset to .env"}}</button>{{end}}
     </div>
   </form>
 </section>
 {{end}}
 </div>
-<p class="acct-foot muted small">Saved values are encrypted in the database with a key kept beside it in the data directory (<code>secret.key</code>, readable by HuntDeck only), and take precedence over your environment's (<code>.env</code>) until reset. Secrets are never shown again, and seeds and exports never include any of this. Saving restarts HuntDeck to use them once no poll is running (a few seconds), then polls that platform to sign in.
-  The listen address, data directory, allowed hosts, logging and VNC stay in <code>.env</code>: HuntDeck needs them before it starts.</p>
+<p class="acct-foot muted small">{{T "Saved values are encrypted in the database with a key kept beside it in the data directory"}} (<code>secret.key</code>{{T ", readable by HuntDeck only), and take precedence over your environment's"}} (<code>.env</code>) {{T "until reset. Secrets are never shown again, and seeds and exports never include any of this. Saving restarts HuntDeck to use them once no poll is running (a few seconds), then polls that platform to sign in."}}
+  {{T "The listen address, data directory, allowed hosts, logging and VNC stay in"}} <code>.env</code>{{T ": HuntDeck needs them before it starts."}}</p>
 {{end}}

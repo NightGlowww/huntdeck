@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"slices"
@@ -220,11 +221,21 @@ func (s *server) targets(w http.ResponseWriter, r *http.Request) {
 	case !az:
 		f.Order = store.TargetsByNewest
 	}
-	rows, total, err := list(r.Context(), f, query, perPage, (pageFrom(r)-1)*perPage)
+	t0 := time.Now()
+	// The rows of one page, memoised like the counts below: the query sorts
+	// every matching target to take the first hundred (its plan walks the
+	// kind index and de-duplicates), so a revisit should not pay that again.
+	p, err := store.Memo(r.Context(), s.Store, "targets-rows?"+facetKey(q, targetFacetParams...)+"&page="+strconv.Itoa(pageFrom(r)),
+		func(ctx context.Context) (pageRows, error) {
+			rows, total, err := list(ctx, f, query, perPage, (pageFrom(r)-1)*perPage)
+			return pageRows{rows: rows, total: total}, err
+		})
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
+	rows, total := p.rows, p.total
+	tRows := time.Since(t0)
 	tags, err := s.Store.Tags(r.Context())
 	if err != nil {
 		s.serverError(w, r, err)
@@ -236,11 +247,15 @@ func (s *server) targets(w http.ResponseWriter, r *http.Request) {
 		for i, v := range addedOptions {
 			cutoffs[i] = addedSince(v, now)
 		}
-		if facets, err = s.Store.TargetFacetsFor(r.Context(), f, query, cutoffs); err != nil {
+		if facets, err = store.Memo(r.Context(), s.Store, "target-facets?"+kindParam+"&"+facetKey(q, targetFacetParams...),
+			func(ctx context.Context) (store.TargetFacets, error) {
+				return s.Store.TargetFacetsFor(ctx, f, query, cutoffs)
+			}); err != nil {
 			s.serverError(w, r, err)
 			return
 		}
 	}
+	tFacets := time.Since(t0)
 	export := url.Values{"kind": {kindParam}, "format": {"txt"}}
 	for _, k := range []string{"q", "scope", "platform", "bounty", "private", "include_paused", "include_ignored", "tag", "added", "sort"} {
 		if v := q.Get(k); v != "" {
@@ -252,6 +267,8 @@ func (s *server) targets(w http.ResponseWriter, r *http.Request) {
 		ExportURL: "/api/v1/targets?" + export.Encode(), Platforms: s.listPlatforms(r.Context()),
 		Added: q.Get("added"), Best: best, AZ: az, Tags: tags, Facets: facets, Counted: !best, query: q,
 	}})
+	s.Log.Debug("targets served", "rows", tRows.Round(time.Millisecond), "counts", (tFacets - tRows).Round(time.Millisecond),
+		"render", (time.Since(t0) - tFacets).Round(time.Millisecond))
 }
 
 // normaliseKind accepts "wildcards" or "wildcard" etc.
@@ -266,4 +283,73 @@ func normaliseKind(k string) string {
 		}
 	}
 	return ""
+}
+
+// SortAria is a sortable heading's aria-sort: the direction the list is
+// sorted in, or nothing when it isn't sorted by that key. Targets sort
+// newest or highest first; "rev" turns bounty around.
+func (d targetsData) SortAria(key string) string {
+	if d.Best || d.AZ || d.Filter.Order != key {
+		return ""
+	}
+	descending := !d.Filter.Reverse
+	if descending {
+		return "descending"
+	}
+	return "ascending"
+}
+
+// targetFacetParams are what the Targets page's facet counts depend on: the
+// filters it reads, less the sort and page. The rest (ignored programs, tags)
+// lives in the database, whose every change starts the memo again.
+var targetFacetParams = []string{"kind", "q", "scope", "platform", "bounty", "private", "include_paused", "include_ignored", "tag", "added"}
+
+// pageRows is one page of a list, in the memo: the rows and how many match.
+type pageRows struct {
+	rows  []store.TargetRow
+	total int
+}
+
+// warmTargets fills the Targets page's first page for the two biggest kinds:
+// the same memo entries a visitor's first request would read. That query sorts
+// every matching target to take the first hundred, the slowest thing on the
+// page, and nobody should wait a second for it after a restart.
+func (s *server) warmTargets(ctx context.Context) {
+	// The kind values the rail links to (singular), so the entries match what a
+	// visitor's first click asks for.
+	for _, kind := range targetKinds {
+		q := url.Values{"kind": {kind}}
+		f := targetFilterFrom(q, s.now(ctx))
+		f.Order = store.TargetsByNewest
+		key := "targets-rows?" + facetKey(q, targetFacetParams...) + "&page=1"
+		if _, err := store.Memo(ctx, s.Store, key, func(ctx context.Context) (pageRows, error) {
+			rows, total, err := s.Store.TargetRows(ctx, f, "", 100, 0)
+			return pageRows{rows: rows, total: total}, err
+		}); err != nil {
+			s.warnWarm(ctx, err)
+			return
+		}
+		s.Log.Debug("warmed targets page", "key", key)
+	}
+}
+
+// warmTargetFacets fills the counts beside each kind, which the page works out
+// over every matching target: the first click on a kind should not pay for it.
+func (s *server) warmTargetFacets(ctx context.Context) {
+	for _, kind := range targetKinds {
+		q := url.Values{"kind": {kind}}
+		f := targetFilterFrom(q, s.now(ctx))
+		cutoffs := make([]time.Time, len(addedOptions))
+		for i, v := range addedOptions {
+			cutoffs[i] = addedSince(v, s.now(ctx))
+		}
+		if _, err := store.Memo(ctx, s.Store, "target-facets?"+kind+"&"+facetKey(q, targetFacetParams...),
+			func(ctx context.Context) (store.TargetFacets, error) {
+				return s.Store.TargetFacetsFor(ctx, f, "", cutoffs)
+			}); err != nil {
+			s.warnWarm(ctx, err)
+			return
+		}
+		s.Log.Debug("warmed target facets", "key", kind)
+	}
 }

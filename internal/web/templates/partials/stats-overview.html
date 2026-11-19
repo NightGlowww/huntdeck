@@ -5,39 +5,39 @@
 {{/* Headline tiles for all platforms, or one: only the numbers it has,
    each with its line. */}}
 {{define "ov-tiles"}}{{$a := .}}
-<section class="panel ov-tiles" aria-label="{{if $a.Platform}}{{platformLabel $a.Platform}}{{else}}All platforms{{end}}">
-  <div class="ov-tile"><span class="l">Open programs</span><span class="v">{{num $a.Open}}</span>
+<section class="panel ov-tiles" aria-label="{{if $a.Platform}}{{platformLabel $a.Platform}}{{else}}{{T "All platforms"}}{{end}}">
+  <div class="ov-tile"><span class="l">{{T "Open programs"}}</span><span class="v">{{num $a.Open}}</span>
     {{if $a.PayingLine}}<div class="ov-split">
-      <div><span class="h"><b>{{num $a.Paying}}</b> paid</span>{{template "ov-spark" $a.PayingLine}}</div>
-      <div><span class="h"><b>{{num $a.Free}}</b> free</span>{{template "ov-spark" $a.FreeLine}}</div>
-    </div>{{else}}<span class="h">{{num $a.Paying}} pay bounties</span>{{end}}</div>
-  <div class="ov-tile"><span class="l">Assets in scope</span><span class="v">{{num $a.Assets}}</span>
-    <span class="h" title="In-scope assets added and removed in the last 30 days">+{{num $a.Added30}} / −{{num $a.Removed30}} in 30 days</span>{{with $a.AssetsLine}}{{template "ov-spark" .}}{{end}}</div>
-  <div class="ov-tile"><span class="l">Added to scope</span><span class="v">{{num $a.ScopeLast}}</span>
-    <span class="h">in {{$a.Month}}</span>{{template "ov-spark" $a.ScopeAdded}}</div>
-  {{with $a.ReceivedCell}}<div class="ov-tile"><span class="l">Reports received · 90 days</span><span class="v">{{.N}}</span>
-    <span class="h" title="Every report, duplicates and N/A included">from {{num $a.ReceivedPrograms}} {{plural $a.ReceivedPrograms "program" "programs"}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
-  {{with $a.ValidCell}}<div class="ov-tile"><span class="l" title="{{validMonthTitle $a.Platform}}">Valid reports</span><span class="v">{{.N}}</span>
-    <span class="h" title="{{validMonthTitle $a.Platform}}">{{with .Also}}{{.}}{{else}}in {{$a.Month}}{{end}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
-  {{with $a.PaidCell}}<div class="ov-tile"><span class="l">Paid · 90 days</span><span class="v"{{if $a.PaidEstimated}} title="Some programs' amounts are estimated, as on the Programs list"{{end}}>{{.N}}{{with .Also}} <span class="ov-also">{{.}}</span>{{end}}</span>
-    <span class="h">from {{num $a.PaidPrograms}} {{plural $a.PaidPrograms "program" "programs"}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
+      <div><span class="h"><b>{{num $a.Paying}}</b> {{T "paid"}}</span>{{template "ov-spark" $a.PayingLine}}</div>
+      <div><span class="h"><b>{{num $a.Free}}</b> {{T "free"}}</span>{{template "ov-spark" $a.FreeLine}}</div>
+    </div>{{else}}<span class="h">{{num $a.Paying}} {{T "pay bounties"}}</span>{{end}}</div>
+  <div class="ov-tile"><span class="l">{{T "Assets in scope"}}</span><span class="v">{{num $a.Assets}}</span>
+    <span class="h" title="{{T "In-scope assets added and removed in the last 30 days"}}">+{{num $a.Added30}} / −{{num $a.Removed30}} {{T "in 30 days"}}</span>{{with $a.AssetsLine}}{{template "ov-spark" .}}{{end}}</div>
+  <div class="ov-tile"><span class="l">{{T "Added to scope"}}</span><span class="v">{{num $a.ScopeLast}}</span>
+    <span class="h">{{T "in"}} {{T $a.Month}}</span>{{template "ov-spark" $a.ScopeAdded}}</div>
+  {{with $a.ReceivedCell}}<div class="ov-tile"><span class="l">{{T "Reports received"}} · 90</span><span class="v">{{.N}}</span>
+    <span class="h" title="{{T "Every report, duplicates and N/A included"}}">{{T "from"}} {{num $a.ReceivedPrograms}} {{plural $a.ReceivedPrograms "program" "programs"}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
+  {{with $a.ValidCell}}<div class="ov-tile"><span class="l" title="{{validMonthTitle $a.Platform}}">{{T "Valid reports"}}</span><span class="v">{{.N}}</span>
+    <span class="h" title="{{validMonthTitle $a.Platform}}">{{with .Also}}{{.}}{{else}}{{T "in"}} {{T $a.Month}}{{end}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
+  {{with $a.PaidCell}}<div class="ov-tile"><span class="l">{{T "Paid"}} · 90</span><span class="v"{{if $a.PaidEstimated}} title="{{T "Some programs' amounts are estimated, as on the Programs list"}}"{{end}}>{{.N}}{{with .Also}} <span class="ov-also">{{.}}</span>{{end}}</span>
+    <span class="h">{{T "from"}} {{num $a.PaidPrograms}} {{plural $a.PaidPrograms "program" "programs"}}</span>{{with .Chart}}{{template "ov-spark" .}}{{else}}{{template "ov-collecting" .Wait}}{{end}}</div>{{end}}
 </section>
 {{end}}
 
 {{/* The Stats page's tiles: what the table's totals don't show, for all
    platforms. */}}
 {{define "ov-highlights"}}{{$a := .}}
-<section class="panel ov-tiles ov-highlights" aria-label="All platforms">
-  {{with $a.PayingLine}}<div class="ov-tile"><span class="l">Paid programs</span><span class="v">{{num $a.Paying}}</span>
-    <span class="h">open, paying bounties</span>{{template "ov-spark" .}}</div>{{end}}
-  {{with $a.FreeLine}}<div class="ov-tile"><span class="l">Free programs</span><span class="v">{{num $a.Free}}</span>
-    <span class="h">open, no bounties</span>{{template "ov-spark" .}}</div>{{end}}
-  {{with $a.ScopeProgramsLine}}<div class="ov-tile"><span class="l">New scope</span><span class="v">{{num $a.ScopePrograms}}</span>
-    <span class="h" title="Programs that added in-scope assets, by the date the platform gives">{{plural $a.ScopePrograms "program" "programs"}} that added scope in {{$a.Month}}</span>{{template "ov-spark" .}}</div>{{end}}
-  {{with $a.WildcardsLine}}<div class="ov-tile"><span class="l">Wildcards in scope</span><span class="v">{{num $a.Wildcards}}</span>
-    <span class="h">of {{num $a.Assets}} assets</span>{{template "ov-spark" .}}</div>{{end}}
-  {{with $a.DisclosedLine}}<div class="ov-tile"><span class="l">Disclosed reports</span><span class="v">{{num $a.Disclosed}}</span>
-    <span class="h" title="Reports made public on the platforms' disclosure feeds">in {{$a.Month}}</span>{{template "ov-spark" .}}</div>{{end}}
+<section class="panel ov-tiles ov-highlights" aria-label="{{T "All platforms"}}">
+  {{with $a.PayingLine}}<div class="ov-tile"><span class="l">{{T "Paid programs"}}</span><span class="v">{{num $a.Paying}}</span>
+    <span class="h">{{T "open, paying bounties"}}</span>{{template "ov-spark" .}}</div>{{end}}
+  {{with $a.FreeLine}}<div class="ov-tile"><span class="l">{{T "Free programs"}}</span><span class="v">{{num $a.Free}}</span>
+    <span class="h">{{T "open, no bounties"}}</span>{{template "ov-spark" .}}</div>{{end}}
+  {{with $a.ScopeProgramsLine}}<div class="ov-tile"><span class="l">{{T "New scope"}}</span><span class="v">{{num $a.ScopePrograms}}</span>
+    <span class="h" title="{{T "Programs that added in-scope assets, by the date the platform gives"}}">{{TF "%s %s added scope in %s" (num $a.ScopePrograms) (plural $a.ScopePrograms "program" "programs") (T $a.Month)}}</span>{{template "ov-spark" .}}</div>{{end}}
+  {{with $a.WildcardsLine}}<div class="ov-tile"><span class="l">{{T "Wildcards in scope"}}</span><span class="v">{{num $a.Wildcards}}</span>
+    <span class="h">{{T "of"}} {{num $a.Assets}} {{T "assets"}}</span>{{template "ov-spark" .}}</div>{{end}}
+  {{with $a.DisclosedLine}}<div class="ov-tile"><span class="l">{{T "Disclosed reports"}}</span><span class="v">{{num $a.Disclosed}}</span>
+    <span class="h" title="{{T "Reports made public on the platforms' disclosure feeds"}}">{{T "in"}} {{T $a.Month}}</span>{{template "ov-spark" .}}</div>{{end}}
 </section>
 {{end}}
 
@@ -47,22 +47,22 @@
 {{/* What a line's colour and dashes mean, under the Stats pages' tables. */}}
 {{define "ov-legend"}}<div class="ov-legend">
   <ul>
-    <li>{{template "ov-swatch" "good"}} Going up</li>
-    <li>{{template "ov-swatch" "bad"}} Going down</li>
-    <li>{{template "ov-swatch" "flat"}} Changed under 5%</li>
-    <li><span class="tchart flat"><svg viewBox="0 0 20 10" aria-hidden="true"><path class="line rest" d="M1 7 L19 3"/></svg></span> This month so far</li>
-    <li><span class="zero">—</span> The platform doesn't share this</li>
-    <li><b>≈</b> Estimated, at least in part</li>
+    <li>{{template "ov-swatch" "good"}} {{T "Going up"}}</li>
+    <li>{{template "ov-swatch" "bad"}} {{T "Going down"}}</li>
+    <li>{{template "ov-swatch" "flat"}} {{T "Changed under 5%"}}</li>
+    <li><span class="tchart flat"><svg viewBox="0 0 20 10" aria-hidden="true"><path class="line rest" d="M1 7 L19 3"/></svg></span> {{T "This month so far"}}</li>
+    <li><span class="zero">—</span> {{T "The platform doesn't share this"}}</li>
+    <li><b>≈</b> {{T "Estimated, at least in part"}}</li>
   </ul>
-  <p>Days to resolve is green when it gets quicker. Monthly numbers compare their last three months with the three before; open programs and assets, this month with a year ago; 90-day totals, today with 90 days earlier. Lines start with the first day or month HuntDeck has, so some are short. Hover a line for each point, and see <a href="/methodology#stats">Methodology</a> for where each number comes from and how the estimates are made.</p>
+  <p>{{T "Days to resolve is green when it gets quicker. Monthly numbers compare their last three months with the three before; open programs and assets, this month with a year ago; 90-day totals, today with 90 days earlier. Lines start with the first day or month HuntDeck has, so some are short. Hover a line for each point, and see"}} <a href="/methodology#stats">{{T "Methodology"}}</a> {{T "for where each number comes from and how the estimates are made."}}</p>
 </div>{{end}}
 
 {{define "ov-swatch"}}<span class="tchart {{.}}"><svg viewBox="0 0 20 10" aria-hidden="true"><path class="line" d="M1 {{if eq . "bad"}}3 L19 7{{else if eq . "good"}}7 L19 3{{else}}5 L19 5{{end}}"/></svg></span>{{end}}
 
-{{define "ov-none"}}<span class="zero" title="{{if .}}{{platformLabel .}} doesn't share this{{else}}No platform shares this{{end}}">—</span>{{end}}
+{{define "ov-none"}}<span class="zero" title="{{if .}}{{TF "%s doesn't share this" (platformLabel .)}}{{else}}{{T "No platform shares this"}}{{end}}">—</span>{{end}}
 
 
-{{define "ov-collecting"}}{{with .}}<span class="ov-wait" title="The line starts once enough of it is saved">line from {{.}}</span>{{end}}{{end}}
+{{define "ov-collecting"}}{{with .}}<span class="ov-wait" title="{{T "The line starts once enough of it is saved"}}">{{T "line from"}} {{.}}</span>{{end}}{{end}}
 
 {{/* A sparkline (lineChart) with its first and last month or day under it. */}}
 {{define "ov-spark"}}<div class="ov-spark"><span class="tchart {{.Tone}}" data-days="{{.Days}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{.Label}}">

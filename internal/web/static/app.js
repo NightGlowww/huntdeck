@@ -8,6 +8,8 @@ document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-copy], [data-copy-text], [data-copy-list], [data-copy-url]");
   if (!btn) return;
   if (btn.dataset.copyUrl) {
+    // A whole list can take a moment to arrive: say so instead of looking dead.
+    busyLabel(btn, t("Copying…"));
     const got = fetch(btn.dataset.copyUrl, { headers: { Accept: "text/plain" } })
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status))))
       .then((t) => t.trim() + "\n");
@@ -16,7 +18,7 @@ document.addEventListener("click", (e) => {
     const write = window.ClipboardItem
       ? navigator.clipboard.write([new ClipboardItem({ "text/plain": got.then((t) => new Blob([t], { type: "text/plain" })) })])
       : got.then((t) => navigator.clipboard.writeText(t));
-    write.then(() => copied(btn), () => copied(btn, "Couldn't copy"));
+    write.then(() => copied(btn), () => copied(btn, t("Couldn't copy")));
     return;
   }
   let text;
@@ -34,8 +36,20 @@ document.addEventListener("click", (e) => {
   navigator.clipboard.writeText(text.trim() + "\n").then(() => copied(btn));
 });
 
+// busyLabel says what a button is doing while it waits, on its label or its
+// own text. Nothing is remembered: copied() replaces it with the outcome.
+function busyLabel(btn, say) {
+	const label = btn.querySelector(".label");
+	if (label) {
+		label.textContent = say;
+		return;
+	}
+	btn.dataset.busyWas = btn.textContent;
+	btn.textContent = say;
+}
+
 // copied says so on the button: in its label, or by a mark on an icon.
-function copied(btn, say = "Copied") {
+function copied(btn, say = t("Copied")) {
   const label = btn.querySelector(".label");
   if (!label) {
     btn.classList.add("copied");
@@ -61,7 +75,7 @@ document.addEventListener("change", (e) => {
   const bar = list.querySelector("[data-selbar]");
   if (bar) {
     bar.hidden = n === 0;
-    bar.querySelector("[data-selcount]").textContent = n + " selected";
+    bar.querySelector("[data-selcount]").textContent = t("%s selected", n);
   }
   const all = list.querySelector("[data-select-all]");
   if (all) {
@@ -76,6 +90,26 @@ document.addEventListener("submit", (e) => {
   if (msg && !window.confirm(msg)) e.preventDefault();
 });
 
+// A form on its way: mark it busy and stop a second click from sending it
+// twice. The button is disabled on the next tick, after this submit has taken
+// its value, and restored if the page comes back from the back/forward cache.
+document.addEventListener("submit", (e) => {
+  const form = e.target;
+  if (e.defaultPrevented || form.dataset.noBusy !== undefined) return;
+  const btn = form.querySelector('button[type="submit"]:not([form])');
+  if (!btn || btn.disabled) return;
+  form.setAttribute("aria-busy", "true");
+  btn.classList.add("is-busy");
+  setTimeout(() => { btn.disabled = true; }, 0);
+});
+window.addEventListener("pageshow", () => {
+  for (const btn of document.querySelectorAll(".is-busy")) {
+    btn.classList.remove("is-busy");
+    btn.disabled = false;
+    if (btn.form) btn.form.removeAttribute("aria-busy");
+  }
+});
+
 // Theme: the top bar's menu sets light or dark ("system" follows the
 // system) and the palette; Settings' picker sets the palette too. Both are
 // kept in this browser (theme.js applies them on later pages) and every
@@ -85,7 +119,7 @@ document.addEventListener("submit", (e) => {
   const menu = document.querySelector("[data-theme-menu]");
   const settings = document.querySelector("[data-palettes]");
   const dark = window.matchMedia("(prefers-color-scheme: dark)");
-  const names = { system: "System", light: "Light", dark: "Dark" };
+  const names = { system: t("System"), light: t("Light"), dark: t("Dark") };
   const mode = () => root.dataset.theme || "system";
   const palette = () => root.dataset.palette || "midnight";
   const save = (key, v) => { try { localStorage.setItem(key, v); } catch (e) { /* ignore */ } };
@@ -96,7 +130,7 @@ document.addEventListener("submit", (e) => {
     const btn = menu.querySelector("[data-theme-toggle]");
     const scheme = mode() === "system" ? names.system + " · " + (dark.matches ? "dark" : "light") : names[mode()];
     const pal = document.querySelector('input[name="tm-palette"]:checked');
-    btn.title = "Theme: " + scheme + (pal ? ", " + pal.closest("label").querySelector(".tm-name").firstChild.textContent : "");
+    btn.title = t("Theme: %s", scheme + (pal ? ", " + pal.closest("label").querySelector(".tm-name").firstChild.textContent : ""));
     for (const icon of btn.querySelectorAll("[data-icon]")) icon.toggleAttribute("hidden", icon.dataset.icon !== mode()); // SVG: an attribute, not .hidden
   };
   document.addEventListener("change", (e) => {
@@ -138,7 +172,7 @@ if (document.documentElement.hasAttribute("data-read-only")) {
     if (f.action.endsWith("/api/v1/match")) continue; // only reads
     for (const el of f.elements) {
       el.disabled = true;
-      el.title = "Not available in this demo";
+      el.title = t("Not available in this demo");
     }
   }
 }
@@ -179,9 +213,15 @@ document.addEventListener("click", (e) => {
 (() => {
   const box = document.getElementById("omni");
   if (!box) return;
+  // The box you searched with shows the words, so they can be read, edited
+  // and cleared from the same place on every page.
+  if (!box.value) {
+    const q = new URLSearchParams(location.search).get("q");
+    if (q) box.value = q;
+  }
   const long = box.placeholder;
   const narrow = matchMedia("(max-width: 700px)");
-  const fit = () => { box.placeholder = narrow.matches ? "Search, or paste a host" : long; };
+  const fit = () => { box.placeholder = narrow.matches ? t("Search, or paste a host") : long; };
   fit();
   narrow.addEventListener("change", fit);
 })();
@@ -326,6 +366,17 @@ for (const btn of document.querySelectorAll("[data-filters-toggle]")) {
     } catch (e) { /* storage blocked: for this page only */ }
     sync();
   });
+  // Escape folds the rail away again, focus back on its button: the panel
+  // sits at the top of the page, where a keyboard user starts.
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || e.defaultPrevented) return;
+    if (root.dataset.filters !== "open") return;
+    if (e.target.closest("input, textarea, select, [contenteditable]")) return;
+    delete root.dataset.filters;
+    try { localStorage.removeItem("huntdeck-filters"); } catch (err) { /* storage blocked */ }
+    sync();
+    btn.focus();
+  });
 }
 
 // Selects with data-autosubmit apply at once; their form's button is only
@@ -370,9 +421,24 @@ for (const input of document.querySelectorAll("input[data-filter-rows]")) {
   const table = document.querySelector(input.dataset.filterRows);
   if (!table) continue;
   const rows = [...table.tBodies].flatMap((b) => [...b.rows]);
+  // Hiding rows silently made a filter that matches nothing look like an
+  // empty list: say how many are left, and let a screen reader hear it.
+  let status = input.parentElement && input.parentElement.querySelector(".filter-count");
+  if (!status) {
+    status = document.createElement("span");
+    status.className = "filter-count muted small";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    input.insertAdjacentElement("afterend", status);
+  }
   input.addEventListener("input", () => {
     const q = input.value.trim().toLowerCase();
-    for (const tr of rows) tr.hidden = q !== "" && !tr.textContent.toLowerCase().includes(q);
+    let shown = 0;
+    for (const tr of rows) {
+      tr.hidden = q !== "" && !tr.textContent.toLowerCase().includes(q);
+      if (!tr.hidden) shown++;
+    }
+    status.textContent = q === "" ? "" : t("%d of %d shown", shown, rows.length);
   });
 }
 
@@ -382,10 +448,15 @@ for (const toc of document.querySelectorAll("[data-toc]")) {
   const links = [...toc.querySelectorAll('a[href^="#"]')];
   const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
   if (!targets.length) continue;
+  // A hidden section (the API page filters them) reports a zero rect, which
+  // would make it look like the section at the top of the page.
+  const shown = (el) => el.getClientRects().length > 0 && !el.hidden;
   const mark = () => {
     const line = 96; // just under the top bar
-    let current = targets[0];
-    for (const t of targets) if (t.getBoundingClientRect().top <= line) current = t;
+    const live = targets.filter(shown);
+    if (!live.length) return;
+    let current = live[0];
+    for (const t of live) if (t.getBoundingClientRect().top <= line) current = t;
     for (const a of links) {
       const on = a.hash.slice(1) === current.id;
       a.classList.toggle("on", on);
@@ -412,6 +483,7 @@ for (const toc of document.querySelectorAll("[data-toc]")) {
 // do, without sending this page as the referrer. Selecting text doesn't
 // count as a click.
 function rowLink(e) {
+  if (document.documentElement.dataset.longpress) return; // the click after a hold
   const row = e.target.closest("tr[data-href], .nrow[data-href]");
   if (!row || e.target.closest("a, button, input, select, textarea, summary, label, [data-norow]")) return;
   if (row.closest(".board.editing")) return; // arranging the hunt board
@@ -449,3 +521,505 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
   };
   setTimeout(tick, every);
 }
+
+// A short status line for things that leave no trace on the page: copying,
+// or a download starting. Screen readers hear it too (role=status).
+(() => {
+  let el, timer;
+  window.hdToast = (msg) => {
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "toast";
+      el.setAttribute("role", "status");
+      el.setAttribute("aria-live", "polite");
+      document.body.append(el);
+    }
+    el.textContent = msg;
+    el.classList.add("on");
+    clearTimeout(timer);
+    timer = setTimeout(() => el.classList.remove("on"), 2400);
+  };
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-export]");
+    if (!a) return;
+    hdToast(t("Download started"));
+  });
+})();
+// Forms say what's wrong where it's wrong: a message under the field, in
+// the page's language, focus on the first one; and a submit that passes
+// marks its button busy so a double click can't post twice.
+(() => {
+  const message = (field) => {
+    if (field.validity.valueMissing) return t("This field is required.");
+    if (field.validity.typeMismatch) return t("That doesn't look like a valid value.");
+    if (field.validity.patternMismatch) return t("Check the format of this value.");
+    if (field.validity.rangeUnderflow || field.validity.rangeOverflow) return t("This value is out of range.");
+    return t("Check this value.");
+  };
+  const show = (field) => {
+    field.setAttribute("aria-invalid", "true");
+    let note = field.parentElement.querySelector(".field-error");
+    if (!note) {
+      note = document.createElement("p");
+      note.className = "field-error";
+      note.setAttribute("role", "alert");
+      field.insertAdjacentElement("afterend", note);
+    }
+    note.textContent = message(field);
+  };
+  const clear = (field) => {
+    field.removeAttribute("aria-invalid");
+    const note = field.parentElement?.querySelector(".field-error");
+    if (note) note.remove();
+  };
+  document.addEventListener("invalid", (e) => show(e.target), true);
+  document.addEventListener("input", (e) => {
+    if (e.target.willValidate && e.target.checkValidity()) clear(e.target);
+  }, true);
+  document.addEventListener("submit", (e) => {
+    const form = e.target;
+    if (form.dataset.noPending !== undefined) return;
+    // After the dispatch: a form that was cancelled (a confirm dismissed, a
+    // validation failure) keeps its button as it was, and a button's own
+    // name and value still reach the server before it is disabled.
+    setTimeout(() => {
+      if (e.defaultPrevented) return;
+      const btn = form.querySelector('button[type="submit"]:not([form])') || form.querySelector('button[type="submit"]');
+      if (!btn || btn.disabled) return;
+      btn.dataset.label = btn.textContent;
+      btn.textContent = form.dataset.busy || t("Saving…");
+      btn.setAttribute("aria-busy", "true");
+      setTimeout(() => { btn.disabled = true; }, 0);
+      // A form that comes back to the same page (an error, a message) gets its
+      // button back after a moment. One that navigates away keeps saying what
+      // it is doing: an invite the server takes up to 40 s over must not offer
+      // a button that no longer answers.
+      if (form.dataset.stayBusy === undefined) {
+        setTimeout(() => { btn.disabled = false; btn.removeAttribute("aria-busy"); btn.textContent = btn.dataset.label || btn.textContent; }, 8000);
+      }
+    }, 0);
+  });
+})();
+
+// The Programs list's selection bar: ignore the ticked programs in one go.
+(() => {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-ignore-selected]");
+    if (!btn) return;
+    const table = document.querySelector("#programs-list");
+    const refs = table ? [...table.querySelectorAll("input.pick:checked")].map((i) => i.value) : [];
+    if (!refs.length) return;
+    const to = btn.dataset.ignoreTo || "1";
+    const ask = to === "1"
+      ? t("Ignore %s programs? They leave the lists, picks and alerts; their pages stay.", refs.length)
+      : t("Unignore %s programs? They come back to the lists, picks and alerts.", refs.length);
+    if (!window.confirm(ask)) return;
+    const form = document.createElement("form");
+    form.method = "post";
+    form.action = "/programs/ignore";
+    const add = (name, value) => {
+      const i = document.createElement("input");
+      i.type = "hidden";
+      i.name = name;
+      i.value = value;
+      form.append(i);
+    };
+    for (const ref of refs) add("p", ref);
+    add("ignored", to);
+    add("back", location.pathname + location.search);
+    document.body.append(form);
+    form.requestSubmit();
+  });
+})();
+
+// A finger's way into a list's selection: press and hold a row to tick it,
+// since the box itself is small on a phone. A press that moves is a scroll
+// and is left alone, and the click that follows the hold doesn't open the row.
+(() => {
+  if (!matchMedia("(pointer: coarse)").matches) return;
+  let timer = null;
+  let start = null;
+  document.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse") return;
+    const row = e.target.closest("tr[data-href]");
+    const box = row && row.querySelector("input.pick");
+    if (!box) return;
+    start = [e.clientX, e.clientY];
+    timer = setTimeout(() => {
+      timer = null;
+      box.checked = !box.checked;
+      box.dispatchEvent(new Event("change", { bubbles: true }));
+      row.classList.add("longpress");
+      setTimeout(() => row.classList.remove("longpress"), 260);
+      document.documentElement.dataset.longpress = "1";
+      setTimeout(() => delete document.documentElement.dataset.longpress, 700);
+      if (navigator.vibrate) navigator.vibrate(12);
+    }, 480);
+  });
+  document.addEventListener("pointermove", (e) => {
+    if (!timer || !start) return;
+    if (Math.abs(e.clientX - start[0]) > 8 || Math.abs(e.clientY - start[1]) > 8) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  });
+  const stop = () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+    start = null;
+  };
+  document.addEventListener("pointerup", stop);
+  document.addEventListener("pointercancel", stop);
+  document.addEventListener("contextmenu", (e) => {
+    if (e.target.closest("tr[data-href] input.pick")) e.preventDefault();
+  });
+  // The click a finger sends when it lifts would open the row (or a link in
+  // it): right after a hold it does nothing.
+  document.addEventListener("click", (e) => {
+    if (!document.documentElement.dataset.longpress) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+})();
+// Back to the top: shown once a long page has been scrolled a screenful,
+// and smooth unless the system asks for less motion.
+(() => {
+  const btn = document.querySelector("[data-to-top]");
+  if (!btn) return;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+  const sync = () => { btn.hidden = window.scrollY < 700; };
+  sync();
+  addEventListener("scroll", sync, { passive: true });
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: reduced.matches ? "auto" : "smooth" });
+    const main = document.getElementById("main");
+    if (main) main.focus({ preventScroll: true });
+  });
+})();
+
+// A page on its way: a thin bar under the top bar, after a moment, because a
+// cold page can take half a second and every filter, sort and pager here is a
+// plain link. Fast pages never show it.
+(() => {
+  const bar = document.createElement("div");
+  bar.id = "navbar";
+  document.body.append(bar);
+  let timer;
+  document.addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest("a[href]");
+    if (!a || a.target || a.hasAttribute("download")) return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname && url.search === location.search) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => bar.classList.add("on"), 150);
+  }, true);
+  addEventListener("pageshow", () => { clearTimeout(timer); bar.classList.remove("on"); });
+})();
+
+// Relative times are painted once by the server. Tick them, so a page left
+// open does not keep saying "5m ago" an hour later, and keep the 7-day fresh
+// highlight honest as it expires.
+(() => {
+  const at = document.querySelectorAll("[data-at]");
+  if (!at.length) return;
+  const say = (s) => {
+    if (s < 60) return t("just now");
+    const m = Math.floor(s / 60);
+    if (m < 60) return t("%dm ago", m);
+    const h = Math.floor(m / 60);
+    if (h < 48) return t("%dh ago", h);
+    return t("%dd ago", Math.floor(h / 24));
+  };
+  const tick = () => {
+    const now = Date.now();
+    for (const el of document.querySelectorAll("[data-at]")) {
+      const when = Date.parse(el.dataset.at);
+      if (Number.isNaN(when)) continue;
+      const text = say((now - when) / 1000);
+      // data-ago is the opt-in for rewriting the text: a feed row shows the
+      // date there and only wants its 7-day mark kept honest.
+      // data-ago marks what may be rewritten: on the element itself, or on its
+      // .when child (the board's "last checked" spans mark the child).
+      const child = el.querySelector(".when");
+      const relative = el.hasAttribute("data-ago") || (child !== null && child.hasAttribute("data-ago"));
+      const cell = el.matches(".when") ? el : el.querySelector(".when") ||
+        (el.childElementCount === 0 ? el : null);
+      if (cell) {
+        if (relative) cell.textContent = text;
+        cell.classList.toggle("fresh", now - when < 7 * 86400000);
+      }
+    }
+  };
+  tick();
+  setInterval(tick, 30000);
+})();
+
+// A poll runs in the background: watch /api/v1/status while the page is visible
+// and show a small pill when one is in flight. Fifteen seconds is cheap (the
+// route is one query) and stops entirely when the tab is hidden.
+(() => {
+  const pill = document.querySelector("[data-poll-watch]");
+  if (!pill) return;
+  const check = async () => {
+    try {
+      const res = await fetch("/api/v1/status", { headers: { Accept: "application/json" } });
+      if (!res.ok) {
+        window.hdConn?.fail();
+        return;
+      }
+      window.hdConn?.ok();
+      const d = await res.json();
+      const running = (d.last_polls || []).some((p) => p.started_at && !p.finished_at);
+      pill.hidden = !running;
+    } catch {
+      window.hdConn?.fail();
+    }
+  };
+  check();
+  setInterval(() => { if (!document.hidden) check(); }, 15000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) check(); });
+})();
+
+// When a poll finishes while a page is open, its numbers are stale: say so and
+// let the reader reload, instead of reloading under their cursor. The baseline
+// is the newest poll at load, so the page's own poll never counts as new.
+(() => {
+  const hint = document.querySelector("[data-reload-hint]");
+  if (!hint) return;
+  let baseline = null;
+  const newest = (d) => {
+    let t = 0;
+    for (const p of d.last_polls || []) {
+      if (!p.finished_at) continue;
+      const at = Date.parse(p.finished_at);
+      if (at > t) t = at;
+    }
+    return t;
+  };
+  const check = async () => {
+    try {
+      const res = await fetch("/api/v1/status", { headers: { Accept: "application/json" } });
+      if (!res.ok) {
+        window.hdConn?.fail();
+        return;
+      }
+      window.hdConn?.ok();
+      const t = newest(await res.json());
+      if (!t) return;
+      if (baseline === null) {
+        baseline = t;
+        return;
+      }
+      // Half a minute of slack: the page's own poll may be the one that
+      // produced what it is showing.
+      hint.hidden = !(t > baseline + 30000);
+    } catch {
+      /* offline or signed out: leave the hint as it is */
+    }
+  };
+  check();
+  setInterval(() => { if (!document.hidden) check(); }, 30000);
+})();
+// A select that submits itself hides its button, but only once the script is
+// running: without JS the button is the only way to apply the choice.
+(() => {
+  for (const form of document.querySelectorAll("form:has([data-autosubmit])")) {
+    const button = form.querySelector("[data-autosubmit-button]");
+    if (button) button.hidden = true;
+  }
+})();
+
+// The filter rail scrolls on its own on wide screens. Clicking a chip reloads the
+// page, which used to put the rail back at the top and hide the chip you just
+// set; keep where it was, and on a first visit bring the active chips into view.
+(() => {
+  const rail = document.querySelector(".plist > .facets");
+  if (!rail) return;
+  const key = "huntdeck-rail:" + location.pathname;
+  let saved = null;
+  try { saved = sessionStorage.getItem(key); } catch { /* private mode */ }
+  if (saved !== null) {
+    rail.scrollTop = Number(saved);
+  } else {
+    const on = rail.querySelectorAll(".fgroups .fc.on");
+    const last = on.length ? on[on.length - 1] : null;
+    if (last) last.scrollIntoView({ block: "nearest" });
+  }
+  rail.addEventListener("scroll", () => {
+    try { sessionStorage.setItem(key, String(rail.scrollTop)); } catch { /* private mode */ }
+  }, { passive: true });
+})();
+
+// The deliveries list shows a queue: it fills and empties while the page is
+// open. Re-fetch it quietly every half minute and swap the table only when it
+// changed, so a waiting row turns into "sent" without a reload.
+(() => {
+  const box = document.querySelector("#deliveries[data-refresh]");
+  if (!box) return;
+  const every = Number(box.dataset.refresh || 30) * 1000;
+  const swap = async () => {
+    if (document.hidden) return;
+    try {
+      const res = await fetch(location.href, { credentials: "same-origin" });
+      if (!res.ok) return;
+      const html = await res.text();
+      const fresh = new DOMParser().parseFromString(html, "text/html").querySelector("#deliveries");
+      if (fresh && fresh.innerHTML !== box.innerHTML) box.innerHTML = fresh.innerHTML;
+    } catch {
+      /* offline or signed out: try again next time */
+    }
+  };
+  setInterval(swap, every);
+})();
+
+// The API page lists every endpoint: 40 of them is a scroll, 80 is a search
+// problem. The box narrows the nav and the sections together, and says how many
+// are left.
+(() => {
+  const box = document.querySelector("input[data-filter-api]");
+  if (!box) return;
+  const nav = box.closest(".apinav");
+  const count = nav.querySelector(".filter-count");
+  const links = [...nav.querySelectorAll('a[href^="#"]:not(.an-top):not(.an-spec)')];
+  const groups = [...nav.querySelectorAll(".an-g")];
+  const sections = [...document.querySelectorAll(".eps > section[id], .eps > h2.apigroup")];
+  const apply = () => {
+    const q = box.value.trim().toLowerCase();
+    let shown = 0;
+    for (const a of links) {
+      const id = a.getAttribute("href").slice(1);
+      const sec = document.getElementById(id);
+      const hit = q === "" || a.textContent.toLowerCase().includes(q) || (sec && sec.textContent.toLowerCase().includes(q));
+      a.hidden = !hit;
+      if (sec && sec.classList.contains("ep")) sec.hidden = !hit;
+      if (hit) shown++;
+    }
+    for (const g of groups) {
+      let any = false;
+      for (let n = g.nextElementSibling; n && !n.classList.contains("an-g"); n = n.nextElementSibling) {
+        if (n.tagName === "A" && !n.hidden) any = true;
+      }
+      g.hidden = !any;
+    }
+    for (const s of sections) {
+      if (s.tagName !== "H2") continue;
+      let any = false;
+      for (let n = s.nextElementSibling; n && !n.classList.contains("apigroup"); n = n.nextElementSibling) {
+        if (n.classList.contains("ep") && !n.hidden) any = true;
+      }
+      s.hidden = !any;
+    }
+    if (q === "") {
+      count.hidden = true;
+      count.textContent = "";
+      return;
+    }
+    count.hidden = false;
+    count.textContent = t("%d of %d endpoints", shown, links.length);
+  };
+  box.addEventListener("input", apply);
+})();
+
+// A page that refreshes itself (the board's reload pill, the deliveries list,
+// the relative times) is confusing when the network is gone: everything quietly
+// stops. Say so, and say when it is back.
+(() => {
+  if (!("onLine" in navigator)) return;
+  const bar = document.createElement("div");
+  bar.className = "offline-bar";
+  bar.setAttribute("role", "status");
+  bar.setAttribute("aria-live", "polite");
+  bar.hidden = true;
+  bar.textContent = t("You are offline: this page cannot refresh until the connection is back.");
+  document.body.append(bar);
+  const sync = () => { bar.hidden = navigator.onLine; };
+  addEventListener("online", sync);
+  addEventListener("offline", sync);
+  sync();
+})();
+
+// Background checks (the poll pill, the reload hint, the deliveries list) fail
+// silently when the instance is restarting or unreachable: the page looks fine
+// and simply stops updating. Two failures in a row raise the same bar the
+// offline notice uses; one success clears it.
+(() => {
+  let misses = 0;
+  const bar = () => document.querySelector(".offline-bar");
+  const show = (text) => {
+    const b = bar();
+    if (!b) return;
+    b.textContent = text;
+    b.hidden = false;
+  };
+  const clear = () => {
+    const b = bar();
+    if (!b) return;
+    b.textContent = t("You are offline: this page cannot refresh until the connection is back.");
+    b.hidden = navigator.onLine;
+  };
+  window.hdConn = {
+    ok() {
+      misses = 0;
+      clear();
+    },
+    fail() {
+      misses++;
+      if (misses < 2) return;
+      show(t("Cannot reach HuntDeck: the last few checks failed. Is it restarting?"));
+    },
+  };
+})();
+
+// The search box's tooltip says "? for every shortcut" and nothing answered it:
+// a promise in the interface with no feature behind it. This is the list, and it
+// only names keys that exist.
+(() => {
+	const rows = [
+		["/", t("Focus the search box")],
+		["Esc", t("Close a menu, the mobile navigation or a dialog")],
+		["g then a letter", t("Open a page: h board, q queue, p programs, t targets, c changes, d disclosed, s settings, a API")],
+		["?", t("This list")],
+	];
+	const dlg = document.createElement("dialog");
+	dlg.className = "keyhelp";
+	dlg.innerHTML = "<h2>" + t("Keyboard") + "</h2><dl>" +
+		rows.map(([k, d]) => "<dt><kbd>" + k + "</kbd></dt><dd>" + d + "</dd>").join("") +
+		"</dl><form method=\"dialog\"><button class=\"button small\">" + t("Close") + "</button></form>";
+	document.body.append(dlg);
+	document.addEventListener("keydown", (e) => {
+		if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey) return;
+		const tag = (document.activeElement && document.activeElement.tagName || "").toLowerCase();
+		if (tag === "input" || tag === "textarea" || tag === "select") return;
+		e.preventDefault();
+		if (!dlg.open) dlg.showModal();
+	});
+})();
+
+// g then a letter opens a page, as the keyboard section of the docs has said
+// for a while without the handler existing. The window is short enough that a
+// stray g while typing is not a navigation.
+(() => {
+	const pages = {
+		h: "/", q: "/queue", p: "/programs", t: "/targets",
+		c: "/changes", d: "/disclosed", s: "/settings", a: "/api",
+	};
+	let waiting = 0;
+	document.addEventListener("keydown", (e) => {
+		if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+		const tag = (document.activeElement && document.activeElement.tagName || "").toLowerCase();
+		if (tag === "input" || tag === "textarea" || tag === "select") return;
+		if (document.querySelector("dialog[open]")) return;
+		if (e.key === "g") {
+			waiting = Date.now();
+			return;
+		}
+		if (!waiting || Date.now() - waiting > 800) return;
+		const to = pages[e.key.toLowerCase()];
+		waiting = 0;
+		if (!to) return;
+		e.preventDefault();
+		location.assign(to);
+	});
+})();

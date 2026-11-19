@@ -153,32 +153,34 @@
   };
   for (const b of boxes) {
     const tools = el("div", "bx-bar");
-    const grip = el("button", "bx-grip", "Drag to move " + b.dataset.title +
-      ". Arrow keys move it; Shift with an arrow key resizes it");
+    const grip = el("button", "bx-grip", t("Drag to move %s. Arrow keys move it; Shift with an arrow key resizes it", b.dataset.title));
     grip.append(icon("grip"));
     const name = el("span", "bx-name");
     name.textContent = b.dataset.title;
-    const fit = el("button", "bx-fit", "Fit the height to the content");
-    fit.textContent = "Fit";
-    const eye = el("button", "bx-eye", "Hide this box");
+    const fit = el("button", "bx-fit", t("Fit the height to the content"));
+    fit.textContent = t("Fit");
+    const eye = el("button", "bx-eye", t("Hide this box"));
     eye.append(icon("eye"));
     tools.append(grip, name, el("span", "bx-w"), fit, eye);
     b.prepend(tools);
-    b.append(el("div", "bx-edge l", "Drag to resize"), el("div", "bx-edge r", "Drag to resize"),
-      el("div", "bx-edge b", "Drag to resize; double-click to fit the content"), el("div", "bx-edge br", "Drag to resize"));
+    b.append(el("div", "bx-edge l", t("Drag to resize")), el("div", "bx-edge r", t("Drag to resize")),
+      el("div", "bx-edge b", t("Drag to resize; double-click to fit the content")), el("div", "bx-edge br", t("Drag to resize")));
   }
   const refresh = () => {
     const l = layout();
     for (const b of boxes) {
       const off = b.classList.contains("off");
       const eye = b.querySelector(".bx-eye");
-      eye.title = off ? "Show this box" : "Hide this box";
+      eye.title = t(off ? "Show this box" : "Hide this box");
       eye.setAttribute("aria-label", eye.title);
       eye.querySelector("use").setAttribute("href", off ? "#i-eye-off" : "#i-eye");
       b.querySelector(".bx-fit").hidden = !l.place[b.dataset.box][2];
     }
   };
-  const setEditing = (on) => {
+  const live = editBar.querySelector("[data-board-live]");
+  const announce = (msg) => { if (live) live.textContent = msg; };
+  const setEditing = (on, say = true) => {
+    const was = editing;
     editing = on;
     board.classList.toggle("editing", on);
     editBar.hidden = !on;
@@ -186,19 +188,40 @@
     for (const b of boxes) b.querySelector(".bx-body").inert = on;
     render();
     refresh();
+    // Focus goes somewhere useful: the first handle while editing, the
+    // button that opened it afterwards. Leaving says the layout is kept.
+    if (on) {
+      announce(t("Editing the layout: drag a box, or use the arrow keys on its handle."));
+      (board.querySelector(".bx-grip") || editBar.querySelector("[data-board-done]")).focus();
+    } else if (was) {
+      announce(t("Layout editing finished."));
+      if (mode() !== "stack") editBtn.focus();
+      if (say && window.hdToast) hdToast(t("Layout saved in this browser"));
+    }
   };
+
+  // Escape leaves the layout editor, keeping what was changed.
+  document.addEventListener("keydown", (e) => {
+    if (editing && e.key === "Escape") {
+      e.preventDefault();
+      setEditing(false);
+    }
+  });
   editBtn.hidden = mode() === "stack";
   window.addEventListener("resize", () => {
-    if (mode() === "stack" && editing) setEditing(false);
+    if (mode() === "stack" && editing) setEditing(false, false);
     editBtn.hidden = editing || mode() === "stack";
   });
   editBtn.addEventListener("click", () => setEditing(true));
   editBar.querySelector("[data-board-done]").addEventListener("click", () => setEditing(false));
   editBar.querySelector("[data-board-reset]").addEventListener("click", () => {
+    if (!window.confirm(t("Reset this layout to the default?"))) return;
     layouts[mode() === "wide" ? "wide" : "std"] = defaults(mode());
     save();
     render();
     refresh();
+    announce(t("Layout reset to the default."));
+    if (window.hdToast) hdToast(t("Layout reset to the default."));
   });
   const fitHeight = (id) => {
     const p = layout().place[id];

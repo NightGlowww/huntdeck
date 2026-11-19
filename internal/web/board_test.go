@@ -154,7 +154,7 @@ func TestHuntBoard(t *testing.T) {
 	for _, want := range []string{`class="topbar"`, `id="omni"`, `<table class="fixed surface" data-cols="board-targets">`, `data-colpick="board-targets"`, `<input type="checkbox" value="score"> Target score</label>`, `<b class="score">`, `<td class="c-target asset" title="*.new.evil.example"><div class="tv-row"><div class="tv">*.new.evil.example</div>`, `<a class="sort on" href="/?bounty=0&amp;kind=wildcard&amp;rev=1" title="Newest first">Added</a>`, `href="/?bounty=0&amp;kind=wildcard&amp;sort=score"`, `href="/?bounty=0&amp;kind=wildcard&amp;sort=bounty"`, "newest first</span>",
 		`data-copy-text="*.new.evil.example"`, `<th class="c-pay"`, `<td class="c-pay" title="Not bounty-eligible"><div class="pay"><span class="none" title="Pays no bounties">—</span>`,
 		`<td class="c-ptotal"><span class="zero" title="Pays no bounties">—</span></td>`,
-		`<a class="fchip" href="/?bounty=0">All</a>`, `<a class="fchip on" href="/?bounty=0" aria-pressed="true" title="Show or hide wildcards; pick several to combine them">Wildcards</a>`, `<a class="fchip" href="/?bounty=0&amp;kind=wildcard%2Curl" aria-pressed="false"`, "<h2>Scope diffs</h2>", "&lt;script&gt;"} {
+		`<a class="fchip" href="/?bounty=0">All</a>`, `<a class="fchip on" href="/?bounty=0" aria-current="true" title="Show or hide wildcards; pick several to combine them">Wildcards</a>`, `<a class="fchip" href="/?bounty=0&amp;kind=wildcard%2Curl"`, "<h2>Scope diffs</h2>", "&lt;script&gt;"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("hunt board lacks %q", want)
 		}
@@ -199,7 +199,7 @@ func TestHuntBoard(t *testing.T) {
 		t.Error("hunt board has more than the one search bar, unescaped input or a formatting error")
 	}
 	_, body = e.do(c, http.MethodGet, "/?bounty=0&kind=apps", nil, nil)
-	for _, want := range []string{`<a class="fchip on" href="/?bounty=0" aria-pressed="true" title="Show or hide apps; pick several to combine them">Apps</a>`, `<span class="kd android">android</span>`, `<span class="kd ios">iOS</span>`,
+	for _, want := range []string{`<a class="fchip on" href="/?bounty=0" aria-current="true" title="Show or hide apps; pick several to combine them">Apps</a>`, `<span class="kd android">android</span>`, `<span class="kd ios">iOS</span>`,
 		// The open button goes to the program on its platform, never the app.
 		`class="open-ext" href="https://platform.example/`, `target="_blank" rel="noopener noreferrer nofollow"`, `data-copy-text="com.example.evil"`} {
 		if !strings.Contains(body, want) {

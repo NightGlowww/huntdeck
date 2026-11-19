@@ -43,7 +43,8 @@ func (s *server) setIgnored(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	err := s.Store.SetIgnored(r.Context(), p.ID, isTrue(r.PostFormValue("ignored")))
+	ignored := isTrue(r.PostFormValue("ignored"))
+	err := s.Store.SetIgnored(r.Context(), p.ID, ignored)
 	if err == nil {
 		err = huntscore.Refresh(r.Context(), s.Store, s.Store.Now())
 	}
@@ -51,7 +52,11 @@ func (s *server) setIgnored(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	http.Redirect(w, r, programPath(p), http.StatusSeeOther) //nolint:gosec // a local path: both parts are path-escaped
+	msg := "program-unignored"
+	if ignored {
+		msg = "program-ignored"
+	}
+	http.Redirect(w, r, programPath(p)+"?msg="+msg, http.StatusSeeOther) //nolint:gosec // a local path: both parts are path-escaped
 }
 
 // setTags replaces a program's tags.
@@ -69,7 +74,7 @@ func (s *server) setTags(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	http.Redirect(w, r, programPath(p), http.StatusSeeOther) //nolint:gosec // a local path: both parts are path-escaped
+	http.Redirect(w, r, programPath(p)+"?msg=program-saved", http.StatusSeeOther) //nolint:gosec // a local path: both parts are path-escaped
 }
 
 // tagParam reads a single tag filter; anything that isn't a valid tag is

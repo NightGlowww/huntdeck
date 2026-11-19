@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/i18n"
 	"github.com/mdpsec/huntdeck/internal/store"
 )
 
@@ -276,12 +277,16 @@ func TestStatsPlatformValidWaiting(t *testing.T) {
 	since := time.Date(2026, 10, 28, 10, 0, 0, 0, time.UTC)
 	o := store.PlatformOverview{Platform: "intigriti", ValidKind: "accepted", ValidSince: &since, Months: make([]store.PlatformMonth, overviewMonths)}
 	d := buildStatsPlatform(o, nil, nil, nil, time.Date(2025, 12, 1, 0, 0, 0, 0, time.UTC), "", false, "", false)
-	pages, err := loadTemplates(func() *time.Location { return time.UTC }, "test", false, readOnlyLinks{})
+	messages, err := i18n.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pages, err := loadTemplates(func() *time.Location { return time.UTC }, "test", false, readOnlyLinks{}, []string{"en"}, messages)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var b strings.Builder
-	if err := pages["statsplatform"].ExecuteTemplate(&b, "ov-tiles", d.Platform); err != nil {
+	if err := pages["en"]["statsplatform"].ExecuteTemplate(&b, "ov-tiles", d.Platform); err != nil {
 		t.Fatal(err)
 	}
 	for _, want := range []string{"since Oct 28"} {

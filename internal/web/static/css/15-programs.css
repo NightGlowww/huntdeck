@@ -14,7 +14,9 @@
   .ptable > .activef, .ptable > .note-bar, .ptable > .pager, .ptable > .empty-state { flex: none; }
   .ptable > .table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
   .ptable thead { position: sticky; top: 0; z-index: 3; background: var(--surface-2); }
-  /* They scroll with the wheel or trackpad, without bars showing. */
+  /* They scroll with the wheel or trackpad, without bars showing: say that
+     there is more below with a fade that only shows when it overflows. */
+  .plist > .facets { mask-image: linear-gradient(#000 calc(100% - 24px), transparent); }
   .plist > .facets, .ptable > .table-wrap { scrollbar-width: none; }
   .plist > .facets::-webkit-scrollbar, .ptable > .table-wrap::-webkit-scrollbar { display: none; }
   /* A pinned heading drops collapsed borders, so its lines are shadows. */
@@ -241,4 +243,37 @@
   .plist-table.cards td:has(> .v > .zero:only-child) { display: none; }
   .plist-table.cards .avg-under { display: inline; margin-left: 6px; }
   .plist-table.cards .h90 { display: inline; margin-left: 6px; }
+}
+/* The Targets list's tick column (select all, copy the ticked ones). */
+.tlist th.c-check, .tlist td.c-check { width: 40px; padding-right: 0; }
+.tlist td.c-check input { margin: 0; }
+@media (pointer: coarse) { .tlist th.c-check, .tlist td.c-check { width: 48px; } }
+/* The Disclosed list's tick column, like the Targets list's. */
+.dlist th.c-check, .dlist td.c-check { width: 40px; padding-right: 0; }
+.dlist td.c-check input { margin: 0; }
+@media (pointer: coarse) { .dlist th.c-check, .dlist td.c-check { width: 48px; } }
+/* The Programs list's tick column; the column picker leaves it first. */
+.ptable th.c-check, .ptable td.c-check { width: 40px; padding-right: 0; }
+.ptable td.c-check input { margin: 0; }
+@media (pointer: coarse) { .ptable th.c-check, .ptable td.c-check { width: 48px; } }
+/* On a touch screen the whole card opens the program, so its own
+   open-on-the-platform icon is redundant — and it sits where the floating
+   "back to the top" button lands. */
+@media (pointer: coarse) {
+  .plist-table td.c-open { display: none; }
+}
+
+/* A chip row's own label (the Scope tab's two rows: type, then when it was
+   added), so the second row reads as a filter rather than more types. */
+.chipbar-label { align-self: center; margin-right: 2px; color: var(--muted); font-size: 12px; }
+
+/* A quick-filter chip's count (Scope changes N): separated, and a little
+   quieter than the label, so the label doesn't read as one word. */
+.qv small { margin-left: 5px; opacity: .72; font-variant-numeric: tabular-nums; }
+
+/* Narrow screens: the header wraps, so a right-pushed sort group or export
+   group lands alone on its own line at the far edge. Keep them with the
+   rest, reading left to right like everything else. */
+@media (max-width: 720px) {
+  .activef .quick, .activef .sorts { margin-left: 0; }
 }

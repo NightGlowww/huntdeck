@@ -3,7 +3,7 @@ its name linking to its page (whole in the tooltip), and whether it's
 private or not open; the programLink's methods leave out the platform or
 "private", or add "VDP" and "ignored". */}}
 {{define "pname"}}<div class="pn">{{if not .NoTag}}{{template "ptag" .Platform}}{{end}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}{{.Suffix}}" title="{{.Name}}">{{.Name}}</a>
-  {{- if .VDP}} <span class="chip vdp" title="Vulnerability disclosure, no bounties">VDP</span>{{end}}
+  {{- if .VDP}} <span class="chip vdp" title="{{T "Vulnerability disclosure, no bounties"}}">VDP</span>{{end}}
   {{- if and .Private (not .NoPrivate)}} <span class="chip private">private</span>{{end}}
-  {{- if and .State (ne .State "open")}} <span class="chip {{.State}}">{{.State}}</span>{{end}}
+  {{- if and .State (ne .State "open")}} <span class="chip {{.State}}">{{T .State}}</span>{{end}}
   {{- if .Ignored}} <span class="chip ignored">ignored</span>{{end}}</div>{{end}}

@@ -5,12 +5,12 @@
   {{with .Program}}<div class="msg-l"><a class="msg-p" href="{{$.Local}}">{{.Name}}</a>{{range $.About}} · {{.}}{{end}}</div>{{end}}
   {{with .Detail}}<div class="msg-l">{{.}}</div>{{end}}
   {{if .Assets}}<ul class="msg-assets">{{range .Assets}}<li><code>{{.Identifier}}</code>{{with .Notes}} <span class="muted">{{.}}</span>{{end}}</li>{{end}}</ul>{{end}}
-  {{with .More}}<div class="msg-l muted">…and {{.}} more</div>{{end}}
+  {{with .More}}<div class="msg-l muted">{{TF "…and %d more" .}}</div>{{end}}
 </article>{{end}}
 
 {{define "channel-preview"}}
-<p class="pv-stat">{{if not .Sends}}Tick <b>After each poll</b> or set a digest time, or this channel sends nothing.
-  {{else if .Events}}<b>{{num .Messages}}</b> {{plural .Messages "message" "messages"}} · <b>{{num .Events}}</b> {{plural .Events "event" "events"}} in the last week, {{.Rate}}{{if .Disable}}, once it's enabled{{end}}.
-  {{else}}Nothing in the last week matches these choices.{{end}}</p>
-{{if .Sends}}{{range .Cards}}{{template "message" .}}{{end}}{{end}}
+<p class="pv-stat">{{if not .Sends}}{{T "Tick"}} <b>{{T "After each poll"}}</b> {{T "or set a digest time, or this channel sends nothing."}}
+  {{else if .Events}}<b>{{num .Messages}}</b> {{plural .Messages "message" "messages"}} · <b>{{num .Events}}</b> {{plural .Events "event" "events"}} {{T "in the last week"}}, {{.RateText}}{{if .Disable}}{{T ", once it's enabled"}}{{end}}.
+  {{else}}{{T "Nothing in the last week matches these choices."}}{{end}}</p>
+{{if .Sends}}{{if .Text}}{{if gt .Parts 1}}<p class="pv-stat muted small">{{TF "long: it goes out as %d messages" .Parts}}</p>{{end}}<pre class="pv-text">{{.Text}}</pre>{{else}}{{range .Cards}}{{template "message" .}}{{end}}{{end}}{{end}}
 {{end}}

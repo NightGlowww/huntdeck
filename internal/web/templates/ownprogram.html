@@ -1,64 +1,64 @@
-{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="Back to"><a href="/programs">Programs</a><span class="sep">/</span><a href="/programs?platform=independent&amp;state=all">Independent</a><span class="sep">/</span><span class="here" title="{{.Title}}">{{.Title}}</span></nav>{{end}}{{end}}
+{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/programs">{{T "Programs"}}</a><span class="sep">/</span><a href="/programs?platform=independent&amp;state=all">Independent</a><span class="sep">/</span><span class="here" title="{{T .Title}}">{{T .Title}}</span></nav>{{end}}{{end}}
 
 {{/* Add or edit a program that isn't on a supported platform (ownprograms.go). */}}
 {{define "content"}}{{with .Data}}
-<h1 class="m-heading">{{.Title}}</h1>
-{{if .ReadOnly}}<div class="demo-tour" role="note"><b>Self-hosted</b><span>{{if .Handle}}On your own HuntDeck, this form edits a program you added by hand: its scope, bounties and rules, with each save shown on its Changes tab.{{else}}On your own HuntDeck, this form adds programs that aren't on a supported platform, such as ones companies run themselves.{{end}} Here it can't be saved.{{with repoURL}} <a class="link" href="{{.}}" target="_blank" rel="noopener noreferrer">Self-host HuntDeck</a>{{end}}</span></div>{{end}}
+<h1 class="m-heading">{{T .Title}}</h1>
+{{if .ReadOnly}}<div class="demo-tour" role="note"><b>{{T "Self-hosted"}}</b><span>{{if .Handle}}On your own HuntDeck, this form edits a program you added by hand: its scope, bounties and rules, with each save shown on its Changes tab.{{else}}On your own HuntDeck, this form adds programs that aren't on a supported platform, such as ones companies run themselves.{{end}} Here it can't be saved.{{with repoURL}} <a class="link" href="{{.}}" target="_blank" rel="noopener noreferrer">Self-host HuntDeck</a>{{end}}</span></div>{{end}}
 <form method="post" action="{{.Action}}" class="channel-form own-form">
   <section class="panel">
-    <div class="panel-head"><h2>Program</h2><span class="aside">not on HackerOne, Bugcrowd, Intigriti or YesWeHack</span></div>
+    <div class="panel-head"><h2>{{T "Program"}}</h2><span class="aside">{{T "not on HackerOne, Bugcrowd, Intigriti or YesWeHack"}}</span></div>
     <div class="panel-body profile-form">
-      <label class="wide"><span>Name</span><input type="text" name="name" value="{{.Name}}" maxlength="120" required placeholder="e.g. Example Corp Bug Bounty"></label>
-      <label class="wide"><span>Program page</span><input type="url" name="url" value="{{.URL}}" maxlength="500" required placeholder="https://example.com/security/bug-bounty" spellcheck="false">
-        <span class="muted small">Where its rules are published: HuntDeck links to it, and never fetches it.</span></label>
-      <label><span>Status</span><select name="state">
-        <option value="open"{{if eq .State "open"}} selected{{end}}>Open</option>
-        <option value="paused"{{if eq .State "paused"}} selected{{end}}>Paused</option>
-        <option value="closed"{{if eq .State "closed"}} selected{{end}}>Closed</option></select></label>
-      <fieldset><legend>Kind</legend>
-        <label class="check"><input type="checkbox" name="paying" value="1"{{if .Paying}} checked{{end}}> Pays bounties</label>
-        <label class="check" title="Invite-only: shown as private"><input type="checkbox" name="private" value="1"{{if .Private}} checked{{end}}> Invite-only</label></fieldset>
+      <label class="wide"><span>{{T "Name"}}</span><input type="text" name="name" value="{{.Name}}" maxlength="120" required placeholder="{{T "e.g. Example Corp Bug Bounty"}}"></label>
+      <label class="wide"><span>{{T "Program page"}}</span><input type="url" name="url" value="{{.URL}}" maxlength="500" required placeholder="https://example.com/security/bug-bounty" spellcheck="false">
+        <span class="muted small">{{T "Where its rules are published: HuntDeck links to it, and never fetches it."}}</span></label>
+      <label><span>{{T "Status"}}</span><select name="state">
+        <option value="open"{{if eq .State "open"}} selected{{end}}>{{T "Open"}}</option>
+        <option value="paused"{{if eq .State "paused"}} selected{{end}}>{{T "Paused"}}</option>
+        <option value="closed"{{if eq .State "closed"}} selected{{end}}>{{T "Closed"}}</option></select></label>
+      <fieldset><legend>{{T "Kind"}}</legend>
+        <label class="check"><input type="checkbox" name="paying" value="1"{{if .Paying}} checked{{end}}> {{T "Pays bounties"}}</label>
+        <label class="check" title="{{T "Invite-only: shown as private"}}"><input type="checkbox" name="private" value="1"{{if .Private}} checked{{end}}> {{T "Invite-only"}}</label></fieldset>
     </div>
   </section>
 
   <section class="panel">
-    <div class="panel-head"><h2>Bounties</h2><span class="aside">if it pays; leave blank where unknown</span></div>
+    <div class="panel-head"><h2>{{T "Bounties"}}</h2><span class="aside">{{T "if it pays; leave blank where unknown"}}</span></div>
     <div class="panel-body profile-form">
-      <label><span>Currency</span><select name="currency">{{$cur := .Currency}}{{range .Currencies}}<option{{if eq . $cur}} selected{{end}}>{{.}}</option>{{end}}</select></label>
-      <label><span>Lowest</span><input type="text" name="bounty_min" value="{{.BountyMin}}" inputmode="numeric" class="interval amount" placeholder="e.g. 500"></label>
-      <label><span>Highest</span><input type="text" name="bounty_max" value="{{.BountyMax}}" inputmode="numeric" class="interval amount" placeholder="e.g. 50000"></label>
+      <label><span>{{T "Currency"}}</span><select name="currency">{{$cur := .Currency}}{{range .Currencies}}<option{{if eq . $cur}} selected{{end}}>{{.}}</option>{{end}}</select></label>
+      <label><span>{{T "Lowest"}}</span><input type="text" name="bounty_min" value="{{.BountyMin}}" inputmode="numeric" class="interval amount" placeholder="{{T "e.g. 500"}}"></label>
+      <label><span>{{T "Highest"}}</span><input type="text" name="bounty_max" value="{{.BountyMax}}" inputmode="numeric" class="interval amount" placeholder="{{T "e.g. 50000"}}"></label>
     </div>
   </section>
 
   <section class="panel">
-    <div class="panel-head"><h2>Scope</h2><span class="aside">one asset per line: domains, wildcards, URLs, IPs or CIDR ranges</span></div>
+    <div class="panel-head"><h2>{{T "Scope"}}</h2><span class="aside">{{T "one asset per line: domains, wildcards, URLs, IPs or CIDR ranges"}}</span></div>
     <div class="panel-body own-scope">
-      <label><span>In scope</span><textarea name="in_scope" rows="10" spellcheck="false" placeholder="*.example.com&#10;api.example.net&#10;https://app.example.com/">{{.InScope}}</textarea></label>
-      <label><span>Out of scope</span><textarea name="out_scope" rows="10" spellcheck="false" placeholder="status.example.com">{{.OutScope}}</textarea></label>
+      <label><span>{{T "In scope"}}</span><textarea name="in_scope" rows="10" spellcheck="false" placeholder="*.example.com&#10;api.example.net&#10;https://app.example.com/">{{.InScope}}</textarea></label>
+      <label><span>{{T "Out of scope"}}</span><textarea name="out_scope" rows="10" spellcheck="false" placeholder="status.example.com">{{.OutScope}}</textarea></label>
     </div>
-    <p class="panel-foot">Saving records what you added, removed or edited on the program's Changes tab, as a platform's news would be (but sends no notifications).</p>
+    <p class="panel-foot">{{T "Saving records what you added, removed or edited on the program's Changes tab, as a platform's news would be (but sends no notifications)."}}</p>
   </section>
 
   <section class="panel">
-    <div class="panel-head"><h2>Rules and notes</h2><span class="aside">Markdown; shown on the Policy tab</span></div>
+    <div class="panel-head"><h2>{{T "Rules and notes"}}</h2><span class="aside">{{T "Markdown; shown on the Policy tab"}}</span></div>
     <div class="panel-body own-scope one">
-      <label><span class="sr-only">Rules and notes</span><textarea name="policy" rows="8" placeholder="What's out of bounds, how to report, anything to remember">{{.Policy}}</textarea></label>
+      <label><span class="sr-only">{{T "Rules and notes"}}</span><textarea name="policy" rows="8" placeholder="{{T "What's out of bounds, how to report, anything to remember"}}">{{.Policy}}</textarea></label>
     </div>
   </section>
 
   {{if not .ReadOnly}}<section class="panel">
-    <div class="panel-head"><h2>Sharing</h2></div>
+    <div class="panel-head"><h2>{{T "Sharing"}}</h2></div>
     <div class="panel-body profile-form column">
-      <label class="check"><input type="checkbox" name="in_seeds" value="1"{{if .InSeeds}} checked{{end}}> Include in seeds</label>
-      <span class="muted small">Seeds are the public snapshots new installs start from, and a read-only copy loads. Programs you add stay out of them unless you tick this, and invite-only ones always do.</span>
+      <label class="check"><input type="checkbox" name="in_seeds" value="1"{{if .InSeeds}} checked{{end}}> {{T "Include in seeds"}}</label>
+      <span class="muted small">{{T "Seeds are the public snapshots new installs start from, and a read-only copy loads. Programs you add stay out of them unless you tick this, and invite-only ones always do."}}</span>
     </div>
   </section>{{end}}
 
   <div class="actbar">
-    <button type="submit" class="act-save">{{if .Handle}}Save{{else}}Add program{{end}}</button>
-    <a class="button ghost act-cancel" href="{{.Back}}">Cancel</a>
-    {{if and .Handle (not .ReadOnly)}}<button type="submit" form="remove-program" class="ghost act-delete">Remove</button>{{end}}
+    <button type="submit" class="act-save">{{if .Handle}}{{T "Save"}}{{else}}{{T "Add program"}}{{end}}</button>
+    <a class="button ghost act-cancel" href="{{.Back}}">{{T "Cancel"}}</a>
+    {{if and .Handle (not .ReadOnly)}}<button type="submit" form="remove-program" class="ghost act-delete">{{T "Remove"}}</button>{{end}}
   </div>
 </form>
-{{if and .Handle (not .ReadOnly)}}<form method="post" action="/programs/independent/{{.Handle}}/remove" id="remove-program" data-confirm="Remove {{.Name}}? Its history stays, under Status › Removed."></form>{{end}}
+{{if and .Handle (not .ReadOnly)}}<form method="post" action="/programs/independent/{{.Handle}}/remove" id="remove-program" data-confirm="{{TF "Remove %s? Its history stays, under Status › Removed." .Name}}"></form>{{end}}
 {{end}}{{end}}

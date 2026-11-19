@@ -2,6 +2,7 @@ package web
 
 import (
 	"cmp"
+	"context"
 	"maps"
 	"net/http"
 	"net/url"
@@ -116,12 +117,26 @@ type moneySum struct {
 }
 
 func (s *server) stats(w http.ResponseWriter, r *http.Request) {
+	t0 := time.Now()
 	in, err := s.statsInputs(r.Context(), statsVisibility(r))
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
-	d := buildStats(in.Overviews, s.platformNames(), in.Items, in.Days, in.Start)
+	tInputs := time.Since(t0)
+	// Laying the page out walks every program and every day saved: the same
+	// work for the same data, so it is memoised with the inputs it reads.
+	d, err := store.Memo(r.Context(), s.Store, "stats-page:"+statsVisibility(r)+":"+in.Start.Format(time.DateOnly),
+		func(context.Context) (statsData, error) {
+			return buildStats(in.Overviews, s.platformNames(), in.Items, in.Days, in.Start), nil
+		})
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	// The rows are the request's own from here: each carries this view's link.
+	d.Rows = slices.Clone(d.Rows)
+	tBuild := time.Since(t0)
 	if d.Vis, err = s.statsToggle(r.Context(), r, ""); err != nil {
 		s.serverError(w, r, err)
 		return
@@ -133,7 +148,10 @@ func (s *server) stats(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	tData := time.Since(t0)
 	s.render(w, r, http.StatusOK, "stats", pageData{Title: "Stats", Nav: "stats", Data: d})
+	s.Log.Debug("stats served", "inputs", tInputs.Round(time.Millisecond), "build", (tBuild - tInputs).Round(time.Millisecond),
+		"rest", (tData - tBuild).Round(time.Millisecond), "render", (time.Since(t0) - tData).Round(time.Millisecond))
 }
 
 // buildStats lays out the Stats page from each platform's overview (in

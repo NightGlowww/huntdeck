@@ -23,7 +23,10 @@ type apiOKJSON struct {
 }
 
 type apiStatusJSON struct {
-	Version   string              `json:"version"`
+	Version string `json:"version"`
+	// ReadOnly says this copy cannot be changed (a demo or a published copy):
+	// a client can hide its write actions instead of meeting a 403.
+	ReadOnly  bool                `json:"read_only"`
 	Platforms []apiStatusPlatform `json:"platforms"`
 	LastPolls []apiStatusRun      `json:"last_polls"`
 }
@@ -153,37 +156,43 @@ type apiProgramTrends struct {
 // reports.
 type apiProgramJSON struct {
 	apiProgramRef
-	Invite             *apiInvite         `json:"invite,omitempty"` // private programs only
-	OffersBounty       bool               `json:"offers_bounty"`
-	Currency           string             `json:"currency,omitempty"`
-	FastPayments       bool               `json:"fast_payments"`
-	SafeHarbor         bool               `json:"safe_harbor"`
-	StartedAt          *time.Time         `json:"started_at,omitempty"`
-	JoinedAt           *time.Time         `json:"joined_at,omitempty"`
-	FirstSeenAt        time.Time          `json:"first_seen_at"`
-	LastSeenAt         time.Time          `json:"last_seen_at"`
-	RemovedAt          *time.Time         `json:"removed_at,omitempty"`
-	ScopeSyncedAt      *time.Time         `json:"scope_synced_at,omitempty"`
-	ScopeCheckedAt     *time.Time         `json:"scope_checked_at,omitempty"`
-	ScopeUnavailableAt *time.Time         `json:"scope_unavailable_at,omitempty"`
-	Stats              *apiYourStats      `json:"your_stats,omitempty"`
-	PublicStats        *apiPublicStats    `json:"program_stats,omitempty"`
-	Scope              []apiScopeEntry    `json:"scope"`
-	Disclosed          *disclosedJSON     `json:"disclosed_reports,omitempty"`
-	Resolved           *resolvedJSON      `json:"resolved_reports,omitempty"`
-	Accepted           *acceptedJSON      `json:"accepted_reports,omitempty"`
-	Hunt               *store.HuntDetail  `json:"hunt_score"`
-	Ignored            bool               `json:"ignored"`
-	Tags               []string           `json:"tags"`
-	Bounty             *apiBounty         `json:"bounty"` // as the Programs list has it
-	Numbers            *apiProgramNumbers `json:"numbers"`
-	Trends             *apiProgramTrends  `json:"trends"`
-	Requirements       *apiRequirements   `json:"requirements"`
-	TestCredentials    []string           `json:"test_credentials"` // scope the platform hands out test credentials for
-	Testing            *apiTestingRules   `json:"testing_rules"`
-	Facts              apiProgramFacts    `json:"facts"`
-	Brief              apiProgramBrief    `json:"brief"`
-	Announcements      []apiAnnouncement  `json:"announcements"`
+	Invite             *apiInvite      `json:"invite,omitempty"` // private programs only
+	OffersBounty       bool            `json:"offers_bounty"`
+	Currency           string          `json:"currency,omitempty"`
+	FastPayments       bool            `json:"fast_payments"`
+	SafeHarbor         bool            `json:"safe_harbor"`
+	StartedAt          *time.Time      `json:"started_at,omitempty"`
+	JoinedAt           *time.Time      `json:"joined_at,omitempty"`
+	FirstSeenAt        time.Time       `json:"first_seen_at"`
+	LastSeenAt         time.Time       `json:"last_seen_at"`
+	RemovedAt          *time.Time      `json:"removed_at,omitempty"`
+	ScopeSyncedAt      *time.Time      `json:"scope_synced_at,omitempty"`
+	ScopeCheckedAt     *time.Time      `json:"scope_checked_at,omitempty"`
+	ScopeUnavailableAt *time.Time      `json:"scope_unavailable_at,omitempty"`
+	Stats              *apiYourStats   `json:"your_stats,omitempty"`
+	PublicStats        *apiPublicStats `json:"program_stats,omitempty"`
+	Scope              []apiScopeEntry `json:"scope"`
+	// ScopeTotal is every entry the program has, however many this answer
+	// carries: with ?scope_limit and ?scope_offset they page it.
+	ScopeTotal int                `json:"scope_total,omitempty"`
+	Disclosed  *disclosedJSON     `json:"disclosed_reports,omitempty"`
+	Resolved   *resolvedJSON      `json:"resolved_reports,omitempty"`
+	Accepted   *acceptedJSON      `json:"accepted_reports,omitempty"`
+	Hunt       *store.HuntDetail  `json:"hunt_score"`
+	Ignored    bool               `json:"ignored"`
+	Tags       []string           `json:"tags"`
+	Bounty     *apiBounty         `json:"bounty"` // as the Programs list has it
+	Numbers    *apiProgramNumbers `json:"numbers"`
+	Trends     *apiProgramTrends  `json:"trends"`
+	// Rules are what "before you test" shows: the platform's requirements and
+	// what only the policy text states (a header, a rate, what is forbidden).
+	Rules           []apiTestRule     `json:"rules,omitempty"`
+	Requirements    *apiRequirements  `json:"requirements"`
+	TestCredentials []string          `json:"test_credentials"` // scope the platform hands out test credentials for
+	Testing         *apiTestingRules  `json:"testing_rules"`
+	Facts           apiProgramFacts   `json:"facts"`
+	Brief           apiProgramBrief   `json:"brief"`
+	Announcements   []apiAnnouncement `json:"announcements"`
 	apiProgramFreshness
 }
 
@@ -332,4 +341,46 @@ type apiBulkResult struct {
 	Input   string         `json:"input"`
 	Verdict string         `json:"verdict"` // in, out or none
 	Matches []apiMatchJSON `json:"matches"`
+}
+
+// apiQueueJSON is HuntQueue: the ranked targets and when they were ranked.
+type apiQueueJSON struct {
+	ComputedAt string        `json:"computed_at"`
+	Rows       []apiQueueRow `json:"rows"`
+	// Gated are targets the queue left out, with the reason: what is one
+	// invitation or one requirement away is still worth knowing.
+	Gated []apiQueueRow `json:"gated,omitempty"`
+}
+
+type apiQueueRow struct {
+	Platform string `json:"platform"`
+	Handle   string `json:"handle"`
+	Kind     string `json:"kind"`
+	Value    string `json:"value"`
+	Apex     string `json:"apex,omitempty"`
+	// Factors is the score breakdown, returned when the request asks for it.
+	Factors []apiQueueFactor `json:"factors,omitempty"`
+	Score   float64          `json:"score"`
+	Reasons []string         `json:"reasons"`
+	Gate    string           `json:"gate,omitempty"`
+}
+
+// apiTestRule is one thing to know before testing a program.
+type apiTestRule struct {
+	Kind       string `json:"kind"` // req, auto, rate, email, header, agent, creds, warn
+	Title      string `json:"title"`
+	Detail     string `json:"detail,omitempty"`
+	Copy       string `json:"copy,omitempty"`        // a value to send, verbatim
+	Alert      bool   `json:"alert,omitempty"`       // limits how you may test
+	FromPolicy bool   `json:"from_policy,omitempty"` // read out of the policy text
+}
+
+// apiQueueFactor is one input's part in a queue score: the value it took and
+// the multiplier it applied — the multipliers of a row multiply back to the
+// score, so the biggest loss is the one to look at.
+type apiQueueFactor struct {
+	Name   string  `json:"name"`
+	Value  float64 `json:"value"`
+	Weight float64 `json:"weight"`
+	Effect float64 `json:"effect"`
 }

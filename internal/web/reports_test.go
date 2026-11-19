@@ -155,7 +155,7 @@ func TestAcceptedReports(t *testing.T) {
 	// Programs whose feed was read but has never listed a report keep it
 	// to themselves, and say so.
 	_, body = e.do(c, http.MethodGet, "/programs/fake/evil?tab=stats", nil, nil)
-	if !strings.Contains(body, "doesn't list its reports on CrowdStream") {
+	if !strings.Contains(body, "list its reports on CrowdStream") {
 		t.Error("evil's page lacks the hidden CrowdStream note")
 	}
 	// The stats page charts the platform's accepted reports per month, from

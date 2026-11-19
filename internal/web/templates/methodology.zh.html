@@ -1,0 +1,136 @@
+{{define "content"}}
+<p class="lead">这些数字是怎么算出来的：每个数字的来源、各平台的差异、哪些是估算，以及 HuntScore 如何评分。各平台公开的内容不同，所以并非每个数字在每个平台都存在。</p>
+
+<section class="panel" id="glance">
+  <div class="panel-head"><h2>一览</h2><span class="aside"><span class="src good">公开</span> 平台自己给出的数字 <span class="src acc">统计</span> 由 HuntDeck 计算 <span class="src warn">≈ 估算</span> <span class="src none">—</span> 平台不公开</span></div>
+  <div class="table-wrap">
+  <table class="glance">
+    <thead><tr><th>列</th><th>HackerOne</th><th>Bugcrowd</th><th>YesWeHack</th><th>Intigriti</th></tr></thead>
+    <tbody>
+      <tr><td>累计支付</td><td data-label="HackerOne"><span class="src good">公开</span><span class="srcd">总额</span></td><td data-label="Bugcrowd"><span class="src warn">≈ 估算</span><span class="srcd">有赏金的报告数 × 平均支出</span></td><td data-label="YesWeHack"><span class="src none" title="平台不公开">—</span></td><td data-label="Intigriti"><span class="src good">公开</span><span class="srcd">总额（公开项目；用网站登录后可见你开放的每个项目）</span></td></tr>
+      <tr><td>平均赏金</td><td data-label="HackerOne"><span class="src good">公开</span><span class="srcd">区间</span></td><td data-label="Bugcrowd"><span class="src good">公开</span><span class="srcd">近 3 个月</span></td><td data-label="YesWeHack"><span class="src good">公开</span><span class="srcd">部分项目</span></td><td data-label="Intigriti"><span class="src good">公开</span><span class="srcd">公开项目</span></td></tr>
+      <tr><td>已付 · 90 天</td><td data-label="HackerOne"><span class="src good">公开</span><span class="srcd">总额</span></td><td data-label="Bugcrowd"><span class="src warn">≈ 估算</span><span class="srcd">已接受报告（CrowdStream）× 平均支出；CrowdStream 私有时用「有赏金报告数的增量 × 平均支出」</span></td><td data-label="YesWeHack"><span class="src none" title="平台不公开">—</span></td><td data-label="Intigriti"><span class="src acc">统计</span><span class="srcd">由保存的累计支付推算（不足 90 天时为 ≈）</span></td></tr>
+      <tr><td>收到报告 · 90 天</td><td data-label="HackerOne"><span class="src good">公开</span><span class="srcd">总额</span></td><td data-label="Bugcrowd"><span class="src none" title="平台不公开">—</span></td><td data-label="YesWeHack"><span class="src acc">统计</span><span class="srcd">由保存的报告累计数推算（不足 90 天时为 ≈）</span></td><td data-label="Intigriti"><span class="src acc">统计</span><span class="srcd">由保存的报告累计数推算（不足 90 天时为 ≈）</span></td></tr>
+      <tr><td>有效 · 90 天</td><td data-label="HackerOne"><span class="src acc">统计</span><span class="srcd">来自 Hacktivity</span></td><td data-label="Bugcrowd"><span class="src acc">统计</span><span class="srcd">来自 CrowdStream（公开且列出报告的项目）</span></td><td data-label="YesWeHack"><span class="src warn">≈ 估算</span><span class="srcd">有效报告：90 天收到数 × 接受比例</span></td><td data-label="Intigriti"><span class="src warn">≈ 估算</span><span class="srcd">有效报告：90 天收到数 × 接受比例</span></td></tr>
+      <tr><td>有效报告 / 月（Stats）</td><td data-label="HackerOne"><span class="src acc">统计</span><span class="srcd">来自 Hacktivity（已解决）</span></td><td data-label="Bugcrowd"><span class="src acc">统计</span><span class="srcd">来自 CrowdStream（已接受）</span></td><td data-label="YesWeHack"><span class="src acc">统计</span><span class="srcd">由保存的致谢总数推算；首次保存前为 ≈</span></td><td data-label="Intigriti"><span class="src acc">统计</span><span class="srcd">由保存的已接受总数推算；首次保存前由月度排行榜推算 ≈</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<div class="mcards">
+<section class="panel mcard" id="sources">
+  <div class="panel-head"><h2>公开、统计与估算</h2></div>
+  <div class="panel-body md">
+  <p><b>公开</b>数字是平台自己展示的数值。<b>统计</b>数字是 HuntDeck 根据平台列出的报告日期自行算出的。<b>估算</b>标有 ≈ 并显示得更浅；悬停可看算式。若平台根本没有可比的指标，单元格显示破折号（—），而不会用别的口径凑数；悬停可确认平台未公开该数字。破折号只代表这一点：零会显示为 0，不付赏金的项目会在金额单元格里说明。</p>
+  <p>金额以缩写显示（"$450"、"$8.3k"、"$1.4M"），时长最多两个单位（"7d 18h"、"51d"、"8mo 1w"）；悬停金额可见精确到元的数值。估算即使悬停也保持缩写，因为它没有那么精确。</p>
+  <p>平台统计每天保存一次，在约 20 小时后的首次全量轮询时写入。Intigriti 的数据来自其公开项目页（研究者 API 没有这些），若配置了可选的网站登录（<code>IT_EMAIL</code>），则还覆盖私有与仅邀请项目，并补充猎人、响应时间、赏金表和项目更新。它们多是平台自行维护的累计值，因此历史从 HuntDeck 第一次保存开始，逐日补齐；更早的日子无法补。</p>
+  </div>
+</section>
+<section class="panel mcard" id="total-paid">
+  <div class="panel-head"><h2>累计支付</h2></div>
+  <div class="panel-body md">
+  <p><b>HackerOne</b> 公开每个项目自开始以来的赏金总额；逐日增量就是该项目当天的支出。</p>
+  <p><b>Intigriti</b> 在公开项目页上给出累计支付；需要申请或受邀的项目没有公开页，因此除非配置了网站登录，否则显示破折号。</p>
+  <p><b>Bugcrowd</b> 不公开总额，只给出项目奖励过的漏洞数（全部时间）与平均支出（近三个月）。这里的总额是估算值：它偏高，因为把最近的平均值套用到历史上每一次奖励，而计数里也可能包含非现金奖励；它也会随三个月平均值波动，即使当天没有支出。</p>
+  </div>
+</section>
+<section class="panel mcard" id="average-bounty">
+  <div class="panel-head"><h2>平均赏金</h2></div>
+  <div class="panel-body md">
+  <p>各平台口径不同：<b>HackerOne</b> 给区间（"$200 – $300"），<b>Bugcrowd</b> 给近三个月的平均支出，<b>YesWeHack</b> 给平均奖励（仅部分项目，欧元），<b>Intigriti</b> 在公开项目页给平均支出。列表里显示为缩写（"$1.6k – $2.5k"），悬停可见精确金额。按此排序时，HackerOne 的区间取其中值。</p>
+  </div>
+</section>
+<section class="panel mcard" id="paid-90">
+  <div class="panel-head"><h2>已付 · 90 天</h2></div>
+  <div class="panel-body md">
+  <p><b>HackerOne</b> 公开近 90 天支付的赏金，图表就是这条数字，每个保存日一个点。</p>
+  <p><b>Intigriti</b> 公开累计支付，因此 90 天支出像「收到报告」一样由它推算：保存满 90 天累计值后为统计值，之前同理为估算（≈）。在 Stats 页，它的线会从首次保存日往前延伸一年，每月初一个点（≈）：前三个月的已接受报告（由项目的月度排行榜估算，见「有效报告 / 月」）乘以该项目每份被接受报告的收入（累计支付 ÷ 累计已接受报告）。只有当项目的数值可靠（统计值，或来自排行榜份额）时才会并入保存的日线。不公开累计支付、或尚无可靠数值的项目不参与这条线。</p>
+  <p>Stats 页的「已付」线只包含以「最常见支付币种」付款的项目，具体币种取决于当前展示的项目：对 Intigriti 来说，私有视图下是欧元（线按上面的估算回推一年），全部与公开视图下是美元（多数以美元付款的公开项目尚无可靠数值，线从首次保存日开始，随项目陆续有值而向前延伸）。其他币种的金额显示在数字旁，因为它们不能相加。</p>
+  <p><b>Bugcrowd</b> 不公开该数字，但 CrowdStream 会列出项目近六个月接受的每份报告，平均支出覆盖近三个月。估算为近 90 天已接受报告（剔除优先级 5，即信息类、极少付钱）乘以该平均值，两边窗口一致。它至少不低于 CrowdStream 自己显示的内容，因为 CrowdStream 只对部分报告显示赏金。Programs 列表中的项目图表使用每天保存的平均值（首次保存之前的日子用最早的那个）；Stats 页的线（汇总所有项目）则用今天的平均值回算每一天。限制：仅公开项目；报告可能当月接受、次月支付；部分被接受的报告给的是积分而非现金。</p>
+  <p>有些 Bugcrowd 项目把 CrowdStream 设为私有：页面显示「没有已接受或已披露的提交」，但项目公开了数百个已奖励漏洞。HuntDeck 把「从未列出过任何报告」的信息源视为私有，而不是「没有报告」，因此其已接受/已解决计数显示破折号。此时 90 天支出改用「已奖励漏洞数的逐日增量 × 平均支出」（始终为 ≈）：不足 90 天时按一周以上的增量折算，上线不足 90 天的项目则用全量计数。</p>
+  </div>
+</section>
+<section class="panel mcard" id="received-90">
+  <div class="panel-head"><h2>收到报告 · 90 天</h2></div>
+  <div class="panel-body md">
+  <p><b>HackerOne</b> 公开近 90 天收到的每一份报告（含重复与无效），因此它衡量竞争度：数字越大，盯着该项目的人越多。Bugcrowd 不公开同类数字；它的「已接受（有效）报告」数量小得多，因此只留在项目自己的页面上。</p>
+  <p><b>YesWeHack</b> 与 <b>Intigriti</b> 公开项目自开始以来收到的全部报告（含重复与无效）。HuntDeck 每天保存该累计值，满 90 天后即为统计值：今日累计减去 90 天前的累计。在此之前为估算（≈）：</p>
+  <ul>
+    <li><b>YesWeHack</b>：已保存天数内的报告数，加上其余天数用其自带的「近 7 天」计数折算（首日为 该计数 × 90/7）。</li>
+    <li><b>Intigriti</b>（需网站登录）：全量累计 × 项目近 90 天获得的排行榜积分占比。每份被接受的报告按危害给固定积分（低危 5 到特殊 50；重复为五分之一），因此该占比反映项目活跃度中有多少是近期的。这个估算较粗：一个严重的积分等于 8 个低危，但金额往往远不止；重复报告能拿积分却没有赏金。排行榜最多列出 100 名研究者，部分项目隐藏积分，因此仅在两者都完整时使用。90 天榜同时给出 Hunters 列的第二行：近 90 天获得积分的研究者数（完整榜单上为 100+）。</li>
+    <li>其他情况：已保存的累计值折算到 90 天（需至少一周数据）；在此之前单元格显示「待评分」。</li>
+  </ul>
+  <p>上线不足 90 天的项目，窗口内的报告已全部计入，因此直接用累计值（统计值）；任何估算都不会超过它所依据的累计值。</p>
+  <p>图表从第一次保存的累计值开始，而不是从该数字本身开始：起初为点线，第五天起为虚线的早期线，每个点是「相对首次保存累计的增量折算到 90 天」（≈，依据天数越少越粗）。只有一天数据的数字，其数字旁会有一条点线，直到次日起图。Intigriti 的 90 天支出与 Bugcrowd 由已奖励报告推算的估算也以同样方式绘制。</p>
+  </div>
+</section>
+<section class="panel mcard" id="stats">
+  <div class="panel-head"><h2>Stats 页：每月有效报告</h2></div>
+  <div class="panel-body md">
+  <p>各平台统计有效报告的方式不同，因此 Stats 页的线展示的是各自的走势，而不是彼此的直接比较。</p>
+  <ul>
+    <li><b>HackerOne</b>：Hacktivity 上已解决（resolved）的报告，按其最近一次公开活动的月份归月。</li>
+    <li><b>Bugcrowd</b>：CrowdStream 上已接受（accepted）的报告，按接受月份归月（仅公开且列出报告的项目）。</li>
+    <li><b>Intigriti</b>：各项目公开的「已接受报告数」的逐日增量。首次保存之前的月份（最多回溯一年）由项目当月排行榜估算（≈）：研究者每份被接受的报告按危害获固定积分（重复为五分之一），因此「当月积分 × 每积分对应的已接受报告数（全部时间）」即为估算值。项目隐藏积分时，按「当月获得积分的研究者数 × 平台平均每人每月已接受报告数」计算。排行榜最多 100 人，因此最繁忙的月份可能略低。</li>
+    <li><b>YesWeHack</b>：项目的致谢（Thanks）列表列出每位猎人与其中有效报告数，加总即该项目全部时间的有效报告。HuntDeck 每天保存该累计值并统计增量。首次保存之前的月份为估算（≈）：项目当月收到的报告数（YesWeHack 自带的自然月计数）× 其有效占比（有效报告 ÷ 收到的全部报告）。隐藏致谢列表的项目不计入，Dojo（练习挑战）不计入。</li>
+  </ul>
+  <p>与之并列的是<b>每月赏金</b>：HackerOne 用 Hacktivity 显示的金额（隐藏金额的项目按平均赏金计，≈），Bugcrowd 用 CrowdStream 显示的金额，Intigriti 用项目实际支付：首次保存之后为公开累计支付的增量，之前（≈）为当月估算的已接受报告数乘以每份被接受报告的收入。各币种分开显示，取最常见支付币种，其余列在旁边。只计入当前仍在付赏金的项目（与 90 天支出一致）：已停止付费的项目其报告仍计入有效数，但赏金不计入。</p>
+  <p><b>哪些项目计入。</b>按月数字（有效报告、赏金、新增范围资产、新增范围的项目、上线、披露）计入当前列出的所有项目，包括暂停与关闭的：它们描述的是平台活跃度，今天暂停的项目上个月同样有报告。「开放项目」「付费项目」按各月月末的状态计；范围内资产与通配符按各月月末开放项目的状态计。范围内通配符按 Targets 页与狩猎面板的口径去重（每项目每个值一次，不论以何种范围条目列出）。90 天数字（收到报告、已付）等于 Programs 列表里开放项目的数字之和，两者一致；它们的日线在两天都有保存的项目之间逐日衔接，并折算到该总数。被忽略的项目在 Stats 页仍然计入（这里描述平台，而不是你的清单；狩猎面板与 Targets 页会排除它们）。</p>
+  <p>平台自己的页面按「90 天支出」或「赏金」排序时，先列以主币种（该页折线所用币种）付款的项目，再列其他币种，各自内部排序，因为欧元与美元无法直接比较。</p>
+  <p>折线从 HuntDeck 拥有的第一个月或第一天开始。只有几周历史或是估算的数字，在覆盖半年之前不计入「全部平台」行。标题旁的「全部 / 公开 / 私有」把每个数字限定到对应项目（私有指你受邀的项目）；项目按其当前状态归类，因此后来转为私有的项目在所有月份都算私有。</p>
+  </div>
+</section>
+<section class="panel mcard" id="resolved-90">
+  <div class="panel-head"><h2>有效 · 90 天</h2></div>
+  <div class="panel-body md">
+  <p>项目在近 90 天内判定为有效的报告数。平台列出报告时，HuntDeck 保存每一份已解决报告及其日期，并统计截至每一天的近 90 天解决数。</p>
+  <ul>
+    <li><b>HackerOne</b>：Hacktivity 上未披露（undisclosed）的报告，按其最近一次公开活动的日期（通常是解决，有时是之后发放赏金）。已披露报告单独保存且不重复计入（约占解决量的 3%）。项目首次出现时，最多回读 5,000 份报告，这只影响极少数超大项目的最早历史。</li>
+    <li><b>Bugcrowd</b>：CrowdStream，按每份被接受报告的关闭时间。它只覆盖近六个月的已接受报告，且仅公开项目，因此更早接受、最近才解决的报告不会被计入。</li>
+  </ul>
+  <p><b>YesWeHack</b> 与 <b>Intigriti</b> 不列出报告，但公开每个项目收到与接受的全部时间计数（YesWeHack 由致谢列表加总）。此列改为显示估算（标 ≈）：近 90 天收到的报告数（同上）× 项目全部报告中被接受的比例。其折线为「每天的收到数 × 当天接受比例」，因此跟随「收到报告」线；项目页把该比例显示为 <b>接受率</b>。</p>
+  </div>
+</section>
+<section class="panel mcard" id="huntscore">
+  <div class="panel-head"><h2>HuntScore</h2></div>
+  <div class="panel-body md">
+  <p>项目此刻「值不值得挖」的评分，0–100，在每轮轮询后依据 HuntDeck 已存数据计算；悬停分数可看分项，或打开项目查看原因。分项权重由设置中的预设决定（均衡为 35 / 30 / 25 / 10）：</p>
+  <ul>
+    <li><b>新度</b>：近 30 天新增的范围内资产，按类型加权（通配符最重），项目首次出现的根域额外加分，每 14 天衰减一半；再加上最近的邀请、上线、重新开放或上调赏金表。</li>
+    <li><b>竞争</b>：相对范围规模收到的报告量，在平台内排名（报告越少分越高），私有项目有加成。使用各平台能给出的最佳口径：HackerOne 的近 90 天报告数，YesWeHack 与 Intigriti 用上文推算的口径，Bugcrowd 用近 90 天已接受报告；若 Bugcrowd 项目把 CrowdStream 设为私有，则用已保存天数内「已奖励报告数」的增量（≈，折算到 90 天）。</li>
+    <li><b>赏金</b>：最高赏金、近 90 天支出、平均赏金，在平台内排名。</li>
+    <li><b>响应</b>：按时回复比例、首次响应时间、验证时间，在平台内排名。</li>
+  </ul>
+  <p>分项只在同一平台内排名，因此各平台不共享同一口径的数字不会被直接比较。某项无数据可依据时按 45 分计并标记为未知，每多一个未知项，总分的置信度就下降一档。不付赏金的项目整体乘以 0.75。暂停与关闭的项目保留分数，但不进入狩猎面板的推荐。你自己的报告不计入。</p>
+  <p>狩猎面板上的目标按同一思路评分，依据是「有多新」：对项目而言，或对你而言。刚获得访问权的私有项目，其全部范围都以你加入的时间（或 HuntDeck 首次列出的时间）计龄，因此老项目的范围也会显得新鲜；面板列出其中 3 个目标，其余给出链接。</p>
+  </div>
+</section>
+<section class="panel mcard" id="charts">
+  <div class="panel-head"><h2>图表</h2></div>
+  <div class="panel-body md">
+  <p>每张图覆盖近 90 天，每天一个点，按自身范围缩放，因此展示的是走势而非绝对大小；悬停可见具体数字。绿色表示上升、红色表示下降（无论数值含义：收到报告变多也是绿色，虽然意味着竞争加剧），灰色表示变化在 5% 以内。变化与 90 天前比较；历史不足时与最早的一天比较。</p>
+  </div>
+</section>
+<section class="panel mcard" id="scope-changed">
+  <div class="panel-head"><h2>范围变更</h2></div>
+  <div class="panel-body md">
+  <p>项目范围最近一次变化的时间：取「HuntDeck 在轮询中看到的增删改」与「平台范围历史给出的日期」（某资产在已知日期添加或移除）中最晚的一个。历史开始时就已存在的资产只有「不晚于」的日期，不计入；两者都没有的项目显示破折号。</p>
+  </div>
+</section>
+<section class="panel mcard" id="api-freshness">
+  <div class="panel-head"><h2>API 中：估算与新鲜度</h2></div>
+  <div class="panel-body md">
+  <p><code>/api/v2/programs</code>、<code>/api/v2/invites</code> 与 <code>/api/v2/programs/{platform}/{handle}</code> 把每个可能被估算、或会被轮询刷新的数字（赏金区间、范围计数、<code>numbers</code> 下的每个数字）表示为对象；v1 仍然保持扁平结构：</p>
+  <pre><code>"paid_90d": {"value": 41500, "estimated": false, "source": "hackerone", "updated_at": "2026-11-03T09:00:12.345Z"}</code></pre>
+  <p><b>estimated</b> 为 true 时，对应单元格会显示 ≈：<b>Bugcrowd</b> 的累计支付与 90 天支出（两者都不公开；它也没有收到报告数，因此该值为 null）、<b>YesWeHack</b> 与 <b>Intigriti</b> 在保存满 90 天累计值之前的收到数与 90 天支出、它们的 90 天有效报告，以及「取自项目历史最高支出而非赏金表」的赏金区间。<b>source</b> 对平台自有数字为平台名，对 HuntDeck 统计或推算的为 <code>derived</code>（来自 Hacktivity/CrowdStream 的有效报告、由累计值推算的数字、所有估算），对手工添加的项目为 <code>manual</code>。<b>updated_at</b> 是该值最近一次变化的时间，精确到看到变化的那次轮询：重新读取但未变化的数字保留原时间。无法定时的值为 null：自开始记录以来从未变化，且没有可回溯的历史。</p>
+  <p>每个项目另有 <code>updated_at</code>（该项目任何信息最近变化的时间：首次出现、变更记录、某个数字、被移除）与 <code>last_synced_at</code>（最近一次从平台读取的时间，无论是否变化）。程序列表的 <code>since</code> 保留在该时间之后有变化的项目；<code>/api/v1/targets</code> 的 <code>since</code> 保留之后新增或编辑的目标。Program、列表与匹配接口都会返回 <code>ETag</code>：把它作为 <code>If-None-Match</code> 发回，在内容未变时返回 <code>304 Not Modified</code> 且没有响应体。</p>
+  <pre><code>HD=http://127.0.0.1:8080   # 这个 HuntDeck
+curl -s -D h.txt "$HD/api/v2/programs?since=2026-11-01T00:00:00Z" -o programs.json
+etag=$(sed -n 's/^[Ee][Tt]ag: //p' h.txt | tr -d '')
+curl -s -o /dev/null -w '%{http_code}
+' -H "If-None-Match: $etag" "$HD/api/v2/programs?since=2026-11-01T00:00:00Z"   # 未变化时返回 304</code></pre>
+  </div>
+</section>
+</div>
+{{end}}

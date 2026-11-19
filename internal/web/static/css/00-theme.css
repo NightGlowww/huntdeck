@@ -7,7 +7,8 @@
 
 :root {
   color-scheme: light dark;
-  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", "Fira Code", Menlo, Consolas, monospace;
   --radius: 8px;
   --sidebar: 212px;
@@ -22,26 +23,27 @@
   --surface-2: light-dark(#f8f6fe, #101c31);
   --surface-3: light-dark(#efebfb, #16233b);
   --border:    light-dark(#e4def5, #18233a);
+  --border-input: light-dark(#8b81ad, #4b5a78); /* a control's edge: 3.17:1 or more */
   --border-2:  light-dark(#d2c9ee, #26354f);
   --text:      light-dark(#0b1220, #e6edf7);
   --text-2:    light-dark(#263247, #cdd6e4);
   --muted:     light-dark(#5b6b84, #8494ad);
-  --faint:     light-dark(#97a3b5, #4a5a76);
+  --faint:     light-dark(#616b7d, #748299); /* 4.5:1 on the surfaces, so placeholders read */
 
   --accent:    light-dark(#7c3aed, #c4b5fd);   /* act here: links, buttons, current page */
   --on-accent: light-dark(#ffffff, #1e1145);
-  --good:      light-dark(#047857, #4ade80);   /* good news: in scope, pays, added, ok */
+  --good:      light-dark(#046b4e, #4ade80);   /* good news: in scope, pays, added, ok */
   --info:      light-dark(#1d64c2, #6cb4ff);
-  --warn:      light-dark(#a15c00, #fbbf24);
-  --bad:       light-dark(#c4262e, #f87171);
-  --priv:      light-dark(#c0266d, #f9a8d4);   /* pink, apart from the lavender accent */
+  --warn:      light-dark(#8a4f00, #fbbf24);
+  --bad:       light-dark(#a81f26, #f87171);
+  --priv:      light-dark(#a5215e, #f9a8d4);   /* pink, apart from the lavender accent */
   --row-hover: light-dark(#f6f3fd, #111d33);
 
-  --pf-hackerone: light-dark(#3b5bdb, #829dff);
-  --pf-bugcrowd:  light-dark(#d9580a, #ff8f3d);
-  --pf-intigriti: light-dark(#0f8f81, #2dd4bf);
-  --pf-yeswehack: light-dark(#c8183e, #ff5277);
-  --pf-independent: light-dark(#5f6b7a, #a3b1c2);
+  --pf-hackerone: light-dark(#2f4bb8, #829dff);
+  --pf-bugcrowd:  light-dark(#963a00, #ff8f3d);
+  --pf-intigriti: light-dark(#0a6359, #2dd4bf);
+  --pf-yeswehack: light-dark(#a0102f, #ff5277);
+  --pf-independent: light-dark(#4a5561, #a3b1c2);
 }
 /* Nord: cool slate grey with frost blue, softer and lower glare (after the Nord palette). */
 [data-palette="nord"] {
@@ -55,7 +57,7 @@
   --text:         light-dark(#2e3440, #eceff4);
   --text-2:       light-dark(#3b4252, #d8dee9);
   --muted:        light-dark(#5d6880, #9ba6ba);
-  --faint:        light-dark(#9aa3b5, #616e88);
+  --faint:        light-dark(#6f7786, #939caf);
   --accent:       light-dark(#4c6d9c, #93b4d6);
   --on-accent:    light-dark(#ffffff, #2e3440);
   --good:         light-dark(#3f6b2a, #8fd18a);
@@ -82,7 +84,7 @@
   --text:         light-dark(#111214, #ececee);
   --text-2:       light-dark(#2c2d31, #c8c9ce);
   --muted:        light-dark(#62646b, #8b8d95);
-  --faint:        light-dark(#a1a3aa, #55575f);
+  --faint:        light-dark(#74767b, #7f8187);
   --accent:       light-dark(#18181b, #f4f4f5);
   --on-accent:    light-dark(#ffffff, #111214);
   --good:         light-dark(#15803d, #4ade80);

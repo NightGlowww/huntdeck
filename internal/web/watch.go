@@ -50,7 +50,7 @@ func watchKey(keys []store.ProgramKey) string {
 
 // watchGroup is the rail's choices from what this browser keeps: the
 // watchlist (?watch=) and, with notes, the programs it has notes on
-// (?noted=, notes.js). Each is on while its parameter keeps the list to
+// (?noted=). Each is on while its parameter keeps the list to
 // it (choosing it again drops that), else hidden for the scripts to show
 // and link when the browser has some.
 func watchGroup(l listQuery, watchOn, notedOn, notes bool) railGroup {

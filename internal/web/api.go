@@ -49,7 +49,7 @@ func (s *server) apiStatus(w http.ResponseWriter, r *http.Request) {
 		s.apiServerError(w, r, err)
 		return
 	}
-	out := apiStatusJSON{Version: s.Version, Platforms: []apiStatusPlatform{}, LastPolls: []apiStatusRun{}}
+	out := apiStatusJSON{Version: s.Version, ReadOnly: s.ReadOnly, Platforms: []apiStatusPlatform{}, LastPolls: []apiStatusRun{}}
 	for _, p := range sum {
 		row := apiStatusPlatform{p.Platform, p.Programs, p.Private, p.Open, p.Bounty, p.Removed,
 			p.InScopeEntries, p.OutScopeEntries, p.Targets, nil}

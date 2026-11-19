@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -171,7 +172,9 @@ func (d changesData) Rail() []railGroup {
 }
 
 // RailView is the filter rail (no search: changes are found by program).
-func (d changesData) RailView() railView { return railView{Path: "/changes", Groups: d.Rail()} }
+func (d changesData) RailView() railView {
+	return railView{Path: "/changes", Groups: d.Rail(), Views: d.Views()}
+}
 
 // Pills are the active filters.
 func (d changesData) Pills() []pill { return d.list().pills(d.Rail()) }
@@ -326,6 +329,12 @@ func changeFilterFrom(q url.Values) (store.ChangeFilter, changeParams) {
 func (s *server) changes(w http.ResponseWriter, r *http.Request) {
 	const perPage = 100
 	q := r.URL.Query()
+	// format=txt is the header's copy and download link: every change these
+	// filters match, one a line.
+	if q.Get("format") == "txt" {
+		s.changesText(w, r)
+		return
+	}
 	f, cp := changeFilterFrom(q)
 	f.Order, f.Reverse = oneOf(q.Get("sort"), "", store.ChangesByName, store.ChangesByPlatform), q.Get("rev") == "1"
 	if f.Order == "" && f.Reverse {
@@ -347,4 +356,69 @@ func (s *server) changes(w http.ResponseWriter, r *http.Request) {
 		Platforms: s.listPlatforms(r.Context()), Counts: counts, query: q,
 	}
 	s.render(w, r, http.StatusOK, "changes", pageData{Title: "Changes", Nav: "changes", Feed: d.FeedURL(), FeedTitle: "HuntDeck: changes", Data: d})
+}
+
+// ShowingScope reports whether the page keeps only scope changes.
+func (d changesData) ShowingScope() bool { return d.Group == "scope" }
+
+// ScopeURL switches to scope changes only, or back to every kind.
+func (d changesData) ScopeURL() string {
+	if d.ShowingScope() {
+		return d.list().with("group", "")
+	}
+	return d.list().with("group", "scope")
+}
+
+// changeViewKeys are what a saved view of the Changes page keeps.
+var changeViewKeys = []string{"platform", "group", "scope", "change", "since", "bounty", "sort", "rev", "watch"}
+
+// Views is the Changes page's saved views.
+func (d changesData) Views() *myViews { return newMyViews("/changes", changeViewKeys, "") }
+
+// ScopeCount is how many scope changes the current platform, period and
+// bounty filters hold, for the header chip.
+func (d changesData) ScopeCount() int {
+	return d.count(d.Platform, changeGroups["scope"], d.Bounty, d.period())
+}
+
+// changesText answers the page's copy and download links: one change a line,
+// as "date<TAB>program<TAB>what happened". Every matching change, not the page
+// of them.
+func (s *server) changesText(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	f, _ := changeFilterFrom(q)
+	f.Order, f.Reverse = oneOf(q.Get("sort"), "", store.ChangesByName, store.ChangesByPlatform), q.Get("rev") == "1"
+	if f.Order == "" && f.Reverse {
+		f.Newest = false
+	}
+	f.Limit, f.Offset = 5000, 0
+	rows, _, err := s.Store.Changes(r.Context(), f)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	for _, c := range rows {
+		// Four columns: when, which program, what happened, and the asset it
+		// is about (empty for a change to the program itself).
+		//nolint:gosec // the response is text/plain and the values are tab-joined, not markup
+		_, _ = fmt.Fprintf(w, "%s\t%s/%s\t%s\t%s\n", c.OccurredAt.Format("2006-01-02"), c.Program.Platform, c.Program.Handle,
+			strings.Join(strings.Fields(describeChangeLang(s.langOf(r), s.messages, c)), " "), oneLine(c.Asset))
+	}
+}
+
+// oneLine keeps a value on its line in a tab-separated export.
+func oneLine(s string) string { return strings.Join(strings.Fields(s), " ") }
+
+// ExportURL is this view as plain text: one change a line, every match.
+func (d changesData) ExportURL() string {
+	v := url.Values{}
+	for k, vs := range d.query {
+		if k != "page" && k != "format" {
+			v[k] = vs
+		}
+	}
+	v.Set("format", "txt")
+	return "/changes?" + v.Encode()
 }

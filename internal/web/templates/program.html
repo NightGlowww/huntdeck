@@ -1,4 +1,4 @@
-{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="Back to"><a href="/programs">Programs</a><span class="sep">/</span><a href="/programs?platform={{.P.Platform}}&amp;state=all">{{platformLabel .P.Platform}}</a></nav>{{end}}{{end}}
+{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/programs">{{T "Programs"}}</a><span class="sep">/</span><a href="/programs?platform={{.P.Platform}}&amp;state=all">{{platformLabel .P.Platform}}</a></nav>{{end}}{{end}}
 
 {{/* A program's page: the head, the headline numbers and the tabs show on
    every tab; each tab is a partial (partials/program-*.html). */}}

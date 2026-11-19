@@ -44,6 +44,6 @@ dl.facts > :nth-last-child(-n+2) { border-bottom: 0; }
 .metaline b { color: var(--text-2); font-weight: 550; }
 /* The Changes list's orders, at the right of its header bar. */
 .activef .sorts { display: flex; align-items: center; gap: 4px; margin-left: auto; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
-.activef .sortopt { padding: 2px 9px; border: 1px solid var(--border-2); border-radius: 12px; color: var(--muted); }
+.activef .sortopt { padding: 2px 9px; border: 1px solid var(--border-input); border-radius: 12px; color: var(--muted); }
 .activef .sortopt.on { border-color: var(--accent); background: var(--accent-weak); color: var(--accent); font-weight: 600; }
 .activef .sortopt small { font-size: 11px; font-weight: 500; }

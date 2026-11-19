@@ -41,3 +41,10 @@ table.fixed.flist td.asset { white-space: nowrap; }
 tbody tr[data-href] { cursor: pointer; }
 
 /* Narrow screens: each row a card (26-cards.css). */
+/* Mid widths: the target is what the page is for, so the program and its
+   numbers give way to it rather than the other way round. */
+@media (max-width: 1250px) {
+  .tlist th.c-prog { width: 180px; }
+  .tlist th.c-bounty { width: 150px; }
+  .tlist th.c-added { width: 130px; }
+}

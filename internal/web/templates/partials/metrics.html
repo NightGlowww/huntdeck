@@ -2,15 +2,15 @@
    page's headline repeats them (m-*: each takes a programRow). Money is
    compact, to the unit only in a tooltip and never for an estimate; a
    tooltip on an estimate (≈) starts with ≈ too. */}}
-{{define "m-hunt"}}{{$p := .}}{{with .Hunt}}<b class="score{{if .Gate}} gated{{end}}" title="{{huntTitle .}}">{{printf "%.0f" .Score}}</b>{{else}}{{if eq $p.Platform "independent"}}<span class="zero" title="Programs added by hand aren't scored: HuntDeck has no stats to judge them by">Not scored</span>{{else}}<span class="zero" title="Scored after the next poll">Pending</span>{{end}}{{end}}{{end}}
+{{define "m-hunt"}}{{$p := .}}{{with .Hunt}}<b class="score{{if .Gate}} gated{{end}}" title="{{huntTitle .}}">{{printf "%.0f" .Score}}</b>{{else}}{{if eq $p.Platform "independent"}}<span class="zero" title="{{T "Programs added by hand aren't scored: HuntDeck has no stats to judge them by"}}">{{T "Not scored"}}</span>{{else}}<span class="zero" title="{{T "Scored after the next poll"}}">{{T "Pending"}}</span>{{end}}{{end}}{{end}}
 
-{{define "m-bounty"}}{{$p := .}}{{if and .BountyMin (not .BountyMax)}}<span title="From {{amountFull .BountyMin .Currency}}: the lowest it pays, with no top given"><span class="upto">from</span> {{amount .BountyMin .Currency}}</span>{{else if .BountyMin}}<span title="{{amountRangeFull .BountyMin .BountyMax .Currency}}: {{if eq .BountyFrom "table"}}from its bounty table{{else}}the range the platform's listing gives{{end}}">{{amountRange .BountyMin .BountyMax .Currency}}</span>{{else if .BountyMax}}<span title="Up to {{amountFull .BountyMax .Currency}}: {{if eq .BountyFrom "stats"}}the most it has paid, from its stats{{else}}the top the platform's listing gives{{end}}"><span class="upto">up to</span> {{amount .BountyMax .Currency}}</span>{{else}}{{template "nomoney" $p}}{{end}}{{end}}
+{{define "m-bounty"}}{{$p := .}}{{if and .BountyMin (not .BountyMax)}}<span title="{{TF "From %s: the lowest it pays, with no top given" (amountFull .BountyMin .Currency)}}"><span class="upto">{{T "from"}}</span> {{amount .BountyMin .Currency}}</span>{{else if .BountyMin}}{{$src := "the range the platform's listing gives"}}{{if eq .BountyFrom "table"}}{{$src = "from its bounty table"}}{{end}}<span title="{{TF "%s: %s" (amountRangeFull .BountyMin .BountyMax .Currency) (T $src)}}">{{amountRange .BountyMin .BountyMax .Currency}}</span>{{else if .BountyMax}}{{$src := "the top the platform's listing gives"}}{{if eq .BountyFrom "stats"}}{{$src = "the most it has paid, from its stats"}}{{end}}<span title="{{TF "Up to %s: %s" (amountFull .BountyMax .Currency) (T $src)}}"><span class="upto">{{T "up to"}}</span> {{amount .BountyMax .Currency}}</span>{{else}}{{template "nomoney" $p}}{{end}}{{end}}
 
-{{define "m-ptotal"}}{{$p := .}}{{with amount .PaidAll .StatsCurrency}}{{if $p.PaidAllEstimated}}<span class="est" title="≈{{.}}. Estimate: {{count $p.Rewarded}} rewarded reports × {{amountFull $p.AvgPayout $p.StatsCurrency}} average payout (last 3 months). {{platformLabel $p.Platform}} doesn't publish its total; see Methodology.">≈{{.}}</span>{{else}}<span title="{{amountFull $p.PaidAll $p.StatsCurrency}} paid in bounties all time">{{.}}</span>{{end}}{{else}}{{template "nomoney" $p}}{{end}}{{end}}
+{{define "m-ptotal"}}{{$p := .}}{{with amount .PaidAll .StatsCurrency}}{{if $p.PaidAllEstimated}}<span class="est" title="{{TF "≈%s. Estimate: %s rewarded reports × %s average payout (last 3 months). %s doesn't publish its total; see Methodology." . (count $p.Rewarded) (amountFull $p.AvgPayout $p.StatsCurrency) (platformLabel $p.Platform)}}">≈{{.}}</span>{{else}}<span title="{{TF "%s paid in bounties all time" (amountFull $p.PaidAll $p.StatsCurrency)}}">{{.}}</span>{{end}}{{else}}{{template "nomoney" $p}}{{end}}{{end}}
 
 {{define "m-avg"}}{{$p := .}}{{with avgBounty .ProgramListItem}}<span title="{{avgBountyTitle $p.ProgramListItem}}">{{.}}</span>{{else}}{{template "nomoney" $p}}{{end}}{{end}}
 
-{{define "m-paid"}}{{$p := .}}{{with amount .Paid90d .StatsCurrency}}{{if $p.CountedDays}}{{if $p.Paid90dIsEstimate}}<span title="≈{{.}}. {{countedTitle $p.ProgramListItem "bounties paid"}}">≈{{.}}</span>{{else}}<span title="{{amountFull $p.Paid90d $p.StatsCurrency}}. {{countedTitle $p.ProgramListItem "bounties paid"}}">{{.}}</span>{{end}}{{else if $p.Paid90dEstimated}}<span title="≈{{.}}. Estimate: {{count $p.PaidAccepted90d}} accepted reports in 90 days (all but priority 5) × {{amountFull $p.AvgPayout $p.StatsCurrency}} average payout (last 3 months). {{platformLabel $p.Platform}} doesn't publish paid in 90 days; see Methodology.">≈{{.}}</span>{{else}}<span title="{{amountFull $p.Paid90d $p.StatsCurrency}} paid in bounties in the last 90 days">{{.}}</span>{{end}}{{else}}{{if and $p.PaidAll (not $p.PaidAllEstimated) (eq $p.Platform "intigriti")}}{{template "collecting" $p}}{{else}}{{template "nomoney" $p}}{{end}}{{end}}{{end}}
+{{define "m-paid"}}{{$p := .}}{{with amount .Paid90d .StatsCurrency}}{{if $p.CountedDays}}{{if $p.Paid90dIsEstimate}}<span title="≈{{.}}. {{countedTitle $p.ProgramListItem "bounties paid"}}">≈{{.}}</span>{{else}}<span title="{{amountFull $p.Paid90d $p.StatsCurrency}}. {{countedTitle $p.ProgramListItem "bounties paid"}}">{{.}}</span>{{end}}{{else if $p.Paid90dEstimated}}<span title="{{TF "≈%s. Estimate: %s accepted reports in 90 days (all but priority 5) × %s average payout (last 3 months). %s doesn't publish paid in 90 days; see Methodology." . (count $p.PaidAccepted90d) (amountFull $p.AvgPayout $p.StatsCurrency) (platformLabel $p.Platform)}}">≈{{.}}</span>{{else}}<span title="{{TF "%s paid in bounties in the last 90 days" (amountFull $p.Paid90d $p.StatsCurrency)}}">{{.}}</span>{{end}}{{else}}{{if and $p.PaidAll (not $p.PaidAllEstimated) (eq $p.Platform "intigriti")}}{{template "collecting" $p}}{{else}}{{template "nomoney" $p}}{{end}}{{end}}{{end}}
 
 {{define "m-comp"}}{{$p := .}}{{with count .Reports90d}}{{if $p.CountedDays}}{{if $p.Reports90dIsEstimate}}<span title="≈{{.}}. {{countedTitle $p.ProgramListItem "reports received"}}">≈{{.}}</span>{{else}}<span title="{{countedTitle $p.ProgramListItem "reports received"}}">{{.}}</span>{{end}}{{else}}{{.}}{{end}}{{else}}{{if $p.TotalReports}}{{template "collecting" $p}}{{else}}{{template "nodata" $p}}{{end}}{{end}}{{end}}
 
@@ -20,20 +20,20 @@
 
 {{define "m-scope"}}{{$p := .}}<span title="{{assetsTitle .ProgramListItem}}">{{num .InScope}}</span>{{end}}
 
-{{define "m-hunters"}}{{$p := .}}{{with count .Hunters}}<span title="{{huntersLabel $p.Platform}}{{if eq $p.Platform "hackerone"}} (hackers thanked){{end}}">{{.}}</span>{{else}}{{template "nodata" $p}}{{end}}{{with .Hunters90d}}<span class="h90" title="Researchers who earned points on the program's leaderboard in the last 90 days: accepted reports or duplicates of them">{{hunters90 .}} · 90d</span>{{end}}{{end}}
+{{define "m-hunters"}}{{$p := .}}{{with count .Hunters}}<span title="{{huntersLabel $p.Platform}}{{if eq $p.Platform "hackerone"}}{{T " (hackers thanked)"}}{{end}}">{{.}}</span>{{else}}{{template "nodata" $p}}{{end}}{{with .Hunters90d}}<span class="h90" title="{{T "Researchers who earned points on the program's leaderboard in the last 90 days: accepted reports or duplicates of them"}}">{{hunters90 .}} · {{T "90d"}}</span>{{end}}{{end}}
 
-{{define "m-new"}}{{$p := .}}{{if .Fresh}}<span class="fresh-badge">+{{num .Fresh}}</span>{{else}}<span class="zero" title="No scope added in the last 30 days">0</span>{{end}}{{end}}
+{{define "m-new"}}{{$p := .}}{{if .Fresh}}<span class="fresh-badge">+{{num .Fresh}}</span>{{else}}<span class="zero" title="{{T "No scope added in the last 30 days"}}">0</span>{{end}}{{end}}
 
-{{define "collecting"}}<span class="zero" title="Worked out from {{platformLabel .Platform}}'s all-time totals once HuntDeck has saved a week of them, a day at a time">Pending</span>{{end}}
+{{define "collecting"}}<span class="zero" title="{{TF "Worked out from %s's all-time totals once HuntDeck has saved a week of them, a day at a time" (platformLabel .Platform)}}">Pending</span>{{end}}
 
 {{/* "—" means only that the platform doesn't share the number; nomoney
    is a money cell's, which for a program that pays no bounties says so.
    Each takes anything with Platform (and OffersBounty). */}}
-{{define "nodata"}}<span class="zero" title="{{platformLabel .Platform}} doesn't share this for the program">—</span>{{end}}
+{{define "nodata"}}<span class="zero" title="{{TF "%s doesn't share this for the program" (platformLabel .Platform)}}">—</span>{{end}}
 
-{{define "nomoney"}}{{if .OffersBounty}}{{template "nodata" .}}{{else}}<span class="zero" title="Pays no bounties">—</span>{{end}}{{end}}
+{{define "nomoney"}}{{if .OffersBounty}}{{template "nodata" .}}{{else}}<span class="zero" title="{{T "Pays no bounties"}}">—</span>{{end}}{{end}}
 
-{{define "trend"}}{{if .Line}}<span class="tchart {{.Tone}}{{if .Provisional}} provisional{{end}}" title="{{.Summary}}" data-days="{{.Days}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{.Heading}}, last 90 days: {{.Summary}}"><path class="area" d="{{.Area}}"/>{{with .Gap}}<path class="gap" d="{{.}}"/>{{end}}<path class="line" d="{{.Line}}"/></svg></span>{{else if .Collecting}}<span class="tchart flat collecting" title="{{.Collecting}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{.Collecting}}"><path class="line" d="M0 15 L100 15"/><path class="today" d="M100 15 L100 15"/></svg></span>{{end}}{{end}}
+{{define "trend"}}{{if .Line}}<span class="tchart {{.Tone}}{{if .Provisional}} provisional{{end}}" title="{{.Summary}}" data-days="{{.Days}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{TF "%s, last 90 days: %s" .Heading .Summary}}"><path class="area" d="{{.Area}}"/>{{with .Gap}}<path class="gap" d="{{.}}"/>{{end}}<path class="line" d="{{.Line}}"/></svg></span>{{else if .Collecting}}<span class="tchart flat collecting" title="{{.Collecting}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{.Collecting}}"><path class="line" d="M0 15 L100 15"/><path class="today" d="M100 15 L100 15"/></svg></span>{{end}}{{end}}
 
 {{/* The trend charts' fills (16-trends.css), once per page. */}}
 {{define "spark-defs"}}<svg class="spark-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>
@@ -55,14 +55,14 @@
       {{with .Line}}<path class="line" d="{{.}}"/>{{end}}{{with .Rest}}<path class="line rest" d="{{.}}"/>{{end}}
     </svg></span>
     <svg class="mc-over" aria-hidden="true">
-      {{with .MaxLabel}}<text class="mc-axis" x="100%" y="10%" dy="-3">{{.}}</text>{{end}}{{with .HalfLabel}}<text class="mc-axis" x="100%" y="55%" dy="-3">{{.}}</text>{{end}}
-      {{with .Last}}<circle class="mc-dot" cx="{{.X}}" cy="{{.Y}}" r="3.5"/><text class="mc-val{{if .Edge}} edge{{end}}" x="{{.X}}" y="{{.Y}}" dy="-8">{{.Label}}</text>{{end}}
+      {{with .MaxLabel}}<text class="mc-axis" x="100%" y="10%" dy="-3">{{fig .}}</text>{{end}}{{with .HalfLabel}}<text class="mc-axis" x="100%" y="55%" dy="-3">{{fig .}}</text>{{end}}
+      {{with .Last}}<circle class="mc-dot" cx="{{.X}}" cy="{{.Y}}" r="3.5"/><text class="mc-val{{if .Edge}} edge{{end}}" x="{{.X}}" y="{{.Y}}" dy="-8">{{fig .Label}}</text>{{end}}
     </svg>
   </div>
-  {{if .Months}}<div class="mc-months">{{range .Months}}<span{{if not .Known}} class="nod"{{end}}>{{.Label}}</span>{{end}}</div>
-  {{else}}<div class="mc-span"><span>{{.From}}</span><span>{{.To}}</span></div>{{end}}
+  {{if .Months}}<div class="mc-months">{{range .Months}}<span{{if not .Known}} class="nod"{{end}}>{{fig .Label}}</span>{{end}}</div>
+  {{else}}<div class="mc-span"><span>{{fig .From}}</span><span>{{fig .To}}</span></div>{{end}}
 </div>
 {{end}}
 
 {{/* What a month chart's dashed end means. */}}
-{{define "month-open"}}{{if eq .Open 1}}dashed: this month so far{{else if .Open}}dashed: still filling in{{end}}{{end}}
+{{define "month-open"}}{{if eq .Open 1}}{{T "dashed: this month so far"}}{{else if .Open}}{{T "dashed: still filling in"}}{{end}}{{end}}

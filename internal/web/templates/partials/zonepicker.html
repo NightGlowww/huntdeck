@@ -8,11 +8,11 @@
     <svg class="i combo-icon" aria-hidden="true"><use href="#i-search"/></svg>
     <input type="text" id="timezone-input" name="timezone" value="{{.Name}}" required maxlength="64" autocomplete="off" spellcheck="false"
       role="combobox" aria-expanded="false" aria-controls="zone-list" aria-autocomplete="list" aria-describedby="timezone-now" data-combo-input>
-    <button type="button" class="combo-toggle" tabindex="-1" aria-label="Show every time zone" data-combo-toggle><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
+    <button type="button" class="combo-toggle" tabindex="-1" aria-label="{{T "Show every time zone"}}" data-combo-toggle><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
   </div>
-  <ul class="combo-list" id="zone-list" role="listbox" aria-label="Time zones" hidden data-combo-list>
+  <ul class="combo-list" id="zone-list" role="listbox" aria-label="{{T "Time zones"}}" hidden data-combo-list>
     {{range $i, $c := .Choices}}<li role="option" id="zone-{{$i}}" data-value="{{.Name}}" data-search="{{.Search}}"{{if .On}} aria-selected="true"{{end}}><span class="cv">{{.Name}}</span><span class="cm">{{with .Country}}{{.}} · {{end}}{{.Offset}}{{with .Abbrev}} · {{.}}{{end}}</span></li>{{end}}
-    <li class="combo-empty" role="presentation" hidden>No time zone matches. Try a city, a country or an offset like +10.</li>
+    <li class="combo-empty" role="presentation" hidden>{{T "No time zone matches. Try a city, a country or an offset like +10."}}</li>
   </ul>
 </div>
 {{end}}

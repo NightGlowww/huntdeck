@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"net/url"
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/store"
@@ -72,23 +73,69 @@ func Warm(ctx context.Context, d Deps) {
 	t := time.NewTicker(warmEvery)
 	defer t.Stop()
 	last := int64(-1)
+	// Right away: a restart empties the caches, and the first visitor should
+	// not pay for the whole Stats page. The stillness check still applies to
+	// later rounds, where a poll may be writing.
+	first := true
 	for {
+		v, err := s.Store.DataVersion(ctx)
+		switch {
+		case err != nil:
+		case first, v == last:
+			first = false
+			last = v
+			t0 := time.Now()
+			s.warmStats(ctx)
+			s.Log.Debug("warm done", "took", time.Since(t0).Round(time.Millisecond))
+		default:
+			last = v // data moved: wait for it to settle
+		}
 		select {
 		case <-ctx.Done():
 			return
 		case <-t.C:
 		}
-		v, err := s.Store.DataVersion(ctx)
-		if err != nil || v != last {
-			last = v
-			continue
-		}
-		_, err = s.statsInputs(ctx, "") // the default view, All
-		if err == nil {
-			_, err = s.programSeries(ctx, "")
-		}
-		if err != nil && ctx.Err() == nil {
-			s.Log.Warn("cannot work out the stats pages' numbers ahead", "err", err)
-		}
+	}
+}
+
+// warmStats reads what the Stats pages and /api/v1/stats work out, so both
+// are ready before anyone asks.
+func (s *server) warmStats(ctx context.Context) {
+	// In the order a visitor meets them: the two landing pages first (the board
+	// and the Programs list), then the rest. Warming the Stats pages first left
+	// the first visitor of a restart waiting for them 200 ms.
+	if _, err := s.summaryMemo(ctx); err != nil {
+		s.warnWarm(ctx, err)
+	}
+	if _, err := s.topHuntsMemo(ctx); err != nil {
+		s.warnWarm(ctx, err)
+	}
+	if _, err := s.boardInvitesMemo(ctx); err != nil {
+		s.warnWarm(ctx, err)
+	}
+	if _, err := s.changeCounts(ctx, nil); err != nil {
+		s.warnWarm(ctx, err)
+	}
+	s.warmLists(ctx)
+	if _, err := s.statsInputs(ctx, ""); err != nil { // the default view, All
+		s.warnWarm(ctx, err)
+	}
+	if _, err := s.programSeries(ctx, ""); err != nil {
+		s.warnWarm(ctx, err)
+	}
+	if _, err := s.statsTotals(ctx, url.Values{}); err != nil {
+		s.warnWarm(ctx, err)
+	}
+	// The Targets page is warmed beside the rest, not before it: its counts are
+	// the heaviest part and nobody is waiting for them at the door.
+	go func() {
+		s.warmTargets(ctx)
+		s.warmTargetFacets(ctx)
+	}()
+}
+
+func (s *server) warnWarm(ctx context.Context, err error) {
+	if err != nil && ctx.Err() == nil {
+		s.Log.Warn("cannot work out the stats pages' numbers ahead", "err", err)
 	}
 }

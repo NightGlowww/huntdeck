@@ -25,7 +25,7 @@ for (const form of document.querySelectorAll("[data-try]")) {
     e.preventDefault();
     const path = input.value.trim();
     if (!/^\/(api\/|healthz)/.test(path)) {
-      show("Not sent", "only this HuntDeck's API: start with /api/", "", true);
+      show(t("Not sent"), t("only this HuntDeck's API: start with /api/"), "", true);
       return;
     }
     const button = form.querySelector("button");
@@ -38,10 +38,10 @@ for (const form of document.querySelectorAll("[data-try]")) {
       const lines = body.replace(/\n$/, "").split("\n");
       const size = body.length < 1024 ? body.length + " B" : (body.length / 1024).toFixed(1) + " kB";
       const cut = lines.length > shownLines;
-      show("Response · " + res.status + (res.ok ? "" : " " + res.statusText), ms + " ms · " + size + (cut ? " · first " + shownLines + " lines" : ""),
+      show(t("Response · %s", res.status + (res.ok ? "" : " " + res.statusText)), ms + " ms · " + size + (cut ? " · " + t("first %s lines", shownLines) : ""),
         (cut ? lines.slice(0, shownLines).join("\n") + "\n…" : lines.join("\n")), !res.ok, cut ? path : "");
     } catch (err) {
-      show("Not sent", String(err), "", true);
+      show(t("Not sent"), String(err), "", true);
     } finally {
       button.disabled = false;
     }
@@ -56,7 +56,7 @@ for (const form of document.querySelectorAll("[data-try]")) {
       a.className = "link";
       a.href = all;
       a.target = "_blank";
-      a.textContent = " · open all";
+      a.textContent = " · " + t("open all");
       note.append(a);
     }
     out.hidden = text === "";

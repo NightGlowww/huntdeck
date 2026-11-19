@@ -47,3 +47,29 @@ col.w-num { width: 104px; }
 col.w-num-s { width: 72px; }
 col.w-date { width: 120px; }
 col.w-you { width: 112px; }
+
+/* Below 1601px the page itself scrolls, not the table: give the headings a
+   sticky home at the window's top. A table wider than its column keeps its
+   horizontal scroll (a scroll container cannot have a sticky child here), and
+   columns.js marks that case with .is-wide. */
+@media (max-width: 1600px) {
+  .table-wrap { overflow-x: clip; }
+  .table-wrap.is-wide { overflow-x: auto; }
+  .ptable thead, .table-wrap:not(.is-wide) thead { position: sticky; top: 56px; z-index: 3; }
+  .ptable thead th, .table-wrap:not(.is-wide) thead th { background: var(--surface-2); border-bottom-color: transparent; box-shadow: inset 0 -1px var(--border); }
+}
+
+/* The list a pager link returns to: no focus ring, but it is focused, so the
+   keyboard continues from the list and the page scrolls to its top. */
+#list:focus { outline: none; }
+#list:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* A score that unfolds into its factors: the number is the summary, the list
+   says what moved it. No script, and it works on a card as well as in a table. */
+.why-score > summary { cursor: pointer; list-style: none; font-variant-numeric: tabular-nums; }
+.why-score > summary::-webkit-details-marker { display: none; }
+.why-score > summary::after { content: "▾"; margin-left: 4px; font-size: 9px; opacity: .55; }
+.why-score[open] > summary::after { content: "▴"; }
+.why-score .factors { margin: 6px 0 0; padding: 0; list-style: none; text-align: left; font-weight: 400; }
+.why-score .factors li { display: flex; gap: 6px; justify-content: space-between; white-space: nowrap; font-size: 11px; }
+.why-score .fname { color: var(--text-2); }

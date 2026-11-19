@@ -7,7 +7,18 @@
   .nav .label, .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* icons alone show, the labels still name them */
   .demo-note { padding: 4px 2px; font-size: 11px; }
   .nav a { justify-content: center; width: 42px; padding: 0; }
-  .sidebar .foot { border-top: 0; }
+  .sidebar .foot { border-top: 0; width: 100%; align-items: center; }
+  /* The rail is 60px: the switcher stacks, the sign-out shortens, and the
+     search box drops its "/" hint so the buttons beside it keep their room. */
+  .lang-switch { flex-direction: column; gap: 0; padding: 0; }
+  .lang-switch .i, .lang-switch .full { display: none; }
+  .lang-switch .short { display: inline; }
+  .lang-switch button { font-size: 11px; padding: 1px 5px; }
+  .sign-out button { height: 28px; padding: 0 4px; font-size: 11px; }
+  .sign-out .i { display: block; }
+  .sign-out .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .omni kbd { display: none; }
+  .omni input[type="search"] { padding-right: 12px; }
 }
 @media (max-width: 700px) {
   .shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; } /* a short page doesn't stretch the nav bar */
@@ -43,12 +54,15 @@
   .js .nav, .js .sidebar .foot { display: none; }
   .js .nav-toggle { margin-left: auto; }
   .js .sidebar.nav-open .nav { position: absolute; top: calc(100% + 6px); right: 10px; display: grid; gap: 1px; width: min(280px, calc(100vw - 20px));
-    max-height: calc(100dvh - 90px); overflow-y: auto; padding: 8px; border: 1px solid var(--border-2); border-radius: 10px; background: var(--surface);
+    max-height: calc(100dvh - 90px); overflow-y: auto; padding: 8px; border: 1px solid var(--border-input); border-radius: 10px; background: var(--surface);
     box-shadow: 0 12px 32px rgb(0 0 0 / .2); justify-content: stretch; }
   .js .sidebar.nav-open .nav a { justify-content: flex-start; width: auto; height: 40px; padding: 0 12px; }
   .js .sidebar.nav-open .nav .label { display: inline; }
   .js .sidebar.nav-open .nav .group { display: block; margin: 10px 12px 4px; }
   .js .sidebar.nav-open .nav .group:first-child { margin-top: 2px; }
+  /* Sign out and the language switch live in .foot, and the menu used to bring
+     back only the nav: on a phone they were unreachable. They come with it. */
+  .js .sidebar.nav-open .foot { display: grid; gap: 8px; margin-top: 8px; padding: 8px 12px 4px; border-top: 1px solid var(--border); }
 }
 
 /* A finger needs a target of 24px or more: checkboxes, radios and "view
@@ -57,4 +71,24 @@
 @media (pointer: coarse) {
   input:is([type="checkbox"], [type="radio"]) { flex: none; width: 24px; height: 24px; }
   .feed .view, td .view { display: inline-block; margin-block: -5px; padding: 5px 2px; }
+}
+
+/* 320 px is the width a 400% zoom on a 1280 px screen leaves (WCAG 1.4.10):
+   headers that hold their line there push the page sideways. Everything that
+   sits in a row can wrap instead. */
+@media (max-width: 420px) {
+  .panel-head { flex-wrap: wrap; row-gap: 6px; }
+  .panel-head .aside { flex-wrap: wrap; gap: 6px 10px; white-space: normal; }
+  .activef { flex-wrap: wrap; row-gap: 6px; }
+  .activef .sorts { margin-left: 0; flex-wrap: wrap; white-space: normal; }
+  .activef .sortopt { white-space: normal; }
+  .activef .total, .activef .what { white-space: normal; }
+}
+/* The same 320 px pass: text that held one line now wraps rather than
+   sticking out of its card. */
+@media (max-width: 420px) {
+  .feed .view, td .view { white-space: normal; }
+  .feed .what { display: block; }
+  table.surface .tv { white-space: normal; max-width: none; }
+  .picks .why, .picks .why b { white-space: normal; }
 }

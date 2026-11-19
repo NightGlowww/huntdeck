@@ -1,0 +1,74 @@
+/* ---------- the login page (HUNTDECK_PASSWORD) ---------- */
+/* A page of its own: no sidebar, no top bar. One card, centred, on a quiet
+   gradient; the same colours, type and shapes as the rest of the app. */
+body.auth {
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(1000px 520px at 12% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 62%),
+    radial-gradient(760px 420px at 108% 112%, color-mix(in srgb, var(--info) 12%, transparent), transparent 58%),
+    var(--bg);
+}
+.auth-wrap { width: min(404px, calc(100vw - 32px)); display: grid; gap: 16px; padding: 24px 0; }
+.auth-card {
+  padding: 30px 30px 26px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 30px 70px -34px rgb(3 8 20 / .45), 0 1px 0 color-mix(in srgb, #fff 6%, transparent) inset;
+  backdrop-filter: blur(14px);
+}
+.auth-brand { padding: 0; font-size: 15px; }
+.auth-brand .logo { width: 30px; height: 30px; border-radius: 8px; }
+.auth-brand .word b { color: var(--accent); }
+.auth-card h1 { margin: 22px 0 4px; font-size: 22px; font-weight: 650; letter-spacing: -0.02em; }
+.auth-sub { margin: 0 0 18px; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.auth-err {
+  margin: 0 0 14px; padding: 9px 11px; border-radius: 8px; font-size: 13px; line-height: 1.45;
+  color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--bad) 32%, var(--border));
+}
+.auth-form label { display: block; margin-bottom: 6px; color: var(--text-2); font-size: 12.5px; font-weight: 600; }
+.auth-field { position: relative; }
+.auth-field input {
+  width: 100%; box-sizing: border-box; height: 44px; padding: 0 46px 0 12px;
+  border: 1px solid var(--border-input); border-radius: 9px;
+  background: var(--surface-2); color: var(--text); font: inherit; font-size: 14.5px;
+}
+.auth-field input:focus { border-color: var(--accent); outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 1px; }
+.auth-reveal {
+  position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+  display: grid; place-items: center; width: 32px; height: 32px; padding: 0;
+  border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer;
+}
+.auth-reveal:hover { background: var(--surface-3); color: var(--text); }
+.auth-reveal .i { width: 17px; height: 17px; }
+.auth-hint { margin: 8px 0 18px; color: var(--faint); font-size: 12px; }
+.auth-submit {
+  width: 100%; height: 44px; border: 1px solid color-mix(in srgb, var(--accent) 70%, #000);
+  border-radius: 9px; background: var(--accent); color: var(--on-accent);
+  font: inherit; font-size: 14.5px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--accent) 80%, transparent);
+}
+.auth-submit:hover { background: color-mix(in srgb, var(--accent) 88%, var(--text)); }
+.auth-submit:active { transform: translateY(1px); }
+.auth-foot { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; color: var(--faint); font-size: 12px; }
+.auth-langs { display: flex; align-items: center; gap: 2px; }
+.auth-langs button {
+  padding: 2px 7px; border: 0; border-radius: 6px; background: transparent;
+  color: var(--muted); font: inherit; font-size: 12px; cursor: pointer;
+}
+.auth-langs button:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
+.auth-langs button[aria-current="true"] { color: var(--accent); font-weight: 600; cursor: default; }
+@media (max-width: 420px) { .auth-card { padding: 24px 20px 22px; } }
+/* The heading carries a small lock: the page is a door, and it says so. */
+.auth-title { display: flex; align-items: center; gap: 9px; }
+.auth-lock { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); flex: none; }
+.auth-lock .i { width: 15px; height: 15px; stroke-width: 1.8; }
+html[lang="zh"] .auth-card h1 { letter-spacing: 0; }
+/* Caps Lock is on: the hint under the password field says so. */
+.auth-caps { margin: 6px 0 0; color: var(--warn, #b7791f); font-size: 12px; }
+.auth-caps::before { content: "⇪ "; }

@@ -13,10 +13,15 @@ import (
 
 // channelForm is the add/edit channel form.
 type channelForm struct {
-	ID        int64
-	Kind      string
-	Name      string
-	ChatID    string // Telegram's isn't secret, so it's shown
+	ID     int64
+	Kind   string
+	Name   string
+	ChatID string // Telegram's isn't secret, so it's shown
+	// Bark's group, sound and level: none of them is secret, so the form
+	// shows them back and saving an edit keeps them.
+	Group     string
+	Sound     string
+	Level     string
 	HasSecret bool   // a webhook secret is set
 	Where     string // the saved address, masked
 	Rules     notify.Rules
@@ -76,7 +81,7 @@ func (s *server) newChannelForm(r *http.Request, kind string) channelForm {
 
 // newChannel shows an empty form for a kind of channel.
 func (s *server) newChannel(w http.ResponseWriter, r *http.Request) {
-	kind := oneOf(r.URL.Query().Get("kind"), store.NotifyDiscord, store.NotifyTelegram, store.NotifyWebhook)
+	kind := oneOf(r.URL.Query().Get("kind"), store.NotifyDiscord, store.NotifyTelegram, store.NotifyWebhook, store.NotifyBark, store.NotifyServerChan)
 	s.renderChannel(w, r, http.StatusOK, s.newChannelForm(r, kind))
 }
 
@@ -89,13 +94,14 @@ func (s *server) editChannel(w http.ResponseWriter, r *http.Request) {
 	cfg := notify.ParseConfig(c.Config)
 	f := s.newChannelForm(r, c.Kind)
 	f.ID, f.Name, f.ChatID, f.HasSecret, f.Where = c.ID, c.Name, cfg.ChatID, cfg.Secret != "", cfg.Masked(c.Kind)
+	f.Group, f.Sound, f.Level = cfg.Group, cfg.Sound, cfg.Level
 	f.Rules, f.Enabled, f.Instant, f.DigestAt = notify.ParseRules(c.Rules), c.Enabled, c.Instant, c.DigestAt
 	s.renderChannel(w, r, http.StatusOK, f)
 }
 
 func (s *server) renderChannel(w http.ResponseWriter, r *http.Request, status int, f channelForm) {
 	var err error
-	if f.Preview, err = s.preview(r.Context(), f.Rules, f.Instant, f.DigestAt, previewShown); err != nil {
+	if f.Preview, err = s.preview(r.Context(), s.langOf(r), f.Kind, f.Rules, f.Instant, f.DigestAt, previewShown); err != nil {
 		s.serverError(w, r, err)
 		return
 	}
@@ -185,7 +191,7 @@ func (s *server) readDraft(w http.ResponseWriter, r *http.Request) (channelDraft
 		}
 		d.c, d.cfg = *old, notify.ParseConfig(old.Config)
 	} else {
-		d.c.Kind = oneOf(r.PostFormValue("kind"), store.NotifyDiscord, store.NotifyTelegram, store.NotifyWebhook)
+		d.c.Kind = oneOf(r.PostFormValue("kind"), store.NotifyDiscord, store.NotifyTelegram, store.NotifyWebhook, store.NotifyBark, store.NotifyServerChan)
 	}
 	f := s.newChannelForm(r, d.c.Kind)
 	f.ID, f.Where, f.HasSecret = d.c.ID, d.cfg.Masked(d.c.Kind), d.cfg.Secret != ""
@@ -220,6 +226,24 @@ func (s *server) readDraft(w http.ResponseWriter, r *http.Request) (channelDraft
 	}
 	if v := strings.TrimSpace(form.Get("secret")); v != "" {
 		d.cfg.Secret = v
+	}
+	if v := strings.TrimSpace(form.Get("server")); v != "" {
+		d.cfg.Server = v
+	}
+	if v := strings.TrimSpace(form.Get("device_key")); v != "" {
+		d.cfg.DeviceKey = v
+	}
+	if v := strings.TrimSpace(form.Get("send_key")); v != "" {
+		d.cfg.SendKey = v
+	}
+	if form.Has("group") {
+		d.cfg.Group = strings.TrimSpace(form.Get("group"))
+	}
+	if form.Has("sound") {
+		d.cfg.Sound = strings.TrimSpace(form.Get("sound"))
+	}
+	if form.Has("level") {
+		d.cfg.Level = strings.TrimSpace(form.Get("level"))
 	}
 	if isTrue(form.Get("clear_secret")) {
 		d.cfg.Secret = ""

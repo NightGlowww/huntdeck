@@ -269,3 +269,12 @@
 
 /* An asset whose name the platform blacked out. */
 .hidden-name { color: var(--muted); font-style: italic; }
+/* A finger needs a taller target than a mouse: the program's tabs grow to
+   44px on touch screens. */
+@media (pointer: coarse) {
+  .ptabs a { min-height: 44px; padding-top: 12px; padding-bottom: 12px; }
+}
+/* The program's sections stay reachable: scrolling a long scope keeps the
+   tabs under the top bar instead of leaving them behind. */
+.ptabs { position: sticky; top: calc(var(--db-h) + 56px); z-index: 3; background: var(--bg); }
+@media (max-width: 900px) { .ptabs { top: var(--db-h); } }

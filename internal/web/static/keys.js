@@ -31,11 +31,11 @@
     if (!help) {
       help = document.createElement("dialog");
       help.className = "kb-help";
-      help.setAttribute("aria-label", "Keyboard shortcuts");
-      const keys = [["/", "Search"], ["j / k", "Next / previous row"], ["Enter or o", "Open the row (Shift: in a new tab)"],
-        ["x", "Tick the row's checkbox"], ["n", "A program's notes (on its page)"], ["v", "Your saved views (Hunt board, Programs, Targets)"], ...pages.map(([k, , name]) => ["g " + k, name]), ["?", "These shortcuts"], ["Esc", "Close"]];
+      help.setAttribute("aria-label", t("Keyboard shortcuts"));
+      const keys = [["/", t("Search")], ["j / k", t("Next / previous row")], ["Enter or o", t("Open the row (Shift: in a new tab)")],
+        ["x", t("Tick the row's checkbox")], ["n", t("A program's notes (on its page)")], ["v", t("Your saved views (Hunt board, Programs, Targets)")], ...pages.map(([k, , name]) => ["g " + k, t(name)]), ["?", t("These shortcuts")], ["Esc", t("Close")]];
       const h = document.createElement("h2");
-      h.textContent = "Keyboard shortcuts";
+      h.textContent = t("Keyboard shortcuts");
       const dl = document.createElement("dl");
       for (const [k, what] of keys) {
         const dt = document.createElement("dt");
@@ -53,7 +53,7 @@
       const close = document.createElement("button");
       close.type = "button";
       close.className = "button secondary small";
-      close.textContent = "Close";
+      close.textContent = t("Close");
       close.addEventListener("click", () => help.close());
       help.addEventListener("click", (e) => { if (e.target === help) help.close(); }); // the backdrop
       help.append(h, dl, close);

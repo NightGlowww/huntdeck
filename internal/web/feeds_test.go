@@ -46,7 +46,7 @@ func TestFeeds(t *testing.T) {
 	}
 	for path, want := range map[string]string{
 		"/changes?group=scope&bounty=1":   `<link rel="alternate" type="application/atom+xml" title="HuntDeck: changes" href="/changes.atom?bounty=1&amp;group=scope">`,
-		"/programs/fake/acme?tab=changes": `href="/programs/fake/acme/changes.atom" title="These changes in a feed reader (Atom)"`,
+		"/programs/fake/acme?tab=changes": `href="/programs/fake/acme/changes.atom" data-export`,
 	} {
 		if _, body := e.do(c, http.MethodGet, path, nil, nil); !strings.Contains(body, want) {
 			t.Errorf("%s lacks %s", path, want)

@@ -1,4 +1,4 @@
-{{define "topbar-actions"}}{{if not .Data.Invites}}<a class="tb-btn" href="/programs/independent/new" title="Add a program that isn't on a supported platform, such as one a company runs itself"><svg class="i"><use href="#i-plus"/></svg><span class="label">Add program</span></a>{{end}}<a class="tb-btn" href="{{.Data.CSVURL}}" data-csv-cols="program" title="These programs as a spreadsheet (CSV): every page, the columns shown"><svg class="i"><use href="#i-download"/></svg><span class="label">CSV</span></a>{{template "colpick" .Data.Columns}}{{end}}
+{{define "topbar-actions"}}{{if not .Data.Invites}}<a class="tb-btn" href="/programs/independent/new" title="{{T "Add a program that isn't on a supported platform, such as one a company runs itself"}}"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg><span class="label">{{T "Add program"}}</span></a>{{end}}<a class="tb-btn" href="{{.Data.CSVURL}}" data-csv-cols="program" data-export title="{{T "These programs as a spreadsheet (CSV): every page, the columns shown"}}"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg><span class="label">CSV</span></a>{{template "colpick" .Data.Columns}}{{end}}
 
 {{define "content"}}{{with .Data}}
 <div class="plist">
@@ -6,66 +6,68 @@
 
 <section class="panel ptable">
   <div class="activef">
-    <span class="total">{{num .Pager.Total}} {{if not .Pills}}open {{end}}{{if .Invites}}{{plural .Pager.Total "invite" "invites"}}{{else}}{{plural .Pager.Total "program" "programs"}}{{end}}</span>
+    <span class="total" role="status" aria-live="polite">{{if .Invites}}{{if .Pills}}{{TF "%s %s" (num .Pager.Total) (plural .Pager.Total "invite" "invites")}}{{else}}{{TF "%s open %s" (num .Pager.Total) (plural .Pager.Total "invite" "invites")}}{{end}}{{else}}{{if .Pills}}{{TF "%s %s" (num .Pager.Total) (plural .Pager.Total "program" "programs")}}{{else}}{{TF "%s open %s" (num .Pager.Total) (plural .Pager.Total "program" "programs")}}{{end}}{{end}}</span>
     {{template "pills" .}}
   </div>
 
-{{with .ScopeMentions}}<div class="note-bar">“{{$.Data.Filter.Query}}” is also in {{num .}} scope {{plural . "rule" "rules"}}. <a class="link" href="/match?q={{$.Data.Filter.Query}}">Check scope →</a></div>{{end}}
+{{with .ScopeMentions}}<div class="note-bar">{{TF "“%s” is also in %s scope %s." $.Data.Filter.Query (num .) (plural . "rule" "rules")}} <a class="link" href="/match?q={{$.Data.Filter.Query}}">{{T "Check scope"}} →</a></div>{{end}}
 {{if .Programs}}
-  <div class="table-wrap">
-  <table class="fixed plist-table cards{{if .Accepts}} has-accept{{end}}" data-cols="program">
+  <div class="table-wrap" id="list" tabindex="-1">
+  <table class="fixed plist-table cards{{if .Accepts}} has-accept{{end}}" data-cols="program" id="programs-list">
     <thead><tr>
-      <th rowspan="2" class="c-prog" data-col-fixed data-col-min="240"><a class="{{.SortClass "name"}}" href="{{.SortURL "name"}}">Program</a></th>
-      <th rowspan="2" class="c-hunt num"><a class="{{.SortClass "huntscore"}}" href="{{.SortURL "huntscore"}}" title="How worth hunting it is right now, 0–100: new scope, competition, payout and response">HuntScore</a></th>
-      <th rowspan="2" class="c-bounty num"><a class="{{.SortClass "bounty"}}" href="{{.SortURL "bounty"}}" title="The bounty range it pays: its bounty table, else the platform's listing, else the most it has paid. Sorts by its top, within each currency, the most common first">Bounty</a></th>
-      <th rowspan="2" class="c-ptotal num"><a class="{{.SortClass "paidall"}}" href="{{.SortURL "paidall"}}" title="Bounties paid since the program started: HackerOne's and Intigriti's own totals, or ≈ an estimate (Bugcrowd: rewarded reports × average payout). Sorts within each currency, the most common first">Total paid</a></th>
-      <th rowspan="2" class="c-avg num"><a class="{{.SortClass "avgbounty"}}" href="{{.SortURL "avgbounty"}}" title="The platform's average bounty: HackerOne gives a range, Bugcrowd its average over the last 3 months, YesWeHack its average reward, Intigriti its average payout. Sorts within each currency, the most common first">Avg bounty</a></th>
-      <th class="c-grp" colspan="3" data-grp="paid comp resolved" title="Each number is today's total for the last 90 days, and is what the column sorts by. Each chart is that total day by day over the last 90 days, so its early points count reports from up to 180 days ago: a line that ends at 0 had none in the last 90 days">Last 90 days</th>
-      <th rowspan="2" class="c-resp num"><a class="{{.SortClass "response"}}" href="{{.SortURL "response"}}" title="Time to first response (HackerOne, YesWeHack) or to validate (Bugcrowd)">Response</a></th>
-      <th rowspan="2" class="c-scope num"><a class="{{.SortClass "scope"}}" href="{{.SortURL "scope"}}" title="In-scope assets: wildcards, domains, apps, APIs and the rest; hover a number for the breakdown">Assets</a></th>
-      <th rowspan="2" class="c-hunters num"><span title="Researchers on the program, as each platform counts them: thanked (HackerOne), joined (Bugcrowd), ranked (YesWeHack), contributed (Intigriti). More means more competition">Hunters</span></th>
-      <th rowspan="2" class="c-new num"><a class="{{.SortClass "fresh"}}" href="{{.SortURL "fresh"}}" title="In-scope assets added in the last 30 days">New · 30d</a></th>
-      <th rowspan="2" class="c-launched num"><a class="{{.SortClass "launched"}}" href="{{.SortURL "launched"}}" title="When the program launched, where the platform says">Launched</a></th>
-      <th rowspan="2" class="c-changed num"><a class="{{.SortClass "updated"}}" href="{{.SortURL "updated"}}" title="Its latest scope change: one HuntDeck recorded, or a dated one from the platform's scope history">Scope changed</a></th>
-      <th rowspan="2" class="c-discl num"><a class="{{.SortClass "disclosed"}}" href="{{.SortURL "disclosed"}}" title="Publicly disclosed reports, where the platform publishes them">Discl.</a></th>
-      <th rowspan="2" class="c-req" title="Requirements: what you need before the program accepts your reports, and test credentials where the platform hands them out">Requirements</th>
-      <th rowspan="2" class="c-open"><span class="sr-only">Open on the platform</span></th>
+      <th rowspan="2" class="c-check"><input type="checkbox" data-select-all aria-label="{{T "Select all"}}"></th>
+      <th rowspan="2" class="c-prog" data-col-fixed data-col-min="240"{{with .SortAria "name"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "name"}}" href="{{.SortURL "name"}}">{{T "Program"}}</a></th>
+      <th rowspan="2" class="c-hunt num"{{with .SortAria "huntscore"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "huntscore"}}" href="{{.SortURL "huntscore"}}" title="{{T "How worth hunting it is right now, 0–100: new scope, competition, payout and response"}}">{{T "HuntScore"}}</a></th>
+      <th rowspan="2" class="c-bounty num"{{with .SortAria "bounty"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "bounty"}}" href="{{.SortURL "bounty"}}" title="{{T "The bounty range it pays: its bounty table, else the platform's listing, else the most it has paid. Sorts by its top, within each currency, the most common first"}}">{{T "Bounty"}}</a></th>
+      <th rowspan="2" class="c-ptotal num"{{with .SortAria "paidall"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "paidall"}}" href="{{.SortURL "paidall"}}" title="{{T "Bounties paid since the program started: HackerOne's and Intigriti's own totals, or ≈ an estimate (Bugcrowd: rewarded reports × average payout). Sorts within each currency, the most common first"}}">{{T "Total paid"}}</a></th>
+      <th rowspan="2" class="c-avg num"{{with .SortAria "avgbounty"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "avgbounty"}}" href="{{.SortURL "avgbounty"}}" title="{{T "The platform's average bounty: HackerOne gives a range, Bugcrowd its average over the last 3 months, YesWeHack its average reward, Intigriti its average payout. Sorts within each currency, the most common first"}}">{{T "Avg bounty"}}</a></th>
+      <th class="c-grp" colspan="3" data-grp="paid comp resolved" title="{{T "Each number is today's total for the last 90 days, and is what the column sorts by. Each chart is that total day by day over the last 90 days, so its early points count reports from up to 180 days ago: a line that ends at 0 had none in the last 90 days"}}">{{T "Last 90 days"}}</th>
+      <th rowspan="2" class="c-resp num"{{with .SortAria "response"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "response"}}" href="{{.SortURL "response"}}" title="{{T "Time to first response (HackerOne, YesWeHack) or to validate (Bugcrowd)"}}">{{T "Response"}}</a></th>
+      <th rowspan="2" class="c-scope num"{{with .SortAria "scope"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "scope"}}" href="{{.SortURL "scope"}}" title="{{T "In-scope assets: wildcards, domains, apps, APIs and the rest; hover a number for the breakdown"}}">{{T "Assets"}}</a></th>
+      <th rowspan="2" class="c-hunters num"><span title="{{T "Researchers on the program, as each platform counts them: thanked (HackerOne), joined (Bugcrowd), ranked (YesWeHack), contributed (Intigriti). More means more competition"}}">{{T "Hunters"}}</span></th>
+      <th rowspan="2" class="c-new num"{{with .SortAria "fresh"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "fresh"}}" href="{{.SortURL "fresh"}}" title="{{T "In-scope assets added in the last 30 days"}}">{{T "New · 30d"}}</a></th>
+      <th rowspan="2" class="c-launched num"{{with .SortAria "launched"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "launched"}}" href="{{.SortURL "launched"}}" title="{{T "When the program launched, where the platform says"}}">{{T "Launched"}}</a></th>
+      <th rowspan="2" class="c-changed num"{{with .SortAria "updated"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "updated"}}" href="{{.SortURL "updated"}}" title="{{T "Its latest scope change: one HuntDeck recorded, or a dated one from the platform's scope history"}}">{{T "Scope changed"}}</a></th>
+      <th rowspan="2" class="c-discl num"><a class="{{.SortClass "disclosed"}}" href="{{.SortURL "disclosed"}}" title="{{T "Publicly disclosed reports, where the platform publishes them"}}">{{T "Discl."}}</a></th>
+      <th rowspan="2" class="c-req" title="{{T "Requirements: what you need before the program accepts your reports, and test credentials where the platform hands them out"}}">{{T "Requirements"}}</th>
+      <th rowspan="2" class="c-open"><span class="sr-only">{{T "Open on the platform"}}</span></th>
     </tr>
     <tr class="sub">
-      <th class="c-paid num"><a class="{{.SortClass "paid90"}}" href="{{.SortURL "paid90"}}" title="Bounties paid in the last 90 days: HackerOne's own figure, counted from Intigriti's total paid, saved daily, or ≈ an estimate (Bugcrowd: accepted reports × average payout; Intigriti until there are 90 days of saved totals). Sorts by that 90-day total, most first, within each currency (the most common first)">Paid</a>{{with .SortHint "paid90"}}<small class="sorthint">{{.}}</small>{{end}}</th>
-      <th class="c-comp num"><a class="{{.SortClass "received"}}" href="{{.SortURL "received"}}" title="Reports received in the last 90 days, every report including duplicates: HackerOne's own figure, or counted from YesWeHack's and Intigriti's all-time totals, saved daily (≈ until there are 90 days of them); more means more competition. Sorts by that 90-day total, most first (the Quiet programs view sorts by competition)">Reports received</a>{{with .SortHint "received"}}<small class="sorthint">{{.}}</small>{{end}}</th>
-      <th class="c-resolved num"><a class="{{.SortClass "resolved"}}" href="{{.SortURL "resolved"}}" title="Reports a program accepted as valid in the last 90 days: resolved on HackerOne Hacktivity, accepted reports resolved on Bugcrowd CrowdStream; on YesWeHack and Intigriti, ≈ estimated from reports received × the share accepted. Sorts by that 90-day total, most first">Valid reports</a>{{with .SortHint "resolved"}}<small class="sorthint">{{.}}</small>{{end}}</th>
+      <th class="c-paid num"{{with .SortAria "paid90"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "paid90"}}" href="{{.SortURL "paid90"}}" title="{{T "Bounties paid in the last 90 days: HackerOne's own figure, counted from Intigriti's total paid, saved daily, or ≈ an estimate (Bugcrowd: accepted reports × average payout; Intigriti until there are 90 days of saved totals). Sorts by that 90-day total, most first, within each currency (the most common first)"}}">{{T "Paid"}}</a>{{with .SortHint "paid90"}}<small class="sorthint">{{.}}</small>{{end}}</th>
+      <th class="c-comp num"{{with .SortAria "received"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "received"}}" href="{{.SortURL "received"}}" title="{{T "Reports received in the last 90 days, every report including duplicates: HackerOne's own figure, or counted from YesWeHack's and Intigriti's all-time totals, saved daily (≈ until there are 90 days of them); more means more competition. Sorts by that 90-day total, most first (the Quiet programs view sorts by competition)"}}">{{T "Reports received"}}</a>{{with .SortHint "received"}}<small class="sorthint">{{.}}</small>{{end}}</th>
+      <th class="c-resolved num"{{with .SortAria "resolved"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "resolved"}}" href="{{.SortURL "resolved"}}" title="{{T "Reports a program accepted as valid in the last 90 days: resolved on HackerOne Hacktivity, accepted reports resolved on Bugcrowd CrowdStream; on YesWeHack and Intigriti, ≈ estimated from reports received × the share accepted. Sorts by that 90-day total, most first"}}">{{T "Valid reports"}}</a>{{with .SortHint "resolved"}}<small class="sorthint">{{.}}</small>{{end}}</th>
     </tr></thead>
     <tbody>
     {{range $i, $_ := .Programs}}{{$p := .}}
       <tr class="prow" data-href="/programs/{{.Platform}}/{{.Handle}}">
+        <td class="c-check"><input type="checkbox" class="pick" value="{{.Platform}}/{{.Handle}}" aria-label="{{TF "Select %s" .Name}}"></td>
         <td class="c-prog"><div class="pn">
           {{if gt (len $.Data.Platforms) 1}}{{template "ptag" .Platform}}{{end}}
           <a class="name" href="/programs/{{.Platform}}/{{.Handle}}" title="{{.Name}}">{{.Name}}</a>
-          {{if not .OffersBounty}}<span class="chip vdp" title="Vulnerability disclosure, no bounties">VDP</span>{{end}}
-          {{if .InvitePending}}<span class="chip waiting" title="{{with .InvitedAt}}Invited {{datetime .}}; {{end}}not accepted yet{{if not ($.Data.Accept $i)}}: accept it on {{platformLabel .Platform}}{{end}}">pending</span>{{else if and .Private (not $.Data.Invites)}}<span class="chip private">private</span>{{end}}
-          {{if and $.Data.Invites (not .InvitePending)}}{{with .JoinedAt}}<span class="chip joined" title="Accepted {{datetime .}} ({{ago .}})">joined</span>{{end}}{{end}}
-          {{if ne .State "open"}}<span class="chip {{.State}}">{{.State}}</span>{{end}}
-          {{if .RemovedAt}}<span class="chip removed">gone</span>{{end}}
-          {{with .ResumedAt}}{{if recent .}}<span class="chip resumed" title="Back open {{datetime .}} after being paused or closed">resumed {{ago .}}</span>{{end}}{{end}}
-          {{if .Ignored}}<span class="chip ignored">ignored</span>{{end}}
+          {{if not .OffersBounty}}<span class="chip vdp" title="{{T "Vulnerability disclosure, no bounties"}}">VDP</span>{{end}}
+          {{if .InvitePending}}<span class="chip waiting" title="{{with .InvitedAt}}{{TF "Invited %s; " (datetime .)}}{{end}}{{T "not accepted yet"}}{{if not ($.Data.Accept $i)}}{{TF ": accept it on %s" (platformLabel .Platform)}}{{end}}">{{T "pending"}}</span>{{else if and .Private (not $.Data.Invites)}}<span class="chip private">{{T "private"}}</span>{{end}}
+          {{if and $.Data.Invites (not .InvitePending)}}{{with .JoinedAt}}<span class="chip joined" title="Accepted {{datetime .}} ({{ago .}})">{{T "joined"}}</span>{{end}}{{end}}
+          {{if ne .State "open"}}<span class="chip {{.State}}">{{T .State}}</span>{{end}}
+          {{if .RemovedAt}}<span class="chip removed">{{T "gone"}}</span>{{end}}
+          {{with .ResumedAt}}{{if recent .}}<span class="chip resumed" title="{{TF "Back open %s after being paused or closed" (datetime .)}}">{{T "resumed"}} {{ago .}}</span>{{end}}{{end}}
+          {{if .Ignored}}<span class="chip ignored">{{T "ignored"}}</span>{{end}}
           {{range .Tags}}<a class="chip tag" href="/programs?tag={{.}}">{{.}}</a>{{end}}
         </div></td>
-        <td class="c-hunt num" data-label="HuntScore">{{template "m-hunt" .}}</td>
-        <td class="c-bounty num nowrap">{{template "m-bounty" .}}{{with avgBounty .ProgramListItem}}<span class="avg-under" title="{{avgBountyTitle $p.ProgramListItem}}">avg {{.}}</span>{{end}}</td>
-        <td class="c-ptotal num nowrap" data-label="Total paid">{{template "m-ptotal" .}}</td>
-        <td class="c-avg num nowrap" data-label="Avg bounty">{{template "m-avg" .}}</td>
-        <td class="c-paid num nowrap{{.Trends.Paid.CellClass}}{{if .Paid90dIsEstimate}} est{{end}}" data-label="Paid · 90d"><span class="v">{{template "m-paid" .}}</span>{{template "trend" .Trends.Paid}}</td>
-        <td class="c-comp num nowrap{{.Trends.Received.CellClass}}{{if .Reports90dIsEstimate}} est{{end}}" data-label="Received · 90d"><span class="v">{{template "m-comp" .}}</span>{{template "trend" .Trends.Received}}</td>
-        <td class="c-resolved num nowrap{{.Trends.Resolved.CellClass}}" data-label="Valid · 90d"><span class="v">{{template "m-resolved" .}}</span>{{template "trend" .Trends.Resolved}}</td>
-        <td class="c-resp num nowrap" data-label="Response">{{template "m-resp" .}}</td>
-        <td class="c-scope num" data-label="Assets">{{template "m-scope" .}}</td>
-        <td class="c-hunters num" data-label="Hunters">{{template "m-hunters" .}}</td>
-        <td class="c-new num" data-label="New · 30d">{{template "m-new" .}}</td>
-        <td class="c-launched num nowrap" data-label="Launched">{{with .StartedAt}}<span class="when{{if fresh .}} fresh{{end}}" title="{{datetime .}}">{{date .}}</span>{{else}}{{template "nodata" .}}{{end}}</td>
-        <td class="c-changed num nowrap" data-label="Scope changed">{{with .ScopeChangedAt}}<span class="when{{if fresh .}} fresh{{end}}" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero" title="No dated scope change yet">none</span>{{end}}</td>
-        <td class="c-discl num" data-label="Disclosed">{{if .Disclosed}}<a class="link" href="/programs/{{.Platform}}/{{.Handle}}?tab=stats#disclosed">{{num .Disclosed}}</a>{{else if .Discloses}}<span class="zero">0</span>{{else}}{{template "nodata" .}}{{end}}</td>
-        <td class="c-req">{{$reqs := requires .Platform .Requirements}}{{if or $reqs .Credentials}}{{$n := notes $reqs .Credentials}}<span class="chips">{{with $n.First}}<span class="chip {{if eq .Label "creds"}}creds{{else}}req{{end}}" title="{{.Title}}">{{.Label}}</span>{{end}}{{if $n.More}}<span class="chip req more" title="{{$n.MoreTitle}}">+{{$n.More}}</span>{{end}}</span>{{else if .Requirements.Known}}<span class="zero" title="None: anyone with an account can submit">—</span>{{else}}<span class="zero" title="Not known yet{{if eq .Platform "hackerone"}}; comes with the program stats{{end}}">?</span>{{end}}</td>
+        <td class="c-hunt num" data-label="{{T "HuntScore"}}">{{template "m-hunt" .}}</td>
+        <td class="c-bounty num nowrap">{{template "m-bounty" .}}{{with avgBounty .ProgramListItem}}<span class="avg-under" title="{{avgBountyTitle $p.ProgramListItem}}">{{T "avg"}} {{.}}</span>{{end}}</td>
+        <td class="c-ptotal num nowrap" data-label="{{T "Total paid"}}">{{template "m-ptotal" .}}</td>
+        <td class="c-avg num nowrap" data-label="{{T "Avg bounty"}}">{{template "m-avg" .}}</td>
+        <td class="c-paid num nowrap{{.Trends.Paid.CellClass}}{{if .Paid90dIsEstimate}} est{{end}}" data-label="{{T "Paid · 90d"}}"><span class="v">{{template "m-paid" .}}</span>{{template "trend" .Trends.Paid}}</td>
+        <td class="c-comp num nowrap{{.Trends.Received.CellClass}}{{if .Reports90dIsEstimate}} est{{end}}" data-label="{{T "Received · 90d"}}"><span class="v">{{template "m-comp" .}}</span>{{template "trend" .Trends.Received}}</td>
+        <td class="c-resolved num nowrap{{.Trends.Resolved.CellClass}}" data-label="{{T "Valid · 90d"}}"><span class="v">{{template "m-resolved" .}}</span>{{template "trend" .Trends.Resolved}}</td>
+        <td class="c-resp num nowrap" data-label="{{T "Response"}}">{{template "m-resp" .}}</td>
+        <td class="c-scope num" data-label="{{T "Assets"}}">{{template "m-scope" .}}</td>
+        <td class="c-hunters num" data-label="{{T "Hunters"}}">{{template "m-hunters" .}}</td>
+        <td class="c-new num" data-label="{{T "New · 30d"}}">{{template "m-new" .}}</td>
+        <td class="c-launched num nowrap" data-label="{{T "Launched"}}">{{with .StartedAt}}<span class="when{{if fresh .}} fresh{{end}}" title="{{datetime .}}">{{date .}}</span>{{else}}{{template "nodata" .}}{{end}}</td>
+        <td class="c-changed num nowrap" data-label="{{T "Scope changed"}}">{{with .ScopeChangedAt}}<span class="when{{if fresh .}} fresh{{end}}" data-ago data-at="{{iso .}}" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero" title="{{T "No dated scope change yet"}}">{{T "none"}}</span>{{end}}</td>
+        <td class="c-discl num" data-label="{{T "Disclosed"}}">{{if .Disclosed}}<a class="link" href="/programs/{{.Platform}}/{{.Handle}}?tab=stats#disclosed">{{num .Disclosed}}</a>{{else if .Discloses}}<span class="zero">0</span>{{else}}{{template "nodata" .}}{{end}}</td>
+        <td class="c-req">{{$reqs := requires .Platform .Requirements}}{{if or $reqs .Credentials}}{{$n := notes $reqs .Credentials}}<span class="chips">{{with $n.First}}<span class="chip {{if eq .Label "creds"}}creds{{else}}req{{end}}" title="{{reqTitle .Title}}">{{T .Label}}</span>{{end}}{{if $n.More}}<span class="chip req more" title="{{$n.MoreTitle}}">+{{$n.More}}</span>{{end}}</span>{{else if .Requirements.Known}}<span class="zero" title="{{T "None: anyone with an account can submit"}}">—</span>{{else}}<span class="zero" title="{{T "Not known yet"}}{{if eq .Platform "hackerone"}}{{T "; comes with the program stats"}}{{end}}">?</span>{{end}}</td>
         <td class="c-open">{{with $.Data.Accept $i}}{{template "accept-invite" .}}{{end}}{{template "open-ext" .}}</td>
       </tr>
     {{end}}
@@ -74,11 +76,16 @@
   </div>
   <script src="{{static "columns.js"}}"></script>
   {{template "pager" .Pager}}
+  <div class="selbar" data-selbar hidden><span data-selcount role="status" aria-live="polite"></span>
+    <button type="button" class="button secondary small" data-copy-list="#programs-list" data-checked><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy selected programs"}}</span></button>
+    <button type="button" class="button secondary small" data-ignore-selected data-ignore-to="{{if .ShowingIgnored}}0{{else}}1{{end}}"><svg class="i" aria-hidden="true"><use href="#i-eye{{if .ShowingIgnored}}-off{{end}}"/></svg><span class="label">{{if .ShowingIgnored}}{{T "Unignore selected"}}{{else}}{{T "Ignore selected"}}{{end}}</span></button>
+    <span class="grow"></span><span class="muted small">{{T "The ticks copy as platform/handle, one per line."}}</span></div>
 {{else if .Pager.Beyond}}
   {{template "past-end" .Pager}}
 {{else}}
-  <div class="empty-state">{{if and .Invites (not .Pills)}}No invites yet: private programs you're invited to show here.{{else if not .Pills}}No programs yet: they show here after the first poll. Add an account in <a class="link" href="/settings?tab=accounts">Settings › Accounts</a> if you haven't.{{else}}No {{if .Invites}}invites{{else}}programs{{end}} match {{if hasFilters .Pills}}these filters. <a class="link" href="{{.ClearURL}}">Clear filters</a>{{else}}this search.{{end}}{{end}}{{with .Filter.Query}}
-    <p class="small">Part of a domain? <a class="link" href="/match?q={{.}}">Check scope mentioning “{{.}}”</a></p>{{end}}</div>
+  <div class="empty-state">{{if and .Invites (not .Pills)}}{{T "No invites yet: private programs you're invited to show here."}}{{else if not .Pills}}{{T "No programs yet: they show here after the first poll. Add an account in"}} <a class="link" href="/settings?tab=accounts">{{T "Settings"}} › {{T "Accounts"}}</a> {{T "if you haven't."}}{{else if .Invites}}{{if hasFilters .Pills}}{{TF "No %s match these filters." (plural .Pager.Total "invite" "invites")}} <a class="link" href="{{.ClearURL}}">{{T "Clear filters"}}</a>{{else}}{{TF "No %s match this search." (plural .Pager.Total "invite" "invites")}}{{end}}{{else}}{{if hasFilters .Pills}}{{TF "No %s match these filters." (plural .Pager.Total "program" "programs")}} <a class="link" href="{{.ClearURL}}">{{T "Clear filters"}}</a>{{else}}{{TF "No %s match this search." (plural .Pager.Total "program" "programs")}}{{end}}{{end}}{{if and (not .Invites) (gt .IgnoredTotal 0)}}
+    <p class="small">{{TF "Ignored programs (%s) are left out." (num .IgnoredTotal)}} <a class="link" href="{{.IgnoredOnlyURL}}">{{T "Show them"}}</a></p>{{end}}{{with .Filter.Query}}
+    <p class="small">{{T "Part of a domain?"}} <a class="link" href="/match?q={{.}}">{{T "Check scope mentioning"}} “{{.}}”</a></p>{{end}}</div>
 {{end}}
 </section>
 </div>

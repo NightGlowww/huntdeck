@@ -47,9 +47,16 @@ type dashboardData struct {
 	// Checked is when each platform's listing was last read, in the
 	// platforms' order: the status line under the totals.
 	Checked []store.PlatformChecked
+	// NoPollsYet says nothing has ever been polled: a copy loaded from the
+	// starter seed. Its "last checked" times are the import, not a check, so
+	// the status line says what to do instead.
+	NoPollsYet bool
 	// FilterPlatforms are the platforms fresh targets can be narrowed to:
 	// Independent too, once there are programs added by hand.
 	FilterPlatforms []string
+
+	// Queue is HuntQueue's top rows: what to hunt today, above the grid.
+	Queue []queueRowView
 
 	// Fresh attack surface: the best recently added targets.
 	Filter      boardFilter
@@ -253,24 +260,30 @@ type flipFlopper struct {
 
 func (s *server) dashboard(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	t0 := time.Now()
 	d := dashboardData{Filter: boardFilterFrom(r.URL.Query())}
 	if err := s.boardHead(ctx, &d); err != nil {
 		s.serverError(w, r, err)
 		return
 	}
+	tHead := time.Since(t0)
+	// The queue is derived data read straight from its table: five rows, one
+	// query, and the page answers "what now" without a second click.
+	if top, _, err := s.Store.HuntQueueTop(ctx, store.QueueFilter{}, 5, 0); err == nil {
+		d.Queue = s.queueViews(r, top)
+	}
 	if err := s.boardTargets(r, &d); err != nil {
 		s.serverError(w, r, err)
 		return
 	}
-	changes, err := s.Store.BoardChanges(ctx, time.Now().Add(-7*24*time.Hour), false, 2000)
+	tTargets := time.Since(t0)
+	changes, err := s.boardChangesMemo(ctx)
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
 	d.Diffs, d.DiffPrograms = boardDiffs(changes, boardCards)
-	if d.Invites, err = store.Memo(ctx, s.Store, "board-invites", func(ctx context.Context) (boardInvites, error) {
-		return s.boardInvites(ctx, time.Now())
-	}); err != nil {
+	if d.Invites, err = s.boardInvitesMemo(ctx); err != nil {
 		s.serverError(w, r, err)
 		return
 	}
@@ -278,6 +291,9 @@ func (s *server) dashboard(w http.ResponseWriter, r *http.Request) {
 	if d.Checked, err = s.Store.PlatformsChecked(ctx); err != nil {
 		s.serverError(w, r, err)
 		return
+	}
+	if polled, err := s.Store.HasFinishedPoll(ctx); err == nil && !polled {
+		d.NoPollsYet = true
 	}
 	order := s.platformNames()
 	rank := func(name string) int {
@@ -287,7 +303,12 @@ func (s *server) dashboard(w http.ResponseWriter, r *http.Request) {
 		return len(order)
 	}
 	slices.SortStableFunc(d.Checked, func(a, b store.PlatformChecked) int { return rank(a.Platform) - rank(b.Platform) })
+	tData := time.Since(t0)
 	s.render(w, r, http.StatusOK, "dashboard", pageData{Title: "Hunt board", Nav: "dashboard", Data: d})
+	// Where the board's time goes, at debug level: the data it reads and the
+	// page it draws, so an optimization starts from a number.
+	s.Log.Debug("dashboard served", "head", tHead.Round(time.Millisecond), "targets", (tTargets - tHead).Round(time.Millisecond),
+		"changes", (tData - tTargets).Round(time.Millisecond), "render", (time.Since(t0) - tData).Round(time.Millisecond))
 }
 
 // boardHead reads the board's summary, which /api/v1/board gives too: the
@@ -295,7 +316,7 @@ func (s *server) dashboard(w http.ResponseWriter, r *http.Request) {
 // and the top hunts.
 func (s *server) boardHead(ctx context.Context, d *dashboardData) error {
 	var err error
-	if d.Summaries, err = store.Memo(ctx, s.Store, "summary", s.Store.Summary); err != nil {
+	if d.Summaries, err = s.summaryMemo(ctx); err != nil {
 		return err
 	}
 	counts, err := s.changeCounts(ctx, nil)
@@ -304,17 +325,25 @@ func (s *server) boardHead(ctx context.Context, d *dashboardData) error {
 	}
 	d.Changes24h, d.Changes7d = changesData{Counts: counts}.count("", nil, "", 0), changesData{Counts: counts}.count("", nil, "", 1)
 	week := time.Now().Add(-7 * 24 * time.Hour)
-	states, err := s.Store.BoardChanges(ctx, week, true, 2000)
+	// The status cards read up to 2,000 changes of the week, and so does the
+	// diffs list below: both are memoised, so the page pays for them once per
+	// data version rather than on every view.
+	states, err := s.boardStatesMemo(ctx)
 	if err != nil {
 		return err
 	}
 	// Reopened is what /programs?resumed=7d lists, which "+N more" links to.
-	reopened, _, err := s.Store.Programs(ctx, store.ProgramFilter{State: "open", ResumedSince: week, Sort: "resumed", Limit: 1000})
+	// Up to a thousand rows, so it is memoised with the changes above.
+	reopened, err := s.boardReopenedMemo(ctx)
 	if err != nil {
 		return err
 	}
 	d.Status = statusOf(states, reopened)
-	if d.Week, err = s.Store.BoardCounts(ctx, week); err != nil {
+	// The counts the header shows, worked out from the week's changes and the
+	// new scope: memoised with the rest of the board's figures.
+	if d.Week, err = store.Memo(ctx, s.Store, "board-counts:7d", func(ctx context.Context) (store.BoardCounts, error) {
+		return s.Store.BoardCounts(ctx, week)
+	}); err != nil {
 		return err
 	}
 	// New wildcards and domains as the cards' Targets pages count them,
@@ -328,9 +357,7 @@ func (s *server) boardHead(ctx context.Context, d *dashboardData) error {
 			return err
 		}
 	}
-	if d.TopHunts, err = store.Memo(ctx, s.Store, "top-hunts", func(ctx context.Context) ([]store.HuntPick, error) {
-		return s.Store.TopHunts(ctx, boardPicks)
-	}); err != nil {
+	if d.TopHunts, err = s.topHuntsMemo(ctx); err != nil {
 		return err
 	}
 	for _, sm := range d.Summaries {
@@ -469,3 +496,111 @@ var boardColumns = columnPicker{Name: "board-targets", Label: "Columns", Icon: "
 
 // Columns is the fresh targets' column picker.
 func (d dashboardData) Columns() columnPicker { return boardColumns }
+
+// The board's memoised numbers, in one place: the page reads them through
+// these, and Warm fills them before the first visitor arrives.
+func (s *server) boardInvitesMemo(ctx context.Context) (boardInvites, error) {
+	return store.Memo(ctx, s.Store, "board-invites", func(ctx context.Context) (boardInvites, error) {
+		return s.boardInvites(ctx, time.Now())
+	})
+}
+
+func (s *server) summaryMemo(ctx context.Context) ([]store.PlatformSummary, error) {
+	return store.Memo(ctx, s.Store, "summary", s.Store.Summary)
+}
+
+func (s *server) topHuntsMemo(ctx context.Context) ([]store.HuntPick, error) {
+	return store.Memo(ctx, s.Store, "top-hunts", func(ctx context.Context) ([]store.HuntPick, error) {
+		return s.Store.TopHunts(ctx, boardPicks)
+	})
+}
+
+// The board's week of changes, in one place: the page reads them through
+// these and Warm fills them before the first visitor arrives.
+func (s *server) boardChangesMemo(ctx context.Context) ([]store.BoardChange, error) {
+	return store.Memo(ctx, s.Store, "board-changes:7d", func(ctx context.Context) ([]store.BoardChange, error) {
+		return s.Store.BoardChanges(ctx, time.Now().Add(-7*24*time.Hour), false, 2000)
+	})
+}
+
+func (s *server) boardStatesMemo(ctx context.Context) ([]store.BoardChange, error) {
+	// The board reads the week twice: every change (for the diffs) and the state
+	// changes alone (for the status cards). When the week fits under the limit
+	// the second is a filter over the first, so one query serves both; a week
+	// with more changes than that falls back to asking for the states alone,
+	// where the two limits could otherwise differ.
+	all, err := s.boardChangesMemo(ctx)
+	if err == nil && len(all) < 2000 {
+		states := make([]store.BoardChange, 0, len(all))
+		for _, c := range all {
+			if c.Kind == store.ChangeStateChanged {
+				states = append(states, c)
+			}
+		}
+		return states, nil
+	}
+	week := time.Now().Add(-7 * 24 * time.Hour)
+	return store.Memo(ctx, s.Store, "board-states:7d", func(ctx context.Context) ([]store.BoardChange, error) {
+		return s.Store.BoardChanges(ctx, week, true, 2000)
+	})
+}
+
+func (s *server) boardReopenedMemo(ctx context.Context) ([]store.ProgramListItem, error) {
+	week := time.Now().Add(-7 * 24 * time.Hour)
+	return store.Memo(ctx, s.Store, "board-reopened:7d", func(ctx context.Context) ([]store.ProgramListItem, error) {
+		rows, _, err := s.Store.Programs(ctx, store.ProgramFilter{State: "open", ResumedSince: week, Sort: "resumed", Limit: 1000})
+		return rows, err
+	})
+}
+
+// warmLists fills the data the first two pages a visitor opens read: the Hunt
+// board (its week of changes and the reopened list) and the Programs list
+// (its first page, its rows' histories and its counts). Without it the first
+// visit after a restart pays two hundred milliseconds for them.
+func (s *server) warmLists(ctx context.Context) {
+	if _, err := s.boardStatesMemo(ctx); err != nil {
+		s.warnWarm(ctx, err)
+		return
+	}
+	if _, err := s.boardChangesMemo(ctx); err != nil {
+		s.warnWarm(ctx, err)
+		return
+	}
+	if _, err := s.boardReopenedMemo(ctx); err != nil {
+		s.warnWarm(ctx, err)
+		return
+	}
+	// The Programs list as /programs serves it: the default order, a page of
+	// rows with their histories, and the counts beside the filters.
+	f := store.ProgramFilter{State: "open", Sort: programsDefaultSort, Limit: 30}
+	progs, _, err := s.Store.Programs(ctx, f)
+	if err != nil {
+		s.warnWarm(ctx, err)
+		return
+	}
+	if _, err := s.programRows(ctx, progs, time.Now()); err != nil {
+		s.warnWarm(ctx, err)
+		return
+	}
+	// The board's uncached reads, touched here so the first visitor does not
+	// pay for cold pages: the per-kind counts and the fresh attack surface.
+	week := time.Now().Add(-7 * 24 * time.Hour)
+	for _, kind := range []string{scope.KindWildcard, scope.KindDomain} {
+		if _, _, err := s.Store.TargetRows(ctx, store.TargetFilter{Kind: kind, AddedSince: week}, "", 1, 0); err != nil {
+			s.warnWarm(ctx, err)
+		}
+	}
+	if _, err := s.Store.PlatformsChecked(ctx); err != nil {
+		s.warnWarm(ctx, err)
+	}
+	if _, _, err := s.Store.BestTargets(ctx, store.TargetFilter{Order: store.TargetsByScore}, "", 25, 0); err != nil {
+		s.warnWarm(ctx, err)
+	}
+	q := url.Values{}
+	if _, err := store.Memo(ctx, s.Store, "program-facets:/programs?"+facetKey(q, programFacetParams...),
+		func(ctx context.Context) (store.ProgramFacets, error) {
+			return s.Store.ProgramFacets(ctx, f, s.listPlatforms(ctx))
+		}); err != nil {
+		s.warnWarm(ctx, err)
+	}
+}

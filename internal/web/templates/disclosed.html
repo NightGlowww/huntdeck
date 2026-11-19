@@ -5,34 +5,41 @@
 <section class="panel ptable">
   <div class="activef">
     <span class="total">{{num .Pager.Total}} {{plural .Pager.Total "report" "reports"}}</span>
-    <span class="what">made public on the programs HuntDeck tracks</span>
+    <span class="what">{{T "made public on the programs HuntDeck tracks"}}</span>
     {{template "pills" .}}
     <span class="quick">
-      <a class="qv{{if eq .Filter.Sort "new"}} on{{end}}" href="{{.SortURL "new"}}">Newest</a>
-      <a class="qv{{if eq .Filter.Sort "bounty"}} on{{end}}" href="{{.SortURL "bounty"}}">Biggest bounties</a>
-      <a class="qv{{if eq .Filter.Sort "votes"}} on{{end}}" href="{{.SortURL "votes"}}">Most upvoted</a>
+      <a class="qv{{if eq .Filter.Sort "new"}} on{{end}}" href="{{.SortURL "new"}}">{{T "Newest"}}</a>
+      <a class="qv{{if eq .Filter.Sort "bounty"}} on{{end}}" href="{{.SortURL "bounty"}}">{{T "Biggest bounties"}}</a>
+      <a class="qv{{if eq .Filter.Sort "votes"}} on{{end}}" href="{{.SortURL "votes"}}">{{T "Most upvoted"}}</a>
     </span>
+    <span class="quick">
+      <button type="button" class="link small" data-copy-url="{{.ExportURL}}" title="{{T "These reports as links, one per line"}}">{{T "Copy links"}}</button>
+      <a class="link small" href="{{.ExportURL}}" download="disclosed.txt" data-export title="{{T "These reports as a .txt file"}}">{{T "Download .txt"}}</a>
+    </span>
+    {{if gt .Pager.Total 5000}}<span class="muted small" title="{{T "Copy and download stop at 5,000 reports: narrow the filters for the rest"}}">{{TF "Export stops at 5,000 of %s: narrow the filters" (num .Pager.Total)}}</span>{{end}}
   </div>
 {{if .Rows}}
-  <div class="table-wrap">
-  <table class="fixed flist dlist cards">
+  <div class="table-wrap" id="list" tabindex="-1">
+  <table class="fixed flist dlist cards" id="disclosed-list">
     <thead><tr>
-      <th class="c-prog">Program</th>
-      <th class="c-report">Report</th>
-      <th class="c-sev">Severity</th>
-      <th class="c-weak">Weakness</th>
-      <th class="c-bounty num"><a class="sort{{if eq .Filter.Sort "bounty"}} on{{end}}" href="{{.SortURL "bounty"}}">Bounty</a></th>
-      <th class="c-votes num"><a class="sort{{if eq .Filter.Sort "votes"}} on{{end}}" href="{{.SortURL "votes"}}">Votes</a></th>
-      <th class="c-date"><a class="sort{{if eq .Filter.Sort "new"}} on{{end}}" href="{{.SortURL "new"}}">Disclosed</a></th>
+      <th class="c-check"><input type="checkbox" data-select-all aria-label="{{T "Select all"}}"></th>
+      <th class="c-prog">{{T "Program"}}</th>
+      <th class="c-report">{{T "Report"}}</th>
+      <th class="c-sev">{{T "Severity"}}</th>
+      <th class="c-weak">{{T "Weakness"}}</th>
+      <th class="c-bounty num"{{with .SortAria "bounty"}} aria-sort="{{.}}"{{end}}><a class="sort{{if eq .Filter.Sort "bounty"}} on{{end}}" href="{{.SortURL "bounty"}}">{{T "Bounty"}}</a></th>
+      <th class="c-votes num"{{with .SortAria "votes"}} aria-sort="{{.}}"{{end}}><a class="sort{{if eq .Filter.Sort "votes"}} on{{end}}" href="{{.SortURL "votes"}}">{{T "Votes"}}</a></th>
+      <th class="c-date"{{with .SortAria "new"}} aria-sort="{{.}}"{{end}}><a class="sort{{if eq .Filter.Sort "new"}} on{{end}}" href="{{.SortURL "new"}}">{{T "Disclosed"}}</a></th>
     </tr></thead>
     <tbody>
     {{range .Rows}}
       <tr{{with httpURL .URL}} data-href="{{.}}" data-ext{{end}}>
+        <td class="c-check"><input type="checkbox" class="pick" value="{{.URL}}" aria-label="{{TF "Select %s" .Title}}"></td>
         <td class="c-prog">{{template "pname" (plink .Program "?tab=stats#disclosed")}}</td>
         <td class="c-report" title="{{.Title}}{{with .Reporter}}&#10;by {{.}}{{end}}{{with .Substate}}{{if ne . "resolved"}} · {{.}}{{end}}{{end}}{{range .CVEIDs}} · {{.}}{{end}}{{with .Summary}}&#10;&#10;{{.}}{{end}}"><a class="link" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{.Title}}</a>{{with .Reporter}} <span class="muted small">by {{.}}</span>{{end}}</td>
         <td class="c-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{.Severity}}</span>{{else}}<span class="zero">{{if .Severity}}none{{else}}—{{end}}</span>{{end}}</td>
-        <td class="c-weak small" title="{{.Weakness}}">{{with .Weakness}}<a class="link" href="{{$.Data.WeaknessURL .}}">{{.}}</a>{{else}}<span class="zero" title="No weakness given">—</span>{{end}}</td>
-        <td class="c-bounty num nowrap" data-label="Bounty">{{$d := .}}{{with amount .Bounty .Currency}}<span title="{{amountFull $d.Bounty $d.Currency}}">{{.}}</span>{{else}}<span class="zero" title="Bounty not shown">—</span>{{end}}</td>
+        <td class="c-weak small" title="{{.Weakness}}">{{with .Weakness}}<a class="link" href="{{$.Data.WeaknessURL .}}">{{.}}</a>{{else}}<span class="zero" title="{{T "No weakness given"}}">—</span>{{end}}</td>
+        <td class="c-bounty num nowrap" data-label="Bounty">{{$d := .}}{{with amount .Bounty .Currency}}<span title="{{amountFull $d.Bounty $d.Currency}}">{{.}}</span>{{else}}<span class="zero" title="{{T "Bounty not shown"}}">—</span>{{end}}</td>
         <td class="c-votes num" data-label="Votes">{{if .Votes}}{{num .Votes}}{{else}}<span class="zero">0</span>{{end}}</td>
         <td class="c-date nowrap"><span class="when{{if fresh .DisclosedAt}} fresh{{end}}" title="disclosed {{datetime .DisclosedAt}}{{with .SubmittedAt}}&#10;submitted {{datetime .}}{{end}}">{{date .DisclosedAt}}</span></td>
       </tr>
@@ -41,10 +48,13 @@
   </table>
   </div>
   {{template "pager" .Pager}}
+  <div class="selbar" data-selbar hidden><span data-selcount role="status" aria-live="polite"></span>
+    <button type="button" class="button secondary small" data-copy-list="#disclosed-list" data-checked><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy selected links"}}</span></button>
+    <span class="grow"></span><span class="muted small">{{T "The ticks copy as links, one per line."}}</span></div>
 {{else if .Pager.Beyond}}
   {{template "past-end" .Pager}}
 {{else}}
-  <div class="empty-state">No disclosed reports match these filters.{{if hasFilters .Pills}} <a class="link" href="{{.ClearURL}}">Clear filters</a>{{end}}</div>
+  <div class="empty-state">{{if .Filter.Query}}{{T "No disclosed reports match this search."}}{{else}}{{T "No disclosed reports match these filters."}}{{end}}{{if hasFilters .Pills}} <a class="link" href="{{.ClearURL}}">{{T "Clear filters"}}</a>{{else if .Filter.Query}} <a class="link" href="{{.ClearURL}}">{{T "Clear the search"}}</a>{{end}}</div>
 {{end}}
 </section>
 </div>

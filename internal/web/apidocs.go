@@ -65,7 +65,15 @@ func servedReadOnly(method, path string) bool {
 
 func (s *server) apiDocs(w http.ResponseWriter, r *http.Request) {
 	o := s.openapi
-	d := apiDocsData{Base: baseURL(r), Version: o.spec.Info.Version, Description: o.spec.Info.Description}
+	// The page's own words (summaries, descriptions, tags) come from the
+	// spec, in English; openapi.zh.json has the Chinese by operation id, tag
+	// and parameter, and the spec itself stays English for machines.
+	zh := s.langOf(r) == "zh"
+	description := o.spec.Info.Description
+	if zh && openapiZh.Info != "" {
+		description = openapiZh.Info
+	}
+	d := apiDocsData{Base: baseURL(r), Version: o.spec.Info.Version, Description: description}
 	// Path examples use a real program, so a GET sent from the page finds one.
 	platform, handle := "hackerone", "acme"
 	if progs, _, err := s.Store.Programs(r.Context(), store.ProgramFilter{State: "open", Sort: "huntscore", Limit: 1}); err == nil && len(progs) > 0 {
@@ -73,10 +81,16 @@ func (s *server) apiDocs(w http.ResponseWriter, r *http.Request) {
 	}
 	groups := map[string]*apiDocGroup{}
 	for _, t := range o.spec.Tags {
-		d.Groups = append(d.Groups, apiDocGroup{Name: t.Name, ID: slug(t.Name), Description: t.Description})
+		group := apiDocGroup{Name: t.Name, ID: slug(t.Name), Description: t.Description}
+		if zh {
+			if tr, ok := openapiZh.Tags[t.Name]; ok {
+				group.Name, group.Description = tr.Name, tr.Description
+			}
+		}
+		d.Groups = append(d.Groups, group)
 	}
-	for i := range d.Groups {
-		groups[d.Groups[i].Name] = &d.Groups[i]
+	for i := range d.Groups { // keyed by the spec's own tag name, not the shown one
+		groups[o.spec.Tags[i].Name] = &d.Groups[i]
 	}
 	d.ReadOnly = s.ReadOnly
 	if s.ReadOnly { // not "reached only from your own machine": this one is public
@@ -91,20 +105,36 @@ func (s *server) apiDocs(w http.ResponseWriter, r *http.Request) {
 		if op == nil || len(op.Tags) == 0 || groups[op.Tags[0]] == nil {
 			continue // a test makes sure there are none
 		}
-		groups[op.Tags[0]].Ops = append(groups[op.Tags[0]].Ops, o.docOp(method, path, op, d.Base, platform, handle))
+		groups[op.Tags[0]].Ops = append(groups[op.Tags[0]].Ops, o.docOp(method, path, op, d.Base, platform, handle, zh))
 	}
 	s.render(w, r, http.StatusOK, "api", pageData{Title: "API", Nav: "api", Data: d})
 }
 
 // docOp lays out one operation, its examples using base and, for path
 // parameters, platform and handle.
-func (o *openAPI) docOp(method, path string, op *oaOp, base, platform, handle string) apiDocOp {
+func (o *openAPI) docOp(method, path string, op *oaOp, base, platform, handle string, zh bool) apiDocOp {
 	v := apiDocOp{ID: op.OperationID, Method: method, Path: path, Summary: op.Summary, Description: op.Description, Live: method == http.MethodGet}
+	if zh {
+		if tr, ok := openapiZh.Ops[op.OperationID]; ok {
+			if tr.Summary != "" {
+				v.Summary = tr.Summary
+			}
+			if tr.Description != "" {
+				v.Description = tr.Description
+			}
+		}
+	}
 	fill := strings.NewReplacer("{platform}", platform, "{handle}", url.PathEscape(handle))
 	query := url.Values{}
 	var keys []string
 	for _, p := range op.Parameters {
-		dp := apiDocParam{Name: p.Name, In: p.In, Type: fmt.Sprint(p.Schema.Type), Description: p.Description, Required: p.Required}
+		paramDesc := p.Description
+		if zh {
+			if tr, ok := openapiZh.Params[p.Name]; ok {
+				paramDesc = tr
+			}
+		}
+		dp := apiDocParam{Name: p.Name, In: p.In, Type: fmt.Sprint(p.Schema.Type), Description: paramDesc, Required: p.Required}
 		if p.Schema.Default != nil {
 			dp.Default = fmt.Sprint(p.Schema.Default)
 		}
@@ -142,6 +172,11 @@ func (o *openAPI) docOp(method, path string, op *oaOp, base, platform, handle st
 	}
 	if b := op.RequestBody; b != nil {
 		v.Body = b.Description
+		if zh {
+			if tr, ok := openapiZh.Bodies[op.OperationID]; ok {
+				v.Body = tr
+			}
+		}
 		for ct := range b.Content {
 			v.BodyType = ct
 		}

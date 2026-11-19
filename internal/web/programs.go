@@ -149,8 +149,8 @@ func (d programsData) Rail() []railGroup {
 	}
 	groups = append(groups,
 		railGroup{Title: "Ignored", Options: []railOption{
-			d.option("Include ignored", "Programs you ignore are left out of lists, exports and picks", "ignored", "include", 0, false),
-			d.option("Only ignored", "", "ignored", "only", 0, false),
+			d.option("Include ignored", "Programs you ignore are left out of lists, exports and picks", "ignored", "include", fc.WithIgnored, true),
+			d.option("Only ignored", "", "ignored", "only", fc.IgnoredOnly, true),
 		}},
 	)
 	if len(d.Tags) > 0 {
@@ -297,15 +297,18 @@ func (d programsData) Columns() columnPicker { return programColumns }
 type programsData struct {
 	// Path is the list's page: /programs, or /invites for the private
 	// programs the user is invited to (Invites).
-	Path      string
-	Invites   bool
-	Filter    store.ProgramFilter
-	Resumed   string // the "resumed in the last" filter as given
-	Programs  []programRow
-	Facets    store.ProgramFacets
-	Pager     pager
-	Platforms []string
-	Tags      []store.TagCount
+	Path     string
+	Invites  bool
+	Filter   store.ProgramFilter
+	Resumed  string // the "resumed in the last" filter as given
+	Programs []programRow
+	Facets   store.ProgramFacets
+	// IgnoredTotal is how many programs the user ignores, whatever the
+	// filters: an empty list says so.
+	IgnoredTotal int
+	Pager        pager
+	Platforms    []string
+	Tags         []store.TagCount
 	// ScopeMentions is how many scope rules contain the name searched for
 	// (store.ScopeMentioning), for a link to them on the scope check.
 	ScopeMentions int
@@ -380,6 +383,7 @@ func (s *server) invites(w http.ResponseWriter, r *http.Request) { s.programList
 
 func (s *server) programList(w http.ResponseWriter, r *http.Request, l programList) {
 	const perPage = 30 // as many as the hunt board shows fresh targets
+	t0 := time.Now()
 	f := programFilterFrom(r.URL.Query())
 	if r.URL.Query().Get("sort") == "" {
 		f.Sort = l.DefaultSort // the API keeps its own default
@@ -393,6 +397,7 @@ func (s *server) programList(w http.ResponseWriter, r *http.Request, l programLi
 		s.serverError(w, r, err)
 		return
 	}
+	tList := time.Since(t0)
 	tags, err := s.Store.Tags(r.Context())
 	if err != nil {
 		s.serverError(w, r, err)
@@ -406,11 +411,13 @@ func (s *server) programList(w http.ResponseWriter, r *http.Request, l programLi
 		s.serverError(w, r, err)
 		return
 	}
+	tFacets := time.Since(t0)
 	rows, err := s.programRows(r.Context(), progs, time.Now())
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
+	tRows := time.Since(t0)
 	mentions := 0
 	if f.Query != "" && total > 0 { // with none, the empty list links to the scope check
 		if _, _, mentions, err = s.Store.ScopeMentioning(r.Context(), f.Query, 0); err != nil {
@@ -418,14 +425,47 @@ func (s *server) programList(w http.ResponseWriter, r *http.Request, l programLi
 			return
 		}
 	}
+	ignoredTotal := 0
+	if n, err := s.Store.IgnoredCount(r.Context()); err == nil {
+		ignoredTotal = n
+	}
 	accepts := map[int]*acceptForm{}
 	for i, p := range rows {
 		if a := s.acceptFor(p.ProgramListItem, backTo(r)); a != nil {
 			accepts[i] = a
 		}
 	}
+	tData := time.Since(t0)
 	s.render(w, r, http.StatusOK, "programs", pageData{Title: l.Title, Nav: l.Nav, Data: programsData{
-		Path: l.Path, Invites: l.Invites, Filter: f, Resumed: r.URL.Query().Get("resumed"), Programs: rows, Facets: facets,
+		Path: l.Path, Invites: l.Invites, Filter: f, Resumed: r.URL.Query().Get("resumed"), Programs: rows, Facets: facets, IgnoredTotal: ignoredTotal,
 		Pager: newPager(r, perPage, total), Platforms: platforms, Tags: tags, ScopeMentions: mentions, Accepts: accepts, query: r.URL.Query(),
 	}})
+	s.Log.Debug("programs served", "list", tList.Round(time.Millisecond), "facets", (tFacets - tList).Round(time.Millisecond),
+		"rows", (tRows - tFacets).Round(time.Millisecond), "rest", (tData - tRows).Round(time.Millisecond),
+		"render", (time.Since(t0) - tData).Round(time.Millisecond))
 }
+
+// ShowingIgnored reports whether the list shows only ignored programs.
+func (d programsData) ShowingIgnored() bool { return d.Filter.Ignored == "only" }
+
+// SortAria is a header's aria-sort value: the direction it sorts in when
+// the list is sorted by it, and nothing otherwise. Every column but the
+// name sorts biggest or newest first, so that is its ascending false
+// case; "rev" turns it around.
+func (d programsData) SortAria(key string) string {
+	if d.Filter.Sort != key {
+		return ""
+	}
+	descending := key != "name"
+	if d.Filter.Reverse {
+		descending = !descending
+	}
+	if descending {
+		return "descending"
+	}
+	return "ascending"
+}
+
+// IgnoredOnlyURL shows only the programs the user ignored, keeping the
+// filters on the page: the way back to them from an empty list.
+func (d programsData) IgnoredOnlyURL() string { return d.list().with("ignored", "only") }

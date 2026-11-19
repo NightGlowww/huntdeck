@@ -34,3 +34,10 @@
 .board.resizing, .board.resizing * { cursor: ew-resize; user-select: none; }
 .board.resizing-b, .board.resizing-b * { cursor: ns-resize; }
 .board.resizing-br, .board.resizing-br * { cursor: nwse-resize; }
+/* Phones: the explaining text takes the width, the two buttons a row of
+   their own under it. */
+@media (max-width: 700px) {
+  .board-editbar { flex-wrap: wrap; row-gap: 10px; }
+  .board-editbar > span { flex: 1 1 100%; }
+  .board-editbar > button { flex: 1 1 auto; min-height: 40px; }
+}

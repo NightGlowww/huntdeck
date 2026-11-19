@@ -1,19 +1,19 @@
 {{define "content"}}{{with .Data}}
-<p class="lead">Found a bug, or have an idea? Email <b>{{.Address}}</b>. Every message is read.</p>
+<p class="lead">{{T "Found a bug, or have an idea? Email"}} <b>{{.Address}}</b>. {{T "Every message is read."}}</p>
 <section class="panel feedback">
-  <div class="panel-head"><h2>Write to us</h2></div>
+  <div class="panel-head"><h2>{{T "Write to us"}}</h2></div>
   <div class="panel-body">
-    <div class="fb-addr"><code id="fb-addr">{{.Address}}</code><button type="button" class="button secondary small" data-copy="#fb-addr"><svg class="i"><use href="#i-copy"/></svg><span class="label">Copy address</span></button></div>
+    <div class="fb-addr"><code id="fb-addr">{{.Address}}</code><button type="button" class="button secondary small" data-copy="#fb-addr"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy address"}}</span></button></div>
     <div class="fb-open">
-      <a class="button" href="{{.Gmail}}" target="_blank" rel="noopener noreferrer"><svg class="i"><use href="#i-mail"/></svg><span class="label">Gmail</span></a>
-      <a class="button secondary" href="{{.Outlook}}" target="_blank" rel="noopener noreferrer"><svg class="i"><use href="#i-mail"/></svg><span class="label">Outlook.com</span></a>
-      <a class="button secondary" href="{{.Mailto}}"><svg class="i"><use href="#i-mail"/></svg><span class="label">Mail app</span></a>
+      <a class="button" href="{{.Gmail}}" target="_blank" rel="noopener noreferrer"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span class="label">Gmail</span></a>
+      <a class="button secondary" href="{{.Outlook}}" target="_blank" rel="noopener noreferrer"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span class="label">Outlook.com</span></a>
+      <a class="button secondary" href="{{.Mailto}}"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span class="label">{{T "Mail app"}}</span></a>
     </div>
   </div>
-  <p class="panel-foot">Each opens a new message with the subject{{if .Page}} and the page you came from, <code>{{.Page}}</code>,{{end}} filled in. Or copy the address into any mail you use. HuntDeck sends nothing itself.</p>
+  <p class="panel-foot">{{T "Each opens a new message with the subject"}}{{if .Page}} {{T "and the page you came from"}} <code>{{.Page}}</code>{{T ","}}{{end}} {{T "filled in. Or copy the address into any mail you use. HuntDeck sends nothing itself."}}</p>
 </section>
 {{end}}{{with repoURL}}
-<p class="lead fb-follow">Bugs and ideas for HuntDeck itself can also go to its <a class="link" href="{{.}}/issues" target="_blank" rel="noopener noreferrer">issues on GitHub</a>.</p>
+<p class="lead fb-follow">{{T "Bugs and ideas for HuntDeck itself can also go to its"}} <a class="link" href="{{.}}/issues" target="_blank" rel="noopener noreferrer">{{T "issues on GitHub"}}</a>.</p>
 {{end}}{{with xAccount}}
-<p class="lead fb-follow">News and launch updates: follow <a class="link" href="https://x.com/{{.}}" target="_blank" rel="noopener noreferrer">@{{.}} on X</a>.</p>
+<p class="lead fb-follow">{{T "News and launch updates: follow"}} <a class="link" href="https://x.com/{{.}}" target="_blank" rel="noopener noreferrer">@{{.}} {{T "on X"}}</a>.</p>
 {{end}}{{end}}

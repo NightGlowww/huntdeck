@@ -1,9 +1,11 @@
 package web
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/platform"
@@ -106,10 +108,11 @@ func (s *server) apiStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// The totals cover every program the filter matches, as the Stats page's
-	// do, not this page's.
-	all := f
-	all.Limit, all.Offset = 1<<20, 0
-	items, _, err := s.Store.Programs(r.Context(), all)
+	// do, not this page's. That is a full pass over the matching programs, so
+	// it goes through the same memo the Stats page uses: the numbers only move
+	// when the data does, and a page of results doesn't cost a second full
+	// scan on every request.
+	items, err := s.statsTotals(r.Context(), q)
 	if err != nil {
 		s.apiServerError(w, r, err)
 		return
@@ -149,6 +152,12 @@ func statsJSON(s *store.UserStatsSnapshot) *apiYourStats {
 }
 
 func (s *server) apiPrograms(w http.ResponseWriter, r *http.Request) {
+	// format=csv hands back the list as the page's export does: same filters,
+	// same columns, every page of it.
+	if strings.EqualFold(r.URL.Query().Get("format"), "csv") {
+		s.programsCSV(w, r)
+		return
+	}
 	s.apiProgramList(w, r, false, false)
 }
 
@@ -160,6 +169,10 @@ func (s *server) apiInvites(w http.ResponseWriter, r *http.Request) {
 
 // apiProgramsV2 and apiInvitesV2 are the two in v2's shape (api_v2.go).
 func (s *server) apiProgramsV2(w http.ResponseWriter, r *http.Request) {
+	if strings.EqualFold(r.URL.Query().Get("format"), "csv") {
+		s.programsCSV(w, r)
+		return
+	}
 	s.apiProgramList(w, r, false, true)
 }
 
@@ -282,6 +295,31 @@ func (s *server) apiProgramDetail(w http.ResponseWriter, r *http.Request, v2 boo
 	if n := len(p.Stats); n > 0 {
 		latest = &p.Stats[n-1]
 	}
+	// ?parts=scope,disclosed narrows the answer: a program with 5,000
+	// disclosures is a megabyte an agent rarely needs all of.
+	parts := strings.TrimSpace(r.URL.Query().Get("parts"))
+	// An unknown part is a typo, not a request for everything: a silent 200
+	// with `scope_total: 0` reads like an empty program.
+	for _, p := range strings.Split(parts, ",") {
+		switch strings.TrimSpace(p) {
+		case "", "scope", "disclosed", "facts", "brief", "announcements", "rules", "numbers":
+		case strings.TrimSpace(p):
+			writeJSONError(w, http.StatusBadRequest, "unknown part: "+strings.TrimSpace(p))
+			return
+		}
+	}
+	want := func(name string) bool {
+		if parts == "" {
+			return true
+		}
+		for _, p := range strings.Split(parts, ",") {
+			if strings.TrimSpace(p) == name {
+				return true
+			}
+		}
+		return false
+	}
+
 	out := apiProgramJSON{
 		apiProgramRef: refJSON(p.ProgramRef), Invite: detailInviteJSON(p), OffersBounty: p.OffersBounty, Currency: p.Currency,
 		FastPayments: p.FastPayments, SafeHarbor: p.SafeHarbor, StartedAt: p.StartedAt, JoinedAt: p.JoinedAt,
@@ -290,7 +328,20 @@ func (s *server) apiProgramDetail(w http.ResponseWriter, r *http.Request, v2 boo
 		Stats: statsJSON(latest), PublicStats: publicStatsJSON(p.PublicStats, true), Scope: []apiScopeEntry{},
 		Hunt: p.Hunt, Ignored: p.Ignored, Tags: nonNil(p.Tags),
 		Requirements: reqsJSON(p.Requirements), TestCredentials: nonNil(p.CredentialAssets), Testing: testingJSON(p.Testing),
-		Facts: factsJSON(p), Brief: briefJSON(p), Announcements: announcementsJSON(p.PublicStats),
+	}
+	if want("rules") {
+		for _, r := range beforeYouTest(p) {
+			out.Rules = append(out.Rules, apiTestRule(r))
+		}
+	}
+	if want("facts") {
+		out.Facts = factsJSON(p)
+	}
+	if want("brief") {
+		out.Brief = briefJSON(p)
+	}
+	if want("announcements") {
+		out.Announcements = announcementsJSON(p.PublicStats)
 	}
 	items, _, err := s.Store.Programs(r.Context(), store.ProgramFilter{ID: p.ID})
 	if err != nil {
@@ -311,24 +362,46 @@ func (s *server) apiProgramDetail(w http.ResponseWriter, r *http.Request, v2 boo
 			s.apiServerError(w, r, err)
 			return
 		}
-		t := rows[0].Trends
-		out.Bounty, out.Numbers = bountyJSON(items[0]), ptrTo(numbersJSON(items[0]))
-		out.Trends = &apiProgramTrends{daysJSON(t.Received.points), daysJSON(t.Paid.points), daysJSON(t.Resolved.points)}
-	}
-	for _, e := range p.Entries {
-		ej := apiScopeEntry{e.InScope, e.AssetType, e.PlatformAssetType, e.Identifier, e.BountyEligible, e.Credentials, e.MaxSeverity,
-			e.Instruction, e.FirstSeenAt, e.AddedAt, e.RemovedAt, []apiScopeTarget{}}
-		for _, t := range e.Targets {
-			ej.Targets = append(ej.Targets, apiScopeTarget{t.Kind, t.Value})
+		// The derived numbers are a projection of the same data and cost a query
+		// each: a caller asking for `facts` alone does not need them.
+		if want("numbers") {
+			t := rows[0].Trends
+			out.Bounty, out.Numbers = bountyJSON(items[0]), ptrTo(numbersJSON(items[0]))
+			out.Trends = &apiProgramTrends{daysJSON(t.Received.points), daysJSON(t.Paid.points), daysJSON(t.Resolved.points)}
 		}
-		out.Scope = append(out.Scope, ej)
+	}
+	if want("scope") {
+		// Entries are the unit: a program can carry thousands, each with its own
+		// targets, so the answer pages them.
+		scopeLimit := clampInt(r.URL.Query().Get("scope_limit"), 500, 1, 5000)
+		scopeOffset := clampInt(r.URL.Query().Get("scope_offset"), 0, 0, 1<<30)
+		out.ScopeTotal = len(p.Entries)
+		entries := p.Entries
+		if scopeOffset < len(entries) {
+			entries = entries[scopeOffset:]
+		} else {
+			entries = nil
+		}
+		if len(entries) > scopeLimit {
+			entries = entries[:scopeLimit]
+		}
+		for _, e := range entries {
+			ej := apiScopeEntry{e.InScope, e.AssetType, e.PlatformAssetType, e.Identifier, e.BountyEligible, e.Credentials, e.MaxSeverity,
+				e.Instruction, e.FirstSeenAt, e.AddedAt, e.RemovedAt, []apiScopeTarget{}}
+			for _, t := range e.Targets {
+				ej.Targets = append(ej.Targets, apiScopeTarget{t.Kind, t.Value})
+			}
+			out.Scope = append(out.Scope, ej)
+		}
 	}
 	reports, sum, err := s.Store.ProgramDisclosures(r.Context(), p.ID, apiDisclosures)
 	if err != nil {
 		s.apiServerError(w, r, err)
 		return
 	}
-	out.Disclosed = disclosuresJSON(reports, sum)
+	if want("disclosed") {
+		out.Disclosed = disclosuresJSON(reports, sum)
+	}
 	res, err := s.Store.ProgramResolutions(r.Context(), p.ID, time.Now(), 24)
 	if err != nil {
 		s.apiServerError(w, r, err)
@@ -362,4 +435,22 @@ func bountyJSON(p store.ProgramListItem) *apiBounty {
 		return nil
 	}
 	return &apiBounty{p.BountyMin, p.BountyMax, p.Currency, p.BountyFrom}
+}
+
+// statsTotals is /api/v1/stats's totals for a filter: every program it matches,
+// loaded once per data version (store.Memo). The warmer calls it too, so the
+// first request after a restart does not pay for a full pass.
+func (s *server) statsTotals(ctx context.Context, q url.Values) ([]store.ProgramListItem, error) {
+	f := statsFilterFrom(q)
+	all := f
+	all.Limit, all.Offset = 1<<20, 0
+	items, err := store.Memo(ctx, s.Store, "stats-totals?"+facetKey(q, programFacetParams...),
+		func(ctx context.Context) ([]store.ProgramListItem, error) {
+			items, _, err := s.Store.Programs(ctx, all)
+			return items, err
+		})
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
 }

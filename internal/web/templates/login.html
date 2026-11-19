@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="{{Lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>{{T "Sign in"}} · HuntDeck</title>
+<script src="{{static "theme.js"}}"></script>
+<link rel="stylesheet" href="{{static "styles.css"}}">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="{{static "favicon.svg"}}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{static "apple-touch-icon.png"}}">
+</head>
+<body class="auth">
+<main class="auth-wrap">
+  <section class="auth-card">
+    <a class="brand auth-brand" href="/">
+      <span class="logo"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></span>
+      <span class="word">Hunt<b>Deck</b></span>
+    </a>
+    <h1 class="auth-title"><span class="auth-lock" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="15.5" r="1.4"/></svg></span>{{T "Sign in"}}</h1>
+    <p class="auth-sub">{{T "Enter your password to continue"}}</p>
+    {{with .Data.Error}}<p class="auth-err" role="alert">{{.}}</p>{{end}}
+    <form class="auth-form" method="post" action="/login">
+      <input type="hidden" name="next" value="{{.Data.Next}}">
+      <label for="password">{{T "Access password"}}</label>
+      <div class="auth-field">
+        <input id="password" name="password" type="password" autocomplete="current-password" autofocus required spellcheck="false" aria-describedby="pw-hint pw-caps"{{with .Data.Error}} aria-invalid="true"{{end}}>
+        <button type="button" class="auth-reveal" data-auth-reveal aria-label="{{T "Show password"}}" title="{{T "Show password"}}">
+          <svg class="i" data-eye viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="i" data-eye-off viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M10.6 5.6A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.4M6.6 6.6C3.9 8.4 2.5 12 2.5 12S6 18.5 12 18.5c1.9 0 3.6-.6 5-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18"/></svg>
+        </button>
+      </div>
+      <p class="auth-hint" id="pw-hint">{{T "Your browser will remember you for 30 days."}}</p>
+      <p class="auth-caps" id="pw-caps" role="status" aria-live="polite" hidden>{{T "Caps Lock is on."}}</p>
+      <button class="auth-submit" type="submit">{{T "Sign in"}}</button>
+    </form>
+  </section>
+  <footer class="auth-foot">
+    <span>HuntDeck · {{T "Protected instance"}}</span>
+    {{- if gt (len .Langs) 1}}
+    <form class="auth-langs" method="post" action="/settings/language">
+      <input type="hidden" name="next" value="/login">
+      {{- range .Langs}}
+      <button type="submit" name="lang" value="{{.Code}}"{{if .Current}} aria-current="true" disabled{{end}}>{{.Name}}</button>
+      {{- end}}
+    </form>
+    {{- end}}
+  </footer>
+</main>
+<script src="{{static "login.js"}}" defer></script>
+</body>
+</html>

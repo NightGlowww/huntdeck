@@ -1,10 +1,10 @@
-{{define "topbar-actions"}}{{with .Data}}<details class="tb-menu" data-tb-menu>
-  <summary class="tb-btn" title="This list as plain text, one per line, as GET {{.ExportURL}} gives it"><svg class="i"><use href="#i-download"/></svg><span class="label">Export</span></summary>
+{{define "topbar-actions"}}{{with .Data}}<details class="tb-menu" data-menu>
+  <summary class="tb-btn" title="{{TF "This list as plain text, one per line, as GET %s gives it" .ExportURL}}"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg><span class="label">{{T "Export"}}</span></summary>
   <div class="menu">
-    <a href="{{.ExportURL}}" target="_blank" rel="noopener"><svg class="i"><use href="#i-external"/></svg>Open as plain text</a>
-    <a href="{{.ExportURL}}&amp;download=1"><svg class="i"><use href="#i-download"/></svg>Download .txt</a>
-    <button type="button" data-copy-url="{{.ExportURL}}"><svg class="i"><use href="#i-copy"/></svg><span class="label">Copy {{if .Filter.OutOfScope}}out-of-scope {{end}}list</span></button>
-    {{if readOnly}}<p class="menu-note">Up to 5,000 at a time here; offset=5000 gives the next ones. Your own HuntDeck exports them all.</p>{{end}}
+    <a href="{{.ExportURL}}" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-external"/></svg>{{T "Open as plain text"}}</a>
+    <a href="{{.ExportURL}}&amp;download=1" data-export><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>{{T "Download .txt"}}</a>
+    <button type="button" data-copy-url="{{.ExportURL}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{if .Filter.OutOfScope}}{{T "Copy out-of-scope list"}}{{else}}{{T "Copy list"}}{{end}}</span></button>
+    {{if readOnly}}<p class="menu-note">{{T "Up to 5,000 at a time here; offset=5000 gives the next ones. Your own HuntDeck exports them all."}}</p>{{end}}
   </div>
 </details>{{end}}{{end}}
 
@@ -14,35 +14,37 @@
 
 <section class="panel ptable">
   <div class="activef">
-    <span class="total">{{num .Pager.Total}} {{lower (kindLabel .KindParam)}}</span>
-    <span class="what">{{if .Best}}best new: in scope, added {{.AddedText}}, on programs you can hunt{{else if eq .KindParam "root"}}of in-scope wildcards, domains and URLs: a root domain itself is often not in scope{{else if .Filter.OutOfScope}}out of scope{{else}}in scope{{end}}</span>
+    <span class="total">{{num .Pager.Total}} {{T (lower (kindLabel .KindParam))}}</span>
+    <span class="what">{{if .Best}}{{TF "best new: in scope, added %s, on programs you can hunt" .AddedText}}{{else if eq .KindParam "root"}}{{T "of in-scope wildcards, domains and URLs: a root domain itself is often not in scope"}}{{else if .Filter.OutOfScope}}{{T "out of scope"}}{{else}}{{T "in scope"}}{{end}}</span>
     {{template "pills" .}}
     <span class="quick">
-      <a class="qv{{if eq .Filter.Order "new"}} on{{end}}" href="{{.SortURL ""}}" title="Most recently added first; ones without a date last">Newest</a>
-      <a class="qv{{if .Best}} on{{end}}" href="{{.SortURL "best"}}" title="Recently added targets ranked by target score">Best new targets</a>
-      <a class="qv{{if eq .Filter.Order "bounty"}} on{{end}}" href="{{.SortURL "bounty"}}" title="Highest bounty first; ones without a bounty last">Highest bounty</a>
-      <a class="qv{{if .AZ}} on{{end}}" href="{{.SortURL "az"}}">A–Z</a>
+      <a class="qv{{if eq .Filter.Order "new"}} on{{end}}" href="{{.SortURL ""}}" title="{{T "Most recently added first; ones without a date last"}}">{{T "Newest"}}</a>
+      <a class="qv{{if .Best}} on{{end}}" href="{{.SortURL "best"}}" title="{{T "Recently added targets ranked by target score"}}">{{T "Best new targets"}}</a>
+      <a class="qv{{if eq .Filter.Order "bounty"}} on{{end}}" href="{{.SortURL "bounty"}}" title="{{T "Highest bounty first; ones without a bounty last"}}">{{T "Highest bounty"}}</a>
+      <a class="qv{{if .AZ}} on{{end}}" href="{{.SortURL "az"}}">{{T "A–Z"}}</a>
     </span>
   </div>
 {{if .Rows}}
-  <div class="table-wrap">
-  <table class="fixed flist tlist cards">
+  <div class="table-wrap" id="list" tabindex="-1">
+  <table class="fixed flist tlist cards" id="targets-list">
     <thead><tr>
-      <th class="c-prog">Program</th>
-      <th class="c-target">{{kindLabel .KindParam}}</th>
-      <th class="c-bounty num"><a class="{{.SortClass "bounty"}}" href="{{.SortURL "bounty"}}" title="What it pays: the program's bounty table (the target's own row where it has one), else the range the platform lists, else up to the most the program has paid. Sorts highest first">Bounty</a></th>
-      <th class="c-score num" title="Target score, 0–100: how new it is, what it's worth (kind, bounty, severity, a new root domain), whether other programs list it, and its program's HuntScore. Only in-scope targets added in the last 90 days, on programs you can hunt, are scored">Target score</th>
-      <th class="c-added" title="When the asset was added to its program, where known">Added</th>
-      <th class="c-open"><span class="sr-only">Open on the platform</span></th>
+      <th class="c-check"><input type="checkbox" data-select-all aria-label="{{T "Select all"}}"></th>
+      <th class="c-prog">{{T "Program"}}</th>
+      <th class="c-target">{{T (kindLabel .KindParam)}}</th>
+      <th class="c-bounty num"{{with .SortAria "bounty"}} aria-sort="{{.}}"{{end}}><a class="{{.SortClass "bounty"}}" href="{{.SortURL "bounty"}}" title="{{T "What it pays: the program's bounty table (the target's own row where it has one), else the range the platform lists, else up to the most the program has paid. Sorts highest first"}}">{{T "Bounty"}}</a></th>
+      <th class="c-score num"{{with .SortAria "score"}} aria-sort="{{.}}"{{end}} title="{{T "Target score, 0–100: how new it is, what it's worth (kind, bounty, severity, a new root domain), whether other programs list it, and its program's HuntScore. Only in-scope targets added in the last 90 days, on programs you can hunt, are scored"}}">{{T "Target score"}}</th>
+      <th class="c-added"{{with .SortAria "new"}} aria-sort="{{.}}"{{end}} title="{{T "When the asset was added to its program, where known"}}">{{T "Added"}}</th>
+      <th class="c-open"><span class="sr-only">{{T "Open on the platform"}}</span></th>
     </tr></thead>
     <tbody>
     {{range .Rows}}
       <tr data-href="/programs/{{.Program.Platform}}/{{.Program.Handle}}?tab=scope">
+        <td class="c-check"><input type="checkbox" class="pick" value="{{.Value}}" aria-label="{{TF "Select %s" .Value}}"></td>
         <td class="c-prog">{{template "pname" (plink .Program)}}</td>
-        <td class="c-target asset" title="{{.Value}}{{with .Reasons}}&#10;{{join . " · "}}{{end}}">{{.Value}}</td>
-        <td class="c-bounty num nowrap">{{if not .OffersBounty}}<span class="chip vdp" title="Vulnerability disclosure, no bounties">VDP</span>{{else if not .Bounty}}<span class="zero" title="Not bounty-eligible">no bounty</span>{{else if .PayMax}}<span title="{{template "pay-title" .}}">{{if not .PayMin}}<span class="upto">up to</span> {{end}}<span class="amt">{{amountRange .PayMin .PayMax .Currency}}</span></span>{{else if .PayMin}}<span title="{{template "pay-title" .}}"><span class="upto">from</span> <span class="amt">{{amount .PayMin .Currency}}</span></span>{{else}}<span class="chip yes" title="{{template "pay-title" .}}">bounty</span>{{end}}</td>
-        <td class="c-score num" data-label="Score">{{if .Scored}}<b class="score"{{with .Reasons}} title="{{join . " · "}}"{{end}}>{{printf "%.0f" .Score}}</b>{{else}}<span class="zero" title="Not scored: only in-scope targets added in the last 90 days, on programs you can hunt, are">not scored</span>{{end}}</td>
-        <td class="c-added nowrap">{{if and .Joined .AddedAt}}<span class="chip joined" title="New to you: in scope when you got access to this private program, {{datetime .AddedAt}}">joined</span> <span class="muted small">{{age .AddedAt}}</span>{{else}}{{with .AddedAt}}<span class="when{{if recent .}} fresh{{end}}" title="{{datetime .}}">{{date .}}</span> <span class="muted small">{{age .}}</span>{{else}}<span class="zero" title="Already in scope when HuntDeck started tracking; the platform doesn&#39;t date its assets">—</span>{{end}}{{end}}</td>
+        <td class="c-target asset" title="{{.Value}}{{with .Reasons}}&#10;{{reasons .}}{{end}}">{{.Value}}</td>
+        <td class="c-bounty num nowrap">{{if not .OffersBounty}}<span class="chip vdp" title="{{T "Vulnerability disclosure, no bounties"}}">VDP</span>{{else if not .Bounty}}<span class="zero" title="{{T "Not bounty-eligible"}}">{{T "no bounty"}}</span>{{else if .PayMax}}<span title="{{template "pay-title" .}}">{{if not .PayMin}}<span class="upto">up to</span> {{end}}<span class="amt">{{amountRange .PayMin .PayMax .Currency}}</span></span>{{else if .PayMin}}<span title="{{template "pay-title" .}}"><span class="upto">from</span> <span class="amt">{{amount .PayMin .Currency}}</span></span>{{else}}<span class="chip yes" title="{{template "pay-title" .}}">{{T "bounty"}}</span>{{end}}</td>
+        <td class="c-score num" data-label="Score">{{if .Scored}}<b class="score"{{with .Reasons}} title="{{join . " · "}}"{{end}}>{{printf "%.0f" .Score}}</b>{{else}}<span class="zero" title="{{T "Not scored: only in-scope targets added in the last 90 days, on programs you can hunt, are"}}">{{T "not scored"}}</span>{{end}}</td>
+        <td class="c-added nowrap">{{if and .Joined .AddedAt}}<span class="chip joined" title="{{TF "New to you: in scope when you got access to this private program, %s" (datetime .AddedAt)}}">{{T "joined"}}</span> <span class="muted small">{{age .AddedAt}}</span>{{else}}{{with .AddedAt}}<span class="when{{if recent .}} fresh{{end}}" title="{{datetime .}}">{{date .}}</span> <span class="muted small">{{age .}}</span>{{else}}<span class="zero" title="{{T "Already in scope when HuntDeck started tracking; the platform doesn't date its assets"}}">—</span>{{end}}{{end}}</td>
         <td class="c-open">{{template "open-ext" .Program}}</td>
       </tr>
     {{end}}
@@ -50,10 +52,13 @@
   </table>
   </div>
   {{template "pager" .Pager}}
+  <div class="selbar" data-selbar hidden><span data-selcount role="status" aria-live="polite"></span>
+    <button type="button" class="button secondary small" data-copy-list="#targets-list" data-checked><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy selected"}}</span></button>
+    <span class="grow"></span><span class="muted small">{{T "The ticks copy as plain text, one per line."}}</span></div>
 {{else if .Pager.Beyond}}
   {{template "past-end" .Pager}}
 {{else}}
-  <div class="empty-state">No targets match these filters.{{if .Best}} Only in-scope targets added in the last 90 days, on open programs, are scored.{{end}}{{if hasFilters .Pills}} <a class="link" href="{{.ClearURL}}">Clear filters</a>{{end}}</div>
+  <div class="empty-state">{{if .Query}}{{T "No targets match this search."}}{{else}}{{T "No targets match these filters."}}{{end}}{{if .Best}} {{T "Only in-scope targets added in the last 90 days, on open programs, are scored."}}{{end}}{{if hasFilters .Pills}} <a class="link" href="{{.ClearURL}}">{{T "Clear filters"}}</a>{{else if .Query}} <a class="link" href="{{.ClearURL}}">{{T "Clear the search"}}</a>{{end}}</div>
 {{end}}
 </section>
 </div>

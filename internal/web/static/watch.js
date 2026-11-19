@@ -20,7 +20,7 @@
       const on = list.includes(btn.dataset.watch);
       btn.hidden = false;
       btn.setAttribute("aria-pressed", String(on));
-      btn.querySelector(".label").textContent = on ? "Watching" : "Watch";
+      btn.querySelector(".label").textContent = t(on ? "Watching" : "Watch");
     }
     for (const a of document.querySelectorAll("[data-watch-link]")) {
       const on = a.dataset.watchLink === "on";
@@ -34,7 +34,7 @@
       const n = on ? (new URL(location.href).searchParams.get("watch") || "").split(",").filter(Boolean).length : list.length;
       if (em) em.textContent = n ? String(n) : "";
       if (!on) a.hidden = list.length === 0;
-      // The group shows while any of its links does (notes.js shares it).
+      // The group shows while any of its links does.
       const group = a.closest("[data-watch-group]");
       if (group) group.hidden = [...group.querySelectorAll("a")].every((x) => x.hidden);
     }
@@ -70,7 +70,7 @@
     const at = Date.parse(el.dataset.at);
     if (at > visit.prev) {
       el.classList.add("since-visit");
-      if (!el.title) el.title = "New since your last visit";
+      if (!el.title) el.title = t("New since your last visit");
       if (el.matches("tr")) n++;
     }
     if (el.matches("tr")) rows++;
@@ -81,7 +81,7 @@
   if (note && n) {
     const when = new Date(visit.prev);
     note.textContent = `${n}${more} new since your last visit`;
-    note.title = "Your last visit ended " + when.toLocaleString() + " (remembered in this browser)";
+    note.title = t("Your last visit ended %s (remembered in this browser)", when.toLocaleString());
     note.hidden = false;
   }
 })();

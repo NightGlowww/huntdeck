@@ -2,15 +2,15 @@
      platform data for a read-only copy of HuntDeck. */}}
 {{define "demo-seed"}}
 <section class="panel" id="demo-seed">
-  <div class="panel-head"><h2>Demo seed</h2><span class="aside">for a read-only copy to show other people</span></div>
+  <div class="panel-head"><h2>{{T "Demo seed"}}</h2><span class="aside">{{T "for a read-only copy to show other people"}}</span></div>
   <div class="panel-body">
-    <p class="muted small">Writes <span class="mono">seed-demo.db.gz</span> to the data directory: programs that are public and were never private, without anything of your account's and without programs a platform shows only to signed-in accounts. A demo box loads it read-only.</p>
+    <p class="muted small">{{T "Writes"}} <span class="mono">seed-demo.db.gz</span> {{T "to the data directory: programs that are public and were never private, without anything of your account's and without programs a platform shows only to signed-in accounts. A demo box loads it read-only."}}</p>
     <div class="seed-row">
-      <span>{{with .Latest}}Last exported <b title="{{datetime .At}}">{{ago .At}}</b> · {{.MB}}{{else}}Not exported yet{{end}}</span>
-      <form method="post" action="/settings/seed" class="inline"><button type="submit" class="secondary small" title="Takes a minute or so">Export now</button></form>
+      <span>{{with .Latest}}Last exported <b title="{{datetime .At}}">{{ago .At}}</b> · {{.MB}}{{else}}{{T "Not exported yet"}}{{end}}</span>
+      <form method="post" action="/settings/seed" class="inline"><button type="submit" class="secondary small" title="{{T "Takes a minute or so"}}">{{T "Export now"}}</button></form>
       <form method="post" action="/settings/seed/daily" class="inline">
-        {{if .Daily}}<button type="submit" class="ghost small" title="Exported every 12 hours while HuntDeck runs">Every 12 hours: on · turn off</button>
-        {{else}}<input type="hidden" name="daily" value="1"><button type="submit" class="ghost small">Export every 12 hours</button>{{end}}
+        {{if .Daily}}<button type="submit" class="ghost small" title="{{T "Exported every 12 hours while HuntDeck runs"}}">{{T "Every 12 hours: on · turn off"}}</button>
+        {{else}}<input type="hidden" name="daily" value="1"><button type="submit" class="ghost small">{{T "Export every 12 hours"}}</button>{{end}}
       </form>
     </div>
   </div>
