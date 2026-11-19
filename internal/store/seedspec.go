@@ -160,6 +160,8 @@ var seedLeftOut = map[string]string{
 	"queue_dropped":      "a count of what this instance left out",
 	"pojia_profiles":     "a cache of this instance's API answers; not shared",
 	"pojia_cache":        "the same, for search answers; not shared",
+	"scan_handoffs":      "what this instance already sent to a scanner",
+	"scan_config":        "this instance is scanner choices",
 	"queue_scores":       "what the queue said here; not shared",
 	"api_tokens":         "a secret of the user's; never in a seed",
 	"program_user_stats": "the user's own numbers",
