@@ -58,6 +58,10 @@ func backtestCmd(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
+	// The aggregate over days with a queue cut, so "which ranking captured
+	// more" is one line the day the data exists, not arithmetic to redo.
+	var hsTotal, qTotal float64
+	qDays := 0
 	for _, day := range days {
 		cut, err := time.Parse("2006-01-02", day)
 		if err != nil {
@@ -87,6 +91,7 @@ func backtestCmd(args []string, stdout, stderr io.Writer) int {
 			share = 100 * captured / total
 		}
 		fmt.Fprintf(stdout, "%s  top-%d by HuntScore captures $%.0f of $%.0f (%.1f%%)\n", day, n, captured, total, share)
+		hsTotal += captured
 		// The same question for the queue: its targets, mapped to the programs
 		// they belong to, since a bounty is paid to a program, not a target.
 		if qrows, err := s.QueueOn(ctx, day); err == nil && len(qrows) > 0 {
@@ -111,6 +116,8 @@ func backtestCmd(args []string, stdout, stderr io.Writer) int {
 				qshare = 100 * qcap / total
 			}
 			fmt.Fprintf(stdout, "%s  top-%d by HuntQueue captures $%.0f of $%.0f (%.1f%%)\n", day, len(order), qcap, total, qshare)
+			qTotal += qcap
+			qDays++
 		} else {
 			fmt.Fprintf(stdout, "%s  no queue snapshot for this day\n", day)
 		}
@@ -124,6 +131,16 @@ func backtestCmd(args []string, stdout, stderr io.Writer) int {
 	if len(qd) < 2 {
 		fmt.Fprintln(stdout, "one day of queue history so far: comparing days needs at least two, and the acceptance line needs eight")
 	} else {
+		if qDays > 0 {
+			side := "even"
+			switch {
+			case qTotal > hsTotal:
+				side = "HuntQueue captured more"
+			case hsTotal > qTotal:
+				side = "HuntScore captured more"
+			}
+			fmt.Fprintf(stdout, "over %d day(s) with a queue cut: HuntScore $%.0f, HuntQueue $%.0f — %s\n", qDays, hsTotal, qTotal, side)
+		}
 		fmt.Fprintln(stdout, "a bounty counted after a cut counts for both rankings; the acceptance line is in docs/design/ai-layer.md 3.4")
 	}
 	return 0
