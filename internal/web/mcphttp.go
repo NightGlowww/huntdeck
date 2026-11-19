@@ -14,17 +14,13 @@ import (
 // would reset them every POST and an agent that loops would never hit the
 // ceiling the comments promise.
 var (
-	mcpOnce  sync.Once
-	mcpSrv   *mcpserver.Server
-	mcpBase  string
-	mcpReady bool
+	mcpOnce sync.Once
+	mcpSrv  *mcpserver.Server
 )
 
 func (s *server) sharedMCP(base, authHeader string) *mcpserver.Server {
 	mcpOnce.Do(func() {
 		mcpSrv = mcpserver.New(base, "", version.Version, false)
-		mcpBase = base
-		mcpReady = true
 	})
 	// The bearer key that opened the gate rides along for the loopback calls;
 	// a session cookie cannot follow into the loopback client, so a cookie-only
