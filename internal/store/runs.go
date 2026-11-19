@@ -255,3 +255,14 @@ func (s *Store) RecentDurations(ctx context.Context, platform, mode string, prog
 	}
 	return out, rows.Err()
 }
+
+// HasFinishedPoll reports whether any poll has finished (ok or partial): a
+// copy loaded from a seed has none, and its "last checked" times are the
+// seed's import, not a check.
+func (s *Store) HasFinishedPoll(ctx context.Context) (bool, error) {
+	var yes bool
+	if err := s.db.R.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM poll_runs WHERE status IN ('ok', 'partial'))`).Scan(&yes); err != nil {
+		return false, fmt.Errorf("check for finished polls: %w", err)
+	}
+	return yes, nil
+}

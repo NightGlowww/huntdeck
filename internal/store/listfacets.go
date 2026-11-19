@@ -29,7 +29,11 @@ type TargetFacets struct {
 // targets each other kind, platform, "added since" cutoff, "bounty-eligible"
 // and "private" would list. Counts are cached until the data changes.
 func (s *Store) TargetFacetsFor(ctx context.Context, f TargetFilter, query string, cutoffs []time.Time) (TargetFacets, error) {
-	f.Order, f.Reverse = "", false
+	// The counts do not depend on the kind: targetFacets clears it before
+	// counting by kind, and assetConds never reads it. Keying on it made every
+	// kind filter recompute the same aggregates (measured: 991 ms cold for
+	// /targets?kind=domains, 529 ms for /targets).
+	f.Order, f.Reverse, f.Kind = "", false, ""
 	key := fmt.Sprintf("target-facets:%+v:%q:%v", f, query, cutoffs)
 	return cached(ctx, s, key, func() (TargetFacets, error) { return s.targetFacets(ctx, f, query, cutoffs) })
 }
@@ -187,6 +191,7 @@ type DisclosureFacets struct {
 	Severities map[string]int // per stored severity ("" for unrated)
 	Since      []int          // per cutoff given, in order
 	Paid       int            // with a public bounty
+	WithCVE    int            // naming a CVE
 	Weaknesses []NamedCount   // the most common, most first
 }
 
@@ -196,7 +201,7 @@ type DisclosureFacets struct {
 func (s *Store) DisclosureFacetsFor(ctx context.Context, f DisclosureFilter, cutoffs []time.Time, limit int) (DisclosureFacets, error) {
 	out := DisclosureFacets{Platforms: map[string]int{}, Severities: map[string]int{}, Since: make([]int, len(cutoffs))}
 	rest := f
-	rest.Platform, rest.Severity, rest.PaidOnly, rest.Since = "", nil, false, time.Time{}
+	rest.Platform, rest.Severity, rest.PaidOnly, rest.WithCVE, rest.Since = "", nil, false, false, time.Time{}
 	where, args := rest.where()
 	bucket := "CASE"
 	var bargs []any
@@ -214,16 +219,17 @@ func (s *Store) DisclosureFacetsFor(ctx context.Context, f DisclosureFilter, cut
 		bargs = append(bargs, ts(f.Since))
 	}
 	//nolint:gosec // constant fragments; values are bound parameters
-	rows, err := s.db.R.QueryContext(ctx, `SELECT p.platform, d.severity, `+bucket+`, `+since+`, COALESCE(d.bounty > 0, 0), COUNT(*)
-		FROM disclosed_reports d JOIN programs p ON p.id = d.program_id`+where+` GROUP BY 1, 2, 3, 4, 5`, append(bargs, args...)...)
+	rows, err := s.db.R.QueryContext(ctx, `SELECT p.platform, d.severity, `+bucket+`, `+since+`, COALESCE(d.bounty > 0, 0),
+		CASE WHEN d.cve_ids IS NOT NULL AND d.cve_ids NOT IN ('', '[]') THEN 1 ELSE 0 END, COUNT(*)
+		FROM disclosed_reports d JOIN programs p ON p.id = d.program_id`+where+` GROUP BY 1, 2, 3, 4, 5, 6`, append(bargs, args...)...)
 	if err != nil {
 		return out, fmt.Errorf("disclosure facets: %w", err)
 	}
 	for rows.Next() {
 		var platform, severity string
 		var bucket, n int
-		var inSince, paid bool
-		if err := rows.Scan(&platform, &severity, &bucket, &inSince, &paid, &n); err != nil {
+		var inSince, paid, hasCVE bool
+		if err := rows.Scan(&platform, &severity, &bucket, &inSince, &paid, &hasCVE, &n); err != nil {
 			_ = rows.Close()
 			return out, err
 		}
@@ -243,6 +249,9 @@ func (s *Store) DisclosureFacetsFor(ctx context.Context, f DisclosureFilter, cut
 		}
 		if inPlatform && inSeverity && inSince && paid {
 			out.Paid += n
+		}
+		if inPlatform && inSeverity && inSince && paidOK && hasCVE {
+			out.WithCVE += n
 		}
 	}
 	if err := closeRows(rows); err != nil {

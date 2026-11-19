@@ -24,7 +24,12 @@ type ProgramFacets struct {
 	NoRequirements    int
 	// InvitesPending and InvitesJoined count the Invite filter's choices.
 	InvitesPending, InvitesJoined int
-	Total                         int
+	// IgnoredOnly counts the programs the user ignored (the Ignored
+	// filter's "only" choice); WithIgnored counts every program with them
+	// in (its "include" choice).
+	IgnoredOnly int
+	WithIgnored int
+	Total       int
 }
 
 // The choices ProgramFacets counts.
@@ -90,6 +95,11 @@ func (s *Store) ProgramFacets(ctx context.Context, f ProgramFilter, platforms []
 		{f.NoRequirements, func(f *ProgramFilter) { f.NoRequirements = false }, []facet{{noRequirementsCond, nil, &fc.NoRequirements}}},
 		{f.Invite != "", func(f *ProgramFilter) { f.Invite = "" },
 			[]facet{{invitePendingCond, nil, &fc.InvitesPending}, {inviteJoinedCond, nil, &fc.InvitesJoined}}},
+		// Always its own pass, with ignored programs in it: the default
+		// filter leaves them out, so counting them with the others would
+		// always be zero.
+		{true, func(f *ProgramFilter) { f.Ignored = "include" },
+			[]facet{{"p.ignored = 1", nil, &fc.IgnoredOnly}, {"1", nil, &fc.WithIgnored}}},
 		{false, nil, []facet{{"1", nil, &fc.Total}}},
 	}
 

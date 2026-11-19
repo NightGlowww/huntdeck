@@ -2,59 +2,71 @@ package store
 
 import (
 	"context"
-	"sync"
 	"testing"
-	"time"
 )
 
-// A memoised result is reused until anything is written to the database
-// or MemoTTL passes; callers asking while it's worked out wait for it.
-func TestMemo(t *testing.T) {
+// Two callers that disagree about a key's type don't bring the server down:
+// the second one works the value out again.
+func TestMemoTypeMismatch(t *testing.T) {
+	s := newTestStore(t, nil)
 	ctx := context.Background()
-	now := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
-	s := newTestStore(t, func() time.Time { return now })
-	runs := 0
-	read := func() int {
-		t.Helper()
-		v, err := Memo(ctx, s, "k", func(context.Context) (int, error) { runs++; return runs, nil })
-		if err != nil {
-			t.Fatal(err)
-		}
-		return v
-	}
-	if first, again := read(), read(); first != 1 || again != 1 {
-		t.Fatalf("not reused while nothing changed: %d, %d", first, again)
-	}
-	if err := s.Write(ctx, func(tx *Tx) error { return tx.PutSetting(ctx, "memo-test", "x") }); err != nil {
+	if _, err := Memo(ctx, s, "k", func(context.Context) (int, error) { return 7, nil }); err != nil {
 		t.Fatal(err)
 	}
-	if got := read(); got != 2 {
-		t.Fatalf("after a write: %d, want worked out again", got)
+	got, err := Memo(ctx, s, "k", func(context.Context) (string, error) { return "other", nil })
+	if err != nil || got != "other" {
+		t.Fatalf("second caller: %q %v", got, err)
 	}
-	now = now.Add(MemoTTL)
-	if got := read(); got != 3 {
-		t.Fatalf("after MemoTTL: %d, want worked out again", got)
+}
+
+// A memoised value follows the data: after a write, the next call works it out
+// again instead of serving what it had. That is what lets the pages cache their
+// counts and rows without showing the numbers from before a poll.
+func TestMemoFollowsWrites(t *testing.T) {
+	s := newTestStore(t, nil)
+	ctx := context.Background()
+	calls := 0
+	programs := func() (int, error) {
+		return Memo(ctx, s, "programs", func(ctx context.Context) (int, error) {
+			calls++
+			sums, err := s.Summary(ctx)
+			if err != nil {
+				return 0, err
+			}
+			n := 0
+			for _, sm := range sums {
+				n += sm.Programs
+			}
+			return n, nil
+		})
 	}
 
-	release := make(chan struct{})
-	var wg sync.WaitGroup
-	got := make([]int, 3)
-	calls := 0
-	for i := range got {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			v, err := Memo(ctx, s, "slow", func(context.Context) (int, error) { calls++; <-release; return 7, nil })
-			if err != nil {
-				t.Error(err)
-			}
-			got[i] = v
-		}()
+	first, err := programs()
+	if err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
-	close(release)
-	wg.Wait()
-	if calls != 1 || got[0] != 7 || got[1] != 7 || got[2] != 7 {
-		t.Errorf("three callers at once: worked out %d times, got %v", calls, got)
+	if _, err := programs(); err != nil { // served from the memo
+		t.Fatal(err)
+	}
+	if calls != 1 {
+		t.Fatalf("the second read worked it out again: %d calls", calls)
+	}
+
+	if err := s.Write(ctx, func(tx *Tx) error {
+		_, err := tx.tx.ExecContext(ctx, `INSERT INTO programs (platform, handle, name, url, state, first_seen_at, last_seen_at,
+			ignored, private, offers_bounty, n_in_scope, n_out_scope, n_wildcards, n_domains, n_disclosed)
+			VALUES ('hackerone', 'memo-fresh', 'Memo Fresh', 'https://example.com', 'open', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z',
+			0, 0, 1, 0, 0, 0, 0, 0)`)
+		return err
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	again, err := programs()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again != first+1 {
+		t.Errorf("after the write the memo said %d programs, want %d", again, first+1)
 	}
 }

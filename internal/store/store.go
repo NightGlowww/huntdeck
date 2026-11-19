@@ -47,6 +47,14 @@ func (s *Store) cachedCount(ctx context.Context, key string, fn func() (int, err
 	return cached(ctx, s, key, fn)
 }
 
+// A cached count is only as fresh as count_version, which triggers bump on
+// programs, scope_entries and scope_targets (see 0017_count_version.sql).
+// Nothing bumps it for program_public_stats, so a count that depends on a
+// stats column (top bounty, reports received, resolutions) must not go through
+// here: it would keep the number from before the stats were fetched. Filters
+// over programs' own columns (state, private, bounty flag, removed) and over
+// targets are safe.
+
 // cached is cachedCount for any value: facet counts as well as totals.
 func cached[T any](ctx context.Context, s *Store, key string, fn func() (T, error)) (T, error) {
 	var zero T

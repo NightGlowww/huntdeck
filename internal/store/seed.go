@@ -215,6 +215,11 @@ func migrateFile(ctx context.Context, file string, migs []db.Migration, backups 
 
 // unpack copies the seed at path to w, gunzipping it if it's gzipped.
 func unpack(path string, w io.Writer) error {
+	return unpackLimit(path, w, maxSeedUnpacked)
+}
+
+// unpackLimit is unpack with the ceiling given, so a test can use a small one.
+func unpackLimit(path string, w io.Writer, limit int64) error {
 	f, err := os.Open(path) //nolint:gosec // a file the user named
 	if err != nil {
 		return err
@@ -230,9 +235,21 @@ func unpack(path string, w io.Writer) error {
 		defer func() { _ = gz.Close() }()
 		r = gz
 	}
-	_, err = io.Copy(w, r) //nolint:gosec // the user's own download; it's a database, not a bomb we expand blindly into memory
-	return err
+	// A seed that unpacks past the ceiling is a bomb or a mistake, not a
+	// database: stop at the limit instead of filling the volume.
+	n, err := io.Copy(w, io.LimitReader(r, limit+1))
+	if err != nil {
+		return err
+	}
+	if n > limit {
+		return fmt.Errorf("seed unpacks past its ceiling of %d MiB: refusing it", limit>>20)
+	}
+	return nil
 }
+
+// maxSeedUnpacked bounds what a seed may expand to. Today's seeds are ~150 MB
+// of database; a gigabyte is generous and still small against a disk.
+const maxSeedUnpacked = 8 << 30
 
 func gzipFile(src, dst string) (err error) {
 	in, err := os.Open(src) //nolint:gosec // our own temporary file

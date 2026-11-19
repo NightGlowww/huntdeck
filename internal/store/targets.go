@@ -80,8 +80,16 @@ func (s *Store) TargetRows(ctx context.Context, f TargetFilter, query string, li
 	conds = append(conds, `NOT EXISTS (SELECT 1 FROM scope_targets t2 JOIN scope_entries e2 ON e2.id = t2.scope_entry_id
 		WHERE `+k.same("t2")+` AND t2.id < t.id AND e2.program_id = e.program_id
 			AND e2.in_scope = e.in_scope AND e2.removed_at IS NULL`+dup+`)`)
+	// Newest and bounty orders sort by when an entry was added. Walking the
+	// entries (scope_entries_order) and reaching their targets stops after the
+	// page's rows; walking the targets instead sorts every match first (about
+	// 250 ms for 39k domains, and it grows). CROSS JOIN fixes the outer side.
 	from := ` FROM scope_targets t` + k.ordered + ` JOIN scope_entries e ON e.id = t.scope_entry_id JOIN programs p ON p.id = e.program_id
 		WHERE ` + strings.Join(conds, " AND ")
+	if f.Order == TargetsByNewest || f.Order == TargetsByBounty {
+		from = ` FROM scope_entries e CROSS JOIN scope_targets t ON t.scope_entry_id = e.id JOIN programs p ON p.id = e.program_id
+			WHERE ` + strings.Join(conds, " AND ")
+	}
 
 	// Counting needs every matching row, so totals are cached until the data
 	// changes; pages walk the value-ordered index and stop early.
@@ -141,6 +149,7 @@ func (s *Store) TargetRows(ctx context.Context, f TargetFilter, query string, li
 			qargs = append(qargs, id)
 		}
 	}
+	//nolint:gosec // q is built from constant fragments; every value is bound
 	rows, err := s.db.R.QueryContext(ctx, q, qargs...)
 	if err != nil {
 		return nil, 0, err

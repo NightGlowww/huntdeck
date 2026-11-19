@@ -93,8 +93,14 @@ func Memo[T any](ctx context.Context, s *Store, key string, fn func(context.Cont
 		c.gen, c.m = gen, map[string]memoEntry{}
 	}
 	if e, ok := c.m[key]; ok && now.Sub(e.at) < MemoTTL {
-		c.mu.Unlock()
-		return e.v.(T), nil
+		// A key belongs to one type. If two callers disagree, drop the entry
+		// and work it out again rather than panicking on a bad cast: a
+		// mismatch is a bug to fix, not an outage to serve.
+		if v, ok := e.v.(T); ok {
+			c.mu.Unlock()
+			return v, nil
+		}
+		delete(c.m, key)
 	}
 	if call, ok := c.inflight[key]; ok {
 		c.mu.Unlock()

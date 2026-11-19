@@ -481,3 +481,37 @@ func TestProgramListMoneyByCurrency(t *testing.T) {
 		}
 	}
 }
+
+// Ignored programs are counted for the rail even though the default
+// filter leaves them out of the list.
+func TestIgnoredFacet(t *testing.T) {
+	ctx := context.Background()
+	s, _ := listFixture(t)
+	list, _, err := s.Programs(ctx, ProgramFilter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) == 0 {
+		t.Fatal("no programs in the fixture")
+	}
+	p, err := s.Program(ctx, list[0].Platform, list[0].Handle)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SetIgnored(ctx, p.ID, true); err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range []ProgramFilter{{}, {Ignored: "only"}} {
+		fc, err := s.ProgramFacets(ctx, f, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if fc.IgnoredOnly != 1 {
+			t.Errorf("ignored count with %+v = %d, want 1", f.Ignored, fc.IgnoredOnly)
+		}
+		// With the default filter the two counts cover every program.
+		if f.Ignored == "" && fc.WithIgnored != fc.Total+fc.IgnoredOnly {
+			t.Errorf("with-ignored = %d, want total %d + ignored %d", fc.WithIgnored, fc.Total, fc.IgnoredOnly)
+		}
+	}
+}

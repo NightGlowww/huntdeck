@@ -255,15 +255,22 @@ func (s *Store) SaveHuntScores(ctx context.Context, scores []HuntScore, targets 
 				return err
 			}
 			part := map[string]float64{}
+			freshWeighted := 0.0
 			for _, p := range sc.Detail.Parts {
 				part[p.Key] = p.Score
+				if p.Key == "fresh" {
+					// What freshness actually contributed to the total: the queue
+					// subtracts this, not the raw part.
+					freshWeighted = p.Score * p.Weight
+				}
 			}
 			if _, err := tx.tx.ExecContext(ctx, `
-				INSERT INTO hunt_scores (program_id, day, score, fresh, competition, payout, response) VALUES (?, ?, ?, ?, ?, ?, ?)
+				INSERT INTO hunt_scores (program_id, day, score, fresh, competition, payout, response, fresh_weighted) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 				ON CONFLICT (program_id, day) DO UPDATE SET score = excluded.score, fresh = excluded.fresh,
-					competition = excluded.competition, payout = excluded.payout, response = excluded.response`,
+					competition = excluded.competition, payout = excluded.payout, response = excluded.response,
+					fresh_weighted = excluded.fresh_weighted`,
 				sc.ProgramID, sc.Detail.At.UTC().Format(time.DateOnly), sc.Detail.Score, part["fresh"], part["competition"],
-				part["payout"], part["response"]); err != nil {
+				part["payout"], part["response"], freshWeighted); err != nil {
 				return err
 			}
 		}

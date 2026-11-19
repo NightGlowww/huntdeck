@@ -91,11 +91,19 @@ func (s *Store) Changes(ctx context.Context, f ChangeFilter) ([]ChangeView, int,
 	args := []any{ts(f.Since)}
 	with, join, flips := "", "", "0"
 	if f.CollapseFlips {
-		with = "WITH " + flipWeeks + " "
+		flipSQL := flipWeeks
+		flipArgs := []any{ts(s.now()), flipsFrom(f.Since)}
+		if f.ProgramID != 0 {
+			// A program page's feed: only that program's weeks matter, so the
+			// window doesn't number every other program's state changes.
+			flipSQL = strings.Replace(flipWeeks, "AND occurred_at >= ?2)", "AND occurred_at >= ?2 AND program_id = ?3)", 1)
+			flipArgs = append(flipArgs, f.ProgramID)
+		}
+		with = "WITH " + flipSQL + " "
 		join = " LEFT JOIN flips fw ON fw.id = c.id"
 		conds = append(conds, fmt.Sprintf("(fw.id IS NULL OR fw.n < %d OR fw.rn = 1)", FlipFlops))
 		flips = fmt.Sprintf("CASE WHEN fw.n >= %d THEN fw.n ELSE 0 END", FlipFlops)
-		args = append([]any{ts(s.now()), flipsFrom(f.Since)}, args...)
+		args = append(flipArgs, args...)
 	}
 	if len(f.Kinds) > 0 {
 		conds = append(conds, "c.kind IN ("+placeholders(len(f.Kinds))+")")

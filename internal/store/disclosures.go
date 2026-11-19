@@ -241,6 +241,7 @@ type DisclosureFilter struct {
 	Severity []string // any of these; empty for all
 	Weakness string   // exact weakness name
 	PaidOnly bool     // only reports with a public bounty
+	WithCVE  bool     // only reports that name a CVE
 	Since    time.Time
 	Sort     string // "new" (default), "bounty" or "votes"
 	Limit    int
@@ -272,6 +273,9 @@ func (f DisclosureFilter) where() (string, []any) {
 	}
 	if f.PaidOnly {
 		conds = append(conds, "d.bounty > 0")
+	}
+	if f.WithCVE {
+		conds = append(conds, "d.cve_ids IS NOT NULL AND d.cve_ids NOT IN ('', '[]')")
 	}
 	if !f.Since.IsZero() {
 		conds = append(conds, "d.disclosed_at >= ?")

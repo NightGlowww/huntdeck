@@ -2,8 +2,10 @@ package db
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"embed"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -81,10 +83,23 @@ func (d *DB) Migrate(ctx context.Context, migs []Migration, backupDir string, lo
 		return 0, fmt.Errorf("create schema_migrations: %w", err)
 	}
 
+	// The runner owns its own table: the digest column is added here, once,
+	// rather than in a migration (a migration recording its own digest would
+	// have to run before the column it needs exists).
+	if !d.hasColumn(ctx, "schema_migrations", "sha256") {
+		if _, err := d.W.ExecContext(ctx, `ALTER TABLE schema_migrations ADD COLUMN sha256 TEXT NOT NULL DEFAULT ''`); err != nil {
+			return 0, fmt.Errorf("add migration digest column: %w", err)
+		}
+	}
+
 	var current int
 	if err := d.W.QueryRowContext(ctx, `SELECT COALESCE(MAX(version), 0) FROM schema_migrations`).Scan(&current); err != nil {
 		return 0, fmt.Errorf("read schema version: %w", err)
 	}
+	if err := d.verifyDigests(ctx, migs[:current]); err != nil {
+		return 0, err
+	}
+
 	latest := len(migs)
 	if current > latest {
 		return 0, fmt.Errorf("database schema is version %d but this HuntDeck build only knows up to %d; upgrade HuntDeck", current, latest)
@@ -124,8 +139,8 @@ func (d *DB) apply(ctx context.Context, m Migration) (err error) {
 		return fmt.Errorf("migration %04d_%s: %w", m.Version, m.Name, err)
 	}
 	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)`,
-		m.Version, m.Name, time.Now().UTC().Format(time.RFC3339)); err != nil {
+		`INSERT INTO schema_migrations (version, name, applied_at, sha256) VALUES (?, ?, ?, ?)`,
+		m.Version, m.Name, time.Now().UTC().Format(time.RFC3339), digest(m.SQL)); err != nil {
 		return fmt.Errorf("migration %04d_%s: record: %w", m.Version, m.Name, err)
 	}
 	if err := tx.Commit(); err != nil {
@@ -152,4 +167,73 @@ func (d *DB) backup(ctx context.Context, dir string, version int) (string, error
 		return "", err
 	}
 	return path, nil
+}
+
+// digest is the migration's SQL, hashed: a shipped migration edited afterwards
+// changes it.
+func digest(sqlText string) string {
+	sum := sha256.Sum256([]byte(sqlText))
+	return hex.EncodeToString(sum[:])
+}
+
+// verifyDigests refuses to run when an applied migration's SQL no longer
+// matches what was recorded. Rows written before digests existed have an empty
+// hash; those are backfilled once from the embedded SQL, which protects every
+// later edit but cannot know about one made before the feature arrived.
+func (d *DB) verifyDigests(ctx context.Context, applied []Migration) error {
+	// The column arrives with migration 0062; a database upgraded from before it
+	// is verified from the next start on.
+	if !d.hasColumn(ctx, "schema_migrations", "sha256") {
+		return nil
+	}
+	rows, err := d.R.QueryContext(ctx, `SELECT version, sha256 FROM schema_migrations WHERE version <= ?`, len(applied))
+	if err != nil {
+		return fmt.Errorf("read migration digests: %w", err)
+	}
+	stored := map[int]string{}
+	for rows.Next() {
+		var v int
+		var h string
+		if err := rows.Scan(&v, &h); err != nil {
+			_ = rows.Close()
+			return err
+		}
+		stored[v] = h
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	for _, m := range applied {
+		want := digest(m.SQL)
+		got, ok := stored[m.Version]
+		if !ok {
+			continue
+		}
+		if got == "" {
+			if _, err := d.W.ExecContext(ctx, `UPDATE schema_migrations SET sha256 = ? WHERE version = ?`, want, m.Version); err != nil {
+				return fmt.Errorf("record migration digest %04d: %w", m.Version, err)
+			}
+			continue
+		}
+		if got != want {
+			return fmt.Errorf("migration %04d_%s was edited after it shipped (digest %s, recorded %s): migrations are append-only, add a new one", m.Version, m.Name, want[:12], got[:12])
+		}
+	}
+	return nil
+}
+
+// hasColumn reports whether a table has the named column.
+func (d *DB) hasColumn(ctx context.Context, table, column string) bool {
+	rows, err := d.R.QueryContext(ctx, `SELECT name FROM pragma_table_info(?)`, table)
+	if err != nil {
+		return false
+	}
+	defer func() { _ = rows.Close() }()
+	for rows.Next() {
+		var name string
+		if rows.Scan(&name) == nil && name == column {
+			return true
+		}
+	}
+	return false
 }

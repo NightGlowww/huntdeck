@@ -5,14 +5,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
 // Notification channel kinds.
 const (
-	NotifyDiscord  = "discord"
-	NotifyTelegram = "telegram"
-	NotifyWebhook  = "webhook"
+	NotifyDiscord    = "discord"
+	NotifyTelegram   = "telegram"
+	NotifyWebhook    = "webhook"
+	NotifyBark       = "bark"       // iOS push, Bark or a self-hosted bark-server
+	NotifyServerChan = "serverchan" // WeChat push, ServerChan (Server酱)
 )
 
 // Outbox message kinds.
@@ -376,4 +379,65 @@ func (s *Store) RecentDeliveries(ctx context.Context, limit int) ([]Delivery, er
 		out = append(out, d)
 	}
 	return out, rows.Err()
+}
+
+// DeliveryFilter narrows the delivery history: a channel's name (as the
+// page shows it), a status ("sent", "failed" or "waiting"), and a limit.
+type DeliveryFilter struct {
+	Channel string
+	Status  string
+	Limit   int
+}
+
+// Deliveries lists recent deliveries newest first, filtered.
+func (s *Store) Deliveries(ctx context.Context, f DeliveryFilter) ([]Delivery, error) {
+	conds := []string{}
+	args := []any{}
+	if f.Channel != "" {
+		conds = append(conds, "c.name = ?")
+		args = append(args, f.Channel)
+	}
+	switch f.Status {
+	case "sent":
+		conds = append(conds, "o.sent_at IS NOT NULL")
+	case "failed":
+		conds = append(conds, "o.failed_at IS NOT NULL")
+	case "waiting":
+		conds = append(conds, "o.sent_at IS NULL AND o.failed_at IS NULL")
+	}
+	where := ""
+	if len(conds) > 0 {
+		where = " WHERE " + strings.Join(conds, " AND ")
+	}
+	limit := f.Limit
+	if limit <= 0 || limit > 200 {
+		limit = 20
+	}
+	q := "SELECT o.id, c.name, o.kind, json_array_length(o.events), o.created_at, o.sent_at, o.failed_at, o.attempts, o.last_error" +
+		" FROM notify_outbox o JOIN notify_channels c ON c.id = o.channel_id" + where + " ORDER BY o.id DESC LIMIT ?"
+	args = append(args, limit)
+	rows, err := s.db.R.QueryContext(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var out []Delivery
+	for rows.Next() {
+		var d Delivery
+		var created string
+		var sent, failed sql.NullString
+		if err := rows.Scan(&d.ID, &d.ChannelName, &d.Kind, &d.Events, &created, &sent, &failed, &d.Attempts, &d.LastError); err != nil {
+			return nil, fmt.Errorf("delivery: %w", err)
+		}
+		d.CreatedAt, d.SentAt, d.FailedAt = parseTS(created), parseTSPtr(sent), parseTSPtr(failed)
+		out = append(out, d)
+	}
+	return out, rows.Err()
+}
+
+// NotificationBacklog counts the notifications queued and not yet delivered.
+func (s *Store) NotificationBacklog(ctx context.Context) (int, error) {
+	var n int
+	err := s.db.R.QueryRowContext(ctx, "SELECT COUNT(*) FROM notify_outbox WHERE sent_at IS NULL AND failed_at IS NULL").Scan(&n)
+	return n, err
 }
