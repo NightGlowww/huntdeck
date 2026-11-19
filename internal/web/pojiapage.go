@@ -25,6 +25,7 @@ func (s *server) pojiaPage(w http.ResponseWriter, r *http.Request) {
 		Class:   strings.TrimSpace(q.Get("class")),
 		Program: strings.TrimSpace(q.Get("program")),
 		CVE:     strings.TrimSpace(q.Get("cve")),
+		Similar: strings.TrimSpace(q.Get("similar")),
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 25*time.Second)
 	defer cancel()
