@@ -249,3 +249,33 @@ a flex line both measure 70. Run it after touching a table or a chip row:
 ```sh
 HD_PASSWORD='…' node scripts/layout-audit.mjs --base https://huntdeck.example --sizes 390,1400
 ```
+
+## Three structural traps, with the measurement that found each
+
+None of these is a property you can fix; each is a consequence of where an
+element sits. They are written down because every one of them cost more than one
+round to find.
+
+**A sticky element pins to the nearest scroll container.** `.panel` has
+`overflow: hidden` for its rounded corners, so a sticky `thead` inside a panel
+pinned to the *panel*, not the window: the heading floated across the rows as the
+page scrolled (measured: `thTop` 299 px after a 600 px scroll, where the table's
+own header had moved to 93.8 px). There is no sticky table heading in the app;
+the two ways out — remove the panel's `overflow`, or stop making the heading
+sticky — were weighed and the second taken.
+
+**Two inline-blocks on one line need not share a top.** The board's kind chip and
+its bounty amount had identical computed styles (11 px, line-height 18 px, no
+margins, no transform) and sat 5 px apart: `offsetTop` 75 against 70 in the same
+line box. Nothing in the CSS is wrong, so nothing in the CSS can be edited to
+fix it; making the row a flex line centres both by definition (measured after:
+70 and 70). `scripts/layout-audit.mjs` reports this class: siblings of equal
+height, side by side, without a shared top.
+
+**A responsive rule can be dead because of file order.** `10-responsive.css`
+loads before `12-board.css`; a media-query rule in the former for a selector the
+latter also declares unconditionally never applies. That is how the phone layout
+kept `white-space: nowrap` for weeks while the CSS said otherwise (measured:
+`matchMedia` true, `whiteSpace` still `nowrap`).
+`TestResponsiveRulesAreNotOverridden` fails on it now.
+
