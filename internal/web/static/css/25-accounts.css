@@ -115,3 +115,9 @@
 .acct-field { grid-template-columns: minmax(140px, 200px) minmax(0, 1fr) auto; }
 .acct-field .acct-help { grid-column: 1 / -1; margin: 2px 0 0; }
 
+
+/* Sections are separated by a rule so the website-login heading does not read as
+   a field of the API group above it. */
+.acct-sec + .acct-sec, .acct-sec + .acct-more { border-top: 1px solid var(--border); padding-top: 16px; }
+.acct-form > .acct-sec:first-of-type { padding-top: 2px; }
+
