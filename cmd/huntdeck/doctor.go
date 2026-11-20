@@ -790,6 +790,10 @@ func checkBugcrowdCaps(ctx context.Context, s *store.Store, dir string, ok, warn
 	if err != nil || handle == "" {
 		return
 	}
+	// A page on bugcrowd.com, so it gets its own budget: a doctor that hangs on
+	// somebody else site is worse than one that says it could not read it.
+	ctx, cancel := context.WithTimeout(ctx, 8*time.Second)
+	defer cancel()
 	caps, err := bugcrowdCaps(ctx, cfg, slog.New(slog.DiscardHandler), handle)
 	if err != nil {
 		warn("bugcrowd submissions: %v", err)
