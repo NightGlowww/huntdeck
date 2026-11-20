@@ -78,22 +78,28 @@ func intigritiCmd(args []string, stdout, stderr io.Writer) int {
 	defer cancel()
 
 	out := struct {
-		Account      *intigriti.Account      `json:"account,omitempty"`
-		AccountError string                  `json:"accountError,omitempty"`
-		Invites      []intigriti.Invite      `json:"invites"`
-		Applications []intigriti.Application `json:"applications"`
-		Payouts      []intigriti.Payout      `json:"payouts"`
-		PayoutsError string                  `json:"payoutsError,omitempty"`
+		Account           *intigriti.Account      `json:"account,omitempty"`
+		AccountError      string                  `json:"accountError,omitempty"`
+		Invites           []intigriti.Invite      `json:"invites"`
+		Applications      []intigriti.Application `json:"applications"`
+		InvitesError      string                  `json:"invitesError,omitempty"`
+		ApplicationsError string                  `json:"applicationsError,omitempty"`
+		Payouts           []intigriti.Payout      `json:"payouts"`
+		PayoutsError      string                  `json:"payoutsError,omitempty"`
 	}{}
 	if a, err := client.MyAccount(ctx); err != nil {
 		out.AccountError = err.Error()
 	} else {
 		out.Account = &a
 	}
-	if inv, err := client.Invites(ctx); err == nil {
+	if inv, err := client.Invites(ctx); err != nil {
+		out.InvitesError = err.Error()
+	} else {
 		out.Invites = inv
 	}
-	if apps, err := client.Applications(ctx); err == nil {
+	if apps, err := client.Applications(ctx); err != nil {
+		out.ApplicationsError = err.Error()
+	} else {
 		out.Applications = apps
 	}
 	if pay, err := client.Payouts(ctx); err != nil {
@@ -120,7 +126,7 @@ func intigritiCmd(args []string, stdout, stderr io.Writer) int {
 	} else {
 		fmt.Fprintf(stdout, "account: %s\n", out.AccountError)
 	}
-	fmt.Fprintf(stdout, "  invites: %d · applications: %d\n", len(out.Invites), len(out.Applications))
+	fmt.Fprintf(stdout, "  invites: %s · applications: %s\n", countOr(out.InvitesError, len(out.Invites)), countOr(out.ApplicationsError, len(out.Applications)))
 	if out.PayoutsError != "" {
 		fmt.Fprintf(stdout, "  payouts: %s\n", out.PayoutsError)
 	} else {
@@ -137,4 +143,13 @@ func doneWord(b bool) string {
 		return "complete"
 	}
 	return "incomplete"
+}
+
+// countOr shows a number, or the reason there is none: an empty list and a
+// failed call must not print the same thing.
+func countOr(errMsg string, n int) string {
+	if errMsg != "" {
+		return errMsg
+	}
+	return fmt.Sprintf("%d", n)
 }
