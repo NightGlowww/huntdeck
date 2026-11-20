@@ -10,7 +10,10 @@ import (
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/config"
+	"github.com/mdpsec/huntdeck/internal/db"
 	"github.com/mdpsec/huntdeck/internal/jev"
+	"github.com/mdpsec/huntdeck/internal/overrides"
+	"github.com/mdpsec/huntdeck/internal/store"
 	"github.com/mdpsec/huntdeck/internal/triage"
 )
 
@@ -20,13 +23,30 @@ import (
 func triageCmd(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("triage", flag.ContinueOnError)
 	fs.SetOutput(stderr)
+	data := fs.String("data", "", "data directory (default $HUNTDECK_DATA_DIR, else ./data)")
 	path := fs.String("file", "-", "the finding as JSON (\"-\" reads stdin)")
 	asJSON := fs.Bool("json", false, "print the verdict as JSON")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
 
-	cfg, err := config.Load(config.OSSource)
+	// Loaded the way the server loads, so a key saved in Settings counts: reading
+	// only the environment made this command answer "not configured" inside the
+	// container, where the key lives in the database.
+	dir := *data
+	if dir == "" {
+		dir = os.Getenv("HUNTDECK_DATA_DIR")
+	}
+	if dir == "" {
+		dir = "data"
+	}
+	d, err := db.Open(ctx0(), dir+"/huntdeck.db")
+	if err != nil {
+		fmt.Fprintf(stderr, "huntdeck triage: %v\n", err)
+		return 1
+	}
+	defer func() { _ = d.Close() }()
+	cfg, err := overrides.New(store.New(d, time.Now), dir, config.OSSource).Config(ctx0())
 	if err != nil {
 		fmt.Fprintf(stderr, "huntdeck triage: %v\n", err)
 		return 1
@@ -75,3 +95,7 @@ func triageCmd(args []string, stdout, stderr io.Writer) int {
 	}
 	return 0
 }
+
+// ctx0 is a plain background context for the setup work that runs before the
+// judged call gets its own timeout.
+func ctx0() context.Context { return context.Background() }
