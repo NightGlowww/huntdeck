@@ -86,3 +86,30 @@ func TestDoctorReportsCorruption(t *testing.T) {
 		t.Errorf("doctor passed a corrupted database:\n%s", out.String())
 	}
 }
+
+// --short is for the cron job that should stay quiet until something is wrong:
+// every ok line is dropped, the failures and warnings are not, and the summary
+// still says how many.
+func TestDoctorShortSpeaksOnlyWhenSomethingIsWrong(t *testing.T) {
+	dir := t.TempDir()
+	makeInstall(t, dir)
+	var out, errOut strings.Builder
+	if code := doctorCmd([]string{"--data", dir, "--short"}, &out, &errOut); code != 0 {
+		t.Fatalf("doctor --short on a healthy install: %d\n%s%s", code, out.String(), errOut.String())
+	}
+	if strings.Contains(out.String(), "  ok    ") {
+		t.Errorf("--short printed ok lines:\n%s", out.String())
+	}
+	if !strings.Contains(out.String(), "warning(s)") && !strings.Contains(out.String(), "no failures") {
+		t.Errorf("--short dropped the summary too:\n%s", out.String())
+	}
+
+	// A broken install still speaks.
+	out.Reset()
+	if code := doctorCmd([]string{"--data", filepath.Join(dir, "nope"), "--short"}, &out, &errOut); code != 1 {
+		t.Errorf("doctor --short on a missing directory = %d", code)
+	}
+	if !strings.Contains(out.String(), "there is no") {
+		t.Errorf("--short hid the failure:\n%s", out.String())
+	}
+}

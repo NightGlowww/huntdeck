@@ -69,9 +69,11 @@ and the ones that can take `--data` say so.
 
 ## Health and setup
 
-- **`huntdeck doctor`** — the data directory, schema, integrity, key, space,
+- **`huntdeck doctor [--short]`** — the data directory, schema, integrity, key, space,
   backup freshness, whether the proxy answers, and how fresh the polls, the queue
-  and the score history are. `FAIL` lines mean something is wrong.
+  and the score history are. `FAIL` lines mean something is wrong. `--short`
+  prints only the failures and warnings, for a cron job that should stay quiet
+  until there is something to say; the exit status is the same either way.
 - **`huntdeck seed export FILE [--signed-out]`** / **`huntdeck seed import FILE`**
   — write the public programs for someone else to start from, or load such a file
   into an empty install.

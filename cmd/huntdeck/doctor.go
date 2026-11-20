@@ -31,6 +31,7 @@ import (
 func doctorCmd(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("doctor", flag.ContinueOnError)
 	data := fs.String("data", "", "data directory (default $HUNTDECK_DATA_DIR, else ./data)")
+	short := fs.Bool("short", false, "only what is wrong: for a cron job that should speak up when something is")
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
@@ -47,7 +48,13 @@ func doctorCmd(args []string, stdout, stderr io.Writer) int {
 	fmt.Fprintf(stdout, "huntdeck doctor: %s\n\n", dir)
 
 	fails := 0
-	ok := func(format string, a ...any) { fmt.Fprintf(stdout, "  ok    "+format+"\n", a...) }
+	ok := func(format string, a ...any) {
+		if *short {
+			return
+		}
+		fmt.Fprintf(stdout, "  ok    "+format+"\n", a...)
+	}
+	_ = short
 	warnings := 0
 	warn := func(format string, a ...any) {
 		warnings++
