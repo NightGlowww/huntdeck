@@ -30,6 +30,7 @@ func pollCmd(args []string, stdout, stderr io.Writer) int {
 	limit := fs.Int("limit", 0, "only process the first N programs (for trying things out; never removes anything)")
 	force := fs.Bool("force-removals", false, "apply removals even if most programs (or a program's whole scope) would disappear at once")
 	refetch := fs.Bool("refetch-scope", false, "full mode: download every program's scope, even ones the platform says are unchanged")
+	handle := fs.String("handle", "", "only this program (a handle, or platform/handle): a targeted refresh, for one whose scope looks wrong")
 	pos, code, ok := parseFlags(fs, args, stderr)
 	if !ok {
 		return code
@@ -69,7 +70,7 @@ func pollCmd(args []string, stdout, stderr io.Writer) int {
 			fmt.Fprintf(stderr, "poll %s: skipped, the platform is disabled in Settings\n", p.Name())
 			continue
 		}
-		run, err := app.syncer.Poll(ctx, p.Platform, syncer.Options{Mode: *mode, Trigger: "manual", Limit: *limit, Concurrency: p.concurrency, ForceRemovals: *force, RefetchScope: *refetch})
+		run, err := app.syncer.Poll(ctx, p.Platform, syncer.Options{Mode: *mode, Trigger: "manual", Handles: handleList(*handle), Limit: *limit, Concurrency: p.concurrency, ForceRemovals: *force, RefetchScope: *refetch})
 		if err != nil {
 			fmt.Fprintf(stderr, "poll %s: %v\n", p.Name(), err)
 			exit = 1
@@ -428,4 +429,18 @@ func statsFetchCmd(args []string, stdout, stderr io.Writer) int {
 		}
 	}
 	return exit
+}
+
+// handleList turns --handle into the handles the sync engine filters by. A
+// value may carry the platform (hackerone/beiersdorf); the platform is dropped
+// here because the poll already runs for one platform at a time.
+func handleList(raw string) []string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	if _, h, ok := strings.Cut(raw, "/"); ok {
+		raw = h
+	}
+	return []string{raw}
 }

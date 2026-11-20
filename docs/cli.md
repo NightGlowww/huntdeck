@@ -50,7 +50,7 @@ and the ones that can take `--data` say so.
 
 ## Polling
 
-- **`huntdeck poll [--platform h1] [--mode full|quick] [--limit N] [--force-removals] [--refetch-scope]`**
+- **`huntdeck poll [--platform h1] [--mode full|quick] [--limit N] [--force-removals] [--refetch-scope] [--handle HANDLE]`**
   — poll now instead of waiting for the scheduler. `--limit` never removes
   anything; `--force-removals` is for a listing that really did shrink.
 - **`huntdeck stats [HANDLE…] [--platform h1]`** — fetch a program's public stats
