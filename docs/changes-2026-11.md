@@ -100,3 +100,44 @@ Two of these were my own mistakes, kept in the record: the allowance fetched
 during a page render (1.6 s, caught by timing it), and a `/v1/me` call that does
 not exist in the hacker API, which reported "authentication failed" about
 credentials that were fine.
+
+## The same day, later: two outages and the guards they left behind
+
+The morning's work was hardening. The evening's was the bill for it: two of my
+own changes took production down, and the deploy script failed four different
+ways. Written down because the pattern matters more than the individual fixes -
+each time I checked that the logic was right and not that the thing could be
+killed.
+
+| Change | Why | How it was checked |
+|---|---|---|
+| The write-ahead-log checkpoint is bounded at five seconds | `context.WithoutCancel` gave it no deadline: after a poll it held the database and every later read queued behind it. The board answered in 28 s with a 500 while `healthz` still said ok | timed before (28 s, 500) and after (40 ms, 200); `huntdeck doctor` hung after the schema line and stopped hanging |
+| Every read-only CLI command gives up after ninety seconds | During that outage two `huntdeck status` runs I had started were holding the very locks the server needed; killing them was the fix. A diagnostic that waits forever joins the outage instead of describing it | status, changes, score, account, bugcrowd-caps, scan-clear and doctor are bounded; a test asserts the deadline and the message |
+| The writes that end a run are bounded at thirty seconds | `CountChanges` and `FinishRun` are detached from the poll context so they survive a cancel - detached also meant unbounded | the same shape as the checkpoint, with its own constant |
+| A run a killed process left behind is closed at startup | An OOM or a restart kills the process before the run can record itself, so the row stays `running` and holds its platform: the doctor showed an Intigriti quick poll "running 1h" with no activity for 56 minutes, and nothing polled Intigriti in that hour | `runs=1` in the log after the restart; the test starts a run, sweeps, and asserts it is closed as interrupted and that a second sweep touches nothing |
+| **A test walks the same path the serve command walks** | The sweep above ran three lines before the store existed, dereferenced nil, and crash-looped the container for six minutes with every unit test green | `TestOpenAppWiresEveryPart` builds the app in a temp directory; putting the bug back makes it panic, which is what production did |
+| A queue target that is a URL is found by its host | The queue ranks a URL entry by its host, so `community.personio.com` is `https://community.personio.com/...` in the scope table; three of ten chosen targets could not be sent | `TestOnlyTargetsFindsAUrlEntryByItsHost`, and the tasks appeared in the scanner afterwards |
+| One program per scan task, named after the program | A task was a count-slice of the candidate list: it could carry two programs under `huntdeck-20261120-161552-1`, a name that names nothing and a task nobody can attribute | grouping and naming tests; the fallback to a handle when a source has no name |
+| A host in two programs is scanned once | The scan page listed `info.shop-apotheke.com` twice because it sits in two programs' scope, and the batch would have scanned it twice | `TestTheSameTargetIsHandedOverOnce` |
+| `scan-handoff --targets` sends named targets | Choosing five programs to scan meant taking whatever the list happened to put first | used to send ten chosen targets; nine reached the scanner, the tenth does not exist in the scope data |
+| The scan page lists recent handoffs by task id | A task in the scanner is named however the scanner was told to name it; nothing on this side said which targets it carried, so a UUID-named task could not be traced back | `TestRecentHandoffsGroupByTask`, proved by flipping the ORDER BY |
+| A failed candidate read says so | The page assigned it to underscore and rendered "nothing waiting" over the error, which reads as a quiet day | dropping `scan_handoffs` shows the message; removing the line fails the test |
+| The deploy refuses a second run on the same host | Two deploys fought over the same image tag: the loser died with "container name already in use" after both had built | `mkdir` rather than `flock` - flock does not exist on macOS and a missing command read as a held lock, which would have blocked every deploy |
+| A build that stopped writing is called dead | The pid echoed back from the detached build is not always captured; without it the loop waited the full ten minutes in silence, which reads as a hung deploy | a log two minutes stale is dead; both directions tested |
+| The wait after a failed login doubles | `RetryAfter` was a flat thirty minutes while the Settings page promised "1h, then 2h, 4h" - so a login that cannot work opened Chrome every half hour on a host short of memory | `TestLoginWaitDoublesAndIsCapped`: 30m, 30m, 1h, 2h, 4h, 4h |
+| The idle login browser is stopped, and its cost recorded | One headful Chrome and its Xvfb had been up 25 minutes with `HUNTDECK_VNC` off, holding 273 MB on a host whose scanner was being OOM-killed | killing it freed 269 MB and left HuntDeck healthy; the number and the unwritten fix are in `docs/daily-use.md` |
+
+**Four ways the deploy script failed, all mine, all found by running it:** a
+staleness check whose nested quotes the remote shell parsed into a syntax error
+(`bash -n` accepted it); a lock that refused a deploy when nothing was running;
+a lock check that `set -o pipefail` turned into a silent exit with an empty log;
+and the original concurrency it was written to prevent. `bash -n` is not a test.
+
+**A fifth attempt was abandoned rather than shipped:** a self-test for the deploy
+script whose own path handling was wrong. A test that breaks is worse than no
+test, so it was deleted.
+
+The night's numbers: two outages, both mine, six and twenty minutes. Three
+guards that did not exist before (the openApp test, the bounded CLI, the build
+death detection). Ten chosen scan targets: nine handed over, three finished,
+three killed by the kernel for memory.
