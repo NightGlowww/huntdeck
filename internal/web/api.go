@@ -59,8 +59,18 @@ func (s *server) apiStatus(w http.ResponseWriter, r *http.Request) {
 		out.Platforms = append(out.Platforms, row)
 	}
 	for _, r := range runs {
-		out.LastPolls = append(out.LastPolls, apiStatusRun{r.Platform, r.Mode, r.Status, r.StartedAt, r.FinishedAt,
-			r.ProgramsSeen, r.Changes, r.Requests, r.Error})
+		row := apiStatusRun{Platform: r.Platform, Mode: r.Mode, Status: r.Status, StartedAt: r.StartedAt,
+			FinishedAt: r.FinishedAt, ProgramsSeen: r.ProgramsSeen, Changes: r.Changes, Requests: r.Requests,
+			Error: r.Error}
+		// A running poll's stored counters are still zero - they are written when
+		// it ends - so ask the syncer what it is doing instead of reporting nothing.
+		if r.Status == store.RunRunning && s.Progress != nil {
+			if pr, ok := s.Progress(r.ID); ok {
+				row.Progress = &apiRunProgress{Step: pr.Step, Done: pr.Done, Total: pr.Total,
+					Requests: pr.Requests, IdleSeconds: int(time.Since(pr.LastActivity).Seconds())}
+			}
+		}
+		out.LastPolls = append(out.LastPolls, row)
 	}
 	writeJSON(w, http.StatusOK, out)
 }

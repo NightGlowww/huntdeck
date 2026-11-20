@@ -57,6 +57,9 @@ type apiStatusRun struct {
 	Changes      int        `json:"changes"`
 	Requests     int64      `json:"requests"`
 	Error        string     `json:"error,omitempty"`
+	// Progress is set only while the run is running: the fields above arrive
+	// when it ends.
+	Progress *apiRunProgress `json:"progress,omitempty"`
 }
 
 type apiProgramListJSON struct {
@@ -388,4 +391,16 @@ type apiQueueFactor struct {
 	Value  float64 `json:"value"`
 	Weight float64 `json:"weight"`
 	Effect float64 `json:"effect"`
+}
+
+// apiRunProgress is what a running poll is doing right now. The stored row only
+// carries the totals, and they are written when the run ends: a poll two minutes
+// into a ten-minute listing reads as zero requests, which looks like a hang and
+// cost an hour of diagnosis once.
+type apiRunProgress struct {
+	Step        string `json:"step"`
+	Done        int    `json:"done"`
+	Total       int    `json:"total"`
+	Requests    int64  `json:"requests"`
+	IdleSeconds int    `json:"idle_seconds"`
 }
