@@ -138,7 +138,28 @@ else
   # BASE defaults to ghcr.io/mdpsec/huntdeck:latest, which the host keeps in
   # its image cache after the first pull; wrapping the running image instead
   # would add a layer on every deploy.
-  remote "cd $dir && sudo docker build -f Dockerfile.prod --build-arg BASE=$base -t $image ."
+  # Detached: an image build takes minutes, the host runs a scanner beside it,
+  # and an SSH session that drops mid-build kills the build with it. Measured
+  # twice: "Connection to ... closed by remote host" at load average 5.6. The
+  # build runs under nohup; this only waits for its log.
+  remote "cd $dir && sudo rm -f /tmp/huntdeck-build.log"
+  remote "cd $dir && sudo nohup docker build -f Dockerfile.prod --build-arg BASE=$base -t $image . >/tmp/huntdeck-build.log 2>&1 & echo started"
+  built=0
+  for _ in $(seq 1 120); do
+    sleep 3
+    if remote_out "grep -q 'Successfully tagged $image' /tmp/huntdeck-build.log 2>/dev/null"; then
+      built=1
+      break
+    fi
+    if remote_out "grep -qiE '^(ERROR|error:)' /tmp/huntdeck-build.log 2>/dev/null"; then
+      break
+    fi
+  done
+  if [ "$built" != 1 ]; then
+    echo "  the image build did not finish; its log:" >&2
+    remote_out "tail -20 /tmp/huntdeck-build.log" >&2 || true
+    exit 1
+  fi
   echo "==> restart"
   remote "cd $dir && sudo docker compose up -d --pull never"
 fi
