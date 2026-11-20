@@ -77,8 +77,8 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	// A backlog that has not moved for hours is the state that took an evening to
 	// notice by hand: say it on the page, with the scanner's own reason if the
 	// last attempt gave one.
-	if len(d.Waiting) > 0 && !d.LastHandoff.IsZero() && time.Since(d.LastHandoff) > 2*time.Hour {
-		d.WaitingSince = humanize.Duration(s.now(r.Context()).Sub(d.LastHandoff))
+	if stalled := stallFor(d.LastHandoff, s.now(r.Context()), len(d.Waiting)); stalled > 0 {
+		d.WaitingSince = humanize.Duration(stalled)
 	}
 	// What went out, and under which task id: the scanner names a task however it
 	// likes, so this is how a task in its list is traced back to a program.
@@ -194,4 +194,17 @@ func firstPerTarget(cands []store.ScanCandidate) []store.ScanCandidate {
 		out = append(out, c)
 	}
 	return out
+}
+
+// stallFor is how long a backlog has been stuck: nothing handed over for two
+// hours while targets wait. Zero when the backlog is moving or empty, so the
+// page stays quiet then.
+func stallFor(lastHandoff, now time.Time, waiting int) time.Duration {
+	if waiting == 0 || lastHandoff.IsZero() {
+		return 0
+	}
+	if d := now.Sub(lastHandoff); d > 2*time.Hour {
+		return d
+	}
+	return 0
 }
