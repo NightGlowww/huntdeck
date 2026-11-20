@@ -324,6 +324,7 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	checkProxy(ctx, s, filepath.Dir(path), ok, warn)
 	checkWebLogins(ctx, s, filepath.Dir(path), ok, warn)
 	checkPolls(ctx, s, ok, warn)
+	checkNotifications(ctx, s, ok, warn)
 
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
 		newest, oldest := time.Time{}, time.Time{}
@@ -709,5 +710,50 @@ func checkPolls(ctx context.Context, s *store.Store, ok, warn func(string, ...an
 			continue
 		}
 		ok("poll %s %s: running %s, last activity %s ago", r.Platform, r.Mode, humanDuration(since), humanDuration(idle))
+	}
+}
+
+// checkNotifications reports whether the channels that are configured are
+// actually delivering.
+//
+// They are the one dependency whose failure is silent by design: a webhook that
+// 404s, a bot token that expired and a quiet week all look the same from the
+// outside - no message arrives. The outbox knows the difference, and nobody
+// reads the outbox.
+
+func checkNotifications(ctx context.Context, s *store.Store, ok, warn func(string, ...any)) {
+	channels, err := s.NotifyChannels(ctx)
+	if err != nil || len(channels) == 0 {
+		ok("notifications: none configured")
+		return
+	}
+	enabled, queued, pending := 0, 0, 0
+	var failing []string
+	for _, c := range channels {
+		if !c.Enabled {
+			continue
+		}
+		enabled++
+		queued += c.Queued
+		pending += c.Pending
+		if c.LastError != "" && c.LastFailedAt != nil {
+			failing = append(failing, c.Name+": "+firstLine(c.LastError))
+		}
+	}
+	if enabled == 0 {
+		ok("notifications: %d channel(s), all switched off", len(channels))
+		return
+	}
+	// An error with nothing waiting is history; an error with messages queued is a
+	// delivery failing right now.
+	switch {
+	case len(failing) > 0 && queued > 0:
+		warn("notifications: %d of %d channel(s) failing with %d message(s) waiting: %s",
+			len(failing), enabled, queued, strings.Join(failing, "; "))
+	case len(failing) > 0:
+		ok("notifications: %d channel(s), %d event(s) waiting for a digest; last error: %s",
+			enabled, pending, strings.Join(failing, "; "))
+	default:
+		ok("notifications: %d channel(s), nothing waiting", enabled)
 	}
 }
