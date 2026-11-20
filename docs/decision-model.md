@@ -179,3 +179,9 @@ average would have moved from 0.86 to 0.59 on the reckless plan, while the rule
 that matters barely budged. It is also why the thresholds are 0.80 and 0.40
 rather than tight bands - a per-rule number is not stable enough to be read
 finely.
+
+The cost of the change, measured on the deployed instance: the whole six-rule
+check answers in **0.41s** (three runs: 0.412, 0.405, 0.410). Six sequential
+round trips at the ~0.3s a single question took in the earlier probes is about
+1.8s, and each round trip was a chance for the proxy to drop the call - which it
+did, twice, mid-sweep.
