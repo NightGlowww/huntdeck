@@ -388,6 +388,19 @@ var tools = []tool{
 			return s.triage(ctx, args)
 		},
 	},
+	{
+		Name:        "huntdeck_policy_check",
+		Description: "Ask the decision model whether a testing plan complies with a program's own policy text. The policy comes from the instance; the plan comes from you. Answers forbidden, check_first or allowed with P(comply). Needs HUNTDECK_JEV_KEY.",
+		Local:       true,
+		Schema: object(map[string]any{
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, independent or custom"),
+			"handle":   prop("string", "the program's handle"),
+			"plan":     prop("string", "what you intend to do, in a sentence"),
+		}, "platform", "handle", "plan"),
+		Call: func(ctx context.Context, s *Server, args map[string]any) (string, error) {
+			return s.policyCheck(ctx, args)
+		},
+	},
 }
 
 // toolList is the tools, declared for the client.

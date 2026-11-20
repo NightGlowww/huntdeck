@@ -128,6 +128,15 @@ docker exec -i -e HUNTDECK_MCP_READONLY=1 huntdeck /huntdeck-mcp
 A client that wants that as its MCP command uses `docker` as the command and
 `exec -i huntdeck /huntdeck-mcp` as the arguments.
 
+### huntdeck_policy_check
+
+Ask the decision model whether a testing plan complies with a program's own
+policy text. The policy comes from the instance (the same text its Policy tab
+shows); the plan comes from the caller. Answers `forbidden`, `check_first` or
+`allowed` with P(comply). Needs `HUNTDECK_JEV_KEY`.
+
+Arguments: `platform`, `handle`, `plan` (all required).
+
 ### huntdeck_triage
 
 Ask the decision model whether a finding would survive triage, before it is
