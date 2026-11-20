@@ -97,8 +97,6 @@ type Deps struct {
 	Platforms []PlatformInfo
 	// BugcrowdCaps answers what the account may still submit, for the polling row.
 	BugcrowdCaps func(ctx context.Context) (bugcrowd.SubmissionCaps, bool)
-	// bugcrowdCaps is where that answer is kept, so a page render never waits on it.
-	bugcrowdCaps capsCache
 	// WebSyncs are the platforms with a browser sync set up, by name.
 	WebSyncs map[string]platform.WebSyncer
 	Schedule Schedule
@@ -179,6 +177,9 @@ type Deps struct {
 
 type server struct {
 	Deps
+	// bugcrowdCaps caches the allowance answer: a page render must not wait on
+	// a request to bugcrowd.com, and copying Deps would copy a mutex.
+	bugcrowdCaps capsCache
 	// pages holds one template set per language: pages[lang][page].
 	pages map[string]map[string]*template.Template
 	// messages are the interface's translations (i18n).
