@@ -26,7 +26,9 @@ and the ones that can take `--data` say so.
   questions: would a triager accept this, and do the supplied artefacts prove
   the impact. The two numbers separate the cases a single verdict collapses:
   out of scope scores low on both axes, a real but unproven bug scores high on
-  the first and low on the second. Needs `HUNTDECK_JEV_KEY`.
+  the first and low on the second. It also rates the finding's severity on a
+  five-level scale (0 informational to 4 critical), which is a Score rather
+  than a choice: the answer can sit between two levels. Needs `HUNTDECK_JEV_KEY`.
 - **`huntdeck backtest [-top 10] [-horizon 4320h]`** — what the top ten by
   HuntScore, and by the queue, would have captured at each past cut. Needs a few
   days of history: it says how many cuts it has.

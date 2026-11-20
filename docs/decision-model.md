@@ -104,3 +104,53 @@ The route to TypeSafe leaves through the host's proxy, and a node dying takes th
 whole check with it: a 20-policy sweep lost ten calls to `EOF` when the selected
 node went away. The code retries three times with a pause and reports the rules it
 could not read; the operational answer is a healthy node, not more retries.
+
+## How questions are shaped (from the vendor's manual)
+
+Three things in docs.typesafe.ai changed how this is written, and each is a
+measured step rather than a preference.
+
+**One request, many questions.** The manual says any mix of question types can
+share a state, that they are evaluated in parallel and in isolation, and that
+"adding questions barely changes the response time". The policy check therefore
+sends its six rules as one request instead of six: same answers, one round trip
+through a proxy that flaps. Triage likewise sends its two nouls and its severity
+score together.
+
+**Criteria are descriptions, not labels.** A Choice's criteria is a map of
+option to the sentence that separates it from its neighbours; the model is sent
+both. Every call site now carries those descriptions - "this must not run now,
+on these conditions" rather than a bare "block".
+
+**Score is a position on a rubric.** The third primitive was missing here.
+Severity is the natural place for it: five ordered levels, from informational to
+critical, and the answer may fall between two of them. Measured on the same three
+findings the triage numbers came from:
+
+| finding | score (0-4) | confidence | level probabilities |
+|---|---|---|---|
+| out-of-scope reflected XSS | 1.04 | 0.61 | low 0.57, informational 0.22 |
+| admin panel, no data behind it | 1.06 | 0.42 | low 0.45, informational 0.32 |
+| cross-tenant invoice read | **3.17** | 0.86 | high 0.83, critical 0.17 |
+
+The two weak findings land on the same rung - which is right, they are equally
+uninteresting - and the real IDOR lands at "high, leaning critical" with the
+highest confidence of the three. A three-way choice could not express that.
+
+## Auditing the sentences, not the numbers
+
+The methodology page offers an audit of one program's figures, and its first run
+over twelve programs found nothing in 44 claims - because each claim is generated
+from the value it is checked against. That audit can only catch a rendering that
+loses the value (5000 becoming "$5k" and reading back wrong).
+
+Pointed at a sentence built by a **different** path - the queue's own reasons - it
+found a real defect in minutes: a three-million-dollar top bounty rendered as
+"$3000.0k", because the queue had its own money formatter. The lesson is now the
+rule for this kind of check: the two sides must be independent, or the audit is
+measuring nothing.
+
+## The primitive that is not used
+
+Box (localisation in an image) and image state have no place here: HuntDeck has
+no screenshot pipeline that would make a bounding-box judgement useful.
