@@ -6,6 +6,7 @@ package scanhandoff
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"time"
 
@@ -108,8 +109,12 @@ func runOpinion(ctx context.Context, opinion SecondOpinion, st State) error {
 	// deterministic checks still govern, and they are the ones that matter.
 	v, err := opinion.Judge(ctx, st)
 	if err != nil {
+		slog.WarnContext(ctx, "scan: the second opinion did not answer", "error", err)
 		return nil
 	}
+	// One line either way: without it, a proceed leaves no trace and "did the
+	// model run?" can only be answered by the absence of a warning.
+	slog.InfoContext(ctx, "scan: second opinion", "choice", v.Choice, "confidence", v.Confidence, "model", v.Model)
 	switch v.Choice {
 	case ActBlock, ActConfirmFirst:
 		return fmt.Errorf("the decision model says %s (confidence %.2f): no scan tasks created", v.Choice, v.Confidence)
