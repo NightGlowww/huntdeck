@@ -92,7 +92,21 @@ func (s *server) apiTargets(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, "kind is required: wildcards, domains, urls, ips, cidrs, roots, all, or an asset type such as apps, android, ios or hardware")
 		return
 	}
-	best := q.Get("sort") == "best"
+	// The page sorts by newest, score or bounty; the API only understood "best" and
+	// silently ignored the rest, so sort=new came back in value order and looked
+	// sorted to a caller who did not check. Same three, and anything else is refused
+	// rather than ignored.
+	best := true
+	switch q.Get("sort") {
+	case "", "best", "score":
+	case "new":
+		f.Order = store.TargetsByNewest
+	case "bounty":
+		f.Order = store.TargetsByBounty
+	default:
+		writeJSONError(w, http.StatusBadRequest, "sort must be best, new or bounty")
+		return
+	}
 	if q.Get("format") == "json" {
 		limit := clampInt(q.Get("limit"), 1000, 1, 5000)
 		offset := clampInt(q.Get("offset"), 0, 0, 1<<30)
