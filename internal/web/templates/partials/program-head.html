@@ -28,7 +28,7 @@
     </div>
   </div>
   <div class="ph-actions">
-    <a class="button secondary" href="/disclosed?q={{$p.Handle}}" title="{{T "Reports others have had paid here: the disclosed list, filtered to this program"}}">{{T "Disclosed"}}</a>
+    <a class="button secondary" href="/disclosed?q={{$p.Handle}}" title="{{T "Reports others have had paid here: the disclosed list, filtered to this program"}}">{{T "Disclosed"}}{{with .DisclosedSum}} <em>{{num .Total}}</em>{{end}}</a>
     <button type="button" class="button secondary" data-watch="{{$p.Platform}}/{{$p.Handle}}" aria-pressed="false" title="{{T "Keep it on your watchlist, saved in this browser: Programs and Changes can then show only the programs you watch"}}" hidden><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span class="label">{{T "Watch"}}</span></button>
     {{if or .Identifiers .OutTargets}}
     <details class="tb-menu" data-menu>
