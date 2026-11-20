@@ -179,6 +179,12 @@ func Start(ctx context.Context, o Options) (*Browser, error) {
 			env = append(env, "DISPLAY="+display)
 		}
 	}
+	// Driving a browser over CDP makes it announce itself: navigator.webdriver
+	// is true and a page that scores visitors reads that first. Measured: with a
+	// residential Japanese exit and the flag absent, Intigriti still answered
+	// "Bot-like behavior detected" after the password. This is the login browser
+	// of the person who configured it, on their own account.
+	args = append(args, "--disable-blink-features=AutomationControlled")
 	if o.Proxy != nil {
 		args = append(args, "--proxy-server=http://"+o.Proxy.Host)
 	}
