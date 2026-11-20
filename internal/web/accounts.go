@@ -116,6 +116,15 @@ func accountChanges(r *http.Request, fields []overrides.FieldState, group string
 		if f.Group != group {
 			continue
 		}
+		// A field the form did not submit is unchanged, not emptied. The page always
+		// sends every field, so this only bites a script - and it bit: a POST that
+		// carried one field cleared a platform's email, because an absent value and
+		// an empty one were the same thing here.
+		_, sent := r.PostForm[f.Name]
+		_, clearing := r.PostForm["clear_"+f.Name]
+		if !sent && !clearing {
+			continue
+		}
 		v := strings.TrimSpace(r.PostFormValue(f.Name))
 		switch f.Kind {
 		case config.KindSecret:
