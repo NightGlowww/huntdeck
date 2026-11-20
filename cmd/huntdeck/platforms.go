@@ -220,7 +220,11 @@ func loginBrowser(cfg config.Config, display string, log *slog.Logger) *weblogin
 			log.Warn("login browser: profile directory is readable by others", "mode", info.Mode().Perm())
 		}
 	}
-	log.Info("login browser", "profile", profile, "headless", cfg.ChromeHeadless,
+	proxy := "direct"
+	if cfg.Proxy != nil {
+		proxy = cfg.Proxy.Host
+	}
+	log.Info("login browser", "profile", profile, "headless", cfg.ChromeHeadless, "proxy", proxy,
 		"sandbox", "off (a container without user namespaces aborts Chrome with it on)")
 	return weblogin.NewHost(weblogin.Chrome{Path: cfg.Chrome, Headless: cfg.ChromeHeadless, Proxy: cfg.Proxy,
 		TimeZone: cfg.ChromeTimezone, Profile: profile, Display: display})
