@@ -483,31 +483,4 @@ func deref[T any](p *T) T {
 	return *p
 }
 
-// Me is the account behind the API token: HackerOne's reputation, signal and
-// impact for the researcher, which the API exposes at /v1/me and which no page
-// of this app showed.
-type Me struct {
-	Username   string
-	Reputation int
-	Signal     float64
-	Impact     float64
-}
-
 // Me reads the token's account.
-func (c *Client) Me(ctx context.Context) (Me, error) {
-	var raw struct {
-		Data struct {
-			Attributes struct {
-				Username   string  `json:"username"`
-				Reputation int     `json:"reputation"`
-				Signal     float64 `json:"signal"`
-				Impact     float64 `json:"impact"`
-			} `json:"attributes"`
-		} `json:"data"`
-	}
-	if err := c.getJSON(ctx, c.endpoint("/me"), &raw); err != nil {
-		return Me{}, err
-	}
-	a := raw.Data.Attributes
-	return Me{Username: a.Username, Reputation: a.Reputation, Signal: a.Signal, Impact: a.Impact}, nil
-}

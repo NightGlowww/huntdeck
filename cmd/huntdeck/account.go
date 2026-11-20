@@ -51,14 +51,9 @@ func accountCmd(args []string, stdout, stderr io.Writer) int {
 	for _, p := range ps {
 		switch c := p.Platform.(type) {
 		case *hackerone.Client:
-			me, err := c.Me(ctx)
-			if err != nil {
-				fmt.Fprintf(stdout, "hackerone  %v\n", err)
-				exit = 1
-				continue
-			}
-			fmt.Fprintf(stdout, "hackerone  %s · reputation %d · signal %.1f · impact %.1f\n",
-				me.Username, me.Reputation, me.Signal, me.Impact)
+			// The hacker API has no account resource: reputation, signal and impact
+			// live only on hackerone.com itself, so there is nothing to ask for here.
+			fmt.Fprintln(stdout, "hackerone  not read: the hacker API has no account endpoint")
 		case *bugcrowd.Client:
 			handle, err := app.store.OpenHandle(ctx, "bugcrowd")
 			if err != nil || handle == "" {

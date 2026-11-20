@@ -270,29 +270,3 @@ func TestNewRequiresCredentials(t *testing.T) {
 		t.Error("New without token should fail")
 	}
 }
-
-// The account numbers the CLI prints come from /v1/me, whose shape is fixed by
-// HackerOne: data.attributes with a username, reputation, signal and impact.
-func TestMeReadsTheAccountsStanding(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/v1/me" {
-			t.Errorf("asked for %q, want /v1/me", r.URL.Path)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"data":{"attributes":{"username":"n1gh7glovv","reputation":1234,"signal":3.2,"impact":4.1}}}`))
-	}))
-	defer srv.Close()
-	c, err := New(Options{Username: "u", Token: "t", BaseURL: srv.URL + "/v1", ScopesPerMinute: 1e6,
-		HTTP: httpclient.New(httpclient.Options{RatePerSecond: 1000, Burst: 100, MaxAttempts: 2,
-			Sleep: func(context.Context, time.Duration) error { return nil }})})
-	if err != nil {
-		t.Fatal(err)
-	}
-	me, err := c.Me(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if me.Username != "n1gh7glovv" || me.Reputation != 1234 || me.Signal != 3.2 || me.Impact != 4.1 {
-		t.Fatalf("me = %+v", me)
-	}
-}
