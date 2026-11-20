@@ -183,6 +183,23 @@ else
   if remote "[ -d $dir/data/backups ]"; then
     backups_flag="--backups $dir/data/backups"
   fi
+  # The version matches before the HTTP side is ready: one deploy's smoke ran
+  # seconds after the restart and reported thirteen 401s, which read as a broken
+  # release. Wait for a login to actually succeed - that is what the checks need.
+  ready=""
+  for i in $(seq 1 40); do
+    code=$(remote "cd $dir && (set -a; . ./.env 2>/dev/null; set +a; curl -s -o /dev/null -w '%{http_code}' -X POST --data-urlencode \"password=\${HUNTDECK_PASSWORD:-}\" -d next=/ http://127.0.0.1:8080/login)" 2>/dev/null) || code=""
+    if [ "$code" = "303" ] || [ "$code" = "200" ]; then
+      ready=1
+      break
+    fi
+    sleep 1
+  done
+  if [ -z "$ready" ]; then
+    echo "  the app does not accept a login yet; the smoke would only see a login page" >&2
+    echo "  last answer: ${code:-none}" >&2
+    exit 1
+  fi
   smoke_run() {
     remote "cd $dir && (set -a; . ./.env 2>/dev/null; set +a; HD_PASSWORD=\"\${HUNTDECK_PASSWORD:-}\" bash scripts/smoke.sh --url http://127.0.0.1:8080 $backups_flag)"
   }
