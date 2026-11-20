@@ -54,7 +54,7 @@
     <span class="aside">{{TF "%d target(s), %d handed over so far" (len .Waiting) .HandedOff}}</span></div>
   <div class="panel-body">
     {{if .Waiting}}
-    <ul class="scan-list">{{range .Waiting}}<li><code>{{.Target}}</code> <span class="muted small">{{.Platform}} · {{.Kind}}</span></li>{{end}}</ul>
+    <ul class="scan-list">{{range .Waiting}}<li><code>{{.Target}}</code> <span class="muted small">{{with .Name}}{{.}}{{else}}{{.Platform}}{{end}} · {{.Kind}}</span></li>{{end}}</ul>
     <form method="post" action="/scan/now" class="scan-actions" data-busy="{{T "Handing over…"}}" data-stay-busy>
       <button type="submit" class="small" data-confirm="{{TF "Create scan tasks for these %d targets now?" (len .Waiting)}}">{{T "Hand them over now"}}</button>
     </form>

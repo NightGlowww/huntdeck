@@ -63,7 +63,7 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	d.Busy = q.Get("busy")
 	// A failed read is not an empty queue: the page used to show "nothing
 	// waiting" over a database error, which reads as a quiet day.
-	if d.Waiting, err = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 200); err != nil {
+	if d.Waiting, err = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 400); err != nil {
 		d.WaitingError = "could not read the candidates: " + err.Error()
 	}
 	if d.HandedOff, d.LastHandoff, err = s.Store.ScanHandoffCount(r.Context()); err != nil && d.WaitingError == "" {
@@ -164,4 +164,19 @@ type scanPageData struct {
 	WaitingError string
 	// Busy is the scanner refusing for capacity: nothing failed, it is full.
 	Busy string
+}
+
+// firstPerTarget keeps one candidate per target, first appearance first: the
+// handoff does the same, and the list should not disagree with it.
+func firstPerTarget(cands []store.ScanCandidate) []store.ScanCandidate {
+	seen := make(map[string]bool, len(cands))
+	out := cands[:0]
+	for _, c := range cands {
+		if seen[c.Target] {
+			continue
+		}
+		seen[c.Target] = true
+		out = append(out, c)
+	}
+	return out
 }
