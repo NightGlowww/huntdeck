@@ -103,6 +103,14 @@ func openApp(ctx context.Context, stderr io.Writer, quiet bool) (*app, bool) {
 		return nil, false
 	}
 	log.Info("database ready", "path", cfg.DBPath(), "schema_version", len(migs), "migrations_applied", n)
+
+	// Nothing can be running yet: a row left in that state was killed with its
+	// process and would hold its platform until someone noticed.
+	if orphaned, err := a.store.FailOrphanedRuns(ctx, a.store.Now()); err != nil {
+		log.Warn("could not close the runs a killed process left", "err", err)
+	} else if orphaned > 0 {
+		log.Info("closed runs left running by a killed process", "runs", orphaned)
+	}
 	a.store = store.New(database, nil)
 	a.syncer = syncer.New(a.store, log, 4)
 	seedURL := cfg.SeedURL

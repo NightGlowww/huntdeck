@@ -307,3 +307,24 @@ func (s *Store) RunningRuns(ctx context.Context) ([]Run, error) {
 	}
 	return out, rows.Err()
 }
+
+// FailOrphanedRuns closes runs a killed process left behind. A run cancelled on
+// purpose records itself; one killed with the process (a restart, an OOM) leaves
+// status=running forever, and the platform stays held: "poll intigriti quick: no
+// activity for 56m (running 1h)" was exactly that, an hour of no Intigriti polling.
+// At startup nothing can be running, so every such row is stale by definition.
+func (s *Store) FailOrphanedRuns(ctx context.Context, now time.Time) (int, error) {
+	var n int64
+	err := s.Write(ctx, func(tx *Tx) error {
+		res, err := tx.tx.ExecContext(ctx, `UPDATE poll_runs
+			SET status = ?, error = ?, finished_at = ?
+			WHERE status = ?`,
+			RunFailed, RunInterrupted, now.UTC().Format(TimeFormat), RunRunning)
+		if err != nil {
+			return fmt.Errorf("fail orphaned runs: %w", err)
+		}
+		n, _ = res.RowsAffected()
+		return nil
+	})
+	return int(n), err
+}
