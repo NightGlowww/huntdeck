@@ -3,8 +3,11 @@ package scanhandoff
 import (
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
 )
@@ -50,5 +53,23 @@ func TestHeadroomRefusesWhenShort(t *testing.T) {
 				t.Errorf("the refusal should say why: %v", err)
 			}
 		})
+	}
+}
+
+// When the scanner's container is paused, the handoff fails with a bare timeout
+// that reads like a network problem. The message now names the likely cause.
+func TestHeadroomSaysWhenTheScannerIsNotAnswering(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(200 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+	c := &scopesentry.Client{BaseURL: srv.URL, Key: "k", HTTP: &http.Client{Timeout: 50 * time.Millisecond}}
+	err := CheckHeadroom(context.Background(), c)
+	if err == nil {
+		t.Fatal("a timed-out scanner passed the guard")
+	}
+	if !strings.Contains(err.Error(), "not answering") {
+		t.Fatalf("the message does not name the cause: %v", err)
 	}
 }

@@ -2,7 +2,9 @@ package scanhandoff
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/mdpsec/huntdeck/internal/jev"
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
@@ -25,6 +27,11 @@ var headroom = func(client *scopesentry.Client) (float64, bool, error) {
 func CheckHeadroom(ctx context.Context, client *scopesentry.Client) error {
 	pct, ok, err := headroom(client)
 	if err != nil {
+		// A paused or stopped container is the usual cause here, and the timeout it
+		// produces says nothing about that: name it, so nobody debugs the network.
+		if errors.Is(err, context.DeadlineExceeded) || strings.Contains(err.Error(), "Timeout exceeded") {
+			return fmt.Errorf("the scanner is not answering at %s (paused or stopped?): %w", client.BaseURL, err)
+		}
 		return fmt.Errorf("cannot read the scanner's memory headroom: %w", err)
 	}
 	if !ok {
