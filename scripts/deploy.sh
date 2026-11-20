@@ -52,7 +52,15 @@ case "$mode" in binary|full) ;; *) echo "--mode must be binary or full" >&2; exi
 lock="/tmp/huntdeck-deploy-$(printf %s "$host" | tr -c 'a-zA-Z0-9' '_').lock.d"
 if [ -z "$dry" ]; then
   if ! mkdir "$lock" 2>/dev/null; then
-    if [ -n "$(find "$lock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then
+    # A lock with no deploy process behind it is a leftover: the script that took
+    # it was killed, or exited in a way that skipped its trap. Age alone is the
+    # wrong test - a run that died a minute ago still blocks the next one.
+    others=$(pgrep -f 'scripts/deploy.sh' 2>/dev/null | grep -vx "$$" | grep -vx "$PPID" | wc -l | tr -d ' ')
+    if [ "$others" = "0" ]; then
+      echo "taking over a lock left by a deploy that is no longer running" >&2
+      rmdir "$lock" 2>/dev/null || true
+      mkdir "$lock" 2>/dev/null || { echo "another deploy to $host is running (lock $lock)" >&2; exit 3; }
+    elif [ -n "$(find "$lock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then
       echo "taking over a stale deploy lock (older than 30 minutes)" >&2
       rmdir "$lock" 2>/dev/null || true
       mkdir "$lock" 2>/dev/null || { echo "another deploy to $host is running (lock $lock)" >&2; exit 3; }
