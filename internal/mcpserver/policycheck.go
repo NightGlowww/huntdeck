@@ -49,6 +49,9 @@ func (s *Server) policyCheck(ctx context.Context, args map[string]any) (string, 
 		if r.Break >= 0.05 {
 			fmt.Fprintf(&b, "\n  %-12s %.2f", r.Key, r.Break)
 		}
+		if r.Quote != "" {
+			fmt.Fprintf(&b, "\n               %q", r.Quote)
+		}
 	}
 	if len(a.Unknown) > 0 {
 		fmt.Fprintf(&b, "\n  not answered: %s", strings.Join(a.Unknown, ", "))
