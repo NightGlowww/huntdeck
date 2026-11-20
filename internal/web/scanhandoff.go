@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mdpsec/huntdeck/internal/humanize"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/humanize"
 	"github.com/mdpsec/huntdeck/internal/jev"
 	"github.com/mdpsec/huntdeck/internal/scanhandoff"
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
