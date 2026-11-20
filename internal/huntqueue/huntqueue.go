@@ -13,6 +13,8 @@ import (
 	"math"
 	"strings"
 	"time"
+
+	"github.com/mdpsec/huntdeck/internal/humanize"
 )
 
 // Weights of the geometric mean. They read as "how much a factor costs when it
@@ -211,14 +213,15 @@ func reasons(in Inputs) []Reason {
 	return out
 }
 
+// moneyText is the amount inside a queue reason: the page's own formatting, with
+// the currency sign dropped because the reason says "pays up to $%s" itself.
+//
+// It used to have its own ladder - everything over a thousand became "%.1fk" -
+// which rendered a three-million-dollar top bounty as "$3000.0k": correct
+// arithmetic, and a number a reader has to divide to understand. One formatter
+// now, so the queue and the pages cannot disagree again.
 func moneyText(usd float64) string {
-	switch {
-	case usd >= 1000:
-		return fmt.Sprintf("%.1fk", usd/1000)
-	case usd >= 10:
-		return fmt.Sprintf("%.0f", usd)
-	}
-	return fmt.Sprintf("%.2f", usd)
+	return strings.TrimPrefix(humanize.Money(usd, "USD"), "$")
 }
 
 func clamp01(v float64) float64 { return math.Max(0.01, math.Min(1, v)) }
