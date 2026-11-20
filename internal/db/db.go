@@ -31,6 +31,10 @@ func Open(ctx context.Context, path string) (*DB, error) {
 		"foreign_keys(ON)",
 		"synchronous(NORMAL)",
 		"temp_store(MEMORY)", // keeps the root filesystem read-only in Docker
+		// SQLite reuses the WAL file rather than shrinking it, so one big poll leaves
+		// its high-water mark on disk forever: 45 MiB beside a 178 MiB database here.
+		// This drops it back to 16 MiB after a checkpoint.
+		"journal_size_limit(16777216)",
 	}
 
 	w, err := sql.Open("sqlite", dsn(path, append([]string{"journal_mode(WAL)"}, common...), true))
