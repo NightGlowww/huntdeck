@@ -114,6 +114,10 @@ type Deps struct {
 	// ScanURL and ScanKey are a ScopeSentry instance the handoff sends targets to.
 	ScanURL string
 	ScanKey config.Secret
+	// JevURL, JevKey and JevModel are the decision model asked before a handoff.
+	JevURL   string
+	JevKey   config.Secret
+	JevModel string
 	// DemoSeed exports seeds for a demo copy (demoseed.go); nil where it can't.
 	DemoSeed DemoSeeder
 	// Timezone is the IANA zone to show times in until one is chosen in

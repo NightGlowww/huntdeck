@@ -173,3 +173,15 @@ With both set, the Scan page lists the instance's templates and nodes;
 turning the handoff on creates one scan task per batch of new in-scope
 targets and records each target so a re-poll does not queue it twice.
 
+
+## Decision model
+
+- **HUNTDECK_JEV_KEY** - a key for typesafe.ai (Jev). With one set, the scan
+  handoff asks for a typed judgement before creating tasks: proceed,
+  confirm_first, split_smaller or block. Block and confirm stand the handoff
+  down, and a model that cannot answer is not permission either.
+- **HUNTDECK_JEV_MODEL** - jev-latest (default) or jev-preview.
+- **HUNTDECK_JEV_URL** - https://api.typesafe.ai unless you proxy it.
+
+It is advisory: the deterministic checks (the memory floor) run first, and a
+decision model can only narrow what they allow.

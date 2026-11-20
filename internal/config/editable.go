@@ -46,6 +46,9 @@ const (
 	GroupPojia = "pojia"
 	// GroupScan is the scanner the handoff sends targets to.
 	GroupScan = "scan"
+	// GroupJev is the decision model: a typed, calibrated judgement asked
+	// before a consequential action, never in place of the deterministic checks.
+	GroupJev = "jev"
 )
 
 // Editable lists every field Settings can set.
@@ -115,6 +118,14 @@ var Editable = []Field{
 		Help: "A ScopeSentry instance, e.g. http://10.0.8.4:8082. The handoff calls its MCP endpoint."},
 	{Name: "HUNTDECK_SCAN_KEY", Group: GroupScan, Label: "MCP key", Kind: KindSecret,
 		Help: "An ssk_ key scoped to task:write, task:read, node:read and template:read."},
+	{Name: "HUNTDECK_JEV_KEY", Group: GroupJev, Label: "API key", Kind: KindSecret,
+		Help: "From typesafe.ai. Asked before a scan handoff; a block or confirm answer stands it down."},
+	{Name: "HUNTDECK_JEV_MODEL", Group: GroupJev, Label: "Model", Kind: KindText,
+		Default: "jev-latest",
+		Help:    "jev-latest, or jev-preview for the next version."},
+	{Name: "HUNTDECK_JEV_URL", Group: GroupJev, Label: "Endpoint", Kind: KindText,
+		Default: "https://api.typesafe.ai",
+		Help:    "Leave at the default unless you proxy it."},
 }
 
 // EditableField returns the editable field called name.

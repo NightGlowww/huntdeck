@@ -84,6 +84,12 @@ type Config struct {
 	// the targets HuntDeck finds and scans them.
 	ScanURL string
 	ScanKey Secret
+	// JevURL, JevKey and JevModel are TypeSafe's System One model: a typed,
+	// calibrated judgement in a few hundred milliseconds, asked before a
+	// consequential action.
+	JevURL   string
+	JevKey   Secret
+	JevModel string
 	// HUNTDECK_CLIENT_IP_HEADER: the header a proxy in front puts the
 	// visitor's address in (CF-Connecting-IP behind Cloudflare), for a
 	// read-only copy's per-visitor limits. Set it only when every request
@@ -260,6 +266,15 @@ func Load(src Source) (Config, error) {
 	cfg.PojiaKey = Secret(strings.TrimSpace(r.get("HUNTDECK_POJIA_KEY", "")))
 	cfg.ScanURL = strings.TrimSpace(r.get("HUNTDECK_SCAN_URL", ""))
 	cfg.ScanKey = Secret(strings.TrimSpace(r.get("HUNTDECK_SCAN_KEY", "")))
+	cfg.JevURL = strings.TrimSpace(r.get("HUNTDECK_JEV_URL", ""))
+	if cfg.JevURL == "" {
+		cfg.JevURL = "https://api.typesafe.ai"
+	}
+	cfg.JevKey = Secret(strings.TrimSpace(r.get("HUNTDECK_JEV_KEY", "")))
+	cfg.JevModel = strings.TrimSpace(r.get("HUNTDECK_JEV_MODEL", ""))
+	if cfg.JevModel == "" {
+		cfg.JevModel = "jev-latest"
+	}
 	cfg.Password = Secret(r.get("HUNTDECK_PASSWORD", ""))
 	if p := cfg.Password.Reveal(); p != "" && len(p) < 8 {
 		r.errs = append(r.errs, errors.New("HUNTDECK_PASSWORD: use at least 8 characters"))

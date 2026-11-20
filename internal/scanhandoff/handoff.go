@@ -15,7 +15,21 @@ import (
 
 // Run creates the tasks and returns how many. manual skips the enabled check:
 // the button is the operator saying "now" whatever the schedule says.
+// Options are what the caller can supply beyond the store and the scanner.
+// Opinion is optional and advisory: nil means the deterministic checks are the
+// whole decision.
+type Options struct {
+	Opinion SecondOpinion
+}
+
 func Run(ctx context.Context, st *store.Store, client *scopesentry.Client, manual bool) (int, error) {
+	return RunWith(ctx, st, client, manual, Options{})
+}
+
+// RunWith is Run with a second opinion: a decision model is asked about the
+// batch before anything is created, and its block or confirm answer is
+// respected. It can only narrow what the deterministic checks allow.
+func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, manual bool, opt Options) (int, error) {
 	cfg, err := st.ScanConfigRow(ctx)
 	if err != nil {
 		return 0, err
@@ -41,6 +55,19 @@ func Run(ctx context.Context, st *store.Store, client *scopesentry.Client, manua
 	if len(cands) == 0 {
 		return 0, nil
 	}
+	// The second opinion, if one is configured, is asked once about the whole
+	// batch: a per-task question would cost a call each and answer the same
+	// thing.
+	if opt.Opinion != nil {
+		free, known, _ := headroom(client)
+		if err := runOpinion(ctx, opt.Opinion, State{
+			Tasks: (len(cands) + perTask - 1) / perTask, Targets: len(cands), PerTask: perTask,
+			Template: cfg.TemplateID, Node: cfg.NodeName, HostFreePct: free, HostKnown: known,
+		}); err != nil {
+			return 0, err
+		}
+	}
+
 	created := 0
 	for start := 0; start < len(cands); start += perTask {
 		end := start + perTask
@@ -68,4 +95,20 @@ func Run(ctx context.Context, st *store.Store, client *scopesentry.Client, manua
 		created++
 	}
 	return created, nil
+}
+
+// runOpinion asks the model and turns its answer into a verdict the handoff
+// obeys. It is separate from RunWith so the rule - block and confirm stop
+// the batch, an unanswered model is not permission - can be tested without
+// a store, a scanner or a network.
+func runOpinion(ctx context.Context, opinion SecondOpinion, st State) error {
+	v, err := opinion.Judge(ctx, st)
+	if err != nil {
+		return fmt.Errorf("the second opinion did not answer: %w", err)
+	}
+	switch v.Choice {
+	case ActBlock, ActConfirmFirst:
+		return fmt.Errorf("the decision model says %s (confidence %.2f): no scan tasks created", v.Choice, v.Confidence)
+	}
+	return nil
 }

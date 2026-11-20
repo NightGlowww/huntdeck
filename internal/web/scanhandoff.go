@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/jev"
 	"github.com/mdpsec/huntdeck/internal/scanhandoff"
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
 	"github.com/mdpsec/huntdeck/internal/store"
@@ -106,7 +107,11 @@ func (s *server) handOff(ctx context.Context, manual bool) (int, error) {
 	}
 	ctx, cancel := context.WithTimeout(ctx, scanTaskTimeout)
 	defer cancel()
-	return scanhandoff.Run(ctx, s.Store, s.scanClient(), manual)
+	var opt scanhandoff.Options
+	if s.JevKey.Reveal() != "" {
+		opt.Opinion = scanhandoff.NewJevOpinion(&jev.Client{BaseURL: s.JevURL, Key: s.JevKey.Reveal(), Model: s.JevModel})
+	}
+	return scanhandoff.RunWith(ctx, s.Store, s.scanClient(), manual, opt)
 }
 
 func urlQuery(s string) string {

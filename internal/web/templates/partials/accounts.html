@@ -39,7 +39,7 @@
 {{range .Groups}}
 <section class="panel acct" id="acct-{{.Key}}">
   <div class="panel-head"><h2>{{if .Platform}}{{template "pf" .Key}}{{else}}{{.Label}}{{end}}</h2>
-    <span class="aside">{{if or (eq .Key "ai") (eq .Key "pojia") (eq .Key "scan")}}{{T "optional"}}{{else if not .Platform}}{{T "every platform's traffic"}}{{else if .Polled}}{{T "polled"}}{{else}}{{T "not set up"}}{{end}}</span></div>
+    <span class="aside">{{if or (eq .Key "ai") (eq .Key "pojia") (eq .Key "scan") (eq .Key "jev")}}{{T "optional"}}{{else if not .Platform}}{{T "every platform's traffic"}}{{else if .Polled}}{{T "polled"}}{{else}}{{T "not set up"}}{{end}}</span></div>
   {{if .SignIn}}<div class="acct-signin signins">{{range .SignIn}}{{template "signin" .}}{{end}}</div>{{end}}
   <form method="post" action="/settings/accounts" class="acct-form" autocomplete="off">
     <input type="hidden" name="group" value="{{.Key}}">
