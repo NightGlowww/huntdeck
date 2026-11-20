@@ -33,6 +33,8 @@ Commands:
   backup [--to FILE]  Write one file holding the database, the settings key and the sessions
                                                   [--data DIR] [--no-sessions] [--keep N]
   doctor       Look the data directory over: writability, schema, key, space  [--data DIR]
+  account     Your standing per platform: HackerOne reputation and signal,
+                Bugcrowd submission allowance, Intigriti reputation and rank
   bugcrowd-caps  What Bugcrowd allows this account to submit: the weekly cap,
                 the acceptance rate against the threshold, the next reassessment
   restore --from FILE  Unpack such a file into a data directory (stop HuntDeck first)
@@ -74,6 +76,7 @@ var commands = map[string]command{
 	"backup":        backupCmd,
 	"restore":       restoreCmd,
 	"doctor":        doctorCmd,
+	"account":       accountCmd,
 	"bugcrowd-caps": bugcrowdCapsCmd,
 }
 

@@ -74,6 +74,10 @@ and the ones that can take `--data` say so.
   and the score history are. `FAIL` lines mean something is wrong. `--short`
   prints only the failures and warnings, for a cron job that should stay quiet
   until there is something to say; the exit status is the same either way.
+- **`huntdeck account [--platform h1]`** - your standing on each configured
+  platform: HackerOne reputation, signal and impact; Bugcrowd weekly submission
+  allowance and acceptance rate; Intigriti reputation and rank. Each lives
+  somewhere different, so the command asks each platform for what it has.
 - **`huntdeck bugcrowd-caps [--engagement HANDLE]`** - what Bugcrowd allows this
   account to submit: the weekly cap and what is left of it, the acceptance rate
   against the 50% threshold that lifts the cap, and the next reassessment. It
