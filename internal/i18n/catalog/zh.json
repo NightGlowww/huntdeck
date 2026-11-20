@@ -1746,6 +1746,16 @@
     "Created %s scan task(s).": "已创建 %s 个扫描任务。",
     "The handoff did not run: %s": "派发没有执行：%s",
     "No such live key: it was already revoked, or another tab revoked it first.": "没有这枚有效密钥：它已被吊销，或另一个标签页先吊销了它。",
-    "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it here when this connection retires.": "已为此连接签发。请立即复制：只存摘要，不再显示。连接停用时在本页吊销它。"
+    "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it here when this connection retires.": "已为此连接签发。请立即复制：只存摘要，不再显示。连接停用时在本页吊销它。",
+    "Check a plan against this policy": "用这份政策检查我的计划",
+    "a decision model reads the text above": "由决策模型读上面的原文",
+    "No decision model is configured: set its key in Settings > Accounts > Decision model.": "没有配置决策模型：在「设置 › 账户 › 决策模型」填入密钥。",
+    "The check could not run: try again, or read the policy yourself.": "检查未能执行：稍后再试，或自己读一遍政策。",
+    "P(complies) %s": "合规概率 %s",
+    "What you plan to do": "你打算做什么",
+    "e.g. run nuclei and a directory brute force against the in-scope web apps": "例如：对范围内的 Web 应用跑 nuclei 与目录爆破",
+    "It reads the policy on this page and nothing else. A low score means read the rules before sending a request; it is not permission.": "它只读本页的政策原文，不读别的。分数低表示发请求前先读规则；分数高也不是许可。",
+    "Reading the policy…": "正在读政策…",
+    "worst rule: %s": "最严重的一条：%s"
   }
 }

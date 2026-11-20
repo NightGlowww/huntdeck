@@ -13,6 +13,7 @@
     </div>
   </nav>
   <div class="stack">
+  {{if .PolicyCheckOn}}{{template "program-policy-check" .}}{{end}}
   {{range .Docs}}
     <section class="panel prose" id="{{.ID}}">
       <div class="panel-head"><h2>{{T .Title}}</h2>{{if eq .ID "excluded"}}<span class="aside">{{T "on top of the platform's standard ineligible list"}}</span>{{end}}</div>

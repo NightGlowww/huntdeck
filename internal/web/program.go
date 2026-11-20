@@ -91,6 +91,14 @@ type programData struct {
 	// configured, PojiaStale that the answer shown is older than a week.
 	Pojia        *store.PojiaProfile
 	PojiaEnabled bool
+	// PolicyCheckOn says a decision model is configured, so the Policy tab
+	// offers the check. PolicyCall, PolicyP and PolicyWhy carry its answer back.
+	PolicyCheckOn bool
+	PolicyCall    string
+	PolicyP       string
+	PolicyRule    string
+	PolicyWhy     string
+	PolicyError   string
 	// PojiaFailed says the fetch failed and nothing is cached, so the panel
 	// says that rather than hiding.
 	PojiaFailed bool
@@ -157,6 +165,15 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 	d := programData{P: p, Tab: oneOf(tab, programTabs...)}
 	// POJIA's disclosed-report history: cached for a week, fetched on the first
 	// visit after that. A missing key leaves the panel off entirely.
+	// The policy check needs a decision model; its answer comes back on the query.
+	d.PolicyCheckOn = s.JevKey.Reveal() != ""
+	q := r.URL.Query()
+	d.PolicyCall = q.Get("policy_call")
+	d.PolicyP = q.Get("policy_p")
+	d.PolicyRule = q.Get("policy_rule")
+	d.PolicyWhy = q.Get("policy_why")
+	d.PolicyError = q.Get("policy_error")
+
 	if s.PojiaKey.Reveal() != "" {
 		s.pojiaPanel(ctx, r, p, &d)
 	}

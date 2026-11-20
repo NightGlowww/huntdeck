@@ -1,58 +1,63 @@
-// Package policycheck asks the decision model one question about a program's
-// own policy text: does this testing plan comply with it.
+// Package policycheck asks the decision model whether a testing plan fits a
+// program's own policy text.
 //
 // Of every judgement tried against this codebase's data, this is the one that
-// discriminates. Measured on two real policies:
+// discriminates. Measured on two real policies, one question per rule, a clean
+// plan against a reckless one:
 //
-//	Phabricator: test secure.phabricator.com (the policy forbids it)  0.02
-//	Phabricator: test an install the hunter owns                     0.92
-//	HackerOne security: scan without the required identifying header  0.03
-//	HackerOne security: scan with the header                          0.43
+//	Phabricator  clean 0.05-0.11 on every rule   reckless 0.59-0.98
+//	H1 security  clean 0.03-0.10 on every rule   reckless 0.44-0.98
 //
-// The framings that did NOT work are recorded here so they are not rebuilt: a
+// A single "does this comply" answered 0.02 for a forbidden target and 0.92 for
+// an owned install, which is right but says nothing about which line was
+// crossed; the per-rule matrix does, and its clean baseline is an order of
+// magnitude lower.
+//
+// The framings that did NOT work are recorded so they are not rebuilt: a
 // per-target "worth starting today" answered 0.44-0.52 for every target, and
 // "hunt, watch or skip" for a program answered at 0.22-0.46 confidence. Both
-// restate the aggregate score the queue already gives, and the queue has no
-// target-specific evidence for the model to weigh.
+// restate the aggregate score the queue already gives.
 package policycheck
 
 import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/mdpsec/huntdeck/internal/jev"
 )
 
-// Answer is the probability that the plan complies, and what to do about it.
+// Answer is the per-rule matrix and what it adds up to.
 type Answer struct {
-	// Comply is P(the plan complies with this policy).
-	Comply float64
-	// Call is allowed, check_first or forbidden.
+	Rules []RuleVerdict
+	// Call is allowed, check_first or forbidden, decided by the worst rule.
 	Call  string
 	Model string
-	// Why is one sentence a person can act on.
+	// Why names the rule that decided it.
 	Why string
 }
 
-// Calls an answer can carry. The thresholds sit on the measured pairs: the
-// forbidden case scored 0.02-0.03, the clearly allowed one 0.92.
+// Calls an answer can carry.
 const (
 	CallAllowed    = "allowed"
 	CallCheckFirst = "check_first"
 	CallForbidden  = "forbidden"
 )
 
+// Thresholds from the measured split: a clean plan sits at 0.03-0.11, a plan
+// that breaks a rule at 0.44-0.98. Nothing lands in between often enough to
+// matter, and when it does the answer says "check the rule".
 const (
-	forbiddenBelow = 0.20
-	allowedAt      = 0.80
+	breakLikely   = 0.80
+	breakPossible = 0.40
 )
 
 // maxPolicy bounds how much policy text is sent: the model is billed by input
 // tokens, and the first few thousand characters carry the rules.
 const maxPolicy = 8000
 
-// Check judges one plan against one policy.
+// Check judges one plan against one policy, one rule at a time.
 func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (Answer, error) {
 	if strings.TrimSpace(policy) == "" {
 		return Answer{}, fmt.Errorf("policycheck: no policy text stored for %s", program)
@@ -63,29 +68,53 @@ func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (An
 	if len(policy) > maxPolicy {
 		policy = policy[:maxPolicy]
 	}
-	p, model, err := c.Probability(ctx,
-		map[string]any{"program": program, "policy": policy, "plan": plan},
-		"Does this testing plan comply with this program's policy?")
-	if err != nil {
-		return Answer{}, err
+	rules := Rules()
+	out := make([]RuleVerdict, len(rules))
+	var wg sync.WaitGroup
+	errs := make([]error, len(rules))
+	for i, r := range rules {
+		wg.Add(1)
+		go func(i int, r Rule) {
+			defer wg.Done()
+			p, _, err := c.Probability(ctx,
+				map[string]any{"program": program, "policy": policy, "plan": plan, "rule": r.Label},
+				"Does this plan break the rule as this policy states it?")
+			if err != nil {
+				errs[i] = err
+				return
+			}
+			out[i] = RuleVerdict{Key: r.Key, Label: r.Label, Break: p}
+		}(i, r)
 	}
-	return classify(p, model), nil
+	wg.Wait()
+	// One rule failing is a hole in the matrix; the caller decides whether that
+	// is worth reporting, but a silent zero would read as "no violation".
+	for _, err := range errs {
+		if err != nil {
+			return Answer{}, err
+		}
+	}
+	return classify(out, c.Model), nil
 }
 
 // classify is the rule, kept off the network so it can be pinned to the
 // measured numbers.
-func classify(p float64, model string) Answer {
-	a := Answer{Comply: p, Model: model}
+func classify(rules []RuleVerdict, model string) Answer {
+	a := Answer{Rules: rules, Model: model, Call: CallAllowed,
+		Why: "no rule in this policy reads as broken by the plan"}
+	worst := RuleVerdict{}
+	for _, r := range rules {
+		if r.Break > worst.Break {
+			worst = r
+		}
+	}
 	switch {
-	case p < forbiddenBelow:
+	case worst.Break >= breakLikely:
 		a.Call = CallForbidden
-		a.Why = "the policy reads as forbidding this: read it before sending a request"
-	case p >= allowedAt:
-		a.Call = CallAllowed
-		a.Why = "the policy allows this plan as described"
-	default:
+		a.Why = fmt.Sprintf("the plan breaks %s (%.2f): read that rule before sending a request", worst.Key, worst.Break)
+	case worst.Break >= breakPossible:
 		a.Call = CallCheckFirst
-		a.Why = "the policy does not settle it: check the quoted rules before testing"
+		a.Why = fmt.Sprintf("%s is not settled by the policy (%.2f): check that rule before testing", worst.Key, worst.Break)
 	}
 	return a
 }

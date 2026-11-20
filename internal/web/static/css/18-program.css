@@ -285,3 +285,8 @@
    as the page and with the mono face the rest of the numbers use. */
 .pojia-profile { margin: 0; padding: 0; max-width: 640px; overflow-x: auto;
   color: var(--text); font: calc(12.5px * var(--fs, 1))/1.7 var(--mono); white-space: pre-wrap; }
+
+/* The policy check: one field and a button, then the verdict above them. */
+.policy-check-form { display: flex; gap: 8px; margin: 0 0 8px; }
+.policy-check-form input { flex: 1 1 auto; min-width: 0; }
+@media (max-width: 700px) { .policy-check-form { flex-direction: column; } }

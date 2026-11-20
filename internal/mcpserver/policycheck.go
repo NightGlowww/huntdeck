@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/mdpsec/huntdeck/internal/jev"
 	"github.com/mdpsec/huntdeck/internal/policycheck"
@@ -42,5 +43,12 @@ func (s *Server) policyCheck(ctx context.Context, args map[string]any) (string, 
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s\ncomplies %.2f · %s\n%s", a.Call, a.Comply, a.Model, a.Why), nil
+	var b strings.Builder
+	fmt.Fprintf(&b, "%s · %s\n%s", a.Call, a.Model, a.Why)
+	for _, r := range a.Rules {
+		if r.Break >= 0.05 {
+			fmt.Fprintf(&b, "\n  %-12s %.2f", r.Key, r.Break)
+		}
+	}
+	return b.String(), nil
 }
