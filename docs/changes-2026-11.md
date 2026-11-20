@@ -172,3 +172,24 @@ program all night"; the task list did.
 The suite also ran under the race detector after the three concurrency changes
 of the evening (the allowance cache, the bounded checkpoint, the startup sweep):
 37 packages, no data race.
+
+### Known gap: the handoff keeps creating tasks it cannot start
+
+The ticker that hands targets over runs every thirty minutes (`serve.go`), takes
+the eight oldest candidates and creates up to four tasks. The scanner refuses to
+*start* them while a node already holds three `huntdeck-*` tasks - its own
+fairness rule - so the tasks are created, recorded, and left parked. One attempt
+in ninety minutes was enough to add another one:
+
+```
+scan handoff failed: task 6b009dfe... created and recorded but not started
+(start it in the scanner): 节点 node-dev-02 队列里已有 3 个「huntdeck-*」任务（上限 3）
+```
+
+The fix is a backoff: a start refused for capacity should stop the next creation
+for a while rather than adding another parked task every half hour. It needs the
+refusal to be distinguishable (it is - the error wraps a marker) and a little
+state in the ticker loop. Not written yet: it wants a test that a refused start
+holds the next handoff, and the run that would prove it needs a scanner that is
+full, which is the current state but not a state to build tests on at seven in
+the morning.
