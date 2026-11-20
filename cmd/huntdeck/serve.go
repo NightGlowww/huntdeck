@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 	"io"
 	"log/slog"
 	"net"
@@ -15,7 +14,6 @@ import (
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/ai"
-
 	"github.com/mdpsec/huntdeck/internal/browser"
 	"github.com/mdpsec/huntdeck/internal/config"
 	"github.com/mdpsec/huntdeck/internal/db"
@@ -24,6 +22,7 @@ import (
 	"github.com/mdpsec/huntdeck/internal/notify"
 	"github.com/mdpsec/huntdeck/internal/overrides"
 	"github.com/mdpsec/huntdeck/internal/platform"
+	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 	"github.com/mdpsec/huntdeck/internal/scanhandoff"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
 	"github.com/mdpsec/huntdeck/internal/scope"

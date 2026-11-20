@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -17,16 +16,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mdpsec/huntdeck/internal/scorecheck"
-
 	"github.com/mdpsec/huntdeck/internal/ai"
 	"github.com/mdpsec/huntdeck/internal/config"
-
 	"github.com/mdpsec/huntdeck/internal/i18n"
 	"github.com/mdpsec/huntdeck/internal/overrides"
 	"github.com/mdpsec/huntdeck/internal/platform"
+	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 	"github.com/mdpsec/huntdeck/internal/platform/independent"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
+	"github.com/mdpsec/huntdeck/internal/scorecheck"
 	"github.com/mdpsec/huntdeck/internal/store"
 )
 
