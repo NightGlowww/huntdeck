@@ -522,6 +522,15 @@ func checkScanner(ctx context.Context, s *store.Store, dir string, ok, warn func
 			full++
 		}
 	}
+	// The other refusal: the scanner host is short of memory and the handoff
+	// stops before creating anything. The page shows this; the CLI did not.
+	if pct, known, err := (&scopesentry.Client{BaseURL: cfg.ScanURL, Key: cfg.ScanKey.Reveal()}).MemAvailablePercent(ctx); err == nil && known {
+		if pct < scanhandoff.MinFreePercent {
+			warn("scanner: its host has %.0f%% memory free, below the %.0f%% floor: a handoff would be refused", pct, scanhandoff.MinFreePercent)
+		} else {
+			ok("scanner: its host has %.0f%% memory free (the floor is %.0f%%)", pct, scanhandoff.MinFreePercent)
+		}
+	}
 	switch {
 	case online == 0:
 		warn("scanner: %d node(s), none online: a handoff would wait", len(nodes))
