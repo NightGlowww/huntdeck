@@ -75,10 +75,14 @@ func (s *Syncer) sample(runID int64) {
 	reqs, _ := st.p.Stats() // outside progMu: the platform has its own locks
 	now := s.store.Now()
 	s.progMu.Lock()
-	defer s.progMu.Unlock()
 	if n := reqs - st.reqsBase; n != st.Requests {
 		st.Requests, st.LastActivity = n, now
 	}
+	s.progMu.Unlock()
+	// The database gets the same heartbeat, so a reader without this process's
+	// memory - the doctor, a script, the next run - can tell working from stuck.
+	// Best effort: a poll that cannot write its heartbeat still polls.
+	_ = s.store.TouchRun(context.WithoutCancel(context.Background()), runID)
 }
 
 // step records that runID moved on to a step of total programs (0: not

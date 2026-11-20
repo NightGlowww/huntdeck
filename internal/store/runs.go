@@ -44,6 +44,8 @@ type Run struct {
 	ListingRecent   bool // only the newest programs were listed (see platform.RecentLister)
 	StartedAt       time.Time
 	FinishedAt      *time.Time
+	// LastActivity is the last heartbeat a running poll left (see TouchRun).
+	LastActivity    *time.Time
 	ProgramsSeen    int
 	ScopesFetched   int
 	ScopesFailed    int
@@ -265,4 +267,42 @@ func (s *Store) HasFinishedPoll(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("check for finished polls: %w", err)
 	}
 	return yes, nil
+}
+
+// TouchRun records that a running poll just did something. It is the only
+// liveness signal a database reader has while a poll runs: the counters are
+// written when it ends.
+func (s *Store) TouchRun(ctx context.Context, id int64) error {
+	_, err := s.db.W.ExecContext(ctx,
+		`UPDATE poll_runs SET last_activity = ? WHERE id = ? AND status = 'running'`,
+		s.Now().UTC().Format(time.RFC3339), id)
+	if err != nil {
+		return fmt.Errorf("touch run: %w", err)
+	}
+	return nil
+}
+
+// RunningRuns are the polls in progress, with the last heartbeat each one left.
+func (s *Store) RunningRuns(ctx context.Context) ([]Run, error) {
+	rows, err := s.db.R.QueryContext(ctx, `SELECT id, platform, mode, started_at, last_activity
+		FROM poll_runs WHERE status = 'running' ORDER BY started_at`)
+	if err != nil {
+		return nil, fmt.Errorf("running polls: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []Run
+	for rows.Next() {
+		var r Run
+		var started, activity sql.NullString
+		if err := rows.Scan(&r.ID, &r.Platform, &r.Mode, &started, &activity); err != nil {
+			return nil, fmt.Errorf("running polls: %w", err)
+		}
+		r.Status = RunRunning
+		if at := parseTSPtr(started); at != nil {
+			r.StartedAt = *at
+		}
+		r.LastActivity = parseTSPtr(activity)
+		out = append(out, r)
+	}
+	return out, rows.Err()
 }

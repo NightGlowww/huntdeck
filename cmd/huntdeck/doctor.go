@@ -323,6 +323,7 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	checkScanner(ctx, s, filepath.Dir(path), ok, warn)
 	checkProxy(ctx, s, filepath.Dir(path), ok, warn)
 	checkWebLogins(ctx, s, filepath.Dir(path), ok, warn)
+	checkPolls(ctx, s, ok, warn)
 
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
 		newest, oldest := time.Time{}, time.Time{}
@@ -671,4 +672,40 @@ func firstLine(s string) string {
 		return s[:200]
 	}
 	return s
+}
+
+// pollStalledAfter is how long a running poll may go without a heartbeat before
+// the doctor calls it stuck. The sampler touches the row every five seconds.
+const pollStalledAfter = 3 * time.Minute
+
+// checkPolls reports what is polling right now, and whether it is alive.
+//
+// A running row's counters are written when it finishes, so they say nothing
+// while it runs - and a record with no heartbeat at all is indistinguishable
+// from a hung one. The heartbeat column settles it: a poll with no activity for
+// minutes is stuck, one that touched the row seconds ago is working.
+func checkPolls(ctx context.Context, s *store.Store, ok, warn func(string, ...any)) {
+	runs, err := s.RunningRuns(ctx)
+	if err != nil {
+		return
+	}
+	if len(runs) == 0 {
+		ok("polls: none running")
+		return
+	}
+	now := time.Now()
+	for _, r := range runs {
+		since := now.Sub(r.StartedAt)
+		last := r.StartedAt
+		if r.LastActivity != nil {
+			last = *r.LastActivity
+		}
+		idle := now.Sub(last)
+		if idle >= pollStalledAfter {
+			warn("poll %s %s: no activity for %s (running %s): it may be stuck, and holds the platform until it is",
+				r.Platform, r.Mode, humanDuration(idle), humanDuration(since))
+			continue
+		}
+		ok("poll %s %s: running %s, last activity %s ago", r.Platform, r.Mode, humanDuration(since), humanDuration(idle))
+	}
 }
