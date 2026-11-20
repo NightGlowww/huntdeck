@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/mdpsec/huntdeck/internal/mcpserver"
 	"github.com/mdpsec/huntdeck/internal/store"
@@ -108,4 +109,32 @@ type mcpPageData struct {
 	Deleted int
 	// Flash is "", "revoked", "deleted", "deletefailed" or "missing".
 	Flash string
+}
+
+// mcpDeleteUnused removes the keys nobody ever used. A list of 141 identical
+// rows is what this is for: a test that minted one is indistinguishable from a
+// client that lost its token, and ticking them off one at a time is not a thing
+// anybody does.
+func (s *server) mcpDeleteUnused(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4<<10)
+	if err := r.ParseForm(); err != nil {
+		s.render(w, r, http.StatusBadRequest, "mcp", pageData{Title: "MCP server", Nav: "mcp",
+			Data: s.mcpPageData(r)})
+		return
+	}
+	// A key made minutes ago may still be in a paste buffer: only older ones go.
+	const unusedGrace = time.Hour
+	n, err := s.Store.DeleteUnusedAPITokens(r.Context(), "mcp", time.Now().Add(-unusedGrace))
+	d := s.mcpPageData(r)
+	switch {
+	case err != nil:
+		s.Log.WarnContext(r.Context(), "mcp: delete unused keys", "error", err)
+		d.Flash = "deletefailed"
+	case n == 0:
+		d.Flash = "nounused"
+	default:
+		d.Flash = "deleted"
+		d.Deleted = n
+	}
+	s.render(w, r, http.StatusOK, "mcp", pageData{Title: "MCP server", Nav: "mcp", Data: d})
 }

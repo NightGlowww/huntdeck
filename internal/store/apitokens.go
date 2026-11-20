@@ -182,3 +182,22 @@ func (s *Store) DeleteAPITokens(ctx context.Context, kind string, ids []int64) (
 	}
 	return total, nil
 }
+
+// DeleteUnusedAPITokens removes keys of a kind that were never used and were
+// made before cutoff. A key that never authenticated cannot be anyone's working
+// client, and one made minutes ago may still be sitting in a paste buffer: the
+// cutoff keeps the second case.
+func (s *Store) DeleteUnusedAPITokens(ctx context.Context, kind string, cutoff time.Time) (int, error) {
+	var n int64
+	err := s.Write(ctx, func(tx *Tx) error {
+		res, err := tx.tx.ExecContext(ctx, `DELETE FROM api_tokens
+			WHERE kind = ? AND last_used_at IS NULL AND revoked_at IS NULL AND created_at < ?`,
+			kind, ts(cutoff))
+		if err != nil {
+			return fmt.Errorf("delete unused tokens: %w", err)
+		}
+		n, _ = res.RowsAffected()
+		return nil
+	})
+	return int(n), err
+}

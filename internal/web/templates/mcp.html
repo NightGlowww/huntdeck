@@ -5,7 +5,7 @@
   <div class="panel-head"><h2>{{T "Hooking it up"}}</h2><span class="aside">{{T "any MCP client"}}</span></div>
   <div class="panel-body">
     {{if .NewToken}}<p class="flash ok">{{T "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it here when this connection retires."}}</p>{{end}}
-    {{if eq .Flash "deleted"}}<p class="flash ok">{{TF "Deleted %d key(s)." .Deleted}}</p>{{else if eq .Flash "deletefailed"}}<p class="flash err">{{T "Those keys were not deleted; the log says why."}}</p>{{else if eq .Flash "revoked"}}<p class="flash ok">{{T "Revoked. Anything still sending it gets 401 from now on."}}</p>{{else if eq .Flash "missing"}}<p class="flash err">{{T "No such live key: it was already revoked, or another tab revoked it first."}}</p>{{end}}
+    {{if eq .Flash "deleted"}}<p class="flash ok">{{TF "Deleted %d key(s)." .Deleted}}</p>{{else if eq .Flash "deletefailed"}}<p class="flash err">{{T "Those keys were not deleted; the log says why."}}</p>{{else if eq .Flash "revoked"}}<p class="flash ok">{{T "Revoked. Anything still sending it gets 401 from now on."}}</p>{{else if eq .Flash "nounused"}}<p class="flash ok">{{T "Every key here has been used at least once; nothing was deleted."}}</p>{{else if eq .Flash "missing"}}<p class="flash err">{{T "No such live key: it was already revoked, or another tab revoked it first."}}</p>{{end}}
     {{if not .NewToken}}<form method="post" action="/mcp/token" class="token-form mcp-token">
       <span class="muted small">{{T "A key of its own for this connection, so what the MCP client holds is not whatever else uses the API:"}}</span>
       <button type="submit" class="small">{{T "Mint a key for this connection"}}</button>
@@ -16,6 +16,7 @@
       <div class="bulk-bar">
         <span class="muted small">{{T "Tick the keys to forget, then delete them in one go."}}</span>
         <button type="submit" class="small secondary" data-confirm="{{T "Delete the ticked keys from the list?"}}">{{T "Delete selected"}}</button>
+        <button type="submit" class="small secondary" formaction="/mcp/delete-unused" data-confirm="{{T "Delete every key that was never used and is more than an hour old? A key that never authenticated cannot be a working client."}}">{{T "Delete never-used"}}</button>
       </div>
     </form></div>{{end}}
     <div class="ex-head"><span>{{T "Client configuration"}}</span><button type="button" class="ghost small" data-copy="#mcp-json"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
