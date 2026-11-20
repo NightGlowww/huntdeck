@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mdpsec/huntdeck/internal/humanize"
 	"net/http"
 	"strconv"
 	"strings"
@@ -72,6 +73,12 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	}
 	if d.HandedOff, d.LastHandoff, err = s.Store.ScanHandoffCount(r.Context()); err != nil && d.WaitingError == "" {
 		d.WaitingError = "could not read the handoff count: " + err.Error()
+	}
+	// A backlog that has not moved for hours is the state that took an evening to
+	// notice by hand: say it on the page, with the scanner's own reason if the
+	// last attempt gave one.
+	if len(d.Waiting) > 0 && !d.LastHandoff.IsZero() && time.Since(d.LastHandoff) > 2*time.Hour {
+		d.WaitingSince = humanize.Duration(s.now(r.Context()).Sub(d.LastHandoff))
 	}
 	// What went out, and under which task id: the scanner names a task however it
 	// likes, so this is how a task in its list is traced back to a program.
@@ -160,6 +167,10 @@ type scanPageData struct {
 	Saved   bool
 	Created string
 	Failure string
+	// WaitingSince is how long the oldest candidate has been waiting, and why
+	// nothing moved: a backlog with no handoff for hours is the state that took
+	// an evening to notice by hand.
+	WaitingSince string
 	// Recent are the tasks handed over lately, by the id the scanner gave back.
 	Recent      map[string]store.HandoffBatch
 	RecentOrder []string

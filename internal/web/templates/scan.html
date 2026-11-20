@@ -15,6 +15,7 @@
 
 {{if .Error}}<p class="flash warn">{{TF "The scanner answered with an error: %s" .Error}}</p>{{end}}
 {{if .Saved}}<p class="flash ok">{{T "Saved."}}</p>{{end}}
+{{if .WaitingSince}}<p class="flash warn">{{TF "Nothing has been handed over for %s while %d target(s) wait: the scanner is full, or its last attempt was refused." .WaitingSince (len .Waiting)}}</p>{{end}}
 {{if .Waiting}}<p class="muted small">{{T "The scanner runs one task per node at a time and queues at most five: a handoff every minute or so is as fast as it can go."}}</p>{{end}}
 {{if .Created}}<p class="flash ok">{{TF "Created %s scan task(s)." .Created}}</p>{{end}}
 {{if .Failure}}<p class="flash err">{{TF "The handoff did not run: %s" .Failure}}</p>{{end}}
