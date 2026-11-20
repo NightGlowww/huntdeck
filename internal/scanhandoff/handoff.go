@@ -23,6 +23,9 @@ import (
 // whole decision.
 type Options struct {
 	Opinion SecondOpinion
+	// Targets, when set, keeps only these: the operator naming what to scan,
+	// rather than taking the next batch off the top of the list.
+	Targets []string
 }
 
 // MinInterval is the gap a scheduled run leaves between handoffs. The scanner
@@ -78,6 +81,13 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 		perTask = 50
 	}
 	cands, err := st.ScanCandidates(ctx, cfg.Kinds, perTask*4)
+	if len(opt.Targets) > 0 {
+		// A named handoff asks for exactly these, so it looks past the batch size.
+		cands, err = st.ScanCandidates(ctx, cfg.Kinds, 5000)
+		if err == nil {
+			cands = onlyTargets(cands, opt.Targets)
+		}
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -223,4 +233,19 @@ func slug(s string) string {
 		}
 	}
 	return strings.Trim(b.String(), "-")
+}
+
+// onlyTargets keeps the candidates named, in the order they were named.
+func onlyTargets(cands []store.ScanCandidate, wanted []string) []store.ScanCandidate {
+	byTarget := make(map[string]store.ScanCandidate, len(cands))
+	for _, c := range cands {
+		byTarget[c.Target] = c
+	}
+	out := make([]store.ScanCandidate, 0, len(wanted))
+	for _, w := range wanted {
+		if c, ok := byTarget[w]; ok {
+			out = append(out, c)
+		}
+	}
+	return out
 }

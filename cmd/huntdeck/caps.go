@@ -4,6 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/mdpsec/huntdeck/internal/scanhandoff"
+	"github.com/mdpsec/huntdeck/internal/scopesentry"
 	"io"
 	"log/slog"
 	"strings"
@@ -113,5 +115,51 @@ func scanClearCmd(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 	fmt.Fprintf(stdout, "cleared %d handoff(s); those targets are candidates again\n", n)
+	return 0
+}
+
+// scanHandoffCmd hands named targets to the scanner: the operator's choice of
+// what to scan, not the next batch off the top of the list. Everything else - a
+// task per program, the scanner's own naming, the record that stops a re-handoff -
+// is the same path the page and the scheduler use.
+func scanHandoffCmd(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("scan-handoff", flag.ContinueOnError)
+	targets := fs.String("targets", "", "comma-separated targets to send (default: the next batch)")
+	pos, code, ok := parseFlags(fs, args, stderr)
+	if !ok {
+		return code
+	}
+	if len(pos) > 0 {
+		fmt.Fprintf(stderr, "scan-handoff: unexpected arguments: %v\n", pos)
+		return 2
+	}
+	ctx, stop := signalContext()
+	defer stop()
+	app, ok := openApp(ctx, stderr, false)
+	if !ok {
+		return 1
+	}
+	defer app.close()
+
+	var wanted []string
+	for _, t := range strings.Split(*targets, ",") {
+		if t = strings.TrimSpace(t); t != "" {
+			wanted = append(wanted, t)
+		}
+	}
+	if app.cfg.ScanURL == "" || app.cfg.ScanKey.Reveal() == "" {
+		fmt.Fprintln(stderr, "scan-handoff: no scanner configured; set it in Settings > Accounts > Scan handoff")
+		return 1
+	}
+	client := &scopesentry.Client{BaseURL: app.cfg.ScanURL, Key: app.cfg.ScanKey.Reveal()}
+	n, err := scanhandoff.RunWith(ctx, app.store, client, true, scanhandoff.Options{Targets: wanted})
+	if err != nil {
+		fmt.Fprintf(stderr, "scan-handoff: %v\n", err)
+		if n > 0 {
+			fmt.Fprintf(stdout, "created %d task(s) before stopping\n", n)
+		}
+		return 1
+	}
+	fmt.Fprintf(stdout, "created %d scan task(s)\n", n)
 	return 0
 }

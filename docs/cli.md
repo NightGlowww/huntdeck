@@ -74,6 +74,10 @@ and the ones that can take `--data` say so.
   and the score history are. `FAIL` lines mean something is wrong. `--short`
   prints only the failures and warnings, for a cron job that should stay quiet
   until there is something to say; the exit status is the same either way.
+- **`huntdeck scan-handoff [--targets a.example.com,b.example.com]`** - send named
+  targets to the scanner instead of the next batch off the top of the list: one
+  task per program, named after it, recorded so a re-handoff does not queue it
+  again.
 - **`huntdeck scan-clear [--task ID,...]`** - forget the scan handoffs HuntDeck
   recorded, so those targets are candidates again. The scanner's own tasks are
   deleted on its page: the key HuntDeck holds has five tools and none deletes.
