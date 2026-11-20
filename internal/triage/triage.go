@@ -14,12 +14,6 @@
 // prove the impact - so the answer says which of the two is the problem.
 package triage
 
-import (
-	"context"
-
-	"github.com/mdpsec/huntdeck/internal/jev"
-)
-
 // Finding is what the submitter knows, in their own words. The model cannot
 // browse: it judges exactly this, and nothing more.
 type Finding struct {
@@ -109,26 +103,3 @@ const (
 	AdviceScope          = "cite_the_scope_entry"
 	AdviceNothing        = "nothing_more_needed"
 )
-
-// advise asks what would most raise the evidential strength, and keeps the
-// answer only when the model was sure: a suggestion at 0.18 confidence is a
-// guess wearing a sentence.
-func advise(ctx context.Context, c *jev.Client, state map[string]any) (string, float64) {
-	v, err := c.Choice(ctx, state,
-		"What single addition would most raise the evidential strength of this report?",
-		map[string]string{
-			AdviceSecondIdentity: "show the same effect from a second account or role",
-			AdviceRawTraffic:     "attach the raw requests and responses",
-			AdviceSteps:          "write numbered reproduction steps",
-			AdviceVideo:          "record a video of the flow",
-			AdviceScope:          "cite the scope entry that covers it",
-			AdviceNothing:        "nothing: the evidence already carries the impact",
-		})
-	if err != nil || v.Confidence < adviceFloor {
-		return "", v.Confidence
-	}
-	if v.Choice == AdviceNothing {
-		return "", v.Confidence
-	}
-	return v.Choice, v.Confidence
-}

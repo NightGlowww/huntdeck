@@ -16,6 +16,7 @@ const (
 	qAccept   = "accept"
 	qEvidence = "evidence"
 	qSeverity = "severity"
+	qAdvice   = "advice"
 )
 
 // SeverityLevels is the rubric, low to high. The wording is what separates the
@@ -39,6 +40,17 @@ func Judge(ctx context.Context, c *jev.Client, f Finding) (Verdict, error) {
 		qAccept:   jev.Noul("Would a bug bounty triager accept this as a valid, in-scope, payable finding?"),
 		qEvidence: jev.Noul("Do the supplied artefacts prove the impact as stated?"),
 		qSeverity: jev.Score("Rate the severity of this finding on a standard bounty scale.", SeverityLevels),
+		// The advice question rides along: it costs a little input and saves a
+		// second round trip through a proxy that drops calls. It is only read
+		// when the evidence is the problem.
+		qAdvice: jev.Choice("What single addition would most raise the evidential strength of this report?", map[string]string{
+			AdviceSecondIdentity: "show the same effect from a second account or role",
+			AdviceRawTraffic:     "attach the raw requests and responses",
+			AdviceSteps:          "write numbered reproduction steps",
+			AdviceVideo:          "record a video of the flow",
+			AdviceScope:          "cite the scope entry that covers it",
+			AdviceNothing:        "nothing: the evidence already carries the impact",
+		}),
 	})
 	if err != nil {
 		return Verdict{}, err
@@ -57,7 +69,12 @@ func Judge(ctx context.Context, c *jev.Client, f Finding) (Verdict, error) {
 	// Only when the evidence is the problem: advice about a finding that would
 	// be rejected for scope is noise.
 	if v.Evidence < evidenceFloor && v.Call != CallRejected {
-		v.Advice, v.AdviceConfidence = advise(ctx, c, state)
+		if adv, ok := answers[qAdvice]; ok {
+			v.AdviceConfidence = adv.Confidence
+			if adv.Confidence >= adviceFloor && adv.Choice != AdviceNothing {
+				v.Advice = adv.Choice
+			}
+		}
 	}
 	return v, nil
 }
