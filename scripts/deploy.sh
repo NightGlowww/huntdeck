@@ -189,7 +189,10 @@ else
   ready=""
   for i in $(seq 1 40); do
     code=$(remote "cd $dir && (set -a; . ./.env 2>/dev/null; set +a; curl -s -o /dev/null -w '%{http_code}' -X POST --data-urlencode \"password=\${HUNTDECK_PASSWORD:-}\" -d next=/ http://127.0.0.1:8080/login)" 2>/dev/null) || code=""
-    if [ "$code" = "303" ] || [ "$code" = "200" ]; then
+    # Only 303 is a session: 200 is the login page coming back, which is the
+    # very failure this wait exists for. Accepting it let the wait pass and the
+    # smoke report thirteen 401s.
+    if [ "$code" = "303" ]; then
       ready=1
       break
     fi
