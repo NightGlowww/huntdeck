@@ -141,3 +141,18 @@ The night's numbers: two outages, both mine, six and twenty minutes. Three
 guards that did not exist before (the openApp test, the bounded CLI, the build
 death detection). Ten chosen scan targets: nine handed over, three finished,
 three killed by the kernel for memory.
+
+### Known gap: a task created but not started is never retried
+
+When the scanner refuses to *start* a task (its per-node queue is full, or the
+node's container memory is close to the limit), the task exists in its list as
+"待开始" and HuntDeck has already recorded the handoff. Nothing tries again:
+thirteen tasks sat parked that way. They can be started by hand - `POST
+/api/task/start` with their ids took nine of them into the running state - but
+that is the scanner's API, not this app's, and the credentials for it are the
+web login, not the handoff key.
+
+The fix, not written yet: record the ids whose start failed and retry them on the
+next handoff, with a bounded attempt count. It needs a column (or a small table)
+and a migration, which is why it was not done at four in the morning after two
+outages.
