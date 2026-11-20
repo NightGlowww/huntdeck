@@ -325,6 +325,7 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	checkWebLogins(ctx, s, filepath.Dir(path), ok, warn)
 	checkPolls(ctx, s, ok, warn)
 	checkNotifications(ctx, s, ok, warn)
+	checkQueue(ctx, s, ok, warn)
 
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
 		newest, oldest := time.Time{}, time.Time{}
@@ -673,6 +674,11 @@ func firstLine(s string) string {
 	return s
 }
 
+// queueStaleAfter is when a materialised ranking stops describing the data:
+// it is rebuilt when polls finish, so a whole polling interval of silence is
+// already a sign something is not finishing.
+const queueStaleAfter = 12 * time.Hour
+
 // pollStalledAfter is how long a running poll may go without a heartbeat before
 // the doctor calls it stuck. The sampler touches the row every five seconds.
 const pollStalledAfter = 3 * time.Minute
@@ -754,4 +760,23 @@ func checkNotifications(ctx context.Context, s *store.Store, ok, warn func(strin
 	default:
 		ok("notifications: %d channel(s), nothing waiting", enabled)
 	}
+}
+
+// checkQueue reports how old the materialised queue is.
+//
+// The ranking in /queue is a table, rebuilt when polls finish; a table nobody
+// rebuilt still renders perfectly and describes this morning. The doctor has
+// said how many days of history the verdict has, which is a different question.
+func checkQueue(ctx context.Context, s *store.Store, ok, warn func(string, ...any)) {
+	at, err := s.HuntQueueBuiltAt(ctx)
+	if err != nil || at.IsZero() {
+		ok("queue: not built yet (the next finished poll builds it)")
+		return
+	}
+	age := time.Since(at)
+	if age > queueStaleAfter {
+		warn("queue: built %s ago: the ranking is older than the data behind it", humanDuration(age))
+		return
+	}
+	ok("queue: built %s ago", humanDuration(age))
 }
