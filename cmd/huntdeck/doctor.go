@@ -553,7 +553,7 @@ func checkProxy(ctx context.Context, s *store.Store, dir string, ok, warn func(s
 		Transport: &http.Transport{Proxy: http.ProxyURL(cfg.Proxy)},
 	}
 	start := time.Now()
-	res, err := client.Get("https://api.ipify.org")
+	res, err := proxyGet(ctx, client, "https://api.ipify.org")
 	if err != nil {
 		warn("proxy: %s does not carry traffic (%v)", cfg.Proxy.Host, err)
 		return
@@ -566,7 +566,7 @@ func checkProxy(ctx context.Context, s *store.Store, dir string, ok, warn func(s
 		warn("proxy: %s answered %d for the exit-address probe", cfg.Proxy.Host, res.StatusCode)
 		return
 	}
-	plat, err := client.Get("https://app.intigriti.com/")
+	plat, err := proxyGet(ctx, client, "https://app.intigriti.com/")
 	if err != nil {
 		warn("proxy: exit %s works, but a platform request failed (%v): check the routing rules", exit, err)
 		return
@@ -574,4 +574,14 @@ func checkProxy(ctx context.Context, s *store.Store, dir string, ok, warn func(s
 	_ = plat.Body.Close()
 	ok("proxy: %s → %s in %s · app.intigriti.com %d (the rules send it through the same proxy)",
 		cfg.Proxy.Host, exit, took, plat.StatusCode)
+}
+
+// proxyGet is one GET with the caller's context attached: a doctor that cannot be
+// interrupted hangs on a proxy that accepts a connection and never answers.
+func proxyGet(ctx context.Context, c *http.Client, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.Do(req)
 }
