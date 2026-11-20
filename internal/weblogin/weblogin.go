@@ -252,3 +252,16 @@ func (h *History) record(change func()) {
 		_ = os.WriteFile(h.path, raw, 0o600)
 	}
 }
+
+// Waiting reports whether a login would not even be attempted: the last one
+// failed under RetryAfter ago, or a rejection is stuck until a restart. A caller
+// about to drop a session so it can sign in again has to ask this first -
+// dropping it is only worth doing when a login will actually run.
+func (h *History) Waiting() bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.stuck != nil {
+		return true
+	}
+	return h.failure != nil && h.Now().Sub(h.lastFailure) < RetryAfter
+}

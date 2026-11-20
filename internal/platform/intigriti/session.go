@@ -112,6 +112,13 @@ func (c *Client) ensureSession(ctx context.Context, force bool) error {
 		}
 	}
 	if force {
+		// Dropping the session is only worth doing when a login will actually run.
+		// With the last one failed under RetryAfter ago, the attempt below returns at
+		// once - and a live session would have been thrown away for nothing. That is
+		// how a working session vanished at 09:19 after a refused login at 09:05.
+		if s.history.Waiting() {
+			return fmt.Errorf("%s: the session was refused, but a login failed recently: keeping the session%s", who, waitingHint(s.history))
+		}
 		// The app refused it: drop it, so the app starts a new one.
 		s.jar.SetCookies(s.app, []*http.Cookie{{Name: appSessionCookie, Path: "/", MaxAge: -1}}) //nolint:gosec // deletes it from the jar
 	}
@@ -368,4 +375,13 @@ func sessionProduced(jar http.CookieJar, app *url.URL) bool {
 		}
 	}
 	return false
+}
+
+// waitingHint names when the next login may run, without repeating the error the
+// caller already carries.
+func waitingHint(h *weblogin.History) string {
+	if err := h.Stuck(); err != nil {
+		return " (a rejection holds until a restart)"
+	}
+	return ""
 }
