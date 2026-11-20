@@ -103,3 +103,25 @@ const (
 	AdviceScope          = "cite_the_scope_entry"
 	AdviceNothing        = "nothing_more_needed"
 )
+
+// SeverityNames are the short names of SeverityLevels, in the same order. A
+// score of 3.17 is "high, leaning critical" to the model but "3.17" to a reader:
+// the name is what the number means.
+var SeverityNames = []string{"informational", "low", "medium", "high", "critical"}
+
+// SeverityName turns a score into the nearest level's name. It rounds rather than
+// truncating: 3.17 is nearer high (3) than critical (4), and reporting "high" for
+// a reading that leans that way is the honest summary.
+func SeverityName(score float64) string {
+	if len(SeverityNames) == 0 {
+		return ""
+	}
+	i := int(score + 0.5)
+	if i < 0 {
+		i = 0
+	}
+	if i >= len(SeverityNames) {
+		i = len(SeverityNames) - 1
+	}
+	return SeverityNames[i]
+}
