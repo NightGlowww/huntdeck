@@ -3,6 +3,7 @@ package triage
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/mdpsec/huntdeck/internal/jev"
@@ -59,6 +60,11 @@ func Judge(ctx context.Context, c *jev.Client, f Finding) (Verdict, error) {
 	evi, okE := answers[qEvidence]
 	if !okA || !okE {
 		return Verdict{}, fmt.Errorf("triage: the decision model did not answer")
+	}
+	if os.Getenv("HUNTDECK_TRIAGE_DEBUG") != "" {
+		for id, a := range answers {
+			fmt.Fprintf(os.Stderr, "DEBUG %s: choice=%q noul=%.2f score=%.2f conf=%.2f\n", id, a.Choice, a.Noul, a.Score, a.Confidence)
+		}
 	}
 	v := classify(acc.Noul, evi.Noul, model)
 	if sev, ok := answers[qSeverity]; ok {

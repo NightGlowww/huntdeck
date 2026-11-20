@@ -54,7 +54,9 @@ func TestAdviceShowsOnlyWhenSure(t *testing.T) {
 		wantShown bool
 	}{
 		{"sure, 0.92", 0.92, true},
-		{"marginal, 0.55", 0.55, false},
+		{"the right suggestion at 0.57", 0.57, true},
+		{"above the guess band, 0.52", 0.52, true},
+		{"a guess, 0.35", 0.35, false},
 		{"guessing, 0.18", 0.18, false},
 	} {
 		t.Run(c.name, func(t *testing.T) {

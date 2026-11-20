@@ -91,8 +91,12 @@ func classify(accept, evidence float64, model string) Verdict {
 // shown. Measured on one finding across five evidence strengths: it named
 // "prove it from a second identity" at 0.92 when the report had single-account
 // traffic - the one addition that moved the evidence score from 0.22 to 0.72 -
-// and answered at 0.18-0.35 everywhere else, where it would be guessing.
-const adviceFloor = 0.60
+// and answered at 0.18-0.35 elsewhere, where it would be guessing.
+//
+// A later reading landed at 0.57 with a suggestion that was right (attach the
+// raw traffic), so the floor sits in the empty band between the guesses and
+// the confident answers rather than above it.
+const adviceFloor = 0.50
 
 // The additions the advisor chooses between.
 const (
