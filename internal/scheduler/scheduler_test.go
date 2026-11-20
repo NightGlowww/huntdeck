@@ -58,6 +58,12 @@ func TestFirstRun(t *testing.T) {
 		{"a browser sync that didn't finish OK tries again an hour after", web, runs{"web": partial(20 * time.Minute)}, now.Add(40 * time.Minute)},
 		{"… or shortly, if that's past", web, runs{"web": partial(3 * time.Hour)}, now.Add(5 * time.Second)},
 		{"polls that didn't finish OK keep their interval", full, runs{"full": &store.Run{StartedAt: now.Add(-time.Hour), Status: store.RunPartial}}, now.Add(5 * time.Hour)},
+		{"a run a restart cut short is retried soon", full,
+			runs{"full": {StartedAt: now.Add(-time.Hour), Status: store.RunFailed, Error: store.RunInterrupted}},
+			now.Add(5 * time.Second)},
+		{"a run that failed keeps its interval", full,
+			runs{"full": {StartedAt: now.Add(-time.Hour), Status: store.RunFailed, Error: "401 Unauthorized"}},
+			now.Add(5 * time.Hour)},
 		{"store error falls back to the first delay", quick, runs{"err": nil}, now.Add(30 * time.Minute)},
 	}
 	for _, tt := range tests {

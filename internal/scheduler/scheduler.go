@@ -36,6 +36,11 @@ func (j Job) firstDelay(interval time.Duration) time.Duration {
 }
 
 // busyRetry is how long to wait when another poll holds the lease.
+// restartedRetry is how soon a run a restart cut short is tried again: short
+// enough that an interrupted full poll finishes before the next restart,
+// long enough not to spin.
+const restartedRetry = 5 * time.Minute
+
 const busyRetry = time.Minute
 
 // loginRetryFirst is how soon a browser sync whose login failed (the site
@@ -201,12 +206,22 @@ func firstRun(ctx context.Context, log *slog.Logger, st lastRunner, platformName
 	if last == nil {
 		return now.Add(firstDelay)
 	}
-	// A browser sync that didn't finish OK before a restart tries again
-	// as soon as a failed login would have, not a whole interval later.
-	if mode == syncer.ModeWeb {
-		if r, err := st.LastRun(ctx, platformName, mode); err == nil && r != nil && r.Status != store.RunOK {
+	// A run that a restart cut short is retried soon, not a whole interval
+	// later. This deployment restarts often, and a full poll of HackerOne takes
+	// longer than the gap between two restarts: with the plain interval, every
+	// restart pushed the next attempt six hours out and a full poll never
+	// finished. Interrupted says "we stopped it", not "the platform refused", so
+	// retrying costs nothing; a run that FAILED keeps the interval, or an auth
+	// error turns into a poll every few minutes.
+	if r, err := st.LastRun(ctx, platformName, mode); err == nil && r != nil {
+		switch {
+		case mode == syncer.ModeWeb && r.Status != store.RunOK:
 			if d, ok := loginRetry(1, interval); ok {
 				interval = d
+			}
+		case r.Status == store.RunFailed && r.Error == store.RunInterrupted:
+			if interval > restartedRetry {
+				interval = restartedRetry
 			}
 		}
 	}
