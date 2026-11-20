@@ -118,3 +118,20 @@ with a request of its own (exit address and a platform request through it), the
 decision model, the scanner's nodes and queue, and each platform's website login
 with the state of its session. A dead proxy, an empty session and a refused
 login each say so on their own line.
+
+## A known cost: the login browser stays open
+
+A website login runs in a headful Chrome with its own Xvfb inside the container
+(`/data/chrome/browser`, `--window-position=0,0 --window-size=1920,1080`).
+After a successful sign-in the browser **stays running** so the next login can
+reuse it, and `HUNTDECK_VNC` is off, so nothing displays it.
+
+Measured on the production host on 2026-11-21: one Chrome and one Xvfb had been
+up for six minutes with no login in progress, at about 3% of a core between them
+(1.4% each in `ps -o pcpu`). On a 4-core host shared with a scanner that is a
+real, permanent cost for nothing.
+
+The fix is small and unwritten: close the host after a login when VNC is off, and
+let the next login open a new browser. It is not done because it cannot be
+verified tonight - a login has to happen to prove the browser closes and the
+session survives, and the host is too loaded to run one.
