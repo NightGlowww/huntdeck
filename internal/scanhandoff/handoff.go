@@ -113,7 +113,7 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 			for _, c := range batch {
 				targets = append(targets, c.Target)
 			}
-			name := taskName(group.platform, group.handle, created+1)
+			name := taskName(group.platform, group.label, created+1)
 			id, err := client.CreateTask(ctx, name, cfg.TemplateID, node, targets)
 			if err != nil {
 				// The scanner refusing work for capacity is not a fault: stop here
@@ -165,6 +165,7 @@ func runOpinion(ctx context.Context, opinion SecondOpinion, st State) error {
 // arrived.
 type programGroup struct {
 	platform, handle string
+	label            string // what the task is called after: the name, not a UUID
 	items            []store.ScanCandidate
 }
 
@@ -179,7 +180,11 @@ func groupByProgram(cands []store.ScanCandidate) []programGroup {
 			continue
 		}
 		index[key] = len(groups)
-		groups = append(groups, programGroup{platform: c.Platform, handle: c.Handle, items: []store.ScanCandidate{c}})
+		label := c.Name
+		if strings.TrimSpace(label) == "" {
+			label = c.Handle // a source with no name keeps the handle
+		}
+		groups = append(groups, programGroup{platform: c.Platform, handle: c.Handle, label: label, items: []store.ScanCandidate{c}})
 	}
 	return groups
 }

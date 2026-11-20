@@ -67,6 +67,7 @@ type ScanCandidate struct {
 	Target   string
 	Platform string
 	Handle   string // the program it belongs to: a task must not mix programs
+	Name     string // what a person calls it: Intigriti handles are UUIDs
 	Kind     string
 }
 
@@ -89,7 +90,7 @@ func (s *Store) ScanCandidates(ctx context.Context, kinds []string, limit int) (
 	}
 	//nolint:gosec // placeholders are counted above; every value is bound
 	rows, err := s.db.R.QueryContext(ctx, `
-SELECT e.identifier, p.platform, p.handle, lower(e.asset_type)
+SELECT e.identifier, p.platform, p.handle, p.name, lower(e.asset_type)
   FROM scope_entries e
   JOIN programs p ON p.id = e.program_id
   LEFT JOIN scan_handoffs h ON h.target = e.identifier
@@ -104,7 +105,7 @@ SELECT e.identifier, p.platform, p.handle, lower(e.asset_type)
 	var out []ScanCandidate
 	for rows.Next() {
 		var c ScanCandidate
-		if err := rows.Scan(&c.Target, &c.Platform, &c.Handle, &c.Kind); err != nil {
+		if err := rows.Scan(&c.Target, &c.Platform, &c.Handle, &c.Name, &c.Kind); err != nil {
 			return nil, err
 		}
 		out = append(out, c)

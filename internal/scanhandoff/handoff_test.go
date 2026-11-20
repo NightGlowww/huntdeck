@@ -219,3 +219,36 @@ func TestTaskNameNamesTheProgram(t *testing.T) {
 		t.Errorf("the name carries characters a task list cannot show: %q", got)
 	}
 }
+
+// Intigriti's handles are UUIDs (d74a9b6a-0356-46e7-8346-2b9de8ac...), so a name
+// built from the handle is unreadable: huntdeck-intigriti-d74a9b6a-0356-46e7-...
+// The name is what a person searches the task list for; the handle is only the
+// identity that keeps two programs apart.
+func TestTaskNameUsesTheProgramNameNotItsUUID(t *testing.T) {
+	cands := []store.ScanCandidate{
+		{Target: "a.example.com", Platform: "intigriti", Handle: "d74a9b6a-0356-46e7-8346-2b9de8ac", Name: "Acme Corp"},
+		{Target: "b.example.com", Platform: "intigriti", Handle: "d74a9b6a-0356-46e7-8346-2b9de8ac", Name: "Acme Corp"},
+	}
+	groups := groupByProgram(cands)
+	if len(groups) != 1 {
+		t.Fatalf("groups = %d", len(groups))
+	}
+	if groups[0].label != "Acme Corp" {
+		t.Fatalf("label = %q, want the program name", groups[0].label)
+	}
+	name := taskName(groups[0].platform, groups[0].label, 1)
+	if strings.Contains(name, "d74a9b6a") {
+		t.Fatalf("the task name carries the UUID: %q", name)
+	}
+	if !strings.HasPrefix(name, "huntdeck-intigriti-acme-corp-") {
+		t.Fatalf("name = %q", name)
+	}
+}
+
+// A source that has no name keeps its handle rather than an empty label.
+func TestTaskNameFallsBackToTheHandle(t *testing.T) {
+	groups := groupByProgram([]store.ScanCandidate{{Target: "a.example.com", Platform: "bugcrowd", Handle: "opensea"}})
+	if groups[0].label != "opensea" {
+		t.Fatalf("label = %q", groups[0].label)
+	}
+}
