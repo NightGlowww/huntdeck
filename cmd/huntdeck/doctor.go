@@ -598,72 +598,64 @@ func proxyGet(ctx context.Context, c *http.Client, url string) (*http.Response, 
 // Hours have gone into diagnosing exactly that from a red line on the accounts
 // page, so the doctor says it in one place: is there a session, and if the last
 // attempt failed, when will the next one be.
+
 func checkWebLogins(ctx context.Context, s *store.Store, dir string, ok, warn func(string, ...any)) {
-	// A login that is no longer configured is not a failure: the file it left is a
-	// record of an earlier setup. Reading the configuration is what separates
-	// "bugcrowd has been failing for two days" from "bugcrowd's login was removed".
-	cfg, cfgErr := overrides.New(s, dir, config.OSSource).Config(ctx)
-	configured := map[string]bool{
-		"hackerone": cfg.HackerOne.Email != "",
-		"bugcrowd":  cfg.Bugcrowd.Email != "",
-		"intigriti": cfg.Intigriti.Email != "",
-		"yeswehack": cfg.YesWeHack.Email != "",
-	}
 	sess := filepath.Join(dir, "sessions")
-	entries, err := os.ReadDir(sess)
-	if err != nil {
-		return
+	cfg, cfgErr := overrides.New(s, dir, config.OSSource).Config(ctx)
+	// Every configured login is reported, whether or not it has a record: a
+	// platform whose attempt left no file is a login nobody has tried yet, not a
+	// platform without a login. The files are the history, not the list.
+	type login struct {
+		platform string
+		email    string
 	}
-	type state struct {
-		LastFailure time.Time `json:"last_failure"`
-		Error       string    `json:"error"`
+	var all []login
+	if cfgErr == nil {
+		all = []login{
+			{"hackerone", cfg.HackerOne.Email},
+			{"bugcrowd", cfg.Bugcrowd.Email},
+			{"intigriti", cfg.Intigriti.Email},
+			{"yeswehack", cfg.YesWeHack.Email},
+		}
 	}
 	reported := 0
-	for _, e := range entries {
-		name := e.Name()
-		if !strings.HasSuffix(name, "-login.json") {
-			continue
-		}
-		platform := strings.TrimSuffix(name, "-login.json")
-		raw, err := os.ReadFile(filepath.Join(sess, name)) //nolint:gosec // the data directory
-		if err != nil {
-			continue
-		}
-		var st state
-		_ = json.Unmarshal(raw, &st)
-		if cfgErr == nil && !configured[platform] {
-			ok("web login %s: not configured now (an earlier login left a record)", platform)
+	for _, l := range all {
+		if l.email == "" {
 			continue
 		}
 		reported++
-		// A login that is configured but whose browser sync is switched off looks
-		// healthy here and refreshes nothing: say which it is.
 		syncNote := ""
-		if websync, saved, werr := s.WebSync(ctx, platform); werr == nil && saved && !websync.Enabled {
+		if websync, saved, werr := s.WebSync(ctx, l.platform); werr == nil && saved && !websync.Enabled {
 			syncNote = " · the browser sync is off in Settings, so this login is not used"
 		}
-		if st.Error == "" {
-			// No recorded failure is not the same as a success: the file is also
-			// absent or reset when a session is put in place by hand.
-			ok("web login %s: no failure recorded%s", platform, syncNote)
+		raw, err := os.ReadFile(filepath.Join(sess, l.platform+"-login.json"))
+		if err != nil {
+			ok("web login %s: configured, no attempt recorded yet%s", l.platform, syncNote)
 			continue
 		}
-		// The jar is what a poll actually uses: an empty one means the next request
-		// will try to sign in again, whatever the history says.
+		var st struct {
+			LastFailure time.Time `json:"last_failure"`
+			Error       string    `json:"error"`
+		}
+		_ = json.Unmarshal(raw, &st)
+		if st.Error == "" {
+			ok("web login %s: no failure recorded%s", l.platform, syncNote)
+			continue
+		}
 		size := int64(0)
-		if info, err := os.Stat(filepath.Join(sess, platform+".json")); err == nil {
+		if info, serr := os.Stat(filepath.Join(sess, l.platform+".json")); serr == nil {
 			size = info.Size()
 		}
-		when := st.LastFailure.UTC().Format(time.RFC3339)
+		when := "earlier"
 		if !st.LastFailure.IsZero() {
 			when = humanDuration(time.Since(st.LastFailure)) + " ago"
 		}
 		if size < 100 {
-			warn("web login %s: no saved session (%d bytes): the next poll will try to sign in, last failure %s: %s",
-				platform, size, when, firstLine(st.Error))
+			warn("web login %s: no saved session (%d bytes): the next poll will try to sign in, last failure %s: %s%s",
+				l.platform, size, when, firstLine(st.Error), syncNote)
 			continue
 		}
-		warn("web login %s: last attempt failed %s: %s", platform, when, firstLine(st.Error))
+		warn("web login %s: last attempt failed %s: %s%s", l.platform, when, firstLine(st.Error), syncNote)
 	}
 	if reported == 0 {
 		ok("web logins: none configured (every platform polls with its API token alone)")
