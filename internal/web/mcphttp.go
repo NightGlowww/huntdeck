@@ -57,4 +57,7 @@ func applyJev(srv *mcpserver.Server, s *server) {
 	srv.JevKey = s.JevKey.Reveal()
 	srv.JevModel = s.JevModel
 	srv.JevProxy = s.JevProxy
+	srv.JevProvider = s.JevProvider
+	srv.JevAccountID = s.JevAccountID
+	srv.JevWorkspaceID = s.JevWorkspaceID
 }

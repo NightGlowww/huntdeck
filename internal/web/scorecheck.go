@@ -48,7 +48,7 @@ func (s *server) methodologyCheck(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 40*time.Second)
 	defer cancel()
-	client := &jev.Client{BaseURL: s.JevURL, Key: s.JevKey.Reveal(), Model: s.JevModel, Proxy: s.JevProxy}
+	client := &jev.Client{BaseURL: s.JevURL, Key: s.JevKey.Reveal(), Model: s.JevModel, Proxy: s.JevProxy, Provider: s.JevProvider, AccountID: s.JevAccountID, WorkspaceID: s.JevWorkspaceID}
 	verdicts, err := scorecheck.Check(ctx, client, facts)
 	if err != nil {
 		s.Log.WarnContext(r.Context(), "score check failed", "program", d.ScoreCheckProgram, "error", err)

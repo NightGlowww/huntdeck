@@ -126,6 +126,13 @@ var Editable = []Field{
 	{Name: "HUNTDECK_JEV_URL", Group: GroupJev, Label: "Endpoint", Kind: KindText,
 		Default: "https://api.typesafe.ai",
 		Help:    "Leave at the default unless you proxy it."},
+	{Name: "HUNTDECK_DECISION_PROVIDER", Group: GroupJev, Label: "Provider", Kind: KindText,
+		Default: "typesafe",
+		Help:    "typesafe, bailian, cloudflare or openai. The first three speak the same protocol; only the address and credentials differ."},
+	{Name: "HUNTDECK_CF_ACCOUNT_ID", Group: GroupJev, Label: "Cloudflare account", Kind: KindText,
+		Help: "Only for the cloudflare provider: the account whose Workers AI runs clef-flash."},
+	{Name: "HUNTDECK_BAILIAN_WORKSPACE_ID", Group: GroupJev, Label: "Bailian workspace", Kind: KindText,
+		Help: "Only for the bailian provider: the workspace id sent with each request."},
 	{Name: "HUNTDECK_JEV_PROXY", Group: GroupJev, Label: "Proxy", Kind: KindText,
 		Help: "An HTTP proxy the call leaves through, for a host whose direct egress TypeSafe refuses by region."},
 }

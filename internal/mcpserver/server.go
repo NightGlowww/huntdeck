@@ -38,11 +38,14 @@ type Server struct {
 	// JevURL, JevKey, JevModel and JevProxy are the decision model the
 	// triage tool asks. Empty key means the tool reports that it is not
 	// configured.
-	JevURL   string
-	JevKey   string
-	JevModel string
-	JevProxy string
-	HTTP     *http.Client
+	JevURL         string
+	JevKey         string
+	JevModel       string
+	JevProxy       string
+	JevProvider    string
+	JevAccountID   string
+	JevWorkspaceID string
+	HTTP           *http.Client
 
 	jar http.CookieJar // the session, kept in memory only
 

@@ -118,7 +118,7 @@ func (s *server) handOff(ctx context.Context, manual bool) (int, error) {
 	defer cancel()
 	var opt scanhandoff.Options
 	if s.JevKey.Reveal() != "" {
-		opt.Opinion = scanhandoff.NewJevOpinion(&jev.Client{BaseURL: s.JevURL, Key: s.JevKey.Reveal(), Model: s.JevModel, Proxy: s.JevProxy})
+		opt.Opinion = scanhandoff.NewJevOpinion(&jev.Client{BaseURL: s.JevURL, Key: s.JevKey.Reveal(), Model: s.JevModel, Proxy: s.JevProxy, Provider: s.JevProvider, AccountID: s.JevAccountID, WorkspaceID: s.JevWorkspaceID})
 	}
 	return scanhandoff.RunWith(ctx, s.Store, s.scanClient(), manual, opt)
 }

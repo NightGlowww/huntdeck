@@ -26,7 +26,7 @@ func (s *Server) triage(ctx context.Context, args map[string]any) (string, error
 	if f.Title == "" || f.Impact == "" {
 		return "", fmt.Errorf("title and impact are both needed: the model judges what it is given, and nothing else")
 	}
-	client := &jev.Client{BaseURL: s.JevURL, Key: s.JevKey, Model: s.JevModel, Proxy: s.JevProxy}
+	client := &jev.Client{BaseURL: s.JevURL, Key: s.JevKey, Model: s.JevModel, Proxy: s.JevProxy, Provider: s.JevProvider, AccountID: s.JevAccountID, WorkspaceID: s.JevWorkspaceID}
 	v, err := triage.Judge(ctx, client, f)
 	if err != nil {
 		return "", err

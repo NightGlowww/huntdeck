@@ -121,6 +121,11 @@ type Deps struct {
 	JevKey   config.Secret
 	JevModel string
 	JevProxy string
+	// JevProvider, JevAccountID and JevWorkspaceID choose the decision service
+	// and carry the two extra identifiers its address needs.
+	JevProvider    string
+	JevAccountID   string
+	JevWorkspaceID string
 	// DemoSeed exports seeds for a demo copy (demoseed.go); nil where it can't.
 	DemoSeed DemoSeeder
 	// Timezone is the IANA zone to show times in until one is chosen in

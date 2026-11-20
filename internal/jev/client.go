@@ -42,6 +42,13 @@ type Client struct {
 	// wants a shorter one sets this rather than supplying HTTP, because a client
 	// passed in HTTP has its own transport and would bypass Proxy silently.
 	Timeout time.Duration
+	// Provider is which service answers: typesafe (default), bailian,
+	// cloudflare or openai. See provider.go for how they differ.
+	Provider string
+	// AccountID is Cloudflare's account and WorkspaceID is Bailian's: both
+	// put part of the address in the path or in a header.
+	AccountID   string
+	WorkspaceID string
 }
 
 // Question is one typed question. Criteria is a map[string]string for a choice
@@ -131,13 +138,27 @@ func (c *Client) Ask(ctx context.Context, state any, questions map[string]Questi
 	if model == "" {
 		model = "jev-latest"
 	}
-	wire := make(map[string]wireQuestion, len(questions))
-	for id, q := range questions {
-		wire[id] = wireQuestion(q)
+	if len(questions) > MaxQuestions {
+		return nil, "", fmt.Errorf("jev: %d questions, and the smallest provider ceiling is %d", len(questions), MaxQuestions)
 	}
-	body, err := json.Marshal(wireRequest{Model: model, State: state, Questions: wire})
-	if err != nil {
-		return nil, "", err
+	provider := normalise(c.Provider)
+	var body []byte
+	if provider == ProviderOpenAI {
+		b, err := toOpenAI(model, state, questions)
+		if err != nil {
+			return nil, "", err
+		}
+		body = b
+	} else {
+		wire := make(map[string]wireQuestion, len(questions))
+		for id, q := range questions {
+			wire[id] = wireQuestion(q)
+		}
+		b, err := json.Marshal(wireRequest{Model: model, State: state, Questions: wire})
+		if err != nil {
+			return nil, "", err
+		}
+		body = b
 	}
 	httpClient := c.HTTP
 	if httpClient == nil {
@@ -156,12 +177,28 @@ func (c *Client) Ask(ctx context.Context, state any, questions map[string]Questi
 		httpClient = &http.Client{Timeout: timeout, Transport: transport}
 	}
 	endpoint := strings.TrimRight(c.BaseURL, "/") + "/v1/systemone"
+	switch provider {
+	case ProviderOpenAI:
+		endpoint = strings.TrimRight(c.BaseURL, "/") + "/v1/decisions"
+	case ProviderCloudflare:
+		if c.AccountID == "" {
+			return nil, "", fmt.Errorf("jev: cloudflare needs an account id")
+		}
+		endpoint = strings.TrimRight(c.BaseURL, "/") + "/accounts/" + c.AccountID + "/ai/run/@cf/cloudflare/clef-flash"
+	case ProviderBailian:
+		// Their base URL already carries the workspace host; the id travels as
+		// a header when the caller has one.
+		endpoint = strings.TrimRight(c.BaseURL, "/")
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
 	if err != nil {
 		return nil, "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.Key)
+	if provider == ProviderBailian && c.WorkspaceID != "" {
+		req.Header.Set("X-Bailian-Workspace-Id", c.WorkspaceID)
+	}
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, "", fmt.Errorf("jev: %w", err)
@@ -171,8 +208,35 @@ func (c *Client) Ask(ctx context.Context, state any, questions map[string]Questi
 		b, _ := io.ReadAll(io.LimitReader(res.Body, 512))
 		return nil, "", fmt.Errorf("jev: HTTP %d: %s", res.StatusCode, strings.TrimSpace(string(b)))
 	}
+	raw, err := io.ReadAll(io.LimitReader(res.Body, maxBody))
+	if err != nil {
+		return nil, "", fmt.Errorf("jev: %w", err)
+	}
+	// OpenAI answers with an array of named objects; the other three answer with
+	// a map. Cloudflare wraps whatever it answers in a result envelope.
+	if provider == ProviderOpenAI {
+		answers, err := fromOpenAI(raw)
+		if err != nil {
+			return nil, "", err
+		}
+		return answers, model, nil
+	}
+	if provider == ProviderCloudflare {
+		var env struct {
+			Result json.RawMessage "json:\"result\""
+			Errors []struct {
+				Message string "json:\"message\""
+			} "json:\"errors\""
+		}
+		if err := json.Unmarshal(raw, &env); err == nil && len(env.Result) > 0 {
+			if len(env.Errors) > 0 && env.Errors[0].Message != "" {
+				return nil, "", fmt.Errorf("jev: %s", env.Errors[0].Message)
+			}
+			raw = env.Result
+		}
+	}
 	var out wireResponse
-	if err := json.NewDecoder(io.LimitReader(res.Body, maxBody)).Decode(&out); err != nil {
+	if err := json.Unmarshal(raw, &out); err != nil {
 		return nil, "", fmt.Errorf("jev: %w", err)
 	}
 	if len(out.Answers) == 0 && len(out.Detail) > 0 {

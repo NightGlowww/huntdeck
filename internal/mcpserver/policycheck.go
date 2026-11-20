@@ -38,7 +38,7 @@ func (s *Server) policyCheck(ctx context.Context, args map[string]any) (string, 
 	if policy == "" {
 		return "", fmt.Errorf("%s/%s has no policy text stored: poll it, or read the policy on its page", platform, handle)
 	}
-	client := &jev.Client{BaseURL: s.JevURL, Key: s.JevKey, Model: s.JevModel, Proxy: s.JevProxy}
+	client := &jev.Client{BaseURL: s.JevURL, Key: s.JevKey, Model: s.JevModel, Proxy: s.JevProxy, Provider: s.JevProvider, AccountID: s.JevAccountID, WorkspaceID: s.JevWorkspaceID}
 	a, err := policycheck.Check(ctx, client, platform+"/"+handle, policy, plan)
 	if err != nil {
 		return "", err

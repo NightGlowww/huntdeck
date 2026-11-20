@@ -35,6 +35,9 @@ func main() {
 	s.JevKey = os.Getenv("HUNTDECK_JEV_KEY")
 	s.JevModel = os.Getenv("HUNTDECK_JEV_MODEL")
 	s.JevProxy = os.Getenv("HUNTDECK_JEV_PROXY")
+	s.JevProvider = os.Getenv("HUNTDECK_DECISION_PROVIDER")
+	s.JevAccountID = os.Getenv("HUNTDECK_CF_ACCOUNT_ID")
+	s.JevWorkspaceID = os.Getenv("HUNTDECK_BAILIAN_WORKSPACE_ID")
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := s.Run(ctx, os.Stdin, os.Stdout); err != nil {

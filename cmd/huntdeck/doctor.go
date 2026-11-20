@@ -460,7 +460,7 @@ func checkDecisionModel(ctx context.Context, s *store.Store, dir string, ok, war
 	// Timeout, not HTTP: a client supplied in HTTP carries its own transport and
 	// would drop the proxy this deployment needs (measured: 451 direct, 403
 	// through it).
-	client := &jev.Client{BaseURL: cfg.JevURL, Key: cfg.JevKey.Reveal(), Model: cfg.JevModel, Proxy: cfg.JevProxy,
+	client := &jev.Client{BaseURL: cfg.JevURL, Key: cfg.JevKey.Reveal(), Model: cfg.JevModel, Proxy: cfg.JevProxy, Provider: cfg.JevProvider, AccountID: cfg.JevAccountID, WorkspaceID: cfg.JevWorkspaceID,
 		Timeout: 6 * time.Second}
 	start := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
@@ -471,7 +471,7 @@ func checkDecisionModel(ctx context.Context, s *store.Store, dir string, ok, war
 		warn("decision model: %s does not answer (%v)", cfg.JevURL, err)
 		return
 	}
-	ok("decision model: %s answered as %s in %s", cfg.JevURL, model, humanDuration(time.Since(start)))
+	ok("decision model: %s (%s) answered as %s in %s", cfg.JevProvider, cfg.JevURL, model, humanDuration(time.Since(start)))
 }
 
 // checkScanner reports whether the scan handoff can actually reach ScopeSentry,

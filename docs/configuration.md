@@ -190,3 +190,27 @@ targets and records each target so a re-poll does not queue it twice.
 
 It is advisory: the deterministic checks (the memory floor) run first, and a
 decision model can only narrow what they allow.
+
+### Decision service providers
+
+Four services answer the same three question types. Three of them speak one
+protocol, so only the address and the credentials change; OpenAI has its own body
+shape, translated in `internal/jev/openai.go`.
+
+| Provider | Endpoint | Credentials |
+|---|---|---|
+| `typesafe` (default) | `POST {url}/v1/systemone` | `HUNTDECK_JEV_KEY` |
+| `bailian` | `POST {url}` (workspace host) | key + `HUNTDECK_BAILIAN_WORKSPACE_ID` |
+| `cloudflare` | `POST {url}/accounts/{id}/ai/run/@cf/cloudflare/clef-flash` | key + `HUNTDECK_CF_ACCOUNT_ID` |
+| `openai` | `POST {url}/v1/decisions`, model `gpt-6-luna` | key |
+
+- **HUNTDECK_DECISION_PROVIDER** - which one answers: `typesafe`, `bailian`,
+  `cloudflare` or `openai`.
+- **HUNTDECK_CF_ACCOUNT_ID** - Cloudflare's account, for `cloudflare`.
+- **HUNTDECK_BAILIAN_WORKSPACE_ID** - Bailian's workspace, for `bailian`.
+
+The question ceiling is the smallest documented one, sixteen: a caller cannot send
+a request that one provider accepts and another rejects. Without a key a provider
+is wired but untested against the live service; the tests check the request and
+response shapes each provider documents, including OpenAI's refusal type, which is
+an error rather than a zero probability.

@@ -35,7 +35,7 @@ func (s *server) programPolicyCheck(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 40*time.Second)
 	defer cancel()
-	client := &jev.Client{BaseURL: s.JevURL, Key: s.JevKey.Reveal(), Model: s.JevModel, Proxy: s.JevProxy}
+	client := &jev.Client{BaseURL: s.JevURL, Key: s.JevKey.Reveal(), Model: s.JevModel, Proxy: s.JevProxy, Provider: s.JevProvider, AccountID: s.JevAccountID, WorkspaceID: s.JevWorkspaceID}
 	a, err := policycheck.Check(ctx, client, platform+"/"+handle, policyText(p), plan)
 	if err != nil {
 		s.Log.WarnContext(r.Context(), "policy check failed", "program", handle, "error", err)

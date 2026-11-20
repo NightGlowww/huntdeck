@@ -74,7 +74,7 @@ func triageCmd(args []string, stdout, stderr io.Writer) int {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 	defer cancel()
-	client := &jev.Client{BaseURL: cfg.JevURL, Key: cfg.JevKey.Reveal(), Model: cfg.JevModel, Proxy: cfg.JevProxy}
+	client := &jev.Client{BaseURL: cfg.JevURL, Key: cfg.JevKey.Reveal(), Model: cfg.JevModel, Proxy: cfg.JevProxy, Provider: cfg.JevProvider, AccountID: cfg.JevAccountID, WorkspaceID: cfg.JevWorkspaceID}
 	v, err := triage.Judge(ctx, client, f)
 	if err != nil {
 		fmt.Fprintf(stderr, "huntdeck triage: %v\n", err)

@@ -75,7 +75,7 @@ func auditTextsCmd(args []string, stdout, stderr io.Writer) int {
 	if len(rows) > *limit {
 		rows = rows[:*limit]
 	}
-	client := &jev.Client{BaseURL: cfg.JevURL, Key: cfg.JevKey.Reveal(), Model: cfg.JevModel, Proxy: cfg.JevProxy, Timeout: 15 * time.Second}
+	client := &jev.Client{BaseURL: cfg.JevURL, Key: cfg.JevKey.Reveal(), Model: cfg.JevModel, Proxy: cfg.JevProxy, Provider: cfg.JevProvider, AccountID: cfg.JevAccountID, WorkspaceID: cfg.JevWorkspaceID, Timeout: 15 * time.Second}
 
 	type finding struct {
 		Program  string
