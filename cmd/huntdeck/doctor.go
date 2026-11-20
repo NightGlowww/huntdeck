@@ -5,8 +5,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/mdpsec/huntdeck/internal/config"
+	"github.com/mdpsec/huntdeck/internal/jev"
+	"github.com/mdpsec/huntdeck/internal/overrides"
 	"io"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -298,6 +302,11 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	}
 	defer func() { _ = d.Close() }()
 	s := store.New(d, time.Now)
+	// The decision model is a dependency now: a scan handoff asks it, and so do
+	// the policy and triage commands. When it is unreachable those features
+	// degrade quietly, so the doctor says which it is.
+	checkDecisionModel(ctx, s, filepath.Dir(path), ok, warn)
+
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
 		newest, oldest := time.Time{}, time.Time{}
 		for _, c := range checked {
@@ -416,4 +425,35 @@ func doctorAI(ctx context.Context, path string, ok, _ func(string, ...any)) {
 		return
 	}
 	ok("ai policy extraction: on (%s), %d cached reading(s)", model, n)
+}
+
+// checkDecisionModel reports whether the decision model is configured and, when
+// it is, whether it answers through whatever proxy it was given. It costs one
+// small call with a short timeout: a doctor that hangs is worse than one that
+// says "not checked".
+func checkDecisionModel(ctx context.Context, s *store.Store, dir string, ok, warn func(string, ...any)) {
+	// The key may live in Settings rather than the environment: load the same
+	// way the server does, or the doctor would report "not configured" on an
+	// instance that is configured.
+	cfg, err := overrides.New(s, dir, config.OSSource).Config(ctx)
+	if err != nil {
+		warn("decision model: the configuration could not be read (%v)", err)
+		return
+	}
+	if cfg.JevKey.Reveal() == "" {
+		ok("decision model: not configured (scan handoffs and the policy check run on their own checks)")
+		return
+	}
+	client := &jev.Client{BaseURL: cfg.JevURL, Key: cfg.JevKey.Reveal(), Model: cfg.JevModel, Proxy: cfg.JevProxy,
+		HTTP: &http.Client{Timeout: 6 * time.Second}}
+	start := time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+	p, model, err := client.Probability(ctx, map[string]any{"probe": "a health check"}, "Is this a health check?")
+	_ = p
+	if err != nil {
+		warn("decision model: %s does not answer (%v)", cfg.JevURL, err)
+		return
+	}
+	ok("decision model: %s answered as %s in %s", cfg.JevURL, model, humanDuration(time.Since(start)))
 }
