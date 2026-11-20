@@ -126,6 +126,8 @@ var Editable = []Field{
 	{Name: "HUNTDECK_JEV_URL", Group: GroupJev, Label: "Endpoint", Kind: KindText,
 		Default: "https://api.typesafe.ai",
 		Help:    "Leave at the default unless you proxy it."},
+	{Name: "HUNTDECK_JEV_PROXY", Group: GroupJev, Label: "Proxy", Kind: KindText,
+		Help: "An HTTP proxy the call leaves through, for a host whose direct egress TypeSafe refuses by region."},
 }
 
 // EditableField returns the editable field called name.
