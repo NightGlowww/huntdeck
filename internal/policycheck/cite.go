@@ -118,7 +118,14 @@ func Cite(ctx context.Context, c *jev.Client, policy, rule string) (string, floa
 		labels = append(labels, "S"+string(rune('0'+i)))
 	}
 	labels = append(labels, "none")
-	state := map[string]any{"rule": rule}
+	// The policy goes along with the candidates: without it the model compares
+	// sentences to a rule label in a vacuum, and the measured confidence (0.77-
+	// 0.99) came from seeing both.
+	trimmed := policy
+	if len(trimmed) > maxPolicy {
+		trimmed = trimmed[:maxPolicy]
+	}
+	state := map[string]any{"rule": rule, "policy": trimmed}
 	for i, s := range candidates {
 		state["S"+string(rune('0'+i))] = s
 	}
