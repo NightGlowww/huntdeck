@@ -11,7 +11,11 @@ import (
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/config"
+	"github.com/mdpsec/huntdeck/internal/db"
+	"github.com/mdpsec/huntdeck/internal/overrides"
 	"github.com/mdpsec/huntdeck/internal/platform/intigriti"
+	"github.com/mdpsec/huntdeck/internal/store"
+	"os"
 )
 
 // intigritiCmd prints the researcher's own state on Intigriti: reputation, rank,
@@ -25,6 +29,7 @@ import (
 func intigritiCmd(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("intigriti", flag.ContinueOnError)
 	fs.SetOutput(stderr)
+	data := fs.String("data", "", "data directory (default $HUNTDECK_DATA_DIR, else ./data)")
 	asJSON := fs.Bool("json", false, "print everything as JSON")
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -32,7 +37,23 @@ func intigritiCmd(args []string, stdout, stderr io.Writer) int {
 		}
 		return 2
 	}
-	cfg, err := config.Load(config.OSSource)
+	// Loaded the way the server loads: the token and the web login live in
+	// Settings, not in the environment, so reading only the environment made this
+	// command answer "not configured" on an instance that is configured.
+	dir := *data
+	if dir == "" {
+		dir = os.Getenv("HUNTDECK_DATA_DIR")
+	}
+	if dir == "" {
+		dir = "data"
+	}
+	d, err := db.Open(context.Background(), dir+"/huntdeck.db")
+	if err != nil {
+		fmt.Fprintf(stderr, "huntdeck intigriti: %v\n", err)
+		return 1
+	}
+	defer func() { _ = d.Close() }()
+	cfg, err := overrides.New(store.New(d, time.Now), dir, config.OSSource).Config(context.Background())
 	if err != nil {
 		fmt.Fprintf(stderr, "huntdeck intigriti: %v\n", err)
 		return 1
