@@ -5,6 +5,7 @@ import (
 	"context"
 	"log/slog"
 	"math/rand/v2"
+	"strings"
 	"sync"
 	"time"
 
@@ -40,6 +41,9 @@ func (j Job) firstDelay(interval time.Duration) time.Duration {
 // enough that an interrupted full poll finishes before the next restart,
 // long enough not to spin.
 const restartedRetry = 5 * time.Minute
+
+// transientRetry is how soon a run that died on a dropped connection tries again.
+const transientRetry = 10 * time.Minute
 
 const busyRetry = time.Minute
 
@@ -228,6 +232,14 @@ func firstRun(ctx context.Context, log *slog.Logger, st lastRunner, platformName
 			if interval > restartedRetry {
 				interval = restartedRetry
 			}
+		case r.Status == store.RunFailed && transient(r.Error):
+			// A connection the proxy dropped is not the platform refusing: five
+			// attempts hit EOF and a full poll then waited six hours to try again.
+			// Retry soon, but not forever - the count is bounded by the same
+			// interval once the failure stops looking transient.
+			if interval > transientRetry {
+				interval = transientRetry
+			}
 		}
 	}
 	due := last.Add(interval)
@@ -302,4 +314,15 @@ func keepAlive(ctx context.Context, log *slog.Logger, ka platform.KeepAliver, ev
 		}
 		healthy = err == nil
 	}
+}
+
+// transient says a failure looked like the network rather than the platform: a
+// dropped connection, a reset, or a timeout after the retries were spent.
+func transient(msg string) bool {
+	for _, s := range []string{"EOF", "connection reset", "connection refused", "i/o timeout", "TLS handshake timeout"} {
+		if strings.Contains(msg, s) {
+			return true
+		}
+	}
+	return false
 }

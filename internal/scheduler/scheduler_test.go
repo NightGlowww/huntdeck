@@ -386,3 +386,23 @@ func TestScheduleWebSync(t *testing.T) {
 		t.Errorf("platform off: every %s", got)
 	}
 }
+
+// A proxy that drops a connection is not the platform refusing. Five attempts hit
+// EOF and a full poll then waited six hours; it should try again in minutes.
+func TestTransientFailuresAreRetriedSoon(t *testing.T) {
+	cases := []struct {
+		msg  string
+		want bool
+	}{
+		{"giving up after 5 attempts: GET https://x: EOF", true},
+		{"read tcp: connection reset by peer", true},
+		{"dial tcp: i/o timeout", true},
+		{"hackerone: authentication failed; check H1_USERNAME and H1_TOKEN", false},
+		{"HTTP 429", false},
+	}
+	for _, c := range cases {
+		if got := transient(c.msg); got != c.want {
+			t.Errorf("transient(%q) = %v, want %v", c.msg, got, c.want)
+		}
+	}
+}
