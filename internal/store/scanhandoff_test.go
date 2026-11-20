@@ -187,3 +187,44 @@ func TestRecentHandoffsGroupByTask(t *testing.T) {
 		t.Fatalf("limit 1 gave %v", order)
 	}
 }
+
+// The handoff took the newest eight candidates, so while new scope kept arriving
+// the older targets were never reached: one program was scanned repeatedly and
+// the rest never. The backlog is read oldest first so it drains.
+func TestScanBacklogDrainsOldestFirst(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t, nil)
+	if err := s.Write(ctx, func(tx *Tx) error {
+		id, err := tx.UpsertProgram(ctx, "fake", platform.Program{Handle: "acme", Name: "Acme", State: "open", OffersBounty: true})
+		if err != nil {
+			return err
+		}
+		for _, h := range []string{"old.example.com", "mid.example.com", "new.example.com"} {
+			if _, err := tx.InsertEntry(ctx, id, h, h, platform.ScopeEntry{InScope: true, AssetType: "domain", Identifier: h}, true); err != nil {
+				return err
+			}
+		}
+		return tx.RefreshScopeCounts(ctx, id)
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	newest, err := s.ScanCandidates(ctx, nil, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(newest) != 2 || newest[0].Target != "new.example.com" {
+		t.Fatalf("newest first is broken: %+v", newest)
+	}
+
+	oldest, err := s.ScanBacklog(ctx, nil, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(oldest) != 2 || oldest[0].Target != "old.example.com" {
+		t.Fatalf("the backlog does not start with the oldest: %+v", oldest)
+	}
+	if oldest[0].Target == newest[0].Target {
+		t.Fatal("both orders returned the same head")
+	}
+}

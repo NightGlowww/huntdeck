@@ -80,7 +80,10 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 	if perTask <= 0 {
 		perTask = 50
 	}
-	cands, err := st.ScanCandidates(ctx, cfg.Kinds, perTask*4)
+	// Oldest first: the newest-first window meant a backlog never drained while
+	// new scope kept arriving - the same program was scanned again and again and
+	// everything older never was.
+	cands, err := st.ScanBacklog(ctx, cfg.Kinds, perTask*4)
 	if len(opt.Targets) > 0 {
 		// A named handoff asks for exactly these, so it looks past the batch size.
 		cands, err = st.ScanCandidates(ctx, cfg.Kinds, 5000)

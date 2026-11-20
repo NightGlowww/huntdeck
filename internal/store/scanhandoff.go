@@ -74,10 +74,21 @@ type ScanCandidate struct {
 	Kind string
 }
 
+// ScanBacklog lists the same targets oldest first. The handoff used to take the
+// newest eight, so a backlog of older targets never drained while new scope kept
+// arriving: the same program was scanned repeatedly and the rest never.
+func (s *Store) ScanBacklog(ctx context.Context, kinds []string, limit int) ([]ScanCandidate, error) {
+	return s.scanCandidates(ctx, kinds, limit, true)
+}
+
 // ScanCandidates lists in-scope targets that no scan has covered yet, newest
 // first, limited to the kinds the operator chose. A target that was handed off
 // before is skipped, so a re-poll does not queue the same scan again.
 func (s *Store) ScanCandidates(ctx context.Context, kinds []string, limit int) ([]ScanCandidate, error) {
+	return s.scanCandidates(ctx, kinds, limit, false)
+}
+
+func (s *Store) scanCandidates(ctx context.Context, kinds []string, limit int, oldestFirst bool) ([]ScanCandidate, error) {
 	if limit <= 0 {
 		limit = 50
 	}
@@ -91,6 +102,10 @@ func (s *Store) ScanCandidates(ctx context.Context, kinds []string, limit int) (
 		}
 		kindClause = " AND lower(e.asset_type) IN (" + strings.Join(placeholders, ",") + ")"
 	}
+	order := "e.id DESC"
+	if oldestFirst {
+		order = "e.id" // the backlog drains: everything gets scanned once
+	}
 	//nolint:gosec // placeholders are counted above; every value is bound
 	rows, err := s.db.R.QueryContext(ctx, `
 SELECT e.identifier, p.platform, p.handle, p.name, lower(e.asset_type),
@@ -100,7 +115,7 @@ SELECT e.identifier, p.platform, p.handle, p.name, lower(e.asset_type),
   LEFT JOIN scan_handoffs h ON h.target = e.identifier
  WHERE e.in_scope = 1 AND e.removed_at IS NULL AND h.target IS NULL
    AND p.state = 'open' AND p.removed_at IS NULL AND p.ignored = 0`+kindClause+`
- ORDER BY e.id DESC
+ ORDER BY `+order+`
  LIMIT ?`, args...)
 	if err != nil {
 		return nil, err
