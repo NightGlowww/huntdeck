@@ -169,3 +169,10 @@ func placeholders(n int) string {
 
 // Now is the transaction's time, as it stamps what it writes.
 func (t *Tx) Now() time.Time { return parseTS(t.now) }
+
+// CheckpointWAL folds the write-ahead log back in so the file can shrink. It is
+// called when a poll finishes, which is when nothing else is writing and the log
+// is at its largest.
+func (s *Store) CheckpointWAL(ctx context.Context) error {
+	return s.db.CheckpointWAL(ctx)
+}

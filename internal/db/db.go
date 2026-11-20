@@ -105,3 +105,16 @@ func dsn(path string, pragmas []string, immediate bool) string {
 	}
 	return "file:" + (&url.URL{Path: path}).EscapedPath() + "?" + q.Encode()
 }
+
+// CheckpointWAL folds the write-ahead log back into the database and lets the
+// file shrink. journal_size_limit only applies when a checkpoint resets the log,
+// and the automatic ones are passive: they never truncate, so the high-water
+// mark of a big poll stays on disk (45 MiB observed beside a 178 MiB database).
+// Best effort: a database busy with readers is not an error worth failing a poll
+// over.
+func (d *DB) CheckpointWAL(ctx context.Context) error {
+	if _, err := d.W.ExecContext(ctx, `PRAGMA wal_checkpoint(TRUNCATE)`); err != nil {
+		return fmt.Errorf("wal checkpoint: %w", err)
+	}
+	return nil
+}
