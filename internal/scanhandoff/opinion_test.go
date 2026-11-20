@@ -31,7 +31,10 @@ func TestSecondOpinionCanOnlyNarrow(t *testing.T) {
 		{"split is allowed through", Verdict{Choice: ActSplitSmaller, Confidence: 0.6}, nil, false},
 		{"block stops it", Verdict{Choice: ActBlock, Confidence: 0.87}, nil, true},
 		{"confirm first stops it", Verdict{Choice: ActConfirmFirst, Confidence: 0.7}, nil, true},
-		{"no answer stops it", Verdict{}, errors.New("boom"), true},
+		// An unreachable model is not a judgement on the batch: the deterministic
+		// checks still govern, so the batch goes through rather than the feature
+		// becoming unusable whenever a third party is down.
+		{"unreachable is not a verdict", Verdict{}, errors.New("boom"), false},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

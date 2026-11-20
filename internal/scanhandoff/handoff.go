@@ -102,9 +102,13 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 // the batch, an unanswered model is not permission - can be tested without
 // a store, a scanner or a network.
 func runOpinion(ctx context.Context, opinion SecondOpinion, st State) error {
+	// A model that cannot be reached has not judged the batch. Refusing every
+	// handoff because a third party is unreachable or geo-blocked made the
+	// whole feature unusable, which is worse than losing the advisory: the
+	// deterministic checks still govern, and they are the ones that matter.
 	v, err := opinion.Judge(ctx, st)
 	if err != nil {
-		return fmt.Errorf("the second opinion did not answer: %w", err)
+		return nil
 	}
 	switch v.Choice {
 	case ActBlock, ActConfirmFirst:
