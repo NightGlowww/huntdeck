@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -580,4 +581,21 @@ func scanProgramList(rows *sql.Rows, total int) ([]ProgramListItem, int, error) 
 		out = append(out, it)
 	}
 	return out, total, rows.Err()
+}
+
+// OpenHandle is one open program's handle on a platform, for the calls that need
+// an example rather than a list (a page to read, a form to look at). Empty when
+// the platform has no open program.
+func (s *Store) OpenHandle(ctx context.Context, platform string) (string, error) {
+	var handle string
+	err := s.db.R.QueryRowContext(ctx, `SELECT handle FROM programs
+		WHERE platform = ? AND state = ? AND removed_at IS NULL AND ignored = 0
+		ORDER BY hunt_score DESC, handle LIMIT 1`, platform, "open").Scan(&handle)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil
+	}
+	if err != nil {
+		return "", fmt.Errorf("open handle: %w", err)
+	}
+	return handle, nil
 }

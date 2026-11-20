@@ -74,6 +74,11 @@ and the ones that can take `--data` say so.
   and the score history are. `FAIL` lines mean something is wrong. `--short`
   prints only the failures and warnings, for a cron job that should stay quiet
   until there is something to say; the exit status is the same either way.
+- **`huntdeck bugcrowd-caps [--engagement HANDLE]`** - what Bugcrowd allows this
+  account to submit: the weekly cap and what is left of it, the acceptance rate
+  against the 50% threshold that lifts the cap, and the next reassessment. It
+  reads one engagement's submission page, because that page is where Bugcrowd
+  renders the numbers; there is no API for them.
 - **`huntdeck seed export FILE [--signed-out]`** / **`huntdeck seed import FILE`**
   — write the public programs for someone else to start from, or load such a file
   into an empty install.
