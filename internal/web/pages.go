@@ -40,7 +40,11 @@ func sortClass(on, reversed bool) string {
 // methodology explains how HuntDeck works out its numbers: where each one
 // comes from on each platform, what is estimated, and HuntScore.
 func (s *server) methodology(w http.ResponseWriter, r *http.Request) {
-	s.render(w, r, http.StatusOK, "methodology", pageData{Title: "Methodology", Nav: "methodology"})
+	d := pageData{Title: "Methodology", Nav: "methodology"}
+	// The audit panel is offered only when a decision model is configured; the
+	// POST handler sets the same flag when it renders the answer.
+	d.ScoreCheckOn = s.JevKey.Reveal() != ""
+	s.render(w, r, http.StatusOK, "methodology", d)
 }
 
 // search serves the top bar: hosts and URLs go to the scope check;
