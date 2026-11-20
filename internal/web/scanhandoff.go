@@ -61,8 +61,14 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	d.Created = q.Get("created")
 	d.Failure = q.Get("error")
 	d.Busy = q.Get("busy")
-	d.Waiting, _ = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 200)
-	d.HandedOff, d.LastHandoff, _ = s.Store.ScanHandoffCount(r.Context())
+	// A failed read is not an empty queue: the page used to show "nothing
+	// waiting" over a database error, which reads as a quiet day.
+	if d.Waiting, err = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 200); err != nil {
+		d.WaitingError = "could not read the candidates: " + err.Error()
+	}
+	if d.HandedOff, d.LastHandoff, err = s.Store.ScanHandoffCount(r.Context()); err != nil && d.WaitingError == "" {
+		d.WaitingError = "could not read the handoff count: " + err.Error()
+	}
 	s.render(w, r, http.StatusOK, "scan", pageData{Title: "Scan handoff", Nav: "scan", Data: d})
 }
 
@@ -145,6 +151,9 @@ type scanPageData struct {
 	Saved   bool
 	Created string
 	Failure string
+	// WaitingError is this side failing to read its own tables: shown whether or
+	// not a scanner is configured, because it says nothing about the scanner.
+	WaitingError string
 	// Busy is the scanner refusing for capacity: nothing failed, it is full.
 	Busy string
 }
