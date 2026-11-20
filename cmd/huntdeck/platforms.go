@@ -224,6 +224,7 @@ func loginBrowser(cfg config.Config, display string, log *slog.Logger) *weblogin
 	if cfg.Proxy != nil {
 		proxy = cfg.Proxy.Host
 	}
+	pruneBrowserCache(profile, log)
 	log.Info("login browser", "profile", profile, "headless", cfg.ChromeHeadless, "proxy", proxy,
 		"sandbox", "off (a container without user namespaces aborts Chrome with it on)")
 	return weblogin.NewHost(weblogin.Chrome{Path: cfg.Chrome, Headless: cfg.ChromeHeadless, Proxy: cfg.Proxy,
@@ -308,4 +309,47 @@ func heldPlatforms(ctx context.Context, s *store.Store) ([]web.PlatformInfo, err
 		out = append(out, web.PlatformInfo{Name: h.Name, Discloses: h.Discloses})
 	}
 	return out, nil
+}
+
+// browserCaches are the profile's directories a login does not need: Chrome
+// downloads components and models for browsing, not for signing in, and they are
+// 218 MiB of the 218 MiB the profile held. "Default" stays - it is the cookies
+// and the session the login exists for.
+var browserCaches = []string{
+	"component_crx_cache", "optimization_guide_model_store",
+	"WasmTtsEngine", "Safe Browsing", "CertificateRevocation", "OnDeviceHeadSuggestModel",
+	"Crashpad", "ShaderCache", "GrShaderCache", "GraphiteDawnCache", "DawnCache", "DawnGraphiteCache",
+	"Segmentation Platform", "OptimizationHints", "BrowserMetrics-spare.pma",
+}
+
+// pruneBrowserCache deletes those directories. It runs at start-up, before the
+// browser opens: a profile that only ever logs in does not need them, and on an
+// instance that restarts often they accumulate without a bound.
+func pruneBrowserCache(profile string, log *slog.Logger) {
+	var freed int64
+	for _, name := range browserCaches {
+		path := filepath.Join(profile, name)
+		info, err := os.Stat(path)
+		if err != nil {
+			continue
+		}
+		if info.IsDir() {
+			_ = filepath.WalkDir(path, func(p string, d fs.DirEntry, err error) error {
+				if err == nil && d != nil && !d.IsDir() {
+					if fi, serr := d.Info(); serr == nil {
+						freed += fi.Size()
+					}
+				}
+				return nil
+			})
+		} else {
+			freed += info.Size()
+		}
+		if err := os.RemoveAll(path); err != nil {
+			log.Debug("browser cache not removed", "path", path, "err", err)
+		}
+	}
+	if freed > 0 {
+		log.Info("login browser: cache cleared", "freed_mb", freed>>20)
+	}
 }

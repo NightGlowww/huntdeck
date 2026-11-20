@@ -104,6 +104,11 @@ func autoSeed(ctx context.Context, st *store.Store, dataDir, seedURL string, cli
 		if err := os.Rename(path, path+".loaded"); err != nil {
 			return err
 		}
+		// The marker only has to exist: keeping the archive itself holds 34 MiB
+		// of a file that has already been imported.
+		if err := os.Truncate(path+".loaded", 0); err != nil {
+			log.Warn("seed marker not truncated", "path", path+".loaded", "err", err)
+		}
 		log.Info("loaded seed", "path", path, "rows", n.String())
 		return huntscore.Refresh(ctx, st, st.Now()) // scores aren't in seeds
 	}
