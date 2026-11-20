@@ -17,6 +17,8 @@
 </nav>
 
 
+{{if .ScoreCheckOn}}{{template "methodology-scorecheck" .Data}}{{end}}
+
 <section class="panel" id="glance">
   <div class="panel-head"><h2>一览</h2><span class="aside"><span class="src good">公开</span> 平台自己给出的数字 <span class="src acc">统计</span> 由 HuntDeck 计算 <span class="src warn">≈ 估算</span> <span class="src none">—</span> 平台不公开</span></div>
   <div class="table-wrap">
