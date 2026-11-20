@@ -697,7 +697,9 @@ func checkPolls(ctx context.Context, s *store.Store, ok, warn func(string, ...an
 	for _, r := range runs {
 		since := now.Sub(r.StartedAt)
 		last := r.StartedAt
-		if r.LastActivity != nil {
+		// A heartbeat that did not parse reads as the zero time, and "no activity
+		// for 106752d" is worse than saying nothing: fall back to when it started.
+		if r.LastActivity != nil && !r.LastActivity.IsZero() {
 			last = *r.LastActivity
 		}
 		idle := now.Sub(last)

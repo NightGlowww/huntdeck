@@ -275,7 +275,7 @@ func (s *Store) HasFinishedPoll(ctx context.Context) (bool, error) {
 func (s *Store) TouchRun(ctx context.Context, id int64) error {
 	_, err := s.db.W.ExecContext(ctx,
 		`UPDATE poll_runs SET last_activity = ? WHERE id = ? AND status = 'running'`,
-		s.Now().UTC().Format(time.RFC3339), id)
+		s.Now().UTC().Format(TimeFormat), id)
 	if err != nil {
 		return fmt.Errorf("touch run: %w", err)
 	}
