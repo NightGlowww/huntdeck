@@ -44,6 +44,26 @@ done
 [ -n "$host" ] || { echo "--host is required" >&2; usage >&2; exit 2; }
 case "$mode" in binary|full) ;; *) echo "--mode must be binary or full" >&2; exit 2 ;; esac
 
+# One deploy per host at a time. Two at once fight over the same image tag and the
+# same container name: the loser's `docker compose up` died with "container name
+# already in use", after both had spent minutes building.
+# mkdir is atomic and portable (flock is not on macOS). A lock older than half an
+# hour is a deploy that was killed: take it over rather than block forever.
+lock="/tmp/huntdeck-deploy-$(printf %s "$host" | tr -c 'a-zA-Z0-9' '_').lock.d"
+if [ -z "$dry" ]; then
+  if ! mkdir "$lock" 2>/dev/null; then
+    if [ -n "$(find "$lock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then
+      echo "taking over a stale deploy lock (older than 30 minutes)" >&2
+      rmdir "$lock" 2>/dev/null || true
+      mkdir "$lock" 2>/dev/null || { echo "another deploy to $host is running (lock $lock)" >&2; exit 3; }
+    else
+      echo "another deploy to $host is running (lock $lock)" >&2
+      exit 3
+    fi
+  fi
+  trap 'rmdir "$lock" 2>/dev/null' EXIT
+fi
+
 run() {
   if [ -n "$dry" ]; then printf '  [dry-run] %s\n' "$*"; else "$@"; fi
 }
