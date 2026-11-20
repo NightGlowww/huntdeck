@@ -133,13 +133,15 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 				}
 				return created, err
 			}
-			if err := client.StartTask(ctx, id); err != nil {
-				// Created but not started: record it anyway so it is not created
-				// twice; starting is a separate act.
-				return created, fmt.Errorf("task %s created but not started: %w", id, err)
-			}
+			// Record before starting, not after. The task exists either way, and a
+			// record that lags behind reality is how the same targets got handed over
+			// twice: thirteen tasks sat parked in the scanner while their targets
+			// stayed eligible for the next handoff. Starting is a separate act.
 			if err := st.MarkHandedOff(ctx, batch, id); err != nil {
 				return created, err
+			}
+			if err := client.StartTask(ctx, id); err != nil {
+				return created, fmt.Errorf("task %s created and recorded but not started (start it in the scanner): %w", id, err)
 			}
 			created++
 		}

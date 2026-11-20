@@ -25,6 +25,9 @@ type fakeScanner struct {
 	mu    sync.Mutex
 	names []string
 	sizes []int
+	// startErr, when set, is the JSON-RPC error text start_task answers with:
+	// a scanner that creates a task and refuses to start it.
+	startErr string
 }
 
 func (f *fakeScanner) server(t *testing.T) *httptest.Server {
@@ -53,6 +56,19 @@ func (f *fakeScanner) server(t *testing.T) *httptest.Server {
 			f.mu.Unlock()
 			text = `{"id":"task-1"}`
 		case "start_task":
+			if f.startErr != "" {
+				// A tool-level failure: the RPC succeeded and the tool said no, which
+				// is how the scanner reports a full queue.
+				payload, _ := json.Marshal(map[string]any{
+					"jsonrpc": "2.0", "id": 1,
+					"result": map[string]any{
+						"content": []map[string]string{{"type": "text", "text": f.startErr}},
+						"isError": true,
+					},
+				})
+				_, _ = w.Write(payload)
+				return
+			}
 			text = `{"ok":true}`
 		}
 		payload, _ := json.Marshal(map[string]any{
@@ -158,6 +174,21 @@ func TestHandoffDoesNothingWhileOff(t *testing.T) {
 	ctx := context.Background()
 	seed(t, st, []string{"a.example.com"})
 	if err := st.SaveScanConfig(ctx, store.ScanConfig{TemplateID: "tpl", NodeName: "node", PerTask: 5}); err != nil {
+		t.Fatal(err)
+	}
+	// A candidate to send: without one, the handoff has nothing to do and
+	// returns success before it ever reaches the scanner.
+	if err := st.Write(ctx, func(tx *store.Tx) error {
+		id, err := tx.UpsertProgram(ctx, "fake", platform.Program{Handle: "acme", Name: "Acme", State: "open", OffersBounty: true})
+		if err != nil {
+			return err
+		}
+		if _, err := tx.InsertEntry(ctx, id, "a.example.com", "a.example.com",
+			platform.ScopeEntry{InScope: true, AssetType: "domain", Identifier: "a.example.com"}, true); err != nil {
+			return err
+		}
+		return tx.RefreshScopeCounts(ctx, id)
+	}); err != nil {
 		t.Fatal(err)
 	}
 	f := &fakeScanner{}
