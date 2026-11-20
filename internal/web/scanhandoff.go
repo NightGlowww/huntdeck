@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -59,6 +60,7 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	d.Saved = q.Get("saved") != ""
 	d.Created = q.Get("created")
 	d.Failure = q.Get("error")
+	d.Busy = q.Get("busy")
 	d.Waiting, _ = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 200)
 	d.HandedOff, d.LastHandoff, _ = s.Store.ScanHandoffCount(r.Context())
 	s.render(w, r, http.StatusOK, "scan", pageData{Title: "Scan handoff", Nav: "scan", Data: d})
@@ -92,6 +94,13 @@ func (s *server) scanSave(w http.ResponseWriter, r *http.Request) {
 func (s *server) scanNow(w http.ResponseWriter, r *http.Request) {
 	created, err := s.handOff(r.Context(), true)
 	if err != nil {
+		// A queued scanner is capacity, not a fault: the page says "wait",
+		// in the warning colour, and does not call it a failure.
+		if errors.Is(err, scanhandoff.ErrBusy) {
+			s.Log.InfoContext(r.Context(), "scan: scanner busy", "error", err)
+			http.Redirect(w, r, "/scan?busy="+urlQuery(err.Error()), http.StatusSeeOther)
+			return
+		}
 		s.Log.WarnContext(r.Context(), "scan: handoff failed", "error", err)
 		http.Redirect(w, r, "/scan?error="+urlQuery(err.Error()), http.StatusSeeOther)
 		return
@@ -136,4 +145,6 @@ type scanPageData struct {
 	Saved   bool
 	Created string
 	Failure string
+	// Busy is the scanner refusing for capacity: nothing failed, it is full.
+	Busy string
 }

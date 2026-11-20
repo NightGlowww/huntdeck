@@ -5,6 +5,7 @@ package scanhandoff
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -23,6 +24,16 @@ type Options struct {
 	Opinion SecondOpinion
 }
 
+// MinInterval is the gap a scheduled run leaves between handoffs. The scanner
+// runs one task per node at a time, so a second batch inside this window only
+// fills its queue; the operator's "send now" is not held back by it.
+const MinInterval = 60 * time.Second
+
+// ErrBusy is the scanner refusing work because its own queue is full or its
+// creation limit is reached. It is capacity, not breakage: the operator's answer
+// is to wait, and the page says so in words rather than in red.
+var ErrBusy = errors.New("the scanner is queued: nothing was created, try again when it has caught up")
+
 func Run(ctx context.Context, st *store.Store, client *scopesentry.Client, manual bool) (int, error) {
 	return RunWith(ctx, st, client, manual, Options{})
 }
@@ -34,6 +45,13 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 	cfg, err := st.ScanConfigRow(ctx)
 	if err != nil {
 		return 0, err
+	}
+	// A scheduled run leaves a gap: the scanner runs one task per node at a
+	// time, so handing over again before it has started the last batch only
+	// fills its queue. The operator pressing "send now" is not held back.
+	_, last, _ := st.ScanHandoffCount(ctx)
+	if !manual && !last.IsZero() && time.Since(last) < MinInterval {
+		return 0, nil
 	}
 	if !manual && !cfg.Enabled {
 		return 0, nil
@@ -83,6 +101,11 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 		name := "huntdeck-" + time.Now().UTC().Format("20060102-150405") + "-" + strconv.Itoa(created+1)
 		id, err := client.CreateTask(ctx, name, cfg.TemplateID, cfg.NodeName, targets)
 		if err != nil {
+			// The scanner refusing work for capacity is not a fault: stop here
+			// and say so, rather than reporting a failure the operator cannot act on.
+			if scopesentry.IsBusy(err) {
+				return created, fmt.Errorf("%w: %w", ErrBusy, err)
+			}
 			return created, err
 		}
 		if err := client.StartTask(ctx, id); err != nil {

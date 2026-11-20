@@ -117,11 +117,6 @@ func Cite(ctx context.Context, c *jev.Client, policy, rule string) (string, floa
 	if len(candidates) == 0 {
 		return "", 0, nil
 	}
-	labels := make([]string, 0, len(candidates)+1)
-	for i := range candidates {
-		labels = append(labels, "S"+string(rune('0'+i)))
-	}
-	labels = append(labels, "none")
 	// The policy goes along with the candidates: without it the model compares
 	// sentences to a rule label in a vacuum, and the measured confidence (0.77-
 	// 0.99) came from seeing both.
@@ -133,9 +128,14 @@ func Cite(ctx context.Context, c *jev.Client, policy, rule string) (string, floa
 	for i, s := range candidates {
 		state["S"+string(rune('0'+i))] = s
 	}
+	opts := make(map[string]string, len(candidates)+1)
+	for i := range candidates {
+		opts["S"+string(rune('0'+i))] = "the policy sentence that states the rule"
+	}
+	opts["none"] = "none of these sentences states the rule"
 	v, err := c.Choice(ctx, state,
 		"Which of these policy sentences states this rule? Answer its label, or none.",
-		labels)
+		opts)
 	if err != nil {
 		return "", 0, err
 	}

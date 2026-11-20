@@ -16,8 +16,6 @@ package triage
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
 	"github.com/mdpsec/huntdeck/internal/jev"
 )
@@ -43,6 +41,12 @@ type Verdict struct {
 	Evidence float64
 	// Call is submittable, needs_work or likely_rejected.
 	Call string
+	// Severity is a position on SeverityLevels, 0 at the low end and 1 at
+	// the high end; SeverityLevels is the probability of each level.
+	Severity           float64
+	SeverityConfidence float64
+	SeverityLevels     map[string]float64
+
 	// Why names the axis that decided it, for the page and the report.
 	Why string
 	// Advice is what would most raise the evidential strength, when the model
@@ -67,46 +71,6 @@ const (
 	rejectCeiling = 0.30
 	evidenceFloor = 0.60
 )
-
-// Judge asks the two questions and turns them into one call.
-func Judge(ctx context.Context, c *jev.Client, f Finding) (Verdict, error) {
-	if strings.TrimSpace(f.Title) == "" || strings.TrimSpace(f.Impact) == "" {
-		return Verdict{}, fmt.Errorf("triage: a finding needs at least a title and an impact")
-	}
-	state := map[string]any{
-		"finding":  f.Title,
-		"target":   f.Target,
-		"scope":    f.InScope,
-		"impact":   f.Impact,
-		"evidence": f.Evidence,
-	}
-	if f.Steps != "" {
-		state["steps"] = f.Steps
-	}
-	if f.Platform != "" {
-		state["platform"] = f.Platform
-	}
-	if f.Program != "" {
-		state["program"] = f.Program
-	}
-	accept, model, err := c.Probability(ctx, state,
-		"Would a bug bounty triager accept this as a valid, in-scope, payable finding?")
-	if err != nil {
-		return Verdict{}, err
-	}
-	evidence, _, err := c.Probability(ctx, state,
-		"Do the supplied artefacts prove the impact as stated?")
-	if err != nil {
-		return Verdict{}, err
-	}
-	v := classify(accept, evidence, model)
-	// Only when the evidence is the problem: advice about a finding that
-	// would be rejected for scope is noise.
-	if evidence < evidenceFloor && v.Call != CallRejected {
-		v.Advice, v.AdviceConfidence = advise(ctx, c, state)
-	}
-	return v, nil
-}
 
 // classify is the rule, kept apart from the network so it can be tested
 // against the measured numbers without a model.
@@ -152,7 +116,14 @@ const (
 func advise(ctx context.Context, c *jev.Client, state map[string]any) (string, float64) {
 	v, err := c.Choice(ctx, state,
 		"What single addition would most raise the evidential strength of this report?",
-		[]string{AdviceSecondIdentity, AdviceRawTraffic, AdviceSteps, AdviceVideo, AdviceScope, AdviceNothing})
+		map[string]string{
+			AdviceSecondIdentity: "show the same effect from a second account or role",
+			AdviceRawTraffic:     "attach the raw requests and responses",
+			AdviceSteps:          "write numbered reproduction steps",
+			AdviceVideo:          "record a video of the flow",
+			AdviceScope:          "cite the scope entry that covers it",
+			AdviceNothing:        "nothing: the evidence already carries the impact",
+		})
 	if err != nil || v.Confidence < adviceFloor {
 		return "", v.Confidence
 	}

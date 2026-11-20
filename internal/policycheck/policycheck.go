@@ -13,18 +13,20 @@
 // crossed; the per-rule matrix does, and its clean baseline is an order of
 // magnitude lower.
 //
+// The six rules go in ONE request: TypeSafe's manual says any mix of questions
+// can share a state, that they are evaluated in parallel and in isolation, and
+// that adding questions barely changes the response time. Six calls were six
+// round trips through a proxy that flaps.
+//
 // The framings that did NOT work are recorded so they are not rebuilt: a
 // per-target "worth starting today" answered 0.44-0.52 for every target, and
-// "hunt, watch or skip" for a program answered at 0.22-0.46 confidence. Both
-// restate the aggregate score the queue already gives.
+// "hunt, watch or skip" for a program answered at 0.22-0.46 confidence.
 package policycheck
 
 import (
 	"context"
 	"fmt"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/mdpsec/huntdeck/internal/jev"
 )
@@ -61,7 +63,7 @@ const (
 // tokens, and the first few thousand characters carry the rules.
 const maxPolicy = 8000
 
-// Check judges one plan against one policy, one rule at a time.
+// Check judges one plan against one policy, one rule at a time, in one call.
 func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (Answer, error) {
 	if strings.TrimSpace(policy) == "" {
 		return Answer{}, fmt.Errorf("policycheck: no policy text stored for %s", program)
@@ -73,44 +75,29 @@ func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (An
 		policy = policy[:maxPolicy]
 	}
 	rules := Rules()
-	out := make([]RuleVerdict, len(rules))
-	var wg sync.WaitGroup
-	errs := make([]error, len(rules))
-	for i, r := range rules {
-		wg.Add(1)
-		go func(i int, r Rule) {
-			defer wg.Done()
-			// The path to the model can flap; one retry costs 300ms and turns a
-			// transient failure into an answer.
-			for attempt := 0; attempt < 3; attempt++ {
-				p, _, err := c.Probability(ctx,
-					map[string]any{"program": program, "policy": policy, "plan": plan, "rule": r.Label},
-					"Does this plan break the rule as this policy states it?")
-				if err == nil {
-					out[i] = RuleVerdict{Key: r.Key, Label: r.Label, Break: p}
-					return
-				}
-				errs[i] = err
-				time.Sleep(300 * time.Millisecond)
-			}
-		}(i, r)
+	questions := make(map[string]jev.Question, len(rules))
+	for _, r := range rules {
+		questions[r.Key] = jev.Noul("Does this plan break this rule as the policy states it: " + r.Label + "?")
 	}
-	wg.Wait()
-	// A rule that did not answer is unknown, not zero: drop it from the matrix
-	// and say so, rather than reading a failure as "no violation".
+	answers, model, err := c.Ask(ctx,
+		map[string]any{"program": program, "policy": policy, "plan": plan}, questions)
+	if err != nil {
+		return Answer{}, err
+	}
 	var known []RuleVerdict
 	var unknown []string
-	for i, r := range out {
-		if errs[i] != nil {
-			unknown = append(unknown, rules[i].Key)
+	for _, r := range rules {
+		a, ok := answers[r.Key]
+		if !ok {
+			unknown = append(unknown, r.Key)
 			continue
 		}
-		known = append(known, r)
+		known = append(known, RuleVerdict{Key: r.Key, Label: r.Label, Break: a.Noul})
 	}
 	if len(known) == 0 {
 		return Answer{}, fmt.Errorf("policycheck: the decision model did not answer")
 	}
-	a := classify(known, c.Model)
+	a := classify(known, model)
 	a.Unknown = unknown
 	// A partial matrix is not a clean bill: "no rule reads as broken" is a claim
 	// about six rules, and five of them may not have answered. Only a rule that
@@ -119,8 +106,8 @@ func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (An
 		a.Call = CallCheckFirst
 		a.Why = "only part of the matrix answered: the rules that did not answer are not evidence of compliance"
 	}
-	// Cite the sentence only for the rules that were flagged: a quote for
-	// every rule would triple the cost to say nothing new.
+	// Cite the sentence only for the rules that were flagged: a quote for every
+	// rule would triple the cost to say nothing new.
 	for i := range a.Rules {
 		if a.Rules[i].Break < breakPossible {
 			continue

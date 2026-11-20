@@ -57,7 +57,7 @@ func (c *Client) CreateTask(ctx context.Context, name, template, node string, ta
 	}
 	raw, err := c.Call(ctx, "create_scan_task", args)
 	if err != nil {
-		return "", err
+		return "", busy(err)
 	}
 	var out struct {
 		ID   string `json:"id"`

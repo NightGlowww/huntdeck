@@ -10,9 +10,9 @@ import (
 	"github.com/mdpsec/huntdeck/internal/jev"
 )
 
-// adviceServer answers the two probability questions with fixed values and the
-// advisor with the confidence the test asks for, so the threshold is what is
-// under test rather than the model.
+// adviceServer answers by question id, in one request: the judge now sends the
+// two nouls and the severity score together, so a fake that answers "q" answers
+// nothing the caller reads.
 func adviceServer(t *testing.T, accept, evidence, adviceConf float64) *httptest.Server {
 	t.Helper()
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -22,31 +22,27 @@ func adviceServer(t *testing.T, accept, evidence, adviceConf float64) *httptest.
 			} `json:"questions"`
 		}
 		_ = json.NewDecoder(r.Body).Decode(&req)
-		q := req.Questions["q"]
-		var answer map[string]any
-		switch q.Type {
-		case "noul":
-			// The first noul is acceptability, the second evidence: count them.
-			n := counter()
-			p := accept
-			if n > 1 {
-				p = evidence
+		answers := map[string]any{}
+		for id, q := range req.Questions {
+			switch q.Type {
+			case "noul":
+				p := evidence
+				if id == qAccept {
+					p = accept
+				}
+				answers[id] = map[string]any{"type": "noul", "noul": p}
+			case "score":
+				answers[id] = map[string]any{"type": "score", "score": 0.6, "confidence": 0.5,
+					"probabilities": map[string]float64{"medium: real impact": 0.5}}
+			case "choice":
+				answers[id] = map[string]any{"type": "choice", "choice": AdviceSecondIdentity,
+					"confidence": adviceConf, "probabilities": map[string]float64{AdviceSecondIdentity: adviceConf}}
 			}
-			answer = map[string]any{"type": "noul", "noul": p}
-		case "choice":
-			answer = map[string]any{"type": "choice", "choice": AdviceSecondIdentity,
-				"confidence": adviceConf, "probabilities": map[string]float64{AdviceSecondIdentity: adviceConf}}
 		}
-		payload, _ := json.Marshal(map[string]any{
-			"model": "jev-test", "answers": map[string]any{"q": answer},
-		})
+		payload, _ := json.Marshal(map[string]any{"model": "jev-test", "answers": answers})
 		_, _ = w.Write(payload)
 	}))
 }
-
-var noulCalls int
-
-func counter() int { noulCalls++; return noulCalls }
 
 // The suggestion is shown only when the model was sure. Measured: 0.92 when the
 // report had single-account traffic (the addition that moved the score from
@@ -62,7 +58,6 @@ func TestAdviceShowsOnlyWhenSure(t *testing.T) {
 		{"guessing, 0.18", 0.18, false},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			noulCalls = 0
 			srv := adviceServer(t, 0.80, 0.40, c.conf)
 			defer srv.Close()
 			client := &jev.Client{BaseURL: srv.URL, Key: "k"}
@@ -77,5 +72,23 @@ func TestAdviceShowsOnlyWhenSure(t *testing.T) {
 				t.Fatalf("advice %q at confidence %.2f, want shown=%v", v.Advice, c.conf, c.wantShown)
 			}
 		})
+	}
+}
+
+// The severity comes back with the other two answers, from the same request.
+func TestJudgeCarriesTheSeverity(t *testing.T) {
+	srv := adviceServer(t, 0.85, 0.80, 0.1)
+	defer srv.Close()
+	v, err := Judge(context.Background(), &jev.Client{BaseURL: srv.URL, Key: "k"}, Finding{
+		Title: "t", InScope: "in scope", Impact: "read another tenant's data", Evidence: "two accounts",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Call != CallSubmittable {
+		t.Fatalf("call %s, want submittable", v.Call)
+	}
+	if v.Severity != 0.6 || len(v.SeverityLevels) == 0 {
+		t.Fatalf("severity %.2f with %d levels", v.Severity, len(v.SeverityLevels))
 	}
 }

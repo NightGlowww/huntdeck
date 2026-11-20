@@ -93,8 +93,13 @@ func (j jevOpinion) Judge(ctx context.Context, s State) (Verdict, error) {
 		"policy": "a scan is the heaviest thing either side runs; the scanner should have its own host",
 	}
 	v, err := j.c.Choice(ctx, state,
-		"Should this batch of scan tasks be created right now, confirmed with a person first, split smaller, or blocked?",
-		[]string{ActProceed, ActConfirmFirst, ActSplitSmaller, ActBlock})
+		"Should this batch of scan tasks be created right now?",
+		map[string]string{
+			ActProceed:      "the batch is safe to run unattended now",
+			ActConfirmFirst: "someone should look before this runs",
+			ActSplitSmaller: "it can run, but smaller than this",
+			ActBlock:        "this must not run now, on these conditions",
+		})
 	if err != nil {
 		return Verdict{}, err
 	}

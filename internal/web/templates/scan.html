@@ -16,6 +16,7 @@
 {{if .Saved}}<p class="flash ok">{{T "Saved."}}</p>{{end}}
 {{if .Created}}<p class="flash ok">{{TF "Created %s scan task(s)." .Created}}</p>{{end}}
 {{if .Failure}}<p class="flash err">{{TF "The handoff did not run: %s" .Failure}}</p>{{end}}
+{{if .Busy}}<p class="flash warn">{{TF "The scanner is queued, so nothing was created: %s" .Busy}}</p>{{end}}
 {{if .BelowFloor}}<p class="flash warn">{{TF "The scanner host has %.0f%% memory free; a handoff is refused below %.0f%%. A scan task is heavy: a full-template run has taken a host down before." .ScannerFree 25.0}}</p>{{end}}
 {{if and .ScannerFreeKnown (not .BelowFloor)}}<p class="muted small">{{TF "Scanner host: %.0f%% memory free, which is above the %.0f%% floor." .ScannerFree 25.0}}</p>{{end}}
 

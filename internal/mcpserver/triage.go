@@ -31,7 +31,7 @@ func (s *Server) triage(ctx context.Context, args map[string]any) (string, error
 	if err != nil {
 		return "", err
 	}
-	out := fmt.Sprintf("%s\naccepted %.2f · evidence %.2f · %s\n%s", v.Call, v.Accept, v.Evidence, v.Model, v.Why)
+	out := fmt.Sprintf("%s\naccepted %.2f · evidence %.2f · severity %.2f · %s\n%s", v.Call, v.Accept, v.Evidence, v.Severity, v.Model, v.Why)
 	if v.Advice != "" {
 		out += fmt.Sprintf("\nwhat would move it: %s (%.2f)", v.Advice, v.AdviceConfidence)
 	}

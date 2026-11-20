@@ -1,10 +1,20 @@
-// Package jev asks TypeSafe's System One model ("Jev") for a typed,
-// calibrated judgement. It does not generate text: it answers a question with a
-// choice and probabilities, in a few hundred milliseconds.
+// Package jev asks TypeSafe's System One model ("Jev") for typed, calibrated
+// judgements. It does not generate text: it answers questions with structured
+// values in a few hundred milliseconds.
 //
-// The project's rule holds here too: a decision is a signal, not an
-// authorization. Nothing in this package acts on its own - the caller decides
-// what a "block" means, and the deterministic checks stay in front.
+// The shapes follow the vendor's manual (docs.typesafe.ai), which says three
+// things this package acts on:
+//
+//   - any mix of question types can go in one request, evaluated in parallel and
+//     in isolation against the same state, and "adding questions barely changes
+//     the response time" - so the six-rule policy check is one call, not six;
+//   - a Choice's criteria are a map of option -> description, and the
+//     descriptions are sent to the model, so they are how options are separated;
+//   - three primitives exist: Choice (pick one), Score (a position on ordered
+//     levels) and Noul (true/false). Score was the one missing here.
+//
+// The project's rule holds throughout: a decision is a signal, not an
+// authorization. Nothing in this package acts on its own.
 package jev
 
 import (
@@ -34,30 +44,39 @@ type Client struct {
 	Timeout time.Duration
 }
 
-type question struct {
-	Type         string         `json:"type"`
-	Instructions string         `json:"instructions"`
-	Criteria     map[string]any `json:"criteria,omitempty"`
+// Question is one typed question. Criteria is a map[string]string for a choice
+// (option -> the description that separates it from the others) and an ordered
+// []string of levels, low to high, for a score.
+type Question struct {
+	Type         string
+	Instructions string
+	Criteria     any
 }
 
-type request struct {
-	Model     string              `json:"model"`
-	State     any                 `json:"state"`
-	Questions map[string]question `json:"questions"`
+// Choice builds a choice question from option -> description. A description may
+// be empty, but an empty map is how options stop being distinguishable.
+func Choice(instructions string, options map[string]string) Question {
+	return Question{Type: "choice", Instructions: instructions, Criteria: options}
 }
 
-type answer struct {
+// Score builds a score question from ordered levels, low to high (2 to 10).
+func Score(instructions string, levels []string) Question {
+	return Question{Type: "score", Instructions: instructions, Criteria: levels}
+}
+
+// Noul builds a true/false question.
+func Noul(instructions string) Question {
+	return Question{Type: "noul", Instructions: instructions}
+}
+
+// Answer is one question's answer, whatever its type.
+type Answer struct {
 	Type          string             `json:"type"`
 	Choice        string             `json:"choice"`
+	Score         float64            `json:"score"`
 	Confidence    float64            `json:"confidence"`
 	Probabilities map[string]float64 `json:"probabilities"`
 	Noul          float64            `json:"noul"`
-}
-
-type response struct {
-	Model   string            `json:"model"`
-	Answers map[string]answer `json:"answers"`
-	Detail  json.RawMessage   `json:"detail"`
 }
 
 // Verdict is one answered choice question.
@@ -68,53 +87,57 @@ type Verdict struct {
 	Probabilities map[string]float64
 }
 
+// Rating is one answered score question: the position, and the probability of
+// each level it was scored against.
+type Rating struct {
+	Model      string
+	Score      float64
+	Confidence float64
+	Levels     map[string]float64
+}
+
 // maxBody bounds one answer: a decision is a few hundred bytes of JSON.
-const maxBody = 64 << 10
+const maxBody = 256 << 10
 
-// Choice asks which of the criteria best fits the state.
-func (c *Client) Choice(ctx context.Context, state any, instruction string, criteria []string) (Verdict, error) {
-	if len(criteria) < 2 {
-		return Verdict{}, fmt.Errorf("jev: a choice needs at least two criteria")
-	}
-	crit := make(map[string]any, len(criteria))
-	for _, k := range criteria {
-		crit[k] = nil
-	}
-	out, err := c.ask(ctx, state, question{Type: "choice", Instructions: instruction, Criteria: crit})
-	if err != nil {
-		return Verdict{}, err
-	}
-	a, ok := out.Answers["q"]
-	if !ok {
-		return Verdict{}, fmt.Errorf("jev: no answer in the response")
-	}
-	return Verdict{Model: out.Model, Choice: a.Choice, Confidence: a.Confidence, Probabilities: a.Probabilities}, nil
+type wireQuestion struct {
+	Type         string `json:"type"`
+	Instructions string `json:"instructions"`
+	Criteria     any    `json:"criteria,omitempty"`
 }
 
-// Probability asks for P(true) of one statement over the state.
-func (c *Client) Probability(ctx context.Context, state any, instruction string) (float64, string, error) {
-	out, err := c.ask(ctx, state, question{Type: "noul", Instructions: instruction})
-	if err != nil {
-		return 0, "", err
-	}
-	a, ok := out.Answers["q"]
-	if !ok {
-		return 0, "", fmt.Errorf("jev: no answer in the response")
-	}
-	return a.Noul, out.Model, nil
+type wireRequest struct {
+	Model     string                  `json:"model"`
+	State     any                     `json:"state"`
+	Questions map[string]wireQuestion `json:"questions"`
 }
 
-func (c *Client) ask(ctx context.Context, state any, q question) (response, error) {
+type wireResponse struct {
+	Model   string            `json:"model"`
+	Answers map[string]Answer `json:"answers"`
+	Detail  json.RawMessage   `json:"detail"`
+}
+
+// Ask sends every question in one request and returns the answers by id. This
+// is the shape the vendor recommends: one state, many questions, evaluated in
+// parallel - a second question costs a little input, not a second round trip.
+func (c *Client) Ask(ctx context.Context, state any, questions map[string]Question) (map[string]Answer, string, error) {
 	if c.BaseURL == "" || c.Key == "" {
-		return response{}, fmt.Errorf("jev: no endpoint or key configured")
+		return nil, "", fmt.Errorf("jev: no endpoint or key configured")
+	}
+	if len(questions) == 0 {
+		return nil, "", fmt.Errorf("jev: no questions")
 	}
 	model := c.Model
 	if model == "" {
 		model = "jev-latest"
 	}
-	body, err := json.Marshal(request{Model: model, State: state, Questions: map[string]question{"q": q}})
+	wire := make(map[string]wireQuestion, len(questions))
+	for id, q := range questions {
+		wire[id] = wireQuestion(q)
+	}
+	body, err := json.Marshal(wireRequest{Model: model, State: state, Questions: wire})
 	if err != nil {
-		return response{}, err
+		return nil, "", err
 	}
 	httpClient := c.HTTP
 	if httpClient == nil {
@@ -122,7 +145,7 @@ func (c *Client) ask(ctx context.Context, state any, q question) (response, erro
 		if c.Proxy != "" {
 			u, perr := url.Parse(c.Proxy)
 			if perr != nil {
-				return response{}, fmt.Errorf("jev: bad proxy %q: %w", c.Proxy, perr)
+				return nil, "", fmt.Errorf("jev: bad proxy %q: %w", c.Proxy, perr)
 			}
 			transport.Proxy = http.ProxyURL(u)
 		}
@@ -132,25 +155,77 @@ func (c *Client) ask(ctx context.Context, state any, q question) (response, erro
 		}
 		httpClient = &http.Client{Timeout: timeout, Transport: transport}
 	}
-	url := strings.TrimRight(c.BaseURL, "/") + "/v1/systemone"
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	endpoint := strings.TrimRight(c.BaseURL, "/") + "/v1/systemone"
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
 	if err != nil {
-		return response{}, err
+		return nil, "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.Key)
 	res, err := httpClient.Do(req)
 	if err != nil {
-		return response{}, fmt.Errorf("jev: %w", err)
+		return nil, "", fmt.Errorf("jev: %w", err)
 	}
 	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(io.LimitReader(res.Body, 512))
-		return response{}, fmt.Errorf("jev: HTTP %d: %s", res.StatusCode, strings.TrimSpace(string(b)))
+		return nil, "", fmt.Errorf("jev: HTTP %d: %s", res.StatusCode, strings.TrimSpace(string(b)))
 	}
-	var out response
+	var out wireResponse
 	if err := json.NewDecoder(io.LimitReader(res.Body, maxBody)).Decode(&out); err != nil {
-		return response{}, fmt.Errorf("jev: %w", err)
+		return nil, "", fmt.Errorf("jev: %w", err)
 	}
-	return out, nil
+	if len(out.Answers) == 0 && len(out.Detail) > 0 {
+		return nil, "", fmt.Errorf("jev: %s", strings.TrimSpace(string(out.Detail)))
+	}
+	return out.Answers, out.Model, nil
+}
+
+// Choice asks which of the options best fits the state. The options map to their
+// descriptions; an option with an empty description still works, it is just less
+// separated from its neighbours.
+func (c *Client) Choice(ctx context.Context, state any, instruction string, options map[string]string) (Verdict, error) {
+	if len(options) < 2 {
+		return Verdict{}, fmt.Errorf("jev: a choice needs at least two options")
+	}
+	answers, model, err := c.Ask(ctx, state, map[string]Question{"q": Choice(instruction, options)})
+	if err != nil {
+		return Verdict{}, err
+	}
+	a, ok := answers["q"]
+	if !ok {
+		return Verdict{}, fmt.Errorf("jev: no answer in the response")
+	}
+	return Verdict{Model: model, Choice: a.Choice, Confidence: a.Confidence, Probabilities: a.Probabilities}, nil
+}
+
+// Probability asks for P(true) of one statement over the state.
+func (c *Client) Probability(ctx context.Context, state any, instruction string) (float64, string, error) {
+	answers, model, err := c.Ask(ctx, state, map[string]Question{"q": Noul(instruction)})
+	if err != nil {
+		return 0, "", err
+	}
+	a, ok := answers["q"]
+	if !ok {
+		return 0, "", fmt.Errorf("jev: no answer in the response")
+	}
+	return a.Noul, model, nil
+}
+
+// Rating asks for a position on ordered levels. Levels are the rubric, low to
+// high; a Score answer may sit between two of them, which is what makes it a
+// rating rather than a choice.
+func (c *Client) Rating(ctx context.Context, state any, instruction string, levels []string) (Rating, error) {
+	if len(levels) < 2 {
+		return Rating{}, fmt.Errorf("jev: a score needs at least two levels")
+	}
+	answers, model, err := c.Ask(ctx, state, map[string]Question{"q": Score(instruction, levels)})
+	if err != nil {
+		return Rating{}, err
+	}
+	a, ok := answers["q"]
+	if !ok {
+		return Rating{}, fmt.Errorf("jev: no answer in the response")
+	}
+	return Rating{Model: model, Score: a.Score, Confidence: a.Confidence, Levels: a.Probabilities}, nil
 }
