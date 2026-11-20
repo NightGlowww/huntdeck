@@ -115,8 +115,6 @@ func (d *DB) Migrate(ctx context.Context, migs []Migration, backupDir string, lo
 			return 0, fmt.Errorf("pre-migration backup: %w", err)
 		}
 		log.Info("database backed up before migrating", "path", path, "from_version", current, "to_version", latest)
-		// Old ones are full copies: keep the last few, or the disk fills quietly.
-		pruneBackups(backupDir, log)
 	}
 
 	for _, m := range migs[current:] {
@@ -125,6 +123,9 @@ func (d *DB) Migrate(ctx context.Context, migs []Migration, backupDir string, lo
 		}
 		log.Info("applied migration", "version", m.Version, "name", m.Name)
 	}
+	// Every start, not only a start that migrates: copies left by earlier versions
+	// are full databases too, and a backlog is what fills a disk unnoticed.
+	pruneBackups(backupDir, log)
 	return latest - current, nil
 }
 
