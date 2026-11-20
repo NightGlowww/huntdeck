@@ -122,3 +122,10 @@ func sortVerdicts(vs []Verdict) {
 		}
 	}
 }
+
+// Classify is the rule on its own: a caller that has one probability and one
+// sentence (the CLI's text audit) should not have to build a whole Facts set to
+// learn whether it reads as supported.
+func Classify(p float64) string {
+	return classify(p, "", "", "").Call
+}

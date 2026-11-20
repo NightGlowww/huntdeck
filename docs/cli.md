@@ -15,6 +15,12 @@ and the ones that can take `--data` say so.
   worth. `-explain` prints each factor, computing rather than reading the
   saved table (which carries scores, not factors); `-fresh` does the same
   for timing; `-kind` and `-paying` narrow the candidates.
+- **`huntdeck audit-texts [-limit 10] [-json]`** - ask the decision model whether
+  the sentences it writes about a target are supported by the numbers behind
+  them. The claims come from the renderer and the evidence from the stored
+  inputs: two paths meant to agree. Exits 1 when a sentence reads as
+  unsupported, so a scheduled run can catch a formatting drift. Needs
+  `HUNTDECK_JEV_KEY`.
 - **`huntdeck triage [-file finding.json] [-json]`** - ask the decision model whether a
   finding would survive triage, before spending a submission. It answers two
   questions: would a triager accept this, and do the supplied artefacts prove
