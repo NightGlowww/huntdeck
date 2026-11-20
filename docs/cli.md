@@ -21,6 +21,11 @@ and the ones that can take `--data` say so.
   inputs: two paths meant to agree. Exits 1 when a sentence reads as
   unsupported, so a scheduled run can catch a formatting drift. Needs
   `HUNTDECK_JEV_KEY`.
+- **`huntdeck intigriti [-json]`** - your own state on Intigriti: reputation,
+  rank, whether the identity check is done, pending invitations and
+  applications, and the payouts the researcher API exposes (marked BETA
+  there). Reputation and rank exist only in the web app, so this needs a web
+  login as well as a token.
 - **`huntdeck triage [-file finding.json] [-json]`** - ask the decision model whether a
   finding would survive triage, before spending a submission. It answers two
   questions: would a triager accept this, and do the supplied artefacts prove
