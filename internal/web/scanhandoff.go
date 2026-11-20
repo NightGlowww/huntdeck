@@ -69,6 +69,11 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	if d.HandedOff, d.LastHandoff, err = s.Store.ScanHandoffCount(r.Context()); err != nil && d.WaitingError == "" {
 		d.WaitingError = "could not read the handoff count: " + err.Error()
 	}
+	// What went out, and under which task id: the scanner names a task however it
+	// likes, so this is how a task in its list is traced back to a program.
+	if d.Recent, d.RecentOrder, err = s.Store.RecentHandoffs(r.Context(), 8); err != nil && d.WaitingError == "" {
+		d.WaitingError = "could not read the recent handoffs: " + err.Error()
+	}
 	s.render(w, r, http.StatusOK, "scan", pageData{Title: "Scan handoff", Nav: "scan", Data: d})
 }
 
@@ -151,6 +156,9 @@ type scanPageData struct {
 	Saved   bool
 	Created string
 	Failure string
+	// Recent are the tasks handed over lately, by the id the scanner gave back.
+	Recent      map[string]store.HandoffBatch
+	RecentOrder []string
 	// WaitingError is this side failing to read its own tables: shown whether or
 	// not a scanner is configured, because it says nothing about the scanner.
 	WaitingError string

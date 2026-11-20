@@ -178,3 +178,49 @@ func (s *Store) ClearHandoffs(ctx context.Context, taskIDs []string) (int, error
 	})
 	return int(n), err
 }
+
+// HandoffBatch is one scan task as this side recorded it: the id the scanner gave
+// back, the platform, and the targets that went into it. The scanner names a task
+// however it likes (an Intigriti program once arrived as a UUID), so this is the
+// bridge back to a program.
+func (s *Store) RecentHandoffs(ctx context.Context, limit int) (map[string]HandoffBatch, []string, error) {
+	if limit <= 0 {
+		limit = 10
+	}
+	rows, err := s.db.R.QueryContext(ctx, `
+		SELECT task_id, platform, target, created_at
+		  FROM scan_handoffs
+		 ORDER BY created_at DESC, task_id
+		 LIMIT ?`, limit*50)
+	if err != nil {
+		return nil, nil, fmt.Errorf("recent handoffs: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+	byTask := map[string]HandoffBatch{}
+	var order []string
+	for rows.Next() {
+		var task, plat, target, at string
+		if err := rows.Scan(&task, &plat, &target, &at); err != nil {
+			return nil, nil, err
+		}
+		b, ok := byTask[task]
+		if !ok {
+			if len(order) >= limit {
+				continue
+			}
+			order = append(order, task)
+			b = HandoffBatch{TaskID: task, Platform: plat, At: at}
+		}
+		b.Targets = append(b.Targets, target)
+		byTask[task] = b
+	}
+	return byTask, order, rows.Err()
+}
+
+// HandoffBatch is one task in RecentHandoffs.
+type HandoffBatch struct {
+	TaskID   string
+	Platform string
+	Targets  []string
+	At       string
+}

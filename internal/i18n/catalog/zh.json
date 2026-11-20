@@ -1787,6 +1787,9 @@
   "Show every key": "显示全部钥匙",
   "next about %s": "下次约 %s 后",
   "%d of %d submissions left this week": "本周还剩 %d / %d 次提交",
-  "Reports others have had paid here: the disclosed list, filtered to this program": "别人在这里拿到赏金的报告：已披露列表，按本项目筛选"
+  "Reports others have had paid here: the disclosed list, filtered to this program": "别人在这里拿到赏金的报告：已披露列表，按本项目筛选",
+  "Handed over lately": "最近派发的任务",
+  "Task": "任务",
+  "the last %d": "最近 %d 个"
  }
 }
