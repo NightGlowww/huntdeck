@@ -159,11 +159,15 @@ func (s *Syncer) Poll(ctx context.Context, p platform.Platform, o Options) (stor
 	if statsErr != nil && run.Error == "" {
 		run.Error = statsErr.Error()
 	}
-	if n, err := s.store.CountChanges(context.WithoutCancel(ctx), runID); err == nil {
+	countCtx, cancelCount := recordContext(ctx)
+	if n, err := s.store.CountChanges(countCtx, runID); err == nil {
 		run.Changes = n
 	}
+	cancelCount()
 	// Record the outcome even if ctx was cancelled, or the lease stays held.
-	if err := s.store.FinishRun(context.WithoutCancel(ctx), run); err != nil {
+	finishCtx, cancelFinish := recordContext(ctx)
+	defer cancelFinish()
+	if err := s.store.FinishRun(finishCtx, run); err != nil {
 		return run, fmt.Errorf("record poll result: %w", err)
 	}
 	// The log is at its largest here and nothing else is writing: fold it back so
@@ -379,4 +383,14 @@ func PollDeadline(mode string) time.Duration {
 	default:
 		return 30 * time.Minute
 	}
+}
+
+// recordTimeout bounds the writes that end a run. They must survive a cancelled
+// poll context, but unbounded they can wait on a locked database forever - the
+// same shape that once held every later read behind a checkpoint.
+const recordTimeout = 30 * time.Second
+
+// recordContext is the context those writes use: detached from the poll, bounded.
+func recordContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.WithoutCancel(ctx), recordTimeout)
 }

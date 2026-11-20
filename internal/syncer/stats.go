@@ -123,10 +123,14 @@ func (s *Syncer) WebSync(ctx context.Context, p platform.Platform, trigger strin
 	default:
 		run.Status = store.RunOK
 	}
-	if n, err := s.store.CountChanges(context.WithoutCancel(ctx), runID); err == nil {
+	countCtx, cancelCount := recordContext(ctx)
+	if n, err := s.store.CountChanges(countCtx, runID); err == nil {
 		run.Changes = n
 	}
-	if err := s.store.FinishRun(context.WithoutCancel(ctx), run); err != nil {
+	cancelCount()
+	finishCtx, cancelFinish := recordContext(ctx)
+	defer cancelFinish()
+	if err := s.store.FinishRun(finishCtx, run); err != nil {
 		return run, fmt.Errorf("record browser sync result: %w", err)
 	}
 	log.Info("browser sync finished", "status", run.Status, "stats_fetched", run.StatsFetched, "stats_failed", run.StatsFailed,
