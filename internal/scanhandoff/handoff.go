@@ -237,9 +237,16 @@ func slug(s string) string {
 
 // onlyTargets keeps the candidates named, in the order they were named.
 func onlyTargets(cands []store.ScanCandidate, wanted []string) []store.ScanCandidate {
-	byTarget := make(map[string]store.ScanCandidate, len(cands))
+	byTarget := make(map[string]store.ScanCandidate, len(cands)*2)
 	for _, c := range cands {
 		byTarget[c.Target] = c
+		// The queue names a URL entry by its host, so a target typed from the queue
+		// has to find the entry it belongs to.
+		if c.Host != "" && c.Host != c.Target {
+			if _, taken := byTarget[c.Host]; !taken {
+				byTarget[c.Host] = c
+			}
+		}
 	}
 	out := make([]store.ScanCandidate, 0, len(wanted))
 	for _, w := range wanted {

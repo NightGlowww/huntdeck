@@ -68,7 +68,10 @@ type ScanCandidate struct {
 	Platform string
 	Handle   string // the program it belongs to: a task must not mix programs
 	Name     string // what a person calls it: Intigriti handles are UUIDs
-	Kind     string
+	// Host is what the queue ranks: a URL entry's identifier is the whole URL,
+	// so "community.personio.com" in the queue is this entry's host.
+	Host string
+	Kind string
 }
 
 // ScanCandidates lists in-scope targets that no scan has covered yet, newest
@@ -90,7 +93,8 @@ func (s *Store) ScanCandidates(ctx context.Context, kinds []string, limit int) (
 	}
 	//nolint:gosec // placeholders are counted above; every value is bound
 	rows, err := s.db.R.QueryContext(ctx, `
-SELECT e.identifier, p.platform, p.handle, p.name, lower(e.asset_type)
+SELECT e.identifier, p.platform, p.handle, p.name, lower(e.asset_type),
+	       COALESCE((SELECT t.host FROM scope_targets t WHERE t.scope_entry_id = e.id LIMIT 1), '')
   FROM scope_entries e
   JOIN programs p ON p.id = e.program_id
   LEFT JOIN scan_handoffs h ON h.target = e.identifier
@@ -105,7 +109,7 @@ SELECT e.identifier, p.platform, p.handle, p.name, lower(e.asset_type)
 	var out []ScanCandidate
 	for rows.Next() {
 		var c ScanCandidate
-		if err := rows.Scan(&c.Target, &c.Platform, &c.Handle, &c.Name, &c.Kind); err != nil {
+		if err := rows.Scan(&c.Target, &c.Platform, &c.Handle, &c.Name, &c.Kind, &c.Host); err != nil {
 			return nil, err
 		}
 		out = append(out, c)

@@ -280,3 +280,31 @@ func TestTheSameTargetIsHandedOverOnce(t *testing.T) {
 		t.Fatalf("%d targets would be sent, want 2", total)
 	}
 }
+
+// The queue ranks a URL entry by its host, so "community.personio.com" in the
+// queue is the entry https://community.personio.com/... - naming the host has to
+// find that entry, or the target the operator picked cannot be sent.
+func TestOnlyTargetsFindsAUrlEntryByItsHost(t *testing.T) {
+	cands := []store.ScanCandidate{
+		{Target: "https://community.example.com/join", Host: "community.example.com", Platform: "intigriti", Handle: "a", Name: "A"},
+		{Target: "api.example.com", Host: "api.example.com", Platform: "hackerone", Handle: "b", Name: "B"},
+	}
+	got := onlyTargets(cands, []string{"community.example.com", "api.example.com"})
+	if len(got) != 2 {
+		t.Fatalf("matched %d of 2: %+v", len(got), got)
+	}
+	if got[0].Target != "https://community.example.com/join" {
+		t.Fatalf("the host matched the wrong entry: %+v", got[0])
+	}
+}
+
+// An exact identifier still wins over a host match.
+func TestOnlyTargetsPrefersTheIdentifier(t *testing.T) {
+	cands := []store.ScanCandidate{
+		{Target: "api.example.com", Host: "api.example.com", Platform: "hackerone", Handle: "b"},
+	}
+	got := onlyTargets(cands, []string{"api.example.com"})
+	if len(got) != 1 || got[0].Target != "api.example.com" {
+		t.Fatalf("exact match failed: %+v", got)
+	}
+}
