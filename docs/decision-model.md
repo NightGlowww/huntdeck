@@ -154,3 +154,28 @@ measuring nothing.
 
 Box (localisation in an image) and image state have no place here: HuntDeck has
 no screenshot pipeline that would make a bounding-box judgement useful.
+
+### Batching changed the per-rule numbers, not the verdict
+
+The six rules moved from six requests to one. Re-measured on the same two plans:
+
+| rule | clean, six calls | clean, one call | reckless, six calls | reckless, one call |
+|---|---|---|---|---|
+| identity | 0.09 | **0.21** | 0.81 | **0.31** |
+| automation | 0.10 | 0.07 | 0.85 | **0.56** |
+| scope | 0.07 | 0.07 | 0.98 | 0.93 |
+| social engineering | 0.06 | 0.06 | 0.59 | **0.11** |
+| denial of service | 0.05 | 0.07 | 0.95 | 0.88 |
+| other people's data | 0.11 | 0.07 | 0.94 | 0.76 |
+
+Two things to read from that. The **verdict held**: the clean plan is allowed with
+every rule under the 0.40 line, the reckless one is forbidden on scope at 0.93 -
+the same rule that decided it before. And the **individual numbers moved by up to
+0.48**, because a question in a shared request is judged on its own against the
+state, without the framing its neighbours gave it in a separate call.
+
+That is the argument for deciding on the worst rule rather than an average: the
+average would have moved from 0.86 to 0.59 on the reckless plan, while the rule
+that matters barely budged. It is also why the thresholds are 0.80 and 0.40
+rather than tight bands - a per-rule number is not stable enough to be read
+finely.

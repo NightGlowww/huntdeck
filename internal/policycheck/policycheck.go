@@ -18,6 +18,11 @@
 // that adding questions barely changes the response time. Six calls were six
 // round trips through a proxy that flaps.
 //
+// Re-measured after the change (docs/decision-model.md has the table): the
+// verdicts held, but individual rules moved by up to 0.48 - a question judged
+// in isolation is not framed by its neighbours. That is why the answer is the
+// WORST rule and not an average: the average moves, the worst one decides.
+//
 // The framings that did NOT work are recorded so they are not rebuilt: a
 // per-target "worth starting today" answered 0.44-0.52 for every target, and
 // "hunt, watch or skip" for a program answered at 0.22-0.46 confidence.
