@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/mdpsec/huntdeck/internal/jev"
 )
@@ -81,7 +82,7 @@ func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (An
 			defer wg.Done()
 			// The path to the model can flap; one retry costs 300ms and turns a
 			// transient failure into an answer.
-			for attempt := 0; attempt < 2; attempt++ {
+			for attempt := 0; attempt < 3; attempt++ {
 				p, _, err := c.Probability(ctx,
 					map[string]any{"program": program, "policy": policy, "plan": plan, "rule": r.Label},
 					"Does this plan break the rule as this policy states it?")
@@ -90,6 +91,7 @@ func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (An
 					return
 				}
 				errs[i] = err
+				time.Sleep(300 * time.Millisecond)
 			}
 		}(i, r)
 	}
@@ -110,6 +112,13 @@ func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (An
 	}
 	a := classify(known, c.Model)
 	a.Unknown = unknown
+	// A partial matrix is not a clean bill: "no rule reads as broken" is a claim
+	// about six rules, and five of them may not have answered. Only a rule that
+	// was actually read as broken outranks this.
+	if len(unknown) > 0 && a.Call == CallAllowed {
+		a.Call = CallCheckFirst
+		a.Why = "only part of the matrix answered: the rules that did not answer are not evidence of compliance"
+	}
 	// Cite the sentence only for the rules that were flagged: a quote for
 	// every rule would triple the cost to say nothing new.
 	for i := range a.Rules {
