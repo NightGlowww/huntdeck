@@ -28,7 +28,7 @@ func accountCmd(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "account: unexpected arguments: %v\n", pos)
 		return 2
 	}
-	ctx, stop := signalContext()
+	ctx, stop := readOnlyContext(stderr)
 	defer stop()
 	app, ok := openApp(ctx, stderr, true)
 	if !ok {

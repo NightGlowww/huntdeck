@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -21,6 +22,24 @@ import (
 
 func signalContext() (context.Context, context.CancelFunc) {
 	return signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+}
+
+// readOnlyTimeout bounds the commands that only look. They open the same database
+// the server writes, and a diagnostic that waits forever becomes part of the
+// problem: during a lock-up, two stuck `huntdeck status` runs were holding the very
+// locks the server needed, and killing them was the fix.
+const readOnlyTimeout = 90 * time.Second
+
+// readOnlyContext is signalContext with a deadline and a message that says what a
+// timeout means, because the likely cause is another process holding the database.
+func readOnlyContext(stderr io.Writer) (context.Context, context.CancelFunc) {
+	ctx, stop := signalContext()
+	ctx, cancel := context.WithTimeout(ctx, readOnlyTimeout)
+	return ctx, func() {
+		explainTimeout(ctx, stderr)
+		cancel()
+		stop()
+	}
 }
 
 func pollCmd(args []string, stdout, stderr io.Writer) int {
@@ -238,7 +257,7 @@ func statusCmd(args []string, stdout, stderr io.Writer) int {
 	if _, code, ok := parseFlags(fs, args, stderr); !ok {
 		return code
 	}
-	ctx, stop := signalContext()
+	ctx, stop := readOnlyContext(stderr)
 	defer stop()
 	app, ok := openApp(ctx, stderr, true)
 	if !ok {
@@ -302,7 +321,7 @@ func changesCmd(args []string, stdout, stderr io.Writer) int {
 	if _, code, ok := parseFlags(fs, args, stderr); !ok {
 		return code
 	}
-	ctx, stop := signalContext()
+	ctx, stop := readOnlyContext(stderr)
 	defer stop()
 	app, ok := openApp(ctx, stderr, true)
 	if !ok {
@@ -344,7 +363,7 @@ func scoreCmd(args []string, stdout, stderr io.Writer) int {
 	if _, code, ok := parseFlags(fs, args, stderr); !ok {
 		return code
 	}
-	ctx, stop := signalContext()
+	ctx, stop := readOnlyContext(stderr)
 	defer stop()
 	app, ok := openApp(ctx, stderr, true)
 	if !ok {
@@ -443,4 +462,11 @@ func handleList(raw string) []string {
 		raw = h
 	}
 	return []string{raw}
+}
+
+// explainTimeout says what running out of time means here, once.
+func explainTimeout(ctx context.Context, w io.Writer) {
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		fmt.Fprintf(w, "gave up after %s: the database is locked by another process?\n", readOnlyTimeout)
+	}
 }

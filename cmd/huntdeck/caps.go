@@ -30,7 +30,7 @@ func bugcrowdCapsCmd(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "bugcrowd-caps: unexpected arguments: %v\n", pos)
 		return 2
 	}
-	ctx, stop := signalContext()
+	ctx, stop := readOnlyContext(stderr)
 	defer stop()
 	app, ok := openApp(ctx, stderr, false)
 	if !ok {
@@ -91,7 +91,7 @@ func scanClearCmd(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "scan-clear: unexpected arguments: %v\n", pos)
 		return 2
 	}
-	ctx, stop := signalContext()
+	ctx, stop := readOnlyContext(stderr)
 	defer stop()
 	app, ok := openApp(ctx, stderr, false)
 	if !ok {
