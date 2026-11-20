@@ -79,3 +79,42 @@ menu.
 3. `huntdeck queue` on the command line — the same ranking without the browser.
 4. `docs/audit/health-2026-11.md` — what is known to be rough, stated by the
    people who built it.
+
+### Is a poll stuck, or just slow?
+
+A poll that is working and a poll that is hung look the same in the run's
+counters: they are written when it ends. Three things tell them apart, and all
+three exist because a working poll was once diagnosed as hung:
+
+- `huntdeck doctor` prints every running poll with the time since its **last
+  activity**, and warns after three minutes of silence. The heartbeat is a
+  column in the database (`poll_runs.last_activity`), so it survives a restart
+  and a reader in another process sees it too.
+- `/api/v1/status` carries the same run under `progress`: the step it is on,
+  how far through that step, the requests made, and the seconds since the last
+  one. `"idle_seconds"` is the field to watch.
+- `/settings` shows the idle time next to a running poll, from the heartbeat
+  when this process's in-memory progress is gone.
+
+A poll that a restart cut short is retried in **five minutes**, not a whole
+interval: an interrupted run is one we stopped. A poll that ran past its limit
+(45 minutes full, 20 quick, 30 web) **fails** with its own reason, because
+retrying a hung poll in five minutes would hang again in five minutes. A poll
+that failed for any other reason keeps its interval - an auth error retried
+every five minutes would hammer the platform.
+
+### A platform says it is not configured, but the credential is saved
+
+The settings form sends every field, so the page cannot hit this; a script
+posting a single field can. Since the fix, a field the request does not mention
+is **left alone** rather than emptied, and clearing is what the `clear_` button
+sends. If a credential looks missing after a script ran against
+`/settings/accounts`, that script posted before the fix.
+
+### Everything fails at once
+
+One dependency, not six integrations: `huntdeck doctor` now checks the proxy
+with a request of its own (exit address and a platform request through it), the
+decision model, the scanner's nodes and queue, and each platform's website login
+with the state of its session. A dead proxy, an empty session and a refused
+login each say so on their own line.
