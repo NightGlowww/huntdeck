@@ -36,7 +36,7 @@
       </tr>
       {{with $w := $p.Web}}
       <tr class="sub{{if not (and $w.Enabled $w.Running)}} off{{end}}" id="websync-{{$w.Name}}">
-        <td class="c-name nowrap"><span class="subl">{{T "Browser sync"}}</span>
+        <td class="c-name nowrap"><span class="subl">{{platformLabel $w.Name}} · {{T "Browser sync"}}</span>
           {{if $w.Overridden}}<form method="post" action="/settings/websync/reset" class="inline">
             <input type="hidden" name="platform" value="{{$w.Name}}">
             <button type="submit" class="ghost small" title="{{T "Back to on, once a day"}}">{{T "Reset"}}</button>
