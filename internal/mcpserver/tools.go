@@ -17,6 +17,9 @@ type tool struct {
 	// Write is set on the tools that change something; a read-only
 	// server leaves them out.
 	Write bool
+	// Local marks a tool that answers without asking the instance: the JSON
+	// sweep parses what the fake answered, and there is no fake in its path.
+	Local bool
 	Call  func(ctx context.Context, s *Server, args map[string]any) (string, error)
 }
 
@@ -367,6 +370,22 @@ var tools = []tool{
 			}
 			s.polled(platform)
 			return body, nil
+		},
+	},
+	{
+		Name:        "huntdeck_triage",
+		Description: "Ask the decision model whether a finding would survive triage, before it is submitted. Two probabilities come back: would a triager accept it, and do the supplied artefacts prove the impact. Needs HUNTDECK_JEV_KEY.",
+		Local:       true,
+		Schema: object(map[string]any{
+			"title":    prop("string", "the finding in one line"),
+			"target":   prop("string", "the host or endpoint it is on"),
+			"in_scope": prop("string", "the scope situation, in a sentence"),
+			"impact":   prop("string", "what an attacker gains"),
+			"evidence": prop("string", "what artefacts exist"),
+			"steps":    prop("string", "how it was done, when that matters"),
+		}, "title", "in_scope", "impact", "evidence"),
+		Call: func(ctx context.Context, s *Server, args map[string]any) (string, error) {
+			return s.triage(ctx, args)
 		},
 	},
 }

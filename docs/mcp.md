@@ -127,3 +127,13 @@ docker exec -i -e HUNTDECK_MCP_READONLY=1 huntdeck /huntdeck-mcp
 
 A client that wants that as its MCP command uses `docker` as the command and
 `exec -i huntdeck /huntdeck-mcp` as the arguments.
+
+### huntdeck_triage
+
+Ask the decision model whether a finding would survive triage, before it is
+submitted. Two probabilities come back: would a triager accept it, and do the
+supplied artefacts prove the impact. Needs `HUNTDECK_JEV_KEY` on the server.
+
+Arguments: `title`, `in_scope`, `impact`, `evidence` (required), `target`,
+`steps` (optional). It changes nothing on the instance.
+

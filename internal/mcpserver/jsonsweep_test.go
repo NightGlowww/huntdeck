@@ -18,7 +18,7 @@ func TestEveryJSONToolParsesAgainstTheFake(t *testing.T) {
 	// own focused tests (the fake checks their request shape).
 	text := map[string]bool{"huntdeck_scope_text": true, "huntdeck_changes_text": true, "huntdeck_programs_csv": true, "huntdeck_export": true, "huntdeck_match": true, "huntdeck_match_many": true}
 	for _, tool := range tools {
-		if text[tool.Name] || tool.Write {
+		if text[tool.Name] || tool.Write || tool.Local {
 			continue
 		}
 		out, err := s.callTool(context.Background(), tool.Name, argsFor(tool.Name))

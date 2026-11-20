@@ -21,6 +21,7 @@ var (
 func (s *server) sharedMCP(base, authHeader string) *mcpserver.Server {
 	mcpOnce.Do(func() {
 		mcpSrv = mcpserver.New(base, "", version.Version, false)
+		applyJev(mcpSrv, s) // the server built once carries the decision model config too
 	})
 	// The bearer key that opened the gate rides along for the loopback calls;
 	// a session cookie cannot follow into the loopback client, so a cookie-only
@@ -47,4 +48,13 @@ func (s *server) mcpRPC(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	s.sharedMCP(baseURL(r), r.Header.Get("Authorization")).HTTPHandler().ServeHTTP(w, r)
+}
+
+// applyJev copies the decision model settings onto the shared server: the
+// triage tool asks them, and they change only when the process restarts.
+func applyJev(srv *mcpserver.Server, s *server) {
+	srv.JevURL = s.JevURL
+	srv.JevKey = s.JevKey.Reveal()
+	srv.JevModel = s.JevModel
+	srv.JevProxy = s.JevProxy
 }

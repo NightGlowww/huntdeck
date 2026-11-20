@@ -30,6 +30,11 @@ func main() {
 	// A token from the API page is the credential for a script: with one set,
 	// the client sends it as a bearer header and never makes a session.
 	s.Token = os.Getenv("HUNTDECK_TOKEN")
+	// The decision model, for the triage tool; empty means it says so.
+	s.JevURL = os.Getenv("HUNTDECK_JEV_URL")
+	s.JevKey = os.Getenv("HUNTDECK_JEV_KEY")
+	s.JevModel = os.Getenv("HUNTDECK_JEV_MODEL")
+	s.JevProxy = os.Getenv("HUNTDECK_JEV_PROXY")
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := s.Run(ctx, os.Stdin, os.Stdout); err != nil {
