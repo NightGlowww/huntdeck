@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
@@ -96,36 +97,42 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 		}
 	}
 
+	// One program per task: a task mixing programs cannot be attributed to a
+	// scope, and its name would say nothing about what is being scanned. The
+	// candidates are grouped first, then chunked, so a program's targets stay
+	// together and the name carries the program.
 	created := 0
-	for start := 0; start < len(cands); start += perTask {
-		end := start + perTask
-		if end > len(cands) {
-			end = len(cands)
-		}
-		batch := cands[start:end]
-		targets := make([]string, 0, len(batch))
-		for _, c := range batch {
-			targets = append(targets, c.Target)
-		}
-		name := "huntdeck-" + time.Now().UTC().Format("20060102-150405") + "-" + strconv.Itoa(created+1)
-		id, err := client.CreateTask(ctx, name, cfg.TemplateID, node, targets)
-		if err != nil {
-			// The scanner refusing work for capacity is not a fault: stop here
-			// and say so, rather than reporting a failure the operator cannot act on.
-			if scopesentry.IsBusy(err) {
-				return created, fmt.Errorf("%w: %w", ErrBusy, err)
+	for _, group := range groupByProgram(cands) {
+		for start := 0; start < len(group.items); start += perTask {
+			end := start + perTask
+			if end > len(group.items) {
+				end = len(group.items)
 			}
-			return created, err
+			batch := group.items[start:end]
+			targets := make([]string, 0, len(batch))
+			for _, c := range batch {
+				targets = append(targets, c.Target)
+			}
+			name := taskName(group.platform, group.handle, created+1)
+			id, err := client.CreateTask(ctx, name, cfg.TemplateID, node, targets)
+			if err != nil {
+				// The scanner refusing work for capacity is not a fault: stop here
+				// and say so, rather than reporting a failure the operator cannot act on.
+				if scopesentry.IsBusy(err) {
+					return created, fmt.Errorf("%w: %w", ErrBusy, err)
+				}
+				return created, err
+			}
+			if err := client.StartTask(ctx, id); err != nil {
+				// Created but not started: record it anyway so it is not created
+				// twice; starting is a separate act.
+				return created, fmt.Errorf("task %s created but not started: %w", id, err)
+			}
+			if err := st.MarkHandedOff(ctx, batch, id); err != nil {
+				return created, err
+			}
+			created++
 		}
-		if err := client.StartTask(ctx, id); err != nil {
-			// Created but not started: record it anyway so it is not created
-			// twice; starting is a separate act.
-			return created, fmt.Errorf("task %s created but not started: %w", id, err)
-		}
-		if err := st.MarkHandedOff(ctx, batch, id); err != nil {
-			return created, err
-		}
-		created++
 	}
 	return created, nil
 }
@@ -152,4 +159,55 @@ func runOpinion(ctx context.Context, opinion SecondOpinion, st State) error {
 		return fmt.Errorf("the decision model says %s (confidence %.2f): no scan tasks created", v.Choice, v.Confidence)
 	}
 	return nil
+}
+
+// programGroup is one program's share of a handoff, in the order the candidates
+// arrived.
+type programGroup struct {
+	platform, handle string
+	items            []store.ScanCandidate
+}
+
+// groupByProgram keeps each program's targets together, first appearance first.
+func groupByProgram(cands []store.ScanCandidate) []programGroup {
+	index := map[string]int{}
+	var groups []programGroup
+	for _, c := range cands {
+		key := c.Platform + "/" + c.Handle
+		if i, ok := index[key]; ok {
+			groups[i].items = append(groups[i].items, c)
+			continue
+		}
+		index[key] = len(groups)
+		groups = append(groups, programGroup{platform: c.Platform, handle: c.Handle, items: []store.ScanCandidate{c}})
+	}
+	return groups
+}
+
+// taskName says what is being scanned: the program and the moment. The counter
+// separates the tasks one handoff creates for the same program.
+func taskName(platformName, handle string, n int) string {
+	name := "huntdeck-" + slug(platformName) + "-" + slug(handle) + "-" + time.Now().UTC().Format("20060102-150405")
+	if n > 1 {
+		name += "-" + strconv.Itoa(n)
+	}
+	return name
+}
+
+// slug keeps a name to what a task list can show on one line.
+func slug(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	var b strings.Builder
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= '0' && r <= '9', r == '-', r == '_':
+			b.WriteRune(r)
+		default:
+			b.WriteByte('-')
+		}
+		if b.Len() >= 32 {
+			break
+		}
+	}
+	return strings.Trim(b.String(), "-")
 }

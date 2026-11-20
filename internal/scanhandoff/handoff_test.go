@@ -171,3 +171,51 @@ func TestHandoffDoesNothingWhileOff(t *testing.T) {
 		t.Fatalf("created %d tasks while off (scanner saw %d)", created, len(f.names))
 	}
 }
+
+// A task must belong to one program. The first version sliced the candidate list
+// by count alone, so a batch could carry targets from two programs under a name
+// that named neither - huntdeck-20261120-161552-1, which says nothing about what
+// is being scanned and cannot be attributed to a scope.
+func TestTasksCarryOneProgramAndSayWhich(t *testing.T) {
+	cands := []store.ScanCandidate{
+		{Target: "a.acme.example", Platform: "hackerone", Handle: "acme"},
+		{Target: "b.other.example", Platform: "hackerone", Handle: "other"},
+		{Target: "c.acme.example", Platform: "hackerone", Handle: "acme"},
+	}
+	groups := groupByProgram(cands)
+	if len(groups) != 2 {
+		t.Fatalf("groups = %d, want 2", len(groups))
+	}
+	if groups[0].handle != "acme" || len(groups[0].items) != 2 {
+		t.Fatalf("first group = %+v", groups[0])
+	}
+	if groups[1].handle != "other" || len(groups[1].items) != 1 {
+		t.Fatalf("second group = %+v", groups[1])
+	}
+	for _, g := range groups {
+		for _, c := range g.items {
+			if c.Handle != g.handle {
+				t.Fatalf("group %s holds a target of %s", g.handle, c.Handle)
+			}
+		}
+	}
+}
+
+// The name has to say which program: a list of huntdeck-<stamp>-N tells the
+// operator nothing about what is being scanned.
+func TestTaskNameNamesTheProgram(t *testing.T) {
+	first := taskName("bugcrowd", "opensea", 1)
+	if !strings.HasPrefix(first, "huntdeck-bugcrowd-opensea-") {
+		t.Fatalf("first task = %q", first)
+	}
+	if strings.HasSuffix(first, "-1") {
+		t.Errorf("the first task carries a counter: %q", first)
+	}
+	second := taskName("bugcrowd", "opensea", 2)
+	if !strings.HasSuffix(second, "-2") {
+		t.Errorf("the second task = %q, want a counter", second)
+	}
+	if got := taskName("hackerone", "Some_Org/../x", 1); strings.Contains(got, "/") || strings.Contains(got, "..") {
+		t.Errorf("the name carries characters a task list cannot show: %q", got)
+	}
+}
