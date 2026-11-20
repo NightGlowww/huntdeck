@@ -46,7 +46,11 @@ func doctorCmd(args []string, stdout, stderr io.Writer) int {
 
 	fails := 0
 	ok := func(format string, a ...any) { fmt.Fprintf(stdout, "  ok    "+format+"\n", a...) }
-	warn := func(format string, a ...any) { fmt.Fprintf(stdout, "  warn  "+format+"\n", a...) }
+	warnings := 0
+	warn := func(format string, a ...any) {
+		warnings++
+		fmt.Fprintf(stdout, "  warn  "+format+"\n", a...)
+	}
 	bad := func(format string, a ...any) {
 		fails++
 		fmt.Fprintf(stdout, "  FAIL  "+format+"\n", a...)
@@ -176,7 +180,13 @@ func doctorCmd(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stdout, "%d check(s) failed\n", fails)
 		return 1
 	}
-	fmt.Fprintln(stdout, "no problems found")
+	// "No problems found" next to a page of warnings reads as a lie: say which
+	// it is, so the last line agrees with the ones above it.
+	if warnings > 0 {
+		fmt.Fprintf(stdout, "no failures, %d warning(s)\n", warnings)
+	} else {
+		fmt.Fprintln(stdout, "no problems found")
+	}
 	return 0
 }
 
