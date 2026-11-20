@@ -15,6 +15,12 @@ and the ones that can take `--data` say so.
   worth. `-explain` prints each factor, computing rather than reading the
   saved table (which carries scores, not factors); `-fresh` does the same
   for timing; `-kind` and `-paying` narrow the candidates.
+- **`huntdeck triage [-file finding.json] [-json]`** - ask the decision model whether a
+  finding would survive triage, before spending a submission. It answers two
+  questions: would a triager accept this, and do the supplied artefacts prove
+  the impact. The two numbers separate the cases a single verdict collapses:
+  out of scope scores low on both axes, a real but unproven bug scores high on
+  the first and low on the second. Needs `HUNTDECK_JEV_KEY`.
 - **`huntdeck backtest [-top 10] [-horizon 4320h]`** — what the top ten by
   HuntScore, and by the queue, would have captured at each past cut. Needs a few
   days of history: it says how many cuts it has.

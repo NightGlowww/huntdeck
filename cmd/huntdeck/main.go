@@ -60,6 +60,7 @@ var commands = map[string]command{
 	"score":       scoreCmd,
 	"status":      statusCmd,
 	"queue":       queueCmd,
+	"triage":      triageCmd,
 	"backtest":    backtestCmd,
 	"compact":     compactCmd,
 	"ai-check":    aiCheckCmd,
