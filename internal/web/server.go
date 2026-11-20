@@ -97,6 +97,8 @@ type Deps struct {
 	Platforms []PlatformInfo
 	// BugcrowdCaps answers what the account may still submit, for the polling row.
 	BugcrowdCaps func(ctx context.Context) (bugcrowd.SubmissionCaps, bool)
+	// bugcrowdCaps is where that answer is kept, so a page render never waits on it.
+	bugcrowdCaps capsCache
 	// WebSyncs are the platforms with a browser sync set up, by name.
 	WebSyncs map[string]platform.WebSyncer
 	Schedule Schedule

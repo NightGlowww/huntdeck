@@ -390,19 +390,28 @@ func dueIn(lastStart time.Time, interval time.Duration, now time.Time) string {
 	return humanize.Duration(d)
 }
 
-// fillBugcrowdCaps puts the account's submission allowance on its row. One
-// request, and only when the process has a client to make it with; a failure
-// leaves the line out rather than showing a zero, which would read as "none
-// left".
+// fillBugcrowdCaps puts the account's submission allowance on its row, from a
+// cache: the figure comes from a page on bugcrowd.com, and fetching it while
+// rendering made this page 1.6 seconds instead of 9 milliseconds. A stale cache
+// starts one refresh in the background; the number shows up on the next look.
 func (s *server) fillBugcrowdCaps(ctx context.Context, rows []platformRow) {
 	if s.BugcrowdCaps == nil {
 		return
 	}
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-	caps, ok := s.BugcrowdCaps(ctx)
-	if !ok {
-		return
+	now := time.Now()
+	caps, fresh, inflight := s.bugcrowdCaps.get(now)
+	if !fresh && !inflight {
+		if s.bugcrowdCaps.startRefresh() {
+			go func() {
+				ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 20*time.Second)
+				defer cancel()
+				c, ok := s.BugcrowdCaps(ctx)
+				s.bugcrowdCaps.set(c, ok, time.Now())
+			}()
+		}
+	}
+	if !fresh {
+		return // nothing to show yet; the page keeps its speed
 	}
 	for i := range rows {
 		if rows[i].Name != "bugcrowd" {
