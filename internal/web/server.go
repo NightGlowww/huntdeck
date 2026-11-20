@@ -16,6 +16,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/scorecheck"
+
 	"github.com/mdpsec/huntdeck/internal/ai"
 	"github.com/mdpsec/huntdeck/internal/config"
 
@@ -244,6 +246,7 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /scan/save", s.scanSave)
 	mux.HandleFunc("POST /scan/now", s.scanNow)
 	mux.HandleFunc("POST /programs/{platform}/{handle}/policy-check", s.programPolicyCheck)
+	mux.HandleFunc("POST /methodology/check", s.methodologyCheck)
 	mux.HandleFunc("GET /pojia", s.pojiaPage)
 	mux.HandleFunc("GET /pojia/report", s.pojiaReport)
 
@@ -460,6 +463,12 @@ func (s *server) healthz(w http.ResponseWriter, r *http.Request) {
 type pageData struct {
 	Title string
 	Nav   string
+	// The methodology page offers an audit of one program's figures: whether the
+	// data stored supports what the page says about it.
+	ScoreCheckOn      bool
+	ScoreCheckProgram string
+	ScoreCheckError   string
+	ScoreCheckRows    []scorecheck.Verdict
 	// Feed is the page's Atom feed (feeds.go), linked in its head for
 	// feed readers; FeedTitle names it.
 	Feed, FeedTitle string

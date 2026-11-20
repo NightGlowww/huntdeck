@@ -1,0 +1,40 @@
+
+{{/* An audit of one program's figures against the data HuntDeck stores. */}}
+{{define "methodology-scorecheck"}}{{with .}}
+<section class="panel" id="score-check">
+  <div class="panel-head"><h2>{{T "Check a program's figures"}}</h2>
+    <span class="aside">{{T "a decision model tests each number against what is stored"}}</span></div>
+  <div class="panel-body">
+    {{if .ScoreCheckError}}<p class="flash {{if eq .ScoreCheckError "nomodel"}}warn{{else}}err{{end}}">
+      {{if eq .ScoreCheckError "nomodel"}}{{T "No decision model is configured: set its key in Settings › Accounts › Decision model."}}
+      {{else if eq .ScoreCheckError "notfound"}}{{T "No program with that handle on that platform."}}
+      {{else if eq .ScoreCheckError "nofigures"}}{{T "That program has no stored figures to audit yet."}}
+      {{else}}{{T "The check could not run: try again in a moment."}}{{end}}</p>{{end}}
+    {{if .ScoreCheckRows}}
+    <p class="muted small">{{TF "What %s says about itself, judged against the stored data:" .ScoreCheckProgram}}</p>
+    <div class="table-wrap"><table class="tokens"><thead><tr>
+      <th>{{T "Figure"}}</th><th>{{T "Stored"}}</th><th>{{T "Verdict"}}</th><th>{{T "P"}}</th>
+    </tr></thead><tbody>
+    {{range .ScoreCheckRows}}<tr>
+      <td>{{.Claim}}</td><td class="mono">{{.Evidence}}</td>
+      <td><span class="src {{if eq .Call "supported"}}good{{else if eq .Call "unsupported"}}warn{{else}}acc{{end}}">{{.Call}}</span></td>
+      <td class="mono">{{printf "%.2f" .Supported}}</td>
+    </tr>{{end}}
+    </tbody></table></div>{{end}}
+    <form method="post" action="/methodology/check" class="policy-check-form" data-busy="{{T "Asking the model…"}}" data-stay-busy>
+      <label class="sr-only" for="sc-handle">{{T "Program handle"}}</label>
+      <input id="sc-handle" type="text" name="handle" maxlength="120" spellcheck="false"
+        placeholder="{{T "e.g. security — the handle, on its platform"}}">
+      <label class="sr-only" for="sc-platform">{{T "Platform"}}</label>
+      <select id="sc-platform" name="platform">
+        <option value="hackerone">HackerOne</option>
+        <option value="bugcrowd">Bugcrowd</option>
+        <option value="intigriti">Intigriti</option>
+        <option value="yeswehack">YesWeHack</option>
+      </select>
+      <button type="submit" class="small">{{T "Check"}}</button>
+    </form>
+    <p class="muted small">{{T "It does not compute the score: HuntScore is arithmetic. It asks whether the numbers the page states are supported by what is stored, which is what this page is about."}}</p>
+  </div>
+</section>
+{{end}}{{end}}

@@ -1756,6 +1756,20 @@
     "e.g. run nuclei and a directory brute force against the in-scope web apps": "例如：对范围内的 Web 应用跑 nuclei 与目录爆破",
     "It reads the policy on this page and nothing else. A low score means read the rules before sending a request; it is not permission.": "它只读本页的政策原文，不读别的。分数低表示发请求前先读规则；分数高也不是许可。",
     "Reading the policy…": "正在读政策…",
-    "worst rule: %s": "最严重的一条：%s"
+    "worst rule: %s": "最严重的一条：%s",
+    "Asking the model…": "正在问决策模型…",
+    "Check a program's figures": "核对某个项目的数字",
+    "Figure": "页面上的说法",
+    "It does not compute the score: HuntScore is arithmetic. It asks whether the numbers the page states are supported by what is stored, which is what this page is about.": "它不计算分数——HuntScore 是算术。它问的是：页面上那句话，是否被已存的数据支持。这也正是本页的主题。",
+    "No decision model is configured: set its key in Settings › Accounts › Decision model.": "没有配置决策模型：在「设置 › 账户 › 决策模型」填入密钥。",
+    "No program with that handle on that platform.": "该平台上没有这个 handle 的项目。",
+    "P": "概率",
+    "Program handle": "项目 handle",
+    "Stored": "已存数据",
+    "That program has no stored figures to audit yet.": "该项目还没有可核对的数字。",
+    "The check could not run: try again in a moment.": "检查未能执行：稍后再试。",
+    "What %s says about itself, judged against the stored data:": "%s 的自述，对照已存数据：",
+    "a decision model tests each number against what is stored": "由决策模型逐条对照已存数据",
+    "e.g. security — the handle, on its platform": "例如 security —— 该项目在其平台上的 handle"
   }
 }

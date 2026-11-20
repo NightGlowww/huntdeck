@@ -80,10 +80,16 @@ fi
 login_page=$(code "$url/login")
 [ "$login_page" = 200 ] && ok "login page" "200" || bad "login page" "answered $login_page"
 
+# The session travels as a header, not a cookie jar: curl 8.18 refuses to write
+# a jar for an IP-literal host, so every scripted login against 127.0.0.1
+# authenticated nothing and thirteen checks reported 401s.
+cookie=""
 if [ -n "$password" ]; then
-  status=$(code -c "$jar" -b "$jar" -X POST --data-urlencode "password=$password" --data "next=/" "$url/login")
+  headers=$(curl -s -D - -o /dev/null -m 15 -X POST --data-urlencode "password=$password" --data "next=/" "$url/login" || true)
+  status=$(printf '%s' "$headers" | head -1 | awk '{print $2}')
+  cookie=$(printf '%s' "$headers" | tr -d '' | awk 'tolower($1) == "set-cookie:" {print $2; exit}')
   case "$status" in
-    200|303) ok "sign in" "$status" ;;
+    200|303) ok "sign in" "$status${cookie:+ (session)}" ;;
     *) bad "sign in" "answered $status" ;;
   esac
 else
@@ -92,12 +98,12 @@ fi
 
 # 4. the API behind the session
 for path in "/api/v1/status" "/api/v1/programs?limit=1" "/api/v1/targets?kind=domain&limit=1" "/api/v1/changes?limit=1"; do
-  got=$(curl -s -m 20 -b "$jar" -o /dev/null -w '%{http_code}' "$url$path" || true)
+  got=$(curl -s -m 20 -H "Cookie: $cookie" -o /dev/null -w '%{http_code}' "$url$path" || true)
   [ "$got" = 200 ] && ok "GET $path" "200" || bad "GET $path" "answered $got"
 done
 # The key has to be there; an empty list is a fresh install with nothing
 # configured yet, which the README's own post-install check runs into.
-status=$(curl -s -m 20 -b "$jar" "$url/api/v1/status" | python3 -c 'import json,sys
+status=$(curl -s -m 20 -H "Cookie: $cookie" "$url/api/v1/status" | python3 -c 'import json,sys
 d = json.load(sys.stdin)
 if "platforms" not in d or not isinstance(d.get("platforms"), list):
     print("missing")
@@ -114,7 +120,7 @@ esac
 # other and would otherwise pass. The markers are ids, not words, so they read
 # the same in either language.
 while IFS="|" read -r path marker; do
-  body=$(curl -s -m 20 -b "$jar" "$url$path" || true)
+  body=$(curl -s -m 20 -H "Cookie: $cookie" "$url$path" || true)
   want=$(printf 'data-page="%s"' "$marker")
   if [ -z "$body" ]; then
     bad "GET $path" "no answer"
