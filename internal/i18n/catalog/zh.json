@@ -1784,6 +1784,7 @@
   "Delete every key that was never used and is more than an hour old? A key that never authenticated cannot be a working client.": "删除所有从未使用过、且创建超过一小时的钥匙？从未通过认证的钥匙不可能是正在使用的客户端。",
   "Every key here has been used at least once; nothing was deleted.": "这里的每一把钥匙都用过；没有删除任何东西。",
   "%d older key(s) are not shown.": "还有 %d 把更早的钥匙未显示。",
-  "Show every key": "显示全部钥匙"
+  "Show every key": "显示全部钥匙",
+  "next about %s": "下次约 %s 后"
  }
 }

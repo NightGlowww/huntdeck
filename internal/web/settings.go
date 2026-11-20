@@ -1,10 +1,14 @@
 package web
 
 import (
+	"context"
 	"errors"
+	"github.com/mdpsec/huntdeck/internal/humanize"
+	"github.com/mdpsec/huntdeck/internal/syncer"
 	"net/http"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/mdpsec/huntdeck/internal/huntscore"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
@@ -81,6 +85,11 @@ type platformRow struct {
 	Overridden bool
 	SignIn     []signIn    // each credential and how it did
 	Web        *webSyncRow // its browser sync, if it has one: a row under it
+	// NextQuick and NextFull say when the next poll is due, as "in 12m".
+	// The scheduler keeps the real time; this is the same arithmetic it does,
+	// from the last run and the interval, and the page says "about" because of
+	// that.
+	NextQuick, NextFull string
 }
 
 // platformSettings returns a platform's current settings; without a
@@ -155,6 +164,7 @@ func (s *server) renderSettings(w http.ResponseWriter, r *http.Request, status i
 			}
 		}
 		d.Live = s.liveRuns(r.Context(), d.Runs)
+		s.fillNextDue(r.Context(), d.Platforms)
 	}
 	if err == nil {
 		var set map[string]string
@@ -333,4 +343,44 @@ func (s *server) startPoll(platformName, mode string) string {
 		return "err=poll-unknown"
 	}
 	return "msg=poll-started"
+}
+
+// fillNextDue puts "in 12m" under each interval, from the last run and the
+// interval the scheduler will use. It is the same arithmetic the scheduler
+// does, not the scheduler's own timer: a manual run or a busy retry moves the
+// real one, which is why the page says "about".
+func (s *server) fillNextDue(ctx context.Context, rows []platformRow) {
+	if s.Schedule == nil {
+		return
+	}
+	last, err := s.Store.LatestRuns(ctx)
+	if err != nil {
+		return
+	}
+	started := map[string]time.Time{}
+	for _, r := range last {
+		started[r.Platform+"|"+r.Mode] = r.StartedAt
+	}
+	now := time.Now()
+	for i := range rows {
+		name := rows[i].Name
+		if rows[i].Enabled {
+			rows[i].NextQuick = dueIn(started[name+"|"+syncer.ModeQuick], rows[i].Interval(syncer.ModeQuick), now)
+			rows[i].NextFull = dueIn(started[name+"|"+syncer.ModeFull], rows[i].Interval(syncer.ModeFull), now)
+		}
+	}
+}
+
+// dueIn is how long until the next poll, given when the last one started and
+// the interval; empty when the interval is off or there is no last run to
+// count from.
+func dueIn(lastStart time.Time, interval time.Duration, now time.Time) string {
+	if interval <= 0 || lastStart.IsZero() {
+		return ""
+	}
+	d := lastStart.Add(interval).Sub(now)
+	if d <= 0 {
+		return "now"
+	}
+	return humanize.Duration(d)
 }
