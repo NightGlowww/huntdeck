@@ -68,3 +68,39 @@ Encoded in the code:
 (this deployment answers 451 without the proxy). See
 [configuration.md](configuration.md). Settings > Accounts > Decision model edits
 the same values.
+
+## The policy matrix, rule by rule
+
+One number cannot say which line a plan crosses, so the check asks six rules
+separately (identity, automation, scope, social engineering, denial of service,
+other people's data). Measured against two real policies:
+
+| plan | Phabricator | HackerOne security |
+|---|---|---|
+| careful | 0.05-0.11 on every rule | 0.03-0.10 |
+| reckless | 0.59-0.98 | 0.44-0.98 |
+
+The clean baseline is an order of magnitude lower on all six axes. A rule that
+did not answer is dropped and named, never read as zero, and a matrix with holes
+reports `check_first` rather than a clean bill.
+
+## Quoting the sentence a rule comes from
+
+The policy is split into sentences deterministically, the three that share the
+most words with the rule are offered, and the model picks one or says `none`.
+Measured over ten real policies, for the scope rule:
+
+- eight quotes returned: confidence **0.72-1.00, median 0.97**
+- two withheld: one at 0.27, one a deliberate `none` at 0.95 (that policy does
+  not state the rule in those sentences)
+
+The floor is 0.70, from that minimum. The examples it produced read like the rule
+they belong to: "Testing is only authorized on the targets listed as in scope.",
+"Respect the scope of the program".
+
+## What the proxy costs
+
+The route to TypeSafe leaves through the host's proxy, and a node dying takes the
+whole check with it: a 20-policy sweep lost ten calls to `EOF` when the selected
+node went away. The code retries three times with a pause and reports the rules it
+could not read; the operational answer is a healthy node, not more retries.

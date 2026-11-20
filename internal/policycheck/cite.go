@@ -18,7 +18,11 @@ import (
 // chosen deterministically first - the choice is over a short list, not the whole
 // policy - so the call stays small and the retrieval stays testable.
 const (
-	citeFloor      = 0.55
+	// citeFloor is where a quotation stops being worth showing. Measured
+	// over ten real policies: every quote it did return scored 0.72-1.00 with a
+	// median of 0.97, and the two it withheld scored 0.27 and a confident 0.95
+	// "none" - it declines when the policy does not state the rule there.
+	citeFloor      = 0.70
 	citeCandidates = 3
 )
 
