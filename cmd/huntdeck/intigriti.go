@@ -74,7 +74,11 @@ func intigritiCmd(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "huntdeck intigriti: not configured: set IT_TOKEN (and IT_EMAIL for the web-only figures)")
 		return 1
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	// A browser login may have to run: four pages, a slow proxy, a challenge. The
+	// login itself allows four minutes (weblogin.LoginBudget), so this must outlast
+	// it - at sixty seconds the command reported `context deadline exceeded` for
+	// every call while the proxy was answering in 200ms.
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
 	out := struct {
