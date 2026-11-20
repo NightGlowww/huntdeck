@@ -89,7 +89,11 @@ type platformRow struct {
 	// The scheduler keeps the real time; this is the same arithmetic it does,
 	// from the last run and the interval, and the page says "about" because of
 	// that.
-	NextQuick, NextFull string
+	NextQuick, NextFull    string
+	CapsRemaining, CapsCap int
+	// CapsRemaining and CapsCap are the Bugcrowd submission allowance; a zero cap
+	// means there is nothing to show. The template composes the sentence, so the
+	// words stay translatable.
 }
 
 // platformSettings returns a platform's current settings; without a
@@ -165,6 +169,7 @@ func (s *server) renderSettings(w http.ResponseWriter, r *http.Request, status i
 		}
 		d.Live = s.liveRuns(r.Context(), d.Runs)
 		s.fillNextDue(r.Context(), d.Platforms)
+		s.fillBugcrowdCaps(r.Context(), d.Platforms)
 	}
 	if err == nil {
 		var set map[string]string
@@ -383,4 +388,26 @@ func dueIn(lastStart time.Time, interval time.Duration, now time.Time) string {
 		return "now"
 	}
 	return humanize.Duration(d)
+}
+
+// fillBugcrowdCaps puts the account's submission allowance on its row. One
+// request, and only when the process has a client to make it with; a failure
+// leaves the line out rather than showing a zero, which would read as "none
+// left".
+func (s *server) fillBugcrowdCaps(ctx context.Context, rows []platformRow) {
+	if s.BugcrowdCaps == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	caps, ok := s.BugcrowdCaps(ctx)
+	if !ok {
+		return
+	}
+	for i := range rows {
+		if rows[i].Name != "bugcrowd" {
+			continue
+		}
+		rows[i].CapsRemaining, rows[i].CapsCap = caps.WeeklyRemaining, caps.WeeklyCap
+	}
 }

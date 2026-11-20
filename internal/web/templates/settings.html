@@ -16,7 +16,7 @@
     {{range $p := .Platforms}}
       <tr class="{{if not $p.Enabled}}off{{end}}{{if $p.Web}} has-sub{{end}}">
         <td class="c-name nowrap">{{template "pf" $p.Name}}{{if not $p.Enabled}} <span class="chip disabled">{{T "disabled"}}</span>{{end}}
-          {{if $p.Overridden}}<form method="post" action="/settings/platform/reset" class="inline">
+          {{if $p.CapsCap}}<span class="muted small caps-line">{{TF "%d of %d submissions left this week" $p.CapsRemaining $p.CapsCap}}</span>{{end}}{{if $p.Overridden}}<form method="post" action="/settings/platform/reset" class="inline">
             <input type="hidden" name="platform" value="{{$p.Name}}">
             <button type="submit" class="ghost small" title="{{TF "Use the intervals from .env (quick %s, full %s) and enable the platform" (interval $p.Default.Quick) (interval $p.Default.Full)}}">{{T "Reset"}}</button>
           </form>{{end}}</td>

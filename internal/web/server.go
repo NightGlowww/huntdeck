@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -96,6 +97,8 @@ type Deps struct {
 	Store     *store.Store
 	Poller    Poller
 	Platforms []PlatformInfo
+	// BugcrowdCaps answers what the account may still submit, for the polling row.
+	BugcrowdCaps func(ctx context.Context) (bugcrowd.SubmissionCaps, bool)
 	// WebSyncs are the platforms with a browser sync set up, by name.
 	WebSyncs map[string]platform.WebSyncer
 	Schedule Schedule

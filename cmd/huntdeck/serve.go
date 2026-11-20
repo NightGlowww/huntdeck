@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 	"io"
 	"log/slog"
 	"net"
@@ -260,9 +261,28 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 		p, ok := a.syncer.RunProgress(id)
 		return web.RunProgress(p), ok
 	}
+	// The Bugcrowd submission allowance, for the polling row: one request, and
+	// only when that platform has a client to make it with.
+	var bcCaps func(context.Context) (bugcrowd.SubmissionCaps, bool)
+	for _, p := range platforms {
+		if c, ok := p.Platform.(*bugcrowd.Client); ok {
+			client := c
+			bcCaps = func(ctx context.Context) (bugcrowd.SubmissionCaps, bool) {
+				h, err := a.store.OpenHandle(ctx, "bugcrowd")
+				if err != nil || h == "" {
+					return bugcrowd.SubmissionCaps{}, false
+				}
+				caps, err := client.SubmissionCaps(ctx, h)
+				if err != nil {
+					return bugcrowd.SubmissionCaps{}, false
+				}
+				return caps, true
+			}
+		}
+	}
 	deps := web.Deps{
 		Log:     log,
-		Metrics: web.NewMetrics(), DB: a.db, Store: a.store, Poller: poller, Progress: progress, Platforms: infos, WebSyncs: webSyncs, Schedule: sched,
+		Metrics: web.NewMetrics(), DB: a.db, Store: a.store, Poller: poller, Progress: progress, Platforms: infos, BugcrowdCaps: bcCaps, WebSyncs: webSyncs, Schedule: sched,
 		Version: version.String(), AllowedHosts: a.cfg.AllowedHosts, Timezone: a.cfg.Timezone, Notify: notifier, VNC: vnc,
 		Language: a.cfg.Language, Password: a.cfg.Password.Reveal(),
 		Browser: host, Accounts: a.saved, Restart: restart, ReadOnly: a.cfg.ReadOnly, AIBaseURL: a.cfg.AIBaseURL, AIModel: a.cfg.AIModel, AI: aiClient(a.cfg), PojiaURL: a.cfg.PojiaURL, PojiaKey: a.cfg.PojiaKey, ScanURL: a.cfg.ScanURL, ScanKey: a.cfg.ScanKey, JevURL: a.cfg.JevURL, JevKey: a.cfg.JevKey, JevModel: a.cfg.JevModel, JevProxy: a.cfg.JevProxy, JevProvider: a.cfg.JevProvider, JevAccountID: a.cfg.JevAccountID, JevWorkspaceID: a.cfg.JevWorkspaceID, FeedbackEmail: a.cfg.FeedbackEmail, ClientIPHeader: a.cfg.ClientIPHeader, PublicURL: a.cfg.PublicURL, XAccount: a.cfg.XAccount, RepoURL: a.cfg.RepoURL,

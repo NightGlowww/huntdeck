@@ -1785,6 +1785,7 @@
   "Every key here has been used at least once; nothing was deleted.": "这里的每一把钥匙都用过；没有删除任何东西。",
   "%d older key(s) are not shown.": "还有 %d 把更早的钥匙未显示。",
   "Show every key": "显示全部钥匙",
-  "next about %s": "下次约 %s 后"
+  "next about %s": "下次约 %s 后",
+  "%d of %d submissions left this week": "本周还剩 %d / %d 次提交"
  }
 }
