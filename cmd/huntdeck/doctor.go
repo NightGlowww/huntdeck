@@ -636,10 +636,16 @@ func checkWebLogins(ctx context.Context, s *store.Store, dir string, ok, warn fu
 			continue
 		}
 		reported++
+		// A login that is configured but whose browser sync is switched off looks
+		// healthy here and refreshes nothing: say which it is.
+		syncNote := ""
+		if websync, saved, werr := s.WebSync(ctx, platform); werr == nil && saved && !websync.Enabled {
+			syncNote = " · the browser sync is off in Settings, so this login is not used"
+		}
 		if st.Error == "" {
 			// No recorded failure is not the same as a success: the file is also
 			// absent or reset when a session is put in place by hand.
-			ok("web login %s: no failure recorded", platform)
+			ok("web login %s: no failure recorded%s", platform, syncNote)
 			continue
 		}
 		// The jar is what a poll actually uses: an empty one means the next request
