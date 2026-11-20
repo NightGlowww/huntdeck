@@ -106,6 +106,10 @@ func (d *DB) Migrate(ctx context.Context, migs []Migration, backupDir string, lo
 		return 0, fmt.Errorf("database schema is version %d but this HuntDeck build only knows up to %d; upgrade HuntDeck", current, latest)
 	}
 	if current == latest {
+		// Nothing to apply, but the copies left behind still need trimming: a
+		// backlog is what fills a disk, and this is the path almost every start
+		// takes.
+		pruneBackups(backupDir, log)
 		return 0, nil
 	}
 
