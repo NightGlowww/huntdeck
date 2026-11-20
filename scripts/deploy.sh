@@ -185,24 +185,25 @@ else
   fi
   # The version matches before the HTTP side is ready: one deploy's smoke ran
   # seconds after the restart and reported thirteen 401s, which read as a broken
-  # release. Wait for a login to actually succeed - that is what the checks need.
+  # release. Wait on /healthz, which costs no login attempt - polling the login
+  # form instead burnt the login budget and locked the smoke out.
   ready=""
   for i in $(seq 1 40); do
-    code=$(remote "cd $dir && (set -a; . ./.env 2>/dev/null; set +a; curl -s -o /dev/null -w '%{http_code}' -X POST --data-urlencode \"password=\${HUNTDECK_PASSWORD:-}\" -d next=/ http://127.0.0.1:8080/login)" 2>/dev/null) || code=""
-    # Only 303 is a session: 200 is the login page coming back, which is the
-    # very failure this wait exists for. Accepting it let the wait pass and the
-    # smoke report thirteen 401s.
-    if [ "$code" = "303" ]; then
+    code=$(remote "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/healthz" 2>/dev/null) || code=""
+    if [ "$code" = "200" ]; then
       ready=1
       break
     fi
     sleep 1
   done
   if [ -z "$ready" ]; then
-    echo "  the app does not accept a login yet; the smoke would only see a login page" >&2
+    echo "  /healthz never answered 200; the smoke would only see a login page" >&2
     echo "  last answer: ${code:-none}" >&2
     exit 1
   fi
+  # One settle, so the first authenticated request is not the one that races the
+  # cookie key being written.
+  sleep 2
   smoke_run() {
     remote "cd $dir && (set -a; . ./.env 2>/dev/null; set +a; HD_PASSWORD=\"\${HUNTDECK_PASSWORD:-}\" bash scripts/smoke.sh --url http://127.0.0.1:8080 $backups_flag)"
   }
