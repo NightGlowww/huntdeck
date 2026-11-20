@@ -66,3 +66,37 @@ beside the rules quoted from the policy, marked as a paraphrase. No page render
 calls a model, and with no endpoint configured every page is exactly as it was.
 Still proposal: the brief that returns row ids only, and the one-call query
 translation.
+
+## A day of hardening (2026-11-20)
+
+One session, spent mostly on the things that fail quietly: a proxy nobody
+checked, a poll that could not be told from a hung one, a gate that reported a
+skip as a pass. Each row says how it was checked, because "it compiles" is not a
+check.
+
+| Change | Why | How it was checked |
+|---|---|---|
+| `huntdeck account` prints the standing on each platform | the numbers that decide what you may do next lived on four different pages | run against production: Bugcrowd 4 of 6 left, Intigriti reputation 4 rank 9652; HackerOne says plainly that the hacker API has no account resource |
+| `huntdeck bugcrowd-caps` reads the weekly allowance from the submission page | Bugcrowd caps at six a week and lifts it above a 50% acceptance rate; the API only says no once the cap is hit | parser tested against the shape measured from Bugcrowd's own page (escaped into an attribute); the command run live |
+| The polling row shows that allowance, cached for ten minutes | the first version fetched it during the render: `/settings?tab=polling` went from 9 ms to 1.6 s | timed before and after; `bench.sh` now measures both settings tabs |
+| A poll a restart cut short is retried in five minutes, not a whole interval | with frequent deploys a full poll never finished: three sat at "interrupted" with the same timestamp | two scheduler cases, one proved by reverting the fix |
+| Each scheduled poll has a deadline (45/20/30 min) and fails as its own reason | a hung poll held its platform until the row looked abandoned two hours later | a test that stalls a fake platform past the deadline; reverted to see it go red |
+| `poll_runs.last_activity` is touched every five seconds | a running poll's counters are written when it ends, so a working poll and a hung one looked identical | round-trip test; the doctor prints "running 2m, last activity 1s ago" |
+| `/api/v1/status` carries that live progress | the same blindness, for anything watching from outside | compared two samples twelve seconds apart |
+| The doctor reports the proxy, the web logins, the running polls, notifications, scanner headroom and backup age | every platform failing at once looked like six broken integrations | each line has a failure mode that was seen for real: a dead proxy, an empty session, a full queue |
+| `huntdeck doctor --short` prints only the failures and warnings | twenty lines is not something a cron job should mail | a test asserts no ok lines; reverting the flag makes it fail |
+| `/api/v1/changes` is newest first, with `order=oldest` for a replay | a limit over a window means the latest N, and the page already defaulted to newest | a test comparing both orders: with the old default they came back identical |
+| `/api/v1/targets` takes `sort=best|new|bounty` and refuses anything else | `sort=new` was silently ignored and answered in value order, which looks sorted | a test that fails on the old default and on an accepted unknown value |
+| MCP keys can be deleted, ticked in bulk, and swept when never used | the list could only revoke, so a morning of reconnecting left 141 identical rows | handler test; the sweep spares keys younger than an hour and any that authenticated |
+| The MCP key list shows the newest twenty and counts the rest | a hundred identical rows is not a list anybody reads | `?all=1` still shows every key; a test counts both |
+| A finished poll folds the write-ahead log back in | SQLite reuses the WAL file instead of shrinking it: 45 MiB stayed beside a 186 MiB database | measured before (45,690,832) and after (16,777,216, the configured cap) |
+| Pre-migration backups are kept to the last three, and pruned at every start | seventeen of them were 2.3 GiB on a host that also runs a scanner | the prune runs on the path a start with nothing to apply takes, which the first version missed; disk went 2.3 GiB → 578 MiB |
+| The Chrome login profile drops component caches at start-up | 218 MiB of downloaded models and TTS engines a sign-in never uses | measured: 218 MiB → 63 MiB, `Default` (the cookies) untouched |
+| The starter seed's marker is emptied, not kept whole | it held the 34 MiB archive after importing it | measured: 34,631,624 → 0 |
+| The deploy builds detached and retries a dropped transfer | three deploys died mid-build or mid-rsync at load average 5.6 | the build survives a dropped SSH; the retry loop proved with a stubbed failure; a failed build reports its log and exits 1 |
+| `make lint` runs the linter or fails | without the binary it printed "the full lint was skipped" and exited 0, so a day of changes went out with a gate that never opened | an unused variable makes it exit 1; a clean tree reports 0 issues |
+
+Two of these were my own mistakes, kept in the record: the allowance fetched
+during a page render (1.6 s, caught by timing it), and a `/v1/me` call that does
+not exist in the hacker API, which reported "authentication failed" about
+credentials that were fine.
