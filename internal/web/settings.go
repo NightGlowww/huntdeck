@@ -3,16 +3,16 @@ package web
 import (
 	"context"
 	"errors"
-	"github.com/mdpsec/huntdeck/internal/humanize"
-	"github.com/mdpsec/huntdeck/internal/syncer"
 	"net/http"
 	"slices"
 	"strings"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/humanize"
 	"github.com/mdpsec/huntdeck/internal/huntscore"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
 	"github.com/mdpsec/huntdeck/internal/store"
+	"github.com/mdpsec/huntdeck/internal/syncer"
 )
 
 type settingsData struct {
