@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -114,6 +115,8 @@ func (d *DB) Migrate(ctx context.Context, migs []Migration, backupDir string, lo
 			return 0, fmt.Errorf("pre-migration backup: %w", err)
 		}
 		log.Info("database backed up before migrating", "path", path, "from_version", current, "to_version", latest)
+		// Old ones are full copies: keep the last few, or the disk fills quietly.
+		pruneBackups(backupDir, log)
 	}
 
 	for _, m := range migs[current:] {
@@ -236,4 +239,49 @@ func (d *DB) hasColumn(ctx context.Context, table, column string) bool {
 		}
 	}
 	return false
+}
+
+// keepBackups is how many pre-migration backups are kept. Each one is a full
+// copy of the database (150 MiB at the time of writing) and a schema upgrade
+// takes one, so on an instance that upgrades often they accumulate without a
+// limit: seventeen of them were 2.3 GiB on a host that also runs a scanner.
+//
+// Three is the point where a bad upgrade can still be retried by hand and the
+// disk is not quietly consumed: the copy from before the upgrade that broke
+// something, the one before that, and the current state.
+const keepBackups = 3
+
+// pruneBackups deletes the oldest pre-migration copies beyond keepBackups. It is
+// best effort: a backup that cannot be removed must not stop a migration.
+func pruneBackups(dir string, log *slog.Logger) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+	type kept struct {
+		path string
+		at   time.Time
+	}
+	var copies []kept
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".db") || !strings.HasPrefix(e.Name(), "huntdeck-") {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		copies = append(copies, kept{filepath.Join(dir, e.Name()), info.ModTime()})
+	}
+	if len(copies) <= keepBackups {
+		return
+	}
+	slices.SortFunc(copies, func(a, b kept) int { return b.at.Compare(a.at) })
+	for _, c := range copies[keepBackups:] {
+		if err := os.Remove(c.path); err != nil {
+			log.Warn("pre-migration backup not removed", "path", c.path, "err", err)
+			continue
+		}
+		log.Info("old pre-migration backup removed", "path", c.path)
+	}
 }
