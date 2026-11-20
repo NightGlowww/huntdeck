@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -24,6 +25,9 @@ type Client struct {
 	Key     string
 	Model   string // jev-latest
 	HTTP    *http.Client
+	// Proxy is an HTTP proxy the call leaves through, when a direct egress is
+	// blocked: this deployment reaches TypeSafe only through the local proxy.
+	Proxy string
 }
 
 type question struct {
@@ -110,7 +114,15 @@ func (c *Client) ask(ctx context.Context, state any, q question) (response, erro
 	}
 	httpClient := c.HTTP
 	if httpClient == nil {
-		httpClient = &http.Client{Timeout: 20 * time.Second}
+		transport := http.DefaultTransport.(*http.Transport).Clone()
+		if c.Proxy != "" {
+			u, perr := url.Parse(c.Proxy)
+			if perr != nil {
+				return response{}, fmt.Errorf("jev: bad proxy %q: %w", c.Proxy, perr)
+			}
+			transport.Proxy = http.ProxyURL(u)
+		}
+		httpClient = &http.Client{Timeout: 20 * time.Second, Transport: transport}
 	}
 	url := strings.TrimRight(c.BaseURL, "/") + "/v1/systemone"
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))

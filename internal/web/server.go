@@ -118,6 +118,7 @@ type Deps struct {
 	JevURL   string
 	JevKey   config.Secret
 	JevModel string
+	JevProxy string
 	// DemoSeed exports seeds for a demo copy (demoseed.go); nil where it can't.
 	DemoSeed DemoSeeder
 	// Timezone is the IANA zone to show times in until one is chosen in

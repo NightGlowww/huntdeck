@@ -90,6 +90,9 @@ type Config struct {
 	JevURL   string
 	JevKey   Secret
 	JevModel string
+	// JevProxy is an HTTP proxy the decision call leaves through, when the
+	// host is geo-blocked on a direct egress.
+	JevProxy string
 	// HUNTDECK_CLIENT_IP_HEADER: the header a proxy in front puts the
 	// visitor's address in (CF-Connecting-IP behind Cloudflare), for a
 	// read-only copy's per-visitor limits. Set it only when every request
@@ -272,6 +275,7 @@ func Load(src Source) (Config, error) {
 	}
 	cfg.JevKey = Secret(strings.TrimSpace(r.get("HUNTDECK_JEV_KEY", "")))
 	cfg.JevModel = strings.TrimSpace(r.get("HUNTDECK_JEV_MODEL", ""))
+	cfg.JevProxy = strings.TrimSpace(r.get("HUNTDECK_JEV_PROXY", ""))
 	if cfg.JevModel == "" {
 		cfg.JevModel = "jev-latest"
 	}

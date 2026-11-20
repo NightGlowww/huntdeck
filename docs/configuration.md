@@ -185,6 +185,8 @@ targets and records each target so a re-poll does not queue it twice.
   while reachable, stops it.
 - **HUNTDECK_JEV_MODEL** - jev-latest (default) or jev-preview.
 - **HUNTDECK_JEV_URL** - https://api.typesafe.ai unless you proxy it.
+- **HUNTDECK_JEV_PROXY** - an HTTP proxy the call leaves through, for a host
+  whose direct egress TypeSafe refuses (it answers 451 by region).
 
 It is advisory: the deterministic checks (the memory floor) run first, and a
 decision model can only narrow what they allow.
