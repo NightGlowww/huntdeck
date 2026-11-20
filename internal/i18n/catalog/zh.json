@@ -1770,6 +1770,7 @@
     "The check could not run: try again in a moment.": "检查未能执行：稍后再试。",
     "What %s says about itself, judged against the stored data:": "%s 的自述，对照已存数据：",
     "a decision model tests each number against what is stored": "由决策模型逐条对照已存数据",
-    "e.g. security — the handle, on its platform": "例如 security —— 该项目在其平台上的 handle"
+    "e.g. security — the handle, on its platform": "例如 security —— 该项目在其平台上的 handle",
+    "The scanner is queued, so nothing was created: %s": "扫描器队列已满，这次什么都没建：%s"
   }
 }
