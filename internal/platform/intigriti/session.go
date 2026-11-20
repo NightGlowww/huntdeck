@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/platform"
+	"github.com/mdpsec/huntdeck/internal/sessionjar"
 	"github.com/mdpsec/huntdeck/internal/weblogin"
 )
 
@@ -94,19 +95,28 @@ func (c *Client) ensureSession(ctx context.Context, force bool) error {
 	if !force && s.appCookie(appSessionCookie) != "" {
 		return nil
 	}
-	// A login can take a working session down with it: the platform answers a
-	// refused attempt by clearing the session cookie, and force clears it here
-	// first. Either way the cookie may be the one a live browser session gave
-	// us, so it is kept before anything is dropped and put back if the attempt
-	// does not produce a session of its own.
-	kept := takeSnapshot(s.jar, s.app)
+	// A login must not be able to damage a session that already works: the
+	// platform answers a refused attempt by clearing the session cookie, force
+	// clears it here first, and a login held in a real browser copies its own
+	// cookies into this jar after the flow ends. So the jar is checkpointed and
+	// put back when the attempt leaves no session - memory and file, which is the
+	// only "as it was" a late write cannot race.
+	if cp, isJar := s.jar.(*sessionjar.Jar); isJar {
+		checkpoint := cp.Checkpoint()
+		if len(checkpoint) > 0 {
+			defer func() {
+				if !sessionProduced(s.jar, s.app) {
+					_ = cp.Rollback(checkpoint)
+				}
+			}()
+		}
+	}
 	if force {
 		// The app refused it: drop it, so the app starts a new one.
 		s.jar.SetCookies(s.app, []*http.Cookie{{Name: appSessionCookie, Path: "/", MaxAge: -1}}) //nolint:gosec // deletes it from the jar
 	}
 	ok, err := c.signIn(ctx)
 	if err != nil {
-		kept.restore(s.jar)
 		return err
 	}
 	if ok {
@@ -114,7 +124,6 @@ func (c *Client) ensureSession(ctx context.Context, force bool) error {
 		return nil
 	}
 	if err := s.history.Login(ctx, s.login); err != nil {
-		kept.restore(s.jar)
 		return err
 	}
 	if s.appCookie(appSessionCookie) == "" {
@@ -339,50 +348,20 @@ func (c *Client) browserLogin(ctx context.Context) error {
 	return f.Run(ctx, s.host, Name, s.jar)
 }
 
-// snapshot keeps the cookies a session had before a login was attempted, so a
-// failed attempt can put them back.
-//
-// This is a real outage, not a precaution: Intigriti answers a bot-flagged
-// login by clearing the session cookie it set, and that cookie was the one a
-// live browser session had given us. One blocked login in the morning and the
-// working session was gone - the jar on disk shrank from a working session's
-// cookies to a stranger's.
-type snapshot struct {
-	url     *url.URL
-	cookies []*http.Cookie
-}
-
-func takeSnapshot(j http.CookieJar, u *url.URL) snapshot {
-	kept := j.Cookies(u)
-	out := make([]*http.Cookie, 0, len(kept))
-	for _, c := range kept {
-		copied := *c
-		out = append(out, &copied)
-	}
-	return snapshot{url: u, cookies: out}
-}
-
 // restore puts the cookies back exactly as they were.
 //
 // Setting the saved ones is not enough: a refused login leaves its own cookies
 // behind too, and the first version of this function kept them - the test below
 // caught it. Anything the attempt added has to go, or "as it was" means a jar
 // holding a live session plus a stranger's crumbs.
-func (s snapshot) restore(j http.CookieJar) {
-	kept := make(map[string]bool, len(s.cookies))
-	for _, c := range s.cookies {
-		kept[c.Name] = true
-	}
-	var drop []*http.Cookie
-	for _, c := range j.Cookies(s.url) {
-		if !kept[c.Name] {
-			drop = append(drop, &http.Cookie{Name: c.Name, Path: c.Path, MaxAge: -1}) //nolint:gosec // deletes it from the jar
+
+// sessionProduced reports whether the jar holds a session worth keeping. A login
+// that ends without one is a login to undo, whatever error it returned.
+func sessionProduced(jar http.CookieJar, app *url.URL) bool {
+	for _, c := range jar.Cookies(app) {
+		if c.Name == appSessionCookie && c.Value != "" {
+			return true
 		}
 	}
-	if len(drop) > 0 {
-		j.SetCookies(s.url, drop)
-	}
-	if len(s.cookies) > 0 {
-		j.SetCookies(s.url, s.cookies)
-	}
+	return false
 }

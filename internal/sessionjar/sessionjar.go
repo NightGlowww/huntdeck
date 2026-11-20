@@ -197,3 +197,52 @@ func (j *Jar) save() error {
 	}
 	return os.Rename(tmp.Name(), j.path)
 }
+
+// Checkpoint is the jar's state as bytes: the cookies it holds and the file it
+// would write. It exists for one caller - a login attempt that must not be able
+// to damage a session that already works (see Rollback).
+func (j *Jar) Checkpoint() []byte {
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	f := file{Cookies: make([]stored, 0, len(j.saved))}
+	for _, s := range j.saved {
+		f.Cookies = append(f.Cookies, s)
+	}
+	slices.SortFunc(f.Cookies, func(a, b stored) int { return strings.Compare(a.key(), b.key()) })
+	b, err := json.Marshal(f)
+	if err != nil {
+		return nil
+	}
+	return b
+}
+
+// Rollback puts the jar back to a Checkpoint: memory and file, or neither.
+//
+// The cookie-level restore in one platform was not enough, because a login held
+// in a real browser copies its cookies into this jar and the copy can land after
+// the attempt has already been judged. Restoring the bytes the jar had before is
+// the only version of "as it was" that cannot be raced.
+func (j *Jar) Rollback(raw []byte) error {
+	if len(raw) == 0 {
+		return nil
+	}
+	var f file
+	if err := json.Unmarshal(raw, &f); err != nil {
+		return fmt.Errorf("sessionjar: rollback: %w", err)
+	}
+	j.mu.Lock()
+	defer j.mu.Unlock()
+	j.saved = make(map[string]stored, len(f.Cookies))
+	inner, ierr := cookiejar.New(nil)
+	if ierr != nil {
+		return ierr
+	}
+	j.inner = inner
+	for _, s := range f.Cookies {
+		j.saved[s.key()] = s
+		//nolint:gosec // puts back the cookie as the site set it
+		c := &http.Cookie{Name: s.Name, Value: s.Value, Domain: s.Domain, Path: s.Path, Expires: s.Expires, Secure: s.Secure, HttpOnly: s.HTTPOnly}
+		j.inner.SetCookies(&url.URL{Scheme: "https", Host: s.Host, Path: "/"}, []*http.Cookie{c})
+	}
+	return j.save()
+}
