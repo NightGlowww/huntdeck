@@ -49,6 +49,22 @@ run() {
 }
 SSH_OPTS="-o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4"
 remote() { run ssh $SSH_OPTS "$host" "$@"; }
+
+# ship_rsync copies one file, retrying a transfer the network dropped. Twice in
+# one evening the connection reset mid-transfer and the deploy died at the ship
+# step: the build survives a drop now, the copy did not.
+ship_rsync() {
+  local attempt=1
+  while [ $attempt -le 3 ]; do
+    if run rsync -az "$1" "$2"; then return 0; fi
+    echo "  transfer failed (attempt $attempt of 3); retrying" >&2
+    attempt=$((attempt + 1))
+    sleep 2
+  done
+  echo "  the transfer did not succeed after 3 attempts: $1" >&2
+  return 1
+}
+
 remote_out() {
   if [ -n "$dry" ]; then printf ''; else ssh $SSH_OPTS "$host" "$@"; fi
 }
@@ -110,17 +126,17 @@ else
     go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=$ver -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
     -o "$tmp/huntdeck-mcp" ./cmd/huntdeck-mcp
   echo "==> ship"
-  run rsync -az "$tmp/huntdeck" "$host:$dir/huntdeck"
-  run rsync -az "$tmp/huntdeck-mcp" "$host:$dir/huntdeck-mcp"
-  run rsync -az Dockerfile.prod "$host:$dir/Dockerfile.prod"
-  run rsync -az scripts/smoke.sh "$host:$dir/scripts/smoke.sh"
+  ship_rsync "$tmp/huntdeck" "$host:$dir/huntdeck"
+  ship_rsync "$tmp/huntdeck-mcp" "$host:$dir/huntdeck-mcp"
+  ship_rsync Dockerfile.prod "$host:$dir/Dockerfile.prod"
+  ship_rsync scripts/smoke.sh "$host:$dir/scripts/smoke.sh"
   # The scheduler (1Panel's 计划任务) runs this one from the app directory.
-  run rsync -az scripts/backup.sh "$host:$dir/backup.sh"
-  run rsync -az scripts/watch.sh "$host:$dir/scripts/watch.sh"
-  run rsync -az scripts/verify-backup.sh "$host:$dir/verify-backup.sh"
-  run rsync -az scripts/bench.sh "$host:$dir/scripts/bench.sh"
-  run rsync -az scripts/perf-snapshot.sh "$host:$dir/scripts/perf-snapshot.sh"
-  run rsync -az scripts/perf-diff.py "$host:$dir/scripts/perf-diff.py"
+  ship_rsync scripts/backup.sh "$host:$dir/backup.sh"
+  ship_rsync scripts/watch.sh "$host:$dir/scripts/watch.sh"
+  ship_rsync scripts/verify-backup.sh "$host:$dir/verify-backup.sh"
+  ship_rsync scripts/bench.sh "$host:$dir/scripts/bench.sh"
+  ship_rsync scripts/perf-snapshot.sh "$host:$dir/scripts/perf-snapshot.sh"
+  ship_rsync scripts/perf-diff.py "$host:$dir/scripts/perf-diff.py"
   # The base has to be here already: a host that cannot reach ghcr.io would
   # otherwise spend half a minute failing to pull it, with docker's message and
   # no way out. Say what is missing and what to do instead.
