@@ -167,10 +167,15 @@ func (s *Syncer) Poll(ctx context.Context, p platform.Platform, o Options) (stor
 		return run, fmt.Errorf("record poll result: %w", err)
 	}
 	// The log is at its largest here and nothing else is writing: fold it back so
-	// the file does not keep the high-water mark of this poll. Best effort.
-	if err := s.store.CheckpointWAL(context.WithoutCancel(ctx)); err != nil {
+	// the file does not keep the high-water mark of this poll. Bounded, because a
+	// TRUNCATE checkpoint waits for readers and WithoutCancel gives it no deadline:
+	// unbounded, it held the database and every later read waited behind it - the
+	// board stopped answering while the server still looked healthy.
+	ckCtx, cancelCk := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+	if err := s.store.CheckpointWAL(ckCtx); err != nil {
 		log.Debug("wal checkpoint skipped", "err", err)
 	}
+	cancelCk()
 	log.Info("poll finished", "status", run.Status, "programs", run.ProgramsSeen, "scopes_fetched", run.ScopesFetched,
 		"scopes_failed", run.ScopesFailed, "stats_fetched", run.StatsFetched, "stats_failed", run.StatsFailed, "disclosures_new", run.DisclosuresNew, "resolutions_new", run.ResolutionsNew, "accepted_new", run.AcceptedNew, "changes", run.Changes, "requests", run.Requests, "rate_limited", run.RateLimited)
 	// Scores read every platform's data and age by the hour, so every poll
