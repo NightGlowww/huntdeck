@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/config"
@@ -15,7 +16,6 @@ import (
 	"github.com/mdpsec/huntdeck/internal/overrides"
 	"github.com/mdpsec/huntdeck/internal/platform/intigriti"
 	"github.com/mdpsec/huntdeck/internal/store"
-	"os"
 )
 
 // intigritiCmd prints the researcher's own state on Intigriti: reputation, rank,
