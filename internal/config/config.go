@@ -365,12 +365,6 @@ func Load(src Source) (Config, error) {
 		RatePerSecond: r.float("H1_RATE", 5, 0.1, 10),
 		Concurrency:   r.int("H1_CONCURRENCY", 4, 1, 16),
 	}
-	if (cfg.HackerOne.Username == "") != (cfg.HackerOne.Token == "") {
-		r.errs = append(r.errs, errors.New("H1_USERNAME and H1_TOKEN must be set together"))
-	}
-	if h := cfg.HackerOne; (h.Email == "") != (h.Password == "") {
-		r.errs = append(r.errs, errors.New("H1_EMAIL and H1_PASSWORD must be set together"))
-	}
 
 	cfg.Bugcrowd = Bugcrowd{
 		Email:         r.get("BC_EMAIL", ""),
@@ -382,12 +376,6 @@ func Load(src Source) (Config, error) {
 		QuickInterval: r.duration("BC_QUICK_INTERVAL", 30*time.Minute),
 		RatePerSecond: r.float("BC_RATE", 1, 0.1, 3),
 		Concurrency:   r.int("BC_CONCURRENCY", 2, 1, 4),
-	}
-	if b := cfg.Bugcrowd; (b.Email == "") != (b.Password == "") {
-		r.errs = append(r.errs, errors.New("BC_EMAIL and BC_PASSWORD must be set together"))
-	}
-	if b := cfg.Bugcrowd; b.TOTPSecret != "" && b.Email == "" {
-		r.errs = append(r.errs, errors.New("BC_TOTP_SECRET needs BC_EMAIL and BC_PASSWORD"))
 	}
 
 	cfg.Intigriti = Intigriti{
@@ -401,16 +389,6 @@ func Load(src Source) (Config, error) {
 		Concurrency:   r.int("IT_CONCURRENCY", 2, 1, 8),
 	}
 
-	if i := cfg.Intigriti; (i.Email == "") != (i.Password == "") {
-		r.errs = append(r.errs, errors.New("IT_EMAIL and IT_PASSWORD must be set together"))
-	}
-	if i := cfg.Intigriti; i.Email != "" && i.Token == "" {
-		r.errs = append(r.errs, errors.New("IT_EMAIL needs IT_TOKEN: the web login only adds stats to the API's programs"))
-	}
-	if i := cfg.Intigriti; i.TOTPSecret != "" && i.Email == "" {
-		r.errs = append(r.errs, errors.New("IT_TOTP_SECRET needs IT_EMAIL and IT_PASSWORD"))
-	}
-
 	cfg.YesWeHack = YesWeHack{
 		Email:         r.get("YWH_EMAIL", ""),
 		Password:      Secret(r.get("YWH_PASSWORD", "")),
@@ -421,12 +399,6 @@ func Load(src Source) (Config, error) {
 		QuickInterval: r.duration("YWH_QUICK_INTERVAL", 30*time.Minute),
 		RatePerSecond: r.float("YWH_RATE", 2, 0.1, 5),
 		Concurrency:   r.int("YWH_CONCURRENCY", 2, 1, 4),
-	}
-	if y := cfg.YesWeHack; (y.Email == "") != (y.Password == "") {
-		r.errs = append(r.errs, errors.New("YWH_EMAIL and YWH_PASSWORD must be set together"))
-	}
-	if y := cfg.YesWeHack; y.TOTPSecret != "" && y.Email == "" {
-		r.errs = append(r.errs, errors.New("YWH_TOTP_SECRET needs YWH_EMAIL and YWH_PASSWORD"))
 	}
 
 	list, errs := parseSources(r.get("HUNTDECK_SOURCES", ""))
@@ -600,4 +572,48 @@ func seedURL(v string, errs *[]error) string {
 		return ""
 	}
 	return v
+}
+
+// Check runs the rules that need the whole picture, not one source.
+//
+// They cannot live where the values are read: a TOTP secret is often in the
+// environment while the email and password it belongs to are saved in Settings,
+// and a check that only sees the environment refuses a configuration that is
+// complete. This was a real outage - a secret in .env next to credentials in
+// Settings stopped the container from starting, because the reader loaded the
+// environment, found no email, and failed before Settings was ever opened.
+//
+// So the reader parses and checks each value on its own; this runs afterwards,
+// on the merged configuration, wherever both sources have been joined
+// (internal/overrides). Callers that only read the environment do not call it.
+func Check(cfg Config) error {
+	var errs []error
+	if (cfg.HackerOne.Username == "") != (cfg.HackerOne.Token == "") {
+		errs = append(errs, errors.New("H1_USERNAME and H1_TOKEN must be set together"))
+	}
+	if h := cfg.HackerOne; (h.Email == "") != (h.Password == "") {
+		errs = append(errs, errors.New("H1_EMAIL and H1_PASSWORD must be set together"))
+	}
+	if b := cfg.Bugcrowd; (b.Email == "") != (b.Password == "") {
+		errs = append(errs, errors.New("BC_EMAIL and BC_PASSWORD must be set together"))
+	}
+	if b := cfg.Bugcrowd; b.TOTPSecret != "" && b.Email == "" {
+		errs = append(errs, errors.New("BC_TOTP_SECRET needs BC_EMAIL and BC_PASSWORD"))
+	}
+	if i := cfg.Intigriti; (i.Email == "") != (i.Password == "") {
+		errs = append(errs, errors.New("IT_EMAIL and IT_PASSWORD must be set together"))
+	}
+	if i := cfg.Intigriti; i.Email != "" && i.Token == "" {
+		errs = append(errs, errors.New("IT_EMAIL needs IT_TOKEN: the web login only adds stats to the API's programs"))
+	}
+	if i := cfg.Intigriti; i.TOTPSecret != "" && i.Email == "" {
+		errs = append(errs, errors.New("IT_TOTP_SECRET needs IT_EMAIL and IT_PASSWORD"))
+	}
+	if y := cfg.YesWeHack; (y.Email == "") != (y.Password == "") {
+		errs = append(errs, errors.New("YWH_EMAIL and YWH_PASSWORD must be set together"))
+	}
+	if y := cfg.YesWeHack; y.TOTPSecret != "" && y.Email == "" {
+		errs = append(errs, errors.New("YWH_TOTP_SECRET needs YWH_EMAIL and YWH_PASSWORD"))
+	}
+	return errors.Join(errs...)
 }

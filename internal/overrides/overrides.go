@@ -85,13 +85,23 @@ func (s *Saved) Source(ctx context.Context) (config.Source, []string, error) {
 	return s.env.Overlay(vals), unreadable, nil
 }
 
-// Config loads the configuration from the environment and the saved values.
+// Config loads the configuration from the environment and the saved values,
+// then checks what only the joined picture can answer: a TOTP secret is often in
+// the environment while the email and password it belongs to are saved here, so
+// the cross-field rules run on the result, not on either source alone.
 func (s *Saved) Config(ctx context.Context) (config.Config, error) {
 	src, _, err := s.Source(ctx)
 	if err != nil {
 		return config.Config{}, err
 	}
-	return config.Load(src)
+	cfg, err := config.Load(src)
+	if err != nil {
+		return config.Config{}, err
+	}
+	if err := config.Check(cfg); err != nil {
+		return config.Config{}, err
+	}
+	return cfg, nil
 }
 
 // Where a field's value comes from.
@@ -172,7 +182,9 @@ func (s *Saved) Save(ctx context.Context, changes map[string]*string) error {
 			vals[name] = *v
 		}
 	}
-	if _, err := config.Load(s.env.Overlay(vals)); err != nil {
+	if cfg, err := config.Load(s.env.Overlay(vals)); err != nil {
+		return ValidationError{err}
+	} else if err := config.Check(cfg); err != nil {
 		return ValidationError{err}
 	}
 	box, err := secretbox.LoadOrCreate(s.keyPath)
