@@ -50,5 +50,8 @@ func (s *Server) policyCheck(ctx context.Context, args map[string]any) (string, 
 			fmt.Fprintf(&b, "\n  %-12s %.2f", r.Key, r.Break)
 		}
 	}
+	if len(a.Unknown) > 0 {
+		fmt.Fprintf(&b, "\n  not answered: %s", strings.Join(a.Unknown, ", "))
+	}
 	return b.String(), nil
 }

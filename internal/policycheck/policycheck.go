@@ -31,6 +31,9 @@ import (
 // Answer is the per-rule matrix and what it adds up to.
 type Answer struct {
 	Rules []RuleVerdict
+	// Unknown names the rules the model did not answer: a hole in the matrix,
+	// not a zero.
+	Unknown []string
 	// Call is allowed, check_first or forbidden, decided by the worst rule.
 	Call  string
 	Model string
@@ -76,25 +79,38 @@ func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (An
 		wg.Add(1)
 		go func(i int, r Rule) {
 			defer wg.Done()
-			p, _, err := c.Probability(ctx,
-				map[string]any{"program": program, "policy": policy, "plan": plan, "rule": r.Label},
-				"Does this plan break the rule as this policy states it?")
-			if err != nil {
+			// The path to the model can flap; one retry costs 300ms and turns a
+			// transient failure into an answer.
+			for attempt := 0; attempt < 2; attempt++ {
+				p, _, err := c.Probability(ctx,
+					map[string]any{"program": program, "policy": policy, "plan": plan, "rule": r.Label},
+					"Does this plan break the rule as this policy states it?")
+				if err == nil {
+					out[i] = RuleVerdict{Key: r.Key, Label: r.Label, Break: p}
+					return
+				}
 				errs[i] = err
-				return
 			}
-			out[i] = RuleVerdict{Key: r.Key, Label: r.Label, Break: p}
 		}(i, r)
 	}
 	wg.Wait()
-	// One rule failing is a hole in the matrix; the caller decides whether that
-	// is worth reporting, but a silent zero would read as "no violation".
-	for _, err := range errs {
-		if err != nil {
-			return Answer{}, err
+	// A rule that did not answer is unknown, not zero: drop it from the matrix
+	// and say so, rather than reading a failure as "no violation".
+	var known []RuleVerdict
+	var unknown []string
+	for i, r := range out {
+		if errs[i] != nil {
+			unknown = append(unknown, rules[i].Key)
+			continue
 		}
+		known = append(known, r)
 	}
-	return classify(out, c.Model), nil
+	if len(known) == 0 {
+		return Answer{}, fmt.Errorf("policycheck: the decision model did not answer")
+	}
+	a := classify(known, c.Model)
+	a.Unknown = unknown
+	return a, nil
 }
 
 // classify is the rule, kept off the network so it can be pinned to the
