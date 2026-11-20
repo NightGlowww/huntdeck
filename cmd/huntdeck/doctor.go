@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -321,6 +322,7 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	checkDecisionModel(ctx, s, filepath.Dir(path), ok, warn)
 	checkScanner(ctx, s, filepath.Dir(path), ok, warn)
 	checkProxy(ctx, s, filepath.Dir(path), ok, warn)
+	checkWebLogins(filepath.Dir(path), ok, warn)
 
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
 		newest, oldest := time.Time{}, time.Time{}
@@ -584,4 +586,73 @@ func proxyGet(ctx context.Context, c *http.Client, url string) (*http.Response, 
 		return nil, err
 	}
 	return c.Do(req)
+}
+
+// checkWebLogins reads what the last sign-in attempt left behind, per platform.
+//
+// It exists because a stale or empty session is the quietest failure here: the
+// API token keeps working, the polls keep running, and only the figures that need
+// a website login go missing - the reputation, the invitations, the statistics.
+// Hours have gone into diagnosing exactly that from a red line on the accounts
+// page, so the doctor says it in one place: is there a session, and if the last
+// attempt failed, when will the next one be.
+func checkWebLogins(dir string, ok, warn func(string, ...any)) {
+	sess := filepath.Join(dir, "sessions")
+	entries, err := os.ReadDir(sess)
+	if err != nil {
+		return
+	}
+	type state struct {
+		LastFailure time.Time `json:"last_failure"`
+		Error       string    `json:"error"`
+	}
+	reported := 0
+	for _, e := range entries {
+		name := e.Name()
+		if !strings.HasSuffix(name, "-login.json") {
+			continue
+		}
+		platform := strings.TrimSuffix(name, "-login.json")
+		raw, err := os.ReadFile(filepath.Join(sess, name)) //nolint:gosec // the data directory
+		if err != nil {
+			continue
+		}
+		var st state
+		_ = json.Unmarshal(raw, &st)
+		reported++
+		if st.Error == "" {
+			ok("web login %s: the last attempt worked", platform)
+			continue
+		}
+		// The jar is what a poll actually uses: an empty one means the next request
+		// will try to sign in again, whatever the history says.
+		size := int64(0)
+		if info, err := os.Stat(filepath.Join(sess, platform+".json")); err == nil {
+			size = info.Size()
+		}
+		when := st.LastFailure.UTC().Format(time.RFC3339)
+		if !st.LastFailure.IsZero() {
+			when = humanDuration(time.Since(st.LastFailure)) + " ago"
+		}
+		if size < 100 {
+			warn("web login %s: no saved session (%d bytes): the next poll will try to sign in, last failure %s: %s",
+				platform, size, when, firstLine(st.Error))
+			continue
+		}
+		warn("web login %s: last attempt failed %s: %s", platform, when, firstLine(st.Error))
+	}
+	if reported == 0 {
+		ok("web logins: none configured (every platform polls with its API token alone)")
+	}
+}
+
+// firstLine keeps a doctor line one line: the errors here can carry a page of text.
+func firstLine(s string) string {
+	if i := strings.IndexByte(s, '\n'); i > 0 {
+		return s[:i]
+	}
+	if len(s) > 200 {
+		return s[:200]
+	}
+	return s
 }
