@@ -5,9 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/mdpsec/huntdeck/internal/config"
-	"github.com/mdpsec/huntdeck/internal/jev"
-	"github.com/mdpsec/huntdeck/internal/overrides"
 	"io"
 	"net"
 	"net/http"
@@ -17,6 +14,10 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/mdpsec/huntdeck/internal/config"
+	"github.com/mdpsec/huntdeck/internal/jev"
+	"github.com/mdpsec/huntdeck/internal/overrides"
 
 	"github.com/mdpsec/huntdeck/internal/db"
 	"github.com/mdpsec/huntdeck/internal/store"
