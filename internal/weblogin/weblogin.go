@@ -29,8 +29,24 @@ import (
 	"github.com/mdpsec/huntdeck/internal/totp"
 )
 
-// RetryAfter is how long a failed browser login blocks the next one.
+// RetryAfter is how long the first failed browser login blocks the next one; each
+// further failure doubles it, up to RetryAfterMax. The Settings text promised
+// "1h, then 2h, 4h…" while the code waited thirty minutes every time: a login
+// that cannot work (a Cloudflare challenge) opened Chrome every half hour for
+// nothing.
 const RetryAfter = 30 * time.Minute
+
+// RetryAfterMax caps the wait.
+const RetryAfterMax = 4 * time.Hour
+
+// waitAfter is how long to wait after n consecutive failures.
+func waitAfter(failures int) time.Duration {
+	wait := RetryAfter
+	for i := 1; i < failures && wait < RetryAfterMax; i++ {
+		wait *= 2
+	}
+	return min(wait, RetryAfterMax)
+}
 
 // LoginBudget is how long one browser login may take: several page
 // steps, each waiting for the page to move, plus a slow proxy.
@@ -130,6 +146,7 @@ type History struct {
 	mu          sync.Mutex
 	stuck       error // a Rejection: kept until restart
 	failure     error
+	failures    int       // consecutive browser-login failures, for the wait
 	lastFailure time.Time // of a browser login
 	lastBrowser time.Time // last browser login that worked
 	lastRenewal time.Time // last session renewed without the browser
@@ -180,7 +197,7 @@ func (h *History) Login(ctx context.Context, login func(context.Context) error) 
 	if stuck != nil {
 		return stuck
 	}
-	if failure != nil && h.Now().Sub(lastFailure) < RetryAfter {
+	if failure != nil && h.Now().Sub(lastFailure) < waitAfter(h.failures) {
 		return fmt.Errorf("%w (%w %s)", failure, ErrWaiting, lastFailure.Add(RetryAfter).Format(time.Kitchen))
 	}
 	// A login runs longer than the poll that triggered it, and a poll can be
@@ -198,10 +215,11 @@ func (h *History) Login(ctx context.Context, login func(context.Context) error) 
 				h.stuck = err
 			}
 			h.failure, h.lastFailure = err, h.Now()
+			h.failures++
 		})
 		return err
 	}
-	h.record(func() { h.failure, h.lastBrowser = nil, h.Now() })
+	h.record(func() { h.failure, h.lastBrowser, h.failures = nil, h.Now(), 0 })
 	return nil
 }
 
@@ -228,7 +246,7 @@ func (h *History) Report(signedIn bool) platform.WebSession {
 	}
 	if h.failure != nil {
 		ws.Failure, ws.LastFailure = h.failure.Error(), at(h.lastFailure)
-		if next := h.lastFailure.Add(RetryAfter); h.stuck == nil && next.After(h.Now()) {
+		if next := h.lastFailure.Add(waitAfter(h.failures)); h.stuck == nil && next.After(h.Now()) {
 			ws.RetryAfter = at(next)
 		}
 	}

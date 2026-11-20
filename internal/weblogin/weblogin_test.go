@@ -96,3 +96,20 @@ func TestAccountCode(t *testing.T) {
 		t.Errorf("a used step: %v, want to wait for the next (cancelled)", err)
 	}
 }
+
+// The Settings text promised "1h, then 2h, 4h…" while the code waited thirty
+// minutes every time, so a login that cannot work opened Chrome every half hour.
+func TestLoginWaitDoublesAndIsCapped(t *testing.T) {
+	cases := []struct {
+		failures int
+		want     time.Duration
+	}{
+		{0, RetryAfter}, {1, RetryAfter}, {2, 2 * RetryAfter}, {3, 4 * RetryAfter},
+		{4, RetryAfterMax}, {9, RetryAfterMax},
+	}
+	for _, c := range cases {
+		if got := waitAfter(c.failures); got != c.want {
+			t.Errorf("waitAfter(%d) = %s, want %s", c.failures, got, c.want)
+		}
+	}
+}
