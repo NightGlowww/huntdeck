@@ -63,6 +63,15 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 	if err := CheckHeadroom(ctx, client); err != nil {
 		return 0, err
 	}
+	// Where it goes: the configured node when it has room, else the
+	// least-queued online one. A full node is capacity, not failure.
+	node, err := chooseNode(ctx, client, cfg.NodeName)
+	if err != nil {
+		return 0, fmt.Errorf("%w: every online node is at its queue limit", err)
+	}
+	if node != cfg.NodeName {
+		slog.InfoContext(ctx, "scan: the configured node has no room", "configured", cfg.NodeName, "using", node)
+	}
 	perTask := cfg.PerTask
 	if perTask <= 0 {
 		perTask = 50
@@ -81,7 +90,7 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 		free, known, _ := headroom(client)
 		if err := runOpinion(ctx, opt.Opinion, State{
 			Tasks: (len(cands) + perTask - 1) / perTask, Targets: len(cands), PerTask: perTask,
-			Template: cfg.TemplateID, Node: cfg.NodeName, HostFreePct: free, HostKnown: known,
+			Template: cfg.TemplateID, Node: node, HostFreePct: free, HostKnown: known,
 		}); err != nil {
 			return 0, err
 		}
@@ -99,7 +108,7 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 			targets = append(targets, c.Target)
 		}
 		name := "huntdeck-" + time.Now().UTC().Format("20060102-150405") + "-" + strconv.Itoa(created+1)
-		id, err := client.CreateTask(ctx, name, cfg.TemplateID, cfg.NodeName, targets)
+		id, err := client.CreateTask(ctx, name, cfg.TemplateID, node, targets)
 		if err != nil {
 			// The scanner refusing work for capacity is not a fault: stop here
 			// and say so, rather than reporting a failure the operator cannot act on.

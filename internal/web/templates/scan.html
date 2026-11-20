@@ -36,7 +36,7 @@
       <label class="scan-row"><span>{{T "Node"}}</span>
         <select name="node_name">
           <option value="">{{T "pick one"}}</option>
-          {{range .Nodes}}<option value="{{.Name}}"{{if eq .Name $.Data.Config.NodeName}} selected{{end}}>{{.Name}}{{if not .Online}} ({{T "offline"}}){{end}} · {{.Version}}</option>{{end}}
+          {{range .Nodes}}<option value="{{.Name}}"{{if eq .Name $.Data.Config.NodeName}} selected{{end}}>{{.Name}}{{if not .Online}} ({{T "offline"}}){{end}} · {{.Version}}{{if .QueueLen}} · {{TF "%d queued" .QueueLen}}{{end}}</option>{{end}}
         </select></label>
       <label class="scan-row"><span>{{T "Targets per task"}}</span>
         <input type="number" name="per_task" min="1" max="500" value="{{.Config.PerTask}}">

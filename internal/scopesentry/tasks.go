@@ -19,6 +19,9 @@ type Node struct {
 	State   string `json:"state"`
 	Version string `json:"version"`
 	Running string `json:"running"`
+	// QueueLen is how many tasks are waiting for this node. The scanner caps
+	// it at five and refuses more, so the handoff reads it before choosing.
+	QueueLen int `json:"queueLen"`
 }
 
 // Online reports whether the node is up.
