@@ -18,7 +18,9 @@
         <button type="submit" class="small secondary" data-confirm="{{T "Delete the ticked keys from the list?"}}">{{T "Delete selected"}}</button>
         <button type="submit" class="small secondary" formaction="/mcp/delete-unused" data-confirm="{{T "Delete every key that was never used and is more than an hour old? A key that never authenticated cannot be a working client."}}">{{T "Delete never-used"}}</button>
       </div>
-    </form></div>{{end}}
+    </form>
+      {{if .Hidden}}<p class="muted small">{{TF "%d older key(s) are not shown." .Hidden}} <a href="?all=1">{{T "Show every key"}}</a></p>{{end}}
+    </div>{{end}}
     <div class="ex-head"><span>{{T "Client configuration"}}</span><button type="button" class="ghost small" data-copy="#mcp-json"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
     <pre class="code"><code id="mcp-json">{
   "mcpServers": {

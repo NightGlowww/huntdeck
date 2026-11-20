@@ -18,15 +18,28 @@ func (s *server) mcpPage(w http.ResponseWriter, r *http.Request) {
 	s.render(w, r, http.StatusOK, "mcp", pageData{Title: "MCP server", Nav: "mcp", Data: d})
 }
 
+// mcpKeysShown is how many keys the page lists by default. The list grows one
+// row per connection a client makes; a hundred identical rows is not a list
+// anybody reads, and the ones worth revoking are almost always recent.
+const mcpKeysShown = 20
+
 func (s *server) mcpPageData(r *http.Request) mcpPageData {
 	d := mcpPageData{Base: baseURL(r), Tools: mcpserver.Catalog()}
+	showAll := r.URL.Query().Get("all") != ""
 	if all, err := s.Store.APITokens(r.Context()); err == nil {
 		for _, t := range all {
-			if t.Kind == "mcp" {
-				d.Keys = append(d.Keys, t)
+			if t.Kind != "mcp" {
+				continue
 			}
+			d.Keys = append(d.Keys, t)
 		}
 	}
+	// APITokens is newest first, so the cut keeps the newest and counts the rest.
+	if !showAll && len(d.Keys) > mcpKeysShown {
+		d.Hidden = len(d.Keys) - mcpKeysShown
+		d.Keys = d.Keys[:mcpKeysShown]
+	}
+	d.ShowAll = showAll
 	return d
 }
 
@@ -105,6 +118,10 @@ type mcpPageData struct {
 	Keys []store.APIToken
 	// NewToken is a key just minted, shown once in the config.
 	NewToken string
+	// Hidden is how many older keys the page does not show.
+	Hidden int
+	// ShowAll says the page was asked for every key.
+	ShowAll bool
 	// Deleted is how many keys the last delete removed.
 	Deleted int
 	// Flash is "", "revoked", "deleted", "deletefailed" or "missing".
