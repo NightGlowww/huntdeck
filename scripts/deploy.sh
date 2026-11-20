@@ -55,7 +55,10 @@ if [ -z "$dry" ]; then
     # A lock with no deploy process behind it is a leftover: the script that took
     # it was killed, or exited in a way that skipped its trap. Age alone is the
     # wrong test - a run that died a minute ago still blocks the next one.
-    others=$(pgrep -f 'scripts/deploy.sh' 2>/dev/null | grep -vx "$$" | grep -vx "$PPID" | wc -l | tr -d ' ')
+    # pgrep exits 1 when nothing matches, and under `set -o pipefail` that fails
+    # the whole pipeline: the script then died here with no output at all, which
+    # looked like an empty deploy log.
+    others=$({ pgrep -f 'scripts/deploy.sh' 2>/dev/null || true; } | grep -vx "$$" | grep -vx "$PPID" | wc -l | tr -d ' ')
     if [ "$others" = "0" ]; then
       echo "taking over a lock left by a deploy that is no longer running" >&2
       rmdir "$lock" 2>/dev/null || true
