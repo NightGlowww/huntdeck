@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -331,6 +332,8 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	checkProxy(ctx, s, filepath.Dir(path), ok, warn)
 	checkWebLogins(ctx, s, filepath.Dir(path), ok, warn)
 	checkPolls(ctx, s, ok, warn)
+	// One request, only when a Bugcrowd session exists to read the page with.
+	checkBugcrowdCaps(ctx, s, filepath.Dir(path), ok, warn)
 	checkNotifications(ctx, s, ok, warn)
 
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
@@ -769,5 +772,37 @@ func checkNotifications(ctx context.Context, s *store.Store, ok, warn func(strin
 			enabled, pending, strings.Join(failing, "; "))
 	default:
 		ok("notifications: %d channel(s), nothing waiting", enabled)
+	}
+}
+
+// checkBugcrowdCaps reports what the account may still submit.
+//
+// It is the one number a hunter acts on before writing a report, and it lives on
+// a page nobody opens until the submission fails: six a week, lifted above a 50
+// percent acceptance rate. Costs one request, only when the platform is set up
+// with a session to read it.
+func checkBugcrowdCaps(ctx context.Context, s *store.Store, dir string, ok, warn func(string, ...any)) {
+	cfg, err := overrides.New(s, dir, config.OSSource).Config(ctx)
+	if err != nil || cfg.Bugcrowd.Email == "" {
+		return // not set up: nothing to read, and nothing to say
+	}
+	handle, err := s.OpenHandle(ctx, "bugcrowd")
+	if err != nil || handle == "" {
+		return
+	}
+	caps, err := bugcrowdCaps(ctx, cfg, slog.New(slog.DiscardHandler), handle)
+	if err != nil {
+		warn("bugcrowd submissions: %v", err)
+		return
+	}
+	line := fmt.Sprintf("bugcrowd submissions: %d of %d left this week, acceptance %.0f%% (the cap lifts above %.0f%%)",
+		caps.WeeklyRemaining, caps.WeeklyCap, caps.AcceptanceRate, caps.Threshold)
+	switch {
+	case caps.AtCap || caps.WeeklyRemaining <= 0:
+		warn("%s: at the cap until the window moves", line)
+	case caps.WeeklyRemaining <= 1:
+		warn("%s: one left", line)
+	default:
+		ok("%s", line)
 	}
 }

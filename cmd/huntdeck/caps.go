@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 
+	"github.com/mdpsec/huntdeck/internal/config"
 	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 )
 
@@ -34,30 +37,7 @@ func bugcrowdCapsCmd(args []string, stdout, stderr io.Writer) int {
 	}
 	defer app.close()
 
-	host := loginBrowser(app.cfg, "", app.log)
-	defer func() { _ = host.Close() }()
-	ps, err := buildPlatforms(app.cfg, host)
-	if err == nil {
-		ps, err = pickPlatforms(ps, "bugcrowd")
-	}
-	if err != nil {
-		fmt.Fprintf(stderr, "bugcrowd-caps: %v\n", err)
-		return 1
-	}
-	client, ok := ps[0].Platform.(*bugcrowd.Client)
-	if !ok {
-		fmt.Fprintln(stderr, "bugcrowd-caps: the bugcrowd platform is not a client")
-		return 1
-	}
-	if *handle == "" {
-		h, err := app.store.OpenHandle(ctx, "bugcrowd")
-		if err != nil || h == "" {
-			fmt.Fprintln(stderr, "bugcrowd-caps: no open bugcrowd program to read the page from; pass --engagement")
-			return 1
-		}
-		*handle = h
-	}
-	caps, err := client.SubmissionCaps(ctx, *handle)
+	caps, err := bugcrowdCaps(ctx, app.cfg, app.log, *handle)
 	if err != nil {
 		fmt.Fprintf(stderr, "bugcrowd-caps: %v\n", err)
 		return 1
@@ -72,4 +52,25 @@ func bugcrowdCapsCmd(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stdout, "at the cap: no submissions until the window moves")
 	}
 	return 0
+}
+
+// bugcrowdCaps reads the account's submission caps through the configured
+// session. Both the command and the doctor use it, so they cannot drift.
+func bugcrowdCaps(ctx context.Context, cfg config.Config, log *slog.Logger, handle string) (bugcrowd.SubmissionCaps, error) {
+	var caps bugcrowd.SubmissionCaps
+	host := loginBrowser(cfg, "", log)
+	defer func() { _ = host.Close() }()
+	ps, err := buildPlatforms(cfg, host)
+	if err != nil {
+		return caps, err
+	}
+	ps, err = pickPlatforms(ps, "bugcrowd")
+	if err != nil {
+		return caps, err
+	}
+	client, ok := ps[0].Platform.(*bugcrowd.Client)
+	if !ok {
+		return caps, fmt.Errorf("the bugcrowd platform is not a client")
+	}
+	return client.SubmissionCaps(ctx, handle)
 }
