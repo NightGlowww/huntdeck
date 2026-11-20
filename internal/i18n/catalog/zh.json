@@ -1772,6 +1772,13 @@
     "a decision model tests each number against what is stored": "由决策模型逐条对照已存数据",
     "e.g. security — the handle, on its platform": "例如 security —— 该项目在其平台上的 handle",
     "The scanner is queued, so nothing was created: %s": "扫描器队列已满，这次什么都没建：%s",
-    "The scanner runs one task per node at a time and queues at most five: a handoff every minute or so is as fast as it can go.": "扫描节点一次只跑一个任务、最多排五个，所以大约每分钟派发一次已经是它的上限。"
+    "The scanner runs one task per node at a time and queues at most five: a handoff every minute or so is as fast as it can go.": "扫描节点一次只跑一个任务、最多排五个，所以大约每分钟派发一次已经是它的上限。",
+    "Delete this key from the list?": "把这个密钥从列表里删掉？",
+    "Delete this key from the list? Revoking already stops it working; deleting forgets it.": "把这个密钥从列表里删掉？吊销已经让它失效，删除只是把这条记录清掉。",
+    "Deleted %d key(s).": "已删除 %d 个密钥。",
+    "Those keys were not deleted; the log says why.": "这些密钥没有删掉，日志里有原因。",
+    "Delete selected": "删除所选",
+    "Delete the ticked keys from the list?": "把勾选的密钥从列表里删掉？",
+    "Tick the keys to forget, then delete them in one go.": "勾选要清掉的密钥，然后一次删除。"
   }
 }

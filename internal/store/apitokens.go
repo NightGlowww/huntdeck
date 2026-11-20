@@ -165,3 +165,20 @@ func (s *Store) RevokeAPITokenByKind(ctx context.Context, kind string, id int64)
 	}
 	return nil
 }
+
+// DeleteAPITokens removes keys outright, revoked or not: a revoked key is still a
+// row in a list someone has to read, and twenty of them from one afternoon of
+// reconnecting is noise, not history.
+func (s *Store) DeleteAPITokens(ctx context.Context, kind string, ids []int64) (int, error) {
+	total := 0
+	for _, id := range ids {
+		res, err := s.db.W.ExecContext(ctx, `DELETE FROM api_tokens WHERE id = ? AND kind = ?`, id, kind)
+		if err != nil {
+			return total, fmt.Errorf("delete token %d: %w", id, err)
+		}
+		if n, _ := res.RowsAffected(); n > 0 {
+			total += int(n)
+		}
+	}
+	return total, nil
+}

@@ -66,6 +66,37 @@ func (s *server) mcpRevoke(w http.ResponseWriter, r *http.Request) {
 	s.render(w, r, http.StatusOK, "mcp", pageData{Title: "MCP server", Nav: "mcp", Data: d})
 }
 
+// mcpDelete removes keys from the list. Revoking keeps the row forever, which is
+// right for one key someone wants to remember and wrong for the twenty an
+// afternoon of reconnecting leaves behind: this deletes, one or many.
+func (s *server) mcpDelete(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 16<<10)
+	if err := r.ParseForm(); err != nil {
+		s.render(w, r, http.StatusBadRequest, "mcp", pageData{Title: "MCP server", Nav: "mcp",
+			Data: s.mcpPageData(r)})
+		return
+	}
+	ids := make([]int64, 0, len(r.PostForm["id"]))
+	for _, raw := range r.PostForm["id"] {
+		if id, err := strconv.ParseInt(raw, 10, 64); err == nil && id > 0 {
+			ids = append(ids, id)
+		}
+	}
+	n, err := s.Store.DeleteAPITokens(r.Context(), "mcp", ids)
+	d := s.mcpPageData(r)
+	switch {
+	case err != nil:
+		s.Log.WarnContext(r.Context(), "mcp: delete keys", "error", err)
+		d.Flash = "deletefailed"
+	case n == 0:
+		d.Flash = "missing"
+	default:
+		d.Flash = "deleted"
+		d.Deleted = n
+	}
+	s.render(w, r, http.StatusOK, "mcp", pageData{Title: "MCP server", Nav: "mcp", Data: d})
+}
+
 type mcpPageData struct {
 	Base  string
 	Tools []mcpserver.ToolInfo
@@ -73,6 +104,8 @@ type mcpPageData struct {
 	Keys []store.APIToken
 	// NewToken is a key just minted, shown once in the config.
 	NewToken string
-	// Flash is "" or "revoked" or "missing".
+	// Deleted is how many keys the last delete removed.
+	Deleted int
+	// Flash is "", "revoked", "deleted", "deletefailed" or "missing".
 	Flash string
 }
