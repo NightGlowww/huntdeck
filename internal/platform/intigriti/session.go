@@ -296,7 +296,11 @@ func (c *Client) browserLogin(ctx context.Context) error {
 		Sites: []*url.URL{{Scheme: "https", Host: appHost, Path: "/"}, {Scheme: "https", Host: loginHost, Path: "/"}},
 		Refused: func(msg, after string) error {
 			if strings.Contains(strings.ToLower(msg), "bot") {
-				return fmt.Errorf("%s: the login page took Chrome for a bot (%s)", who, msg)
+				// The page scores the visitor, not the password: say what changes
+				// the score, or the next reader tries the same login again.
+				return fmt.Errorf("%s: the login page took Chrome for a bot (%s): set HUNTDECK_PROXY to a "+
+					"residential proxy and HUNTDECK_CHROME_TIMEZONE to its country, and HUNTDECK_VNC=true to "+
+					"watch the browser", who, msg)
 			}
 			if after == "" {
 				after = "the start"
