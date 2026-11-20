@@ -17,6 +17,8 @@ import (
 	"github.com/mdpsec/huntdeck/internal/config"
 	"github.com/mdpsec/huntdeck/internal/jev"
 	"github.com/mdpsec/huntdeck/internal/overrides"
+	"github.com/mdpsec/huntdeck/internal/scanhandoff"
+	"github.com/mdpsec/huntdeck/internal/scopesentry"
 
 	"github.com/mdpsec/huntdeck/internal/db"
 	"github.com/mdpsec/huntdeck/internal/store"
@@ -306,6 +308,7 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	// the policy and triage commands. When it is unreachable those features
 	// degrade quietly, so the doctor says which it is.
 	checkDecisionModel(ctx, s, filepath.Dir(path), ok, warn)
+	checkScanner(ctx, s, filepath.Dir(path), ok, warn)
 
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
 		newest, oldest := time.Time{}, time.Time{}
@@ -459,4 +462,57 @@ func checkDecisionModel(ctx context.Context, s *store.Store, dir string, ok, war
 		return
 	}
 	ok("decision model: %s answered as %s in %s", cfg.JevURL, model, humanDuration(time.Since(start)))
+}
+
+// checkScanner reports whether the scan handoff can actually reach ScopeSentry,
+// and how loaded its nodes are.
+//
+// It exists because the doctor said "no problems found" while the scanner key was
+// disabled on the other side: every handoff answered 403, the page showed a red
+// line, and the diagnostic tool reported a healthy instance. A dependency that
+// can be switched off remotely belongs in the doctor.
+func checkScanner(ctx context.Context, s *store.Store, dir string, ok, warn func(string, ...any)) {
+	cfg, err := overrides.New(s, dir, config.OSSource).Config(ctx)
+	if err != nil {
+		warn("scanner: the configuration could not be read (%v)", err)
+		return
+	}
+	if cfg.ScanKey.Reveal() == "" || cfg.ScanURL == "" {
+		ok("scanner: not configured (no handoff is offered)")
+		return
+	}
+	client := &scopesentry.Client{BaseURL: cfg.ScanURL, Key: cfg.ScanKey.Reveal()}
+	probe, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	nodes, err := client.Nodes(probe)
+	if err != nil {
+		// The scanner's own words, verbatim: "API key is disabled" is the one
+		// that matters and it is not a transport failure.
+		warn("scanner: %s does not answer (%v)", cfg.ScanURL, err)
+		return
+	}
+	if len(nodes) == 0 {
+		warn("scanner: reachable but no node is registered: a handoff would have nowhere to go")
+		return
+	}
+	online, full, queued := 0, 0, 0
+	for _, n := range nodes {
+		if !n.Online() {
+			continue
+		}
+		online++
+		queued += n.QueueLen
+		if n.QueueLen >= scanhandoff.MaxQueuePerNode {
+			full++
+		}
+	}
+	switch {
+	case online == 0:
+		warn("scanner: %d node(s), none online: a handoff would wait", len(nodes))
+	case full == online:
+		warn("scanner: all %d online node(s) at their queue limit (%d task(s) waiting): a handoff would be refused", online, queued)
+	default:
+		ok("scanner: %d of %d node(s) online, %d task(s) queued, %d node(s) with room",
+			online, len(nodes), queued, online-full)
+	}
 }
