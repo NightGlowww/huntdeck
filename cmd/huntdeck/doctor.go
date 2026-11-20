@@ -526,9 +526,9 @@ func checkScanner(ctx context.Context, s *store.Store, dir string, ok, warn func
 	case online == 0:
 		warn("scanner: %d node(s), none online: a handoff would wait", len(nodes))
 	case full == online:
-		warn("scanner: all %d online node(s) at their queue limit (%d task(s) waiting): a handoff would be refused", online, queued)
+		warn("scanner: all %d online node(s) at their queue limit (their queues hold %d task(s)): a handoff would be refused", online, queued)
 	default:
-		ok("scanner: %d of %d node(s) online, %d task(s) queued, %d node(s) with room",
+		ok("scanner: %d of %d node(s) online, their queues hold %d task(s), %d node(s) with room",
 			online, len(nodes), queued, online-full)
 	}
 }
