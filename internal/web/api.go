@@ -195,7 +195,10 @@ func (s *server) apiChanges(w http.ResponseWriter, r *http.Request) {
 		NoBounty:   q.Get("bounty") == "vdp",
 		Limit:      clampInt(q.Get("limit"), 200, 1, 1000),
 		Offset:     clampInt(q.Get("offset"), 0, 0, 1<<30),
-		Newest:     q.Get("order") == "newest",
+		// Newest first unless asked otherwise: a limit over a window means "the
+		// latest N", and the page's own default is the same. Oldest first is still
+		// there for a replay.
+		Newest: q.Get("order") != "oldest",
 	}
 	since, err := parseSince(q.Get("since"), 24*time.Hour)
 	if err != nil {

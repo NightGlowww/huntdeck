@@ -35,6 +35,7 @@ curl -s "http://127.0.0.1:8080/healthz"                                     # {"
 curl -s "http://127.0.0.1:8080/api/v1/stats/platforms"     # the Stats page: every platform, with a year of months
 curl -s "http://127.0.0.1:8080/api/v1/stats/platforms/hackerone?limit=20"     # a platform and its programs
 curl -s "http://127.0.0.1:8080/api/v1/changes?since=24h"
+curl -s "http://127.0.0.1:8080/api/v1/changes?since=30d&limit=100&order=oldest"   # newest first is the default
 curl -s "http://127.0.0.1:8080/api/v1/match?host=app.example.com"
 curl -s "http://127.0.0.1:8080/api/v1/targets?kind=wildcards&sort=best"   # newest, most promising first
 subfinder -d example.com -silent | curl -s --data-binary @- "http://127.0.0.1:8080/api/v1/match?format=txt"   # keep the in-scope hosts
