@@ -252,3 +252,31 @@ func TestTaskNameFallsBackToTheHandle(t *testing.T) {
 		t.Fatalf("label = %q", groups[0].label)
 	}
 }
+
+// The same host can sit in two programs' scope - the scan page lists
+// info.shop-apotheke.com twice - and a handoff that sends it twice scans it
+// twice. The first program keeps it.
+func TestTheSameTargetIsHandedOverOnce(t *testing.T) {
+	cands := []store.ScanCandidate{
+		{Target: "info.example.com", Platform: "intigriti", Handle: "a", Name: "A"},
+		{Target: "info.example.com", Platform: "intigriti", Handle: "b", Name: "B"},
+		{Target: "other.example.com", Platform: "intigriti", Handle: "b", Name: "B"},
+	}
+	groups := groupByProgram(cands)
+	if len(groups) != 2 {
+		t.Fatalf("groups = %d, want 2", len(groups))
+	}
+	if len(groups[0].items) != 1 || groups[0].handle != "a" {
+		t.Fatalf("the first program should keep the shared host: %+v", groups[0])
+	}
+	if len(groups[1].items) != 1 || groups[1].items[0].Target != "other.example.com" {
+		t.Fatalf("second group = %+v", groups[1])
+	}
+	total := 0
+	for _, g := range groups {
+		total += len(g.items)
+	}
+	if total != 2 {
+		t.Fatalf("%d targets would be sent, want 2", total)
+	}
+}

@@ -172,8 +172,16 @@ type programGroup struct {
 // groupByProgram keeps each program's targets together, first appearance first.
 func groupByProgram(cands []store.ScanCandidate) []programGroup {
 	index := map[string]int{}
+	seen := map[string]bool{}
 	var groups []programGroup
 	for _, c := range cands {
+		// The same host can be in two programs' scope (the scan page lists it twice),
+		// and a handoff that sends it twice scans it twice. The record is keyed by
+		// target anyway, so the first program keeps it.
+		if seen[c.Target] {
+			continue
+		}
+		seen[c.Target] = true
 		key := c.Platform + "/" + c.Handle
 		if i, ok := index[key]; ok {
 			groups[i].items = append(groups[i].items, c)
