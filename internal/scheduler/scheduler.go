@@ -167,7 +167,12 @@ func runJob(ctx context.Context, log *slog.Logger, st *store.Store, sy *syncer.S
 			continue
 		}
 
-		_, err := sy.Poll(ctx, j.Platform, syncer.Options{Mode: j.Mode, Trigger: "schedule", Concurrency: j.Concurrency})
+		// A poll that hangs holds its platform's lease until the row looks
+		// abandoned (two hours). Give it a limit instead: past it, the run fails
+		// with a reason of its own and the platform is free again.
+		pollCtx, cancelPoll := context.WithTimeoutCause(ctx, syncer.PollDeadline(j.Mode), syncer.ErrPollTimeout)
+		_, err := sy.Poll(pollCtx, j.Platform, syncer.Options{Mode: j.Mode, Trigger: "schedule", Concurrency: j.Concurrency})
+		cancelPoll()
 		switch {
 		case ctx.Err() != nil:
 			return

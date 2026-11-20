@@ -136,6 +136,10 @@ func (s *Syncer) Poll(ctx context.Context, p platform.Platform, o Options) (stor
 	reqs1, limited1 := p.Stats()
 	run.Requests, run.RateLimited = reqs1-reqs0, limited1-limited0
 	switch {
+	case ctx.Err() != nil && errors.Is(context.Cause(ctx), ErrPollTimeout):
+		// Its own outcome, not an interruption: a run that hung must not be
+		// retried in minutes, or it hangs again in minutes.
+		run.Status, run.Error = store.RunFailed, ErrPollTimeout.Error()
 	case ctx.Err() != nil:
 		run.Status, run.Error = store.RunFailed, store.RunInterrupted
 	case runErr != nil && run.ProgramsSeen == 0:
@@ -343,4 +347,26 @@ func FormatRun(r store.Run) string {
 		fmt.Fprintf(&b, "\n  error: %s", r.Error)
 	}
 	return b.String()
+}
+
+// ErrPollTimeout marks a poll the scheduler stopped because it ran far longer
+// than it should have. It is separate from an interruption on purpose: an
+// interrupted run is retried in minutes, and a run that hung would then hang
+// again in minutes, forever. This one waits for its next interval.
+var ErrPollTimeout = errors.New("the poll ran past its time limit")
+
+// pollDeadline is how long one poll may take. Measured: a full poll of
+// Intigriti (235 programs, 249 requests) takes about three minutes, and
+// HackerOne's listing is five times the size; these leave room for a slow
+// platform without letting a stuck one hold its platform for hours.
+// PollDeadline is how long a poll of this mode may take.
+func PollDeadline(mode string) time.Duration {
+	switch mode {
+	case ModeFull:
+		return 45 * time.Minute
+	case ModeQuick:
+		return 20 * time.Minute
+	default:
+		return 30 * time.Minute
+	}
 }
