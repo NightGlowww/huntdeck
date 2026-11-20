@@ -156,3 +156,19 @@ The fix, not written yet: record the ids whose start failed and retry them on th
 next handoff, with a bounded attempt count. It needs a column (or a small table)
 and a migration, which is why it was not done at four in the morning after two
 outages.
+
+### Two more, found by watching the queue rather than the code
+
+| Change | Why | How it was checked |
+|---|---|---|
+| The targets are recorded before the scanner is asked to start | The comment said "record it anyway so it is not created twice" and the code returned before recording: thirteen tasks sat parked while their targets stayed eligible, so the next handoff made another task for the same target | the ordering is two lines; the test for this path was written, would not exercise it, and was removed rather than kept as a green that proves nothing |
+| The handoff drains the backlog oldest first | It asked for the newest eight candidates every time, so while new scope kept arriving the older ones were never reached: `redcare-pharmacy-sites` was scanned ten times and everything else never. No log said so - the queue's composition did | `TestScanBacklogDrainsOldestFirst`: the two orders must not return the same head. In production the first non-redcare task in hours appeared 27 seconds after the deploy |
+
+The second one is the one worth remembering. It raised no error, wrote no
+warning, and failed nothing: the scheduler was carrying out a wrong policy
+correctly. Nothing in a log would have said "you have been scanning the same
+program all night"; the task list did.
+
+The suite also ran under the race detector after the three concurrency changes
+of the evening (the allowance cache, the bounded checkpoint, the startup sweep):
+37 packages, no data race.
