@@ -143,15 +143,20 @@ else
   # twice: "Connection to ... closed by remote host" at load average 5.6. The
   # build runs under nohup; this only waits for its log.
   remote "cd $dir && sudo rm -f /tmp/huntdeck-build.log"
-  remote "cd $dir && sudo nohup docker build -f Dockerfile.prod --build-arg BASE=$base -t $image . >/tmp/huntdeck-build.log 2>&1 & echo started"
+  # The PID comes back so a build that dies is noticed in seconds: a Docker
+  # failure does not start its last line with ERROR, and waiting out the whole
+  # timeout to say so is six minutes of pretending to work.
+  buildpid=$(remote "cd $dir && sudo nohup docker build -f Dockerfile.prod --build-arg BASE=$base -t $image . >/tmp/huntdeck-build.log 2>&1 & echo \$!" | tail -1)
+  case "$buildpid" in (''|*[!0-9]*) buildpid="" ;; esac
   built=0
-  for _ in $(seq 1 120); do
-    sleep 3
+  for _ in $(seq 1 300); do
+    sleep 2
     if remote_out "grep -q 'Successfully tagged $image' /tmp/huntdeck-build.log 2>/dev/null"; then
       built=1
       break
     fi
-    if remote_out "grep -qiE '^(ERROR|error:)' /tmp/huntdeck-build.log 2>/dev/null"; then
+    if [ -n "$buildpid" ] && ! remote_out "sudo kill -0 $buildpid 2>/dev/null"; then
+      remote_out "grep -q 'Successfully tagged $image' /tmp/huntdeck-build.log 2>/dev/null" && built=1
       break
     fi
   done
