@@ -156,9 +156,10 @@ scripts/perf-diff.py A.md B.md       # that comparison, largest change first
 
 Run `make check` before calling a change done, and `make docker` for changes
 to the container. If you couldn't run something, say so. Neither lint tool has
-to be installed: `make lint` says when golangci-lint is missing, and `make vuln`
-runs govulncheck through `go run` when the binary isn't on the PATH (it then
-needs the module proxy).
+to be installed: `make lint` runs golangci-lint through `go run` when the binary
+isn't on the PATH, and `make vuln` does the same for govulncheck (both then need
+the module proxy). They fail when they cannot run: a lint that silently skipped
+itself was green for a day of changes.
 
 ### Performance
 

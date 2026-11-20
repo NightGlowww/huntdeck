@@ -24,7 +24,9 @@ test:
 
 lint:
 	go vet ./...
-	@if command -v $(GOLANGCI_LINT) >/dev/null 2>&1; then $(GOLANGCI_LINT) run; 	else echo "golangci-lint not installed: go vet passed, the full lint was skipped"; fi
+	@if command -v $(GOLANGCI_LINT) >/dev/null 2>&1; then $(GOLANGCI_LINT) run; \
+	else echo "golangci-lint not installed: running it through go run (needs the module proxy)"; \
+	     go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest run --timeout=5m ./...; fi
 
 vuln:
 	@if command -v govulncheck >/dev/null 2>&1; then govulncheck ./...; \
