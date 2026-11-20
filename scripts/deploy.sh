@@ -195,6 +195,18 @@ else
       remote_out "grep -q 'Successfully tagged $image' /tmp/huntdeck-build.log 2>/dev/null" && built=1
       break
     fi
+    # The pid is not always captured (the shell that echoed it may be the one
+    # that exits). Without it the loop cannot see a dead build and waits the
+    # whole ten minutes in silence, which reads as a hung deploy.
+    if [ -z "$buildpid" ] && [ $((_ % 30)) -eq 0 ]; then
+      if remote_out "[ -n "\$(find /tmp/huntdeck-build.log -mmin +2 2>/dev/null)" ]"; then
+        remote_out "grep -q 'Successfully tagged $image' /tmp/huntdeck-build.log 2>/dev/null" && built=1
+        if [ "$built" != 1 ]; then
+          echo "  the build stopped writing two minutes ago; it died" >&2
+        fi
+        break
+      fi
+    fi
   done
   if [ "$built" != 1 ]; then
     echo "  the image build did not finish; its log:" >&2
