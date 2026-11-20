@@ -80,8 +80,14 @@
    fit it without scrolling sideways; see "Columns by the box's width"
    below. */
 .ptable { container: plist / inline-size; }
-.plist-table th.c-hunt { width: 112px; }
-.plist-table th.c-bounty { width: 140px; }
+.plist-table th.c-hunt { width: 76px; }
+.plist-table th.c-bounty { width: 116px; }
+/* Both read as one figure per row, centred: right-aligned numbers in a wide
+   column pushed the table past the window and the last columns had to be
+   scrolled to. */
+.plist-table :is(th, td).c-hunt, .plist-table :is(th, td).c-bounty { text-align: center; }
+.plist-table th.c-hunt a, .plist-table th.c-bounty a { justify-content: center; }
+.plist-table td.c-bounty .avg-under { white-space: nowrap; }
 .plist-table th.c-ptotal { width: 92px; }
 /* Columns that only show by default on wider screens have their width at
    every size, for when Customize turns them on. */
