@@ -261,3 +261,16 @@ func onlyTargets(cands []store.ScanCandidate, wanted []string) []store.ScanCandi
 	}
 	return out
 }
+
+// StalledFor is how long a backlog has been stuck: nothing handed over for two
+// hours while targets wait. Zero when it is moving or empty, so a page or a
+// doctor line stays quiet then.
+func StalledFor(lastHandoff, now time.Time, waiting int) time.Duration {
+	if waiting == 0 || lastHandoff.IsZero() {
+		return 0
+	}
+	if d := now.Sub(lastHandoff); d > 2*time.Hour {
+		return d
+	}
+	return 0
+}

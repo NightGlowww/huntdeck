@@ -17,6 +17,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/humanize"
+
 	"github.com/mdpsec/huntdeck/internal/config"
 	"github.com/mdpsec/huntdeck/internal/jev"
 	"github.com/mdpsec/huntdeck/internal/overrides"
@@ -332,6 +334,7 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	checkProxy(ctx, s, filepath.Dir(path), ok, warn)
 	checkWebLogins(ctx, s, filepath.Dir(path), ok, warn)
 	checkPolls(ctx, s, ok, warn)
+	checkScanHandoff(ctx, s, ok, warn)
 	// One request, only when a Bugcrowd session exists to read the page with.
 	checkBugcrowdCaps(ctx, s, filepath.Dir(path), ok, warn)
 	checkNotifications(ctx, s, ok, warn)
@@ -808,5 +811,39 @@ func checkBugcrowdCaps(ctx context.Context, s *store.Store, dir string, ok, warn
 		warn("%s: one left", line)
 	default:
 		ok("%s", line)
+	}
+}
+
+// checkScanHandoff says whether the scanner is being fed. A backlog that has not
+// moved for hours is invisible in a log - the ticker runs, finds the scanner
+// full, and says nothing - so the doctor asks the same question the page does.
+func checkScanHandoff(ctx context.Context, s *store.Store, ok, warn func(string, ...any)) {
+	if s == nil {
+		return
+	}
+	cfg, err := s.ScanConfigRow(ctx)
+	if err != nil || !cfg.Enabled || cfg.TemplateID == "" {
+		return // off: nothing to report
+	}
+	n, last, err := s.ScanHandoffCount(ctx)
+	if err != nil {
+		return
+	}
+	if n == 0 {
+		ok("scan handoff: nothing handed over yet")
+		return
+	}
+	waiting, err := s.ScanCandidates(ctx, cfg.Kinds, 1)
+	if err != nil {
+		return
+	}
+	stalled := scanhandoff.StalledFor(last, s.Now(), len(waiting))
+	switch {
+	case stalled > 0:
+		warn("scan handoff: nothing handed over for %s while targets wait: the scanner is full, or its last attempt was refused", humanize.Duration(stalled))
+	case len(waiting) > 0:
+		ok("scan handoff: %d target(s) handed over, newest %s ago", n, humanize.Duration(s.Now().Sub(last)))
+	default:
+		ok("scan handoff: %d target(s) handed over, nothing waiting", n)
 	}
 }

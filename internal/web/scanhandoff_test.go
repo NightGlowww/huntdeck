@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/mdpsec/huntdeck/internal/scanhandoff"
 )
 
 // The page dropped the candidate read's error and rendered "nothing waiting",
@@ -44,7 +46,7 @@ func TestStallFor(t *testing.T) {
 		{"never handed over", time.Time{}, 10, 0},
 	}
 	for _, c := range cases {
-		if got := stallFor(c.last, now, c.waiting); got != c.want {
+		if got := scanhandoff.StalledFor(c.last, now, c.waiting); got != c.want {
 			t.Errorf("%s: stallFor = %s, want %s", c.name, got, c.want)
 		}
 	}
