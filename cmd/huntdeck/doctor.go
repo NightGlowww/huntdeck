@@ -621,7 +621,9 @@ func checkWebLogins(dir string, ok, warn func(string, ...any)) {
 		_ = json.Unmarshal(raw, &st)
 		reported++
 		if st.Error == "" {
-			ok("web login %s: the last attempt worked", platform)
+			// No recorded failure is not the same as a success: the file is also
+			// absent or reset when a session is put in place by hand.
+			ok("web login %s: no failure recorded", platform)
 			continue
 		}
 		// The jar is what a poll actually uses: an empty one means the next request
