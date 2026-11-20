@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/mdpsec/huntdeck/internal/platform"
 )
@@ -136,5 +137,53 @@ func TestClearHandoffsBringsTargetsBack(t *testing.T) {
 	}
 	if cands, _ := s.ScanCandidates(ctx, nil, 10); len(cands) != 1 {
 		t.Fatalf("after clearing: %v", cands)
+	}
+}
+
+// RecentHandoffs is the only way back from a task id to what went into it, so it
+// has to group correctly, keep the newest first, and respect the limit.
+func TestRecentHandoffsGroupByTask(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t, nil)
+	batches := []struct {
+		task    string
+		targets []string
+	}{
+		{"task-old", []string{"a.example.com", "b.example.com"}},
+		{"task-new", []string{"c.example.com"}},
+	}
+	for _, b := range batches {
+		var items []ScanCandidate
+		for _, tgt := range b.targets {
+			items = append(items, ScanCandidate{Target: tgt, Platform: "intigriti", Handle: "h"})
+		}
+		if err := s.MarkHandedOff(ctx, items, b.task); err != nil {
+			t.Fatal(err)
+		}
+		// created_at has second resolution; keep the order deterministic.
+		time.Sleep(1100 * time.Millisecond)
+	}
+
+	byTask, order, err := s.RecentHandoffs(ctx, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(order) != 2 || order[0] != "task-new" {
+		t.Fatalf("order = %v, want the newest first", order)
+	}
+	if got := len(byTask["task-old"].Targets); got != 2 {
+		t.Fatalf("task-old carries %d targets", got)
+	}
+	if byTask["task-new"].Platform != "intigriti" {
+		t.Fatalf("platform = %q", byTask["task-new"].Platform)
+	}
+
+	// The limit keeps the newest and does not leave half a batch behind.
+	_, order, err = s.RecentHandoffs(ctx, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(order) != 1 || order[0] != "task-new" {
+		t.Fatalf("limit 1 gave %v", order)
 	}
 }
