@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -445,8 +444,11 @@ func checkDecisionModel(ctx context.Context, s *store.Store, dir string, ok, war
 		ok("decision model: not configured (scan handoffs and the policy check run on their own checks)")
 		return
 	}
+	// Timeout, not HTTP: a client supplied in HTTP carries its own transport and
+	// would drop the proxy this deployment needs (measured: 451 direct, 403
+	// through it).
 	client := &jev.Client{BaseURL: cfg.JevURL, Key: cfg.JevKey.Reveal(), Model: cfg.JevModel, Proxy: cfg.JevProxy,
-		HTTP: &http.Client{Timeout: 6 * time.Second}}
+		Timeout: 6 * time.Second}
 	start := time.Now()
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()

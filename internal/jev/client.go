@@ -28,6 +28,10 @@ type Client struct {
 	// Proxy is an HTTP proxy the call leaves through, when a direct egress is
 	// blocked: this deployment reaches TypeSafe only through the local proxy.
 	Proxy string
+	// Timeout bounds one call. Leave it zero for the 20s default; a caller that
+	// wants a shorter one sets this rather than supplying HTTP, because a client
+	// passed in HTTP has its own transport and would bypass Proxy silently.
+	Timeout time.Duration
 }
 
 type question struct {
@@ -122,7 +126,11 @@ func (c *Client) ask(ctx context.Context, state any, q question) (response, erro
 			}
 			transport.Proxy = http.ProxyURL(u)
 		}
-		httpClient = &http.Client{Timeout: 20 * time.Second, Transport: transport}
+		timeout := c.Timeout
+		if timeout == 0 {
+			timeout = 20 * time.Second
+		}
+		httpClient = &http.Client{Timeout: timeout, Transport: transport}
 	}
 	url := strings.TrimRight(c.BaseURL, "/") + "/v1/systemone"
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
