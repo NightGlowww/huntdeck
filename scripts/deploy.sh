@@ -237,7 +237,9 @@ else
     tail -1 /tmp/hd-bench.$$
   else
     grep -E "OVER|slower" /tmp/hd-bench.$$ | sed "s/^/  /" || true
-    echo "  (a route is over its budget; this does not fail the deploy)" >&2
+    echo "  (a route is over its budget; this does not fail the deploy. The numbers are
+  taken while the deploy is still running: re-run scripts/bench.sh once it settles
+  before treating one as a regression.)" >&2
   fi
   rm -f /tmp/hd-bench.$$
   # Keep the record too: one file per deploy, the last ten kept, so two
