@@ -69,5 +69,8 @@ func triageCmd(args []string, stdout, stderr io.Writer) int {
 	fmt.Fprintf(stdout, "%s\n", v.Call)
 	fmt.Fprintf(stdout, "  accepted %.2f · evidence %.2f · %s\n", v.Accept, v.Evidence, v.Model)
 	fmt.Fprintf(stdout, "  %s\n", v.Why)
+	if v.Advice != "" {
+		fmt.Fprintf(stdout, "  what would move it: %s (%.2f)\n", v.Advice, v.AdviceConfidence)
+	}
 	return 0
 }

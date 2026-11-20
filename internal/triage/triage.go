@@ -44,8 +44,12 @@ type Verdict struct {
 	// Call is submittable, needs_work or likely_rejected.
 	Call string
 	// Why names the axis that decided it, for the page and the report.
-	Why   string
-	Model string
+	Why string
+	// Advice is what would most raise the evidential strength, when the model
+	// was sure enough to name it; AdviceConfidence says how sure.
+	Advice           string
+	AdviceConfidence float64
+	Model            string
 }
 
 // Calls a verdict can carry.
@@ -95,7 +99,13 @@ func Judge(ctx context.Context, c *jev.Client, f Finding) (Verdict, error) {
 	if err != nil {
 		return Verdict{}, err
 	}
-	return classify(accept, evidence, model), nil
+	v := classify(accept, evidence, model)
+	// Only when the evidence is the problem: advice about a finding that
+	// would be rejected for scope is noise.
+	if evidence < evidenceFloor && v.Call != CallRejected {
+		v.Advice, v.AdviceConfidence = advise(ctx, c, state)
+	}
+	return v, nil
 }
 
 // classify is the rule, kept apart from the network so it can be tested
@@ -117,4 +127,37 @@ func classify(accept, evidence float64, model string) Verdict {
 		v.Why = "in scope, payable, and the evidence carries the impact"
 	}
 	return v
+}
+
+// adviceFloor is the confidence below which the model's suggestion is not
+// shown. Measured on one finding across five evidence strengths: it named
+// "prove it from a second identity" at 0.92 when the report had single-account
+// traffic - the one addition that moved the evidence score from 0.22 to 0.72 -
+// and answered at 0.18-0.35 everywhere else, where it would be guessing.
+const adviceFloor = 0.60
+
+// The additions the advisor chooses between.
+const (
+	AdviceSecondIdentity = "prove_it_from_a_second_identity"
+	AdviceRawTraffic     = "attach_raw_traffic"
+	AdviceSteps          = "write_reproduction_steps"
+	AdviceVideo          = "record_a_video"
+	AdviceScope          = "cite_the_scope_entry"
+	AdviceNothing        = "nothing_more_needed"
+)
+
+// advise asks what would most raise the evidential strength, and keeps the
+// answer only when the model was sure: a suggestion at 0.18 confidence is a
+// guess wearing a sentence.
+func advise(ctx context.Context, c *jev.Client, state map[string]any) (string, float64) {
+	v, err := c.Choice(ctx, state,
+		"What single addition would most raise the evidential strength of this report?",
+		[]string{AdviceSecondIdentity, AdviceRawTraffic, AdviceSteps, AdviceVideo, AdviceScope, AdviceNothing})
+	if err != nil || v.Confidence < adviceFloor {
+		return "", v.Confidence
+	}
+	if v.Choice == AdviceNothing {
+		return "", v.Confidence
+	}
+	return v.Choice, v.Confidence
 }
