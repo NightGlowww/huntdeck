@@ -166,6 +166,7 @@ func (s *Store) ClearHandoffs(ctx context.Context, taskIDs []string) (int, error
 				placeholders[i] = "?"
 				args[i] = id
 			}
+			//nolint:gosec // the placeholders are counted above; every value is bound
 			res, err = tx.tx.ExecContext(ctx, `DELETE FROM scan_handoffs WHERE task_id IN (`+strings.Join(placeholders, ",")+`)`, args...)
 		}
 		if err != nil {
