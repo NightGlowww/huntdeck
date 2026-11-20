@@ -193,3 +193,17 @@ state in the ticker loop. Not written yet: it wants a test that a refused start
 holds the next handoff, and the run that would prove it needs a scanner that is
 full, which is the current state but not a state to build tests on at seven in
 the morning.
+
+#### Checked: the progress tool cannot say whether a task failed
+
+`get_task_progress` is the only per-task tool the handoff key has, and it answers
+with per-target module timings - `{cmdFail, list: [{_id, TargetHandler: [...],
+PortScan: [...], ...}]}` - and no status at all. So HuntDeck cannot learn that a
+task failed, which is why releasing a failed task's targets is a manual
+`scan-clear --task` and not something the ticker does.
+
+Two ways out, neither written: ask the scanner for a `get_task` that returns the
+status on this key, or record the ids whose start was refused in HuntDeck itself
+(one column on `scan_handoffs`, a migration, and a retry on the next handoff).
+The second is self-contained; it is not written because a migration at eight in
+the morning, after two outages in one night, is not a trade worth making.
