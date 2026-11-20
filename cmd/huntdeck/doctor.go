@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -319,6 +320,7 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	// degrade quietly, so the doctor says which it is.
 	checkDecisionModel(ctx, s, filepath.Dir(path), ok, warn)
 	checkScanner(ctx, s, filepath.Dir(path), ok, warn)
+	checkProxy(ctx, s, filepath.Dir(path), ok, warn)
 
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
 		newest, oldest := time.Time{}, time.Time{}
@@ -525,4 +527,51 @@ func checkScanner(ctx context.Context, s *store.Store, dir string, ok, warn func
 		ok("scanner: %d of %d node(s) online, %d task(s) queued, %d node(s) with room",
 			online, len(nodes), queued, online-full)
 	}
+}
+
+// checkProxy reports whether the proxy this install is configured to use actually
+// carries traffic, and where it comes out.
+//
+// It earns its line: every platform failing at once looks like six broken
+// integrations, and the cause has been one dead proxy, one empty variable and one
+// node that answered later. Without this, the doctor said "no problems found"
+// while nothing could reach anything.
+func checkProxy(ctx context.Context, s *store.Store, dir string, ok, warn func(string, ...any)) {
+	cfg, err := overrides.New(s, dir, config.OSSource).Config(ctx)
+	if err != nil {
+		warn("proxy: the configuration could not be read (%v)", err)
+		return
+	}
+	if cfg.Proxy == nil {
+		ok("proxy: direct (no HUNTDECK_PROXY set)")
+		return
+	}
+	// A request through the proxy, and one to a platform: the first says the
+	// proxy answers, the second says the routing that matters works.
+	client := &http.Client{
+		Timeout:   12 * time.Second,
+		Transport: &http.Transport{Proxy: http.ProxyURL(cfg.Proxy)},
+	}
+	start := time.Now()
+	res, err := client.Get("https://api.ipify.org")
+	if err != nil {
+		warn("proxy: %s does not carry traffic (%v)", cfg.Proxy.Host, err)
+		return
+	}
+	body, _ := io.ReadAll(io.LimitReader(res.Body, 64))
+	_ = res.Body.Close()
+	exit := strings.TrimSpace(string(body))
+	took := time.Since(start).Round(time.Millisecond)
+	if res.StatusCode != http.StatusOK || exit == "" {
+		warn("proxy: %s answered %d for the exit-address probe", cfg.Proxy.Host, res.StatusCode)
+		return
+	}
+	plat, err := client.Get("https://app.intigriti.com/")
+	if err != nil {
+		warn("proxy: exit %s works, but a platform request failed (%v): check the routing rules", exit, err)
+		return
+	}
+	_ = plat.Body.Close()
+	ok("proxy: %s → %s in %s · app.intigriti.com %d (the rules send it through the same proxy)",
+		cfg.Proxy.Host, exit, took, plat.StatusCode)
 }
