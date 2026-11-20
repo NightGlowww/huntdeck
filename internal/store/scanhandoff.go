@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -146,4 +147,32 @@ func (s *Store) ScanHandoffCount(ctx context.Context) (int, time.Time, error) {
 		last, _ = time.Parse(time.RFC3339, at.String)
 	}
 	return n, last, nil
+}
+
+// ClearHandoffs forgets that targets were handed off, so they become candidates
+// again. With names set it clears only the targets whose task matches one of
+// them; without it clears everything. Returns how many rows went.
+func (s *Store) ClearHandoffs(ctx context.Context, taskIDs []string) (int, error) {
+	var n int64
+	err := s.Write(ctx, func(tx *Tx) error {
+		var res sql.Result
+		var err error
+		if len(taskIDs) == 0 {
+			res, err = tx.tx.ExecContext(ctx, `DELETE FROM scan_handoffs`)
+		} else {
+			placeholders := make([]string, len(taskIDs))
+			args := make([]any, len(taskIDs))
+			for i, id := range taskIDs {
+				placeholders[i] = "?"
+				args[i] = id
+			}
+			res, err = tx.tx.ExecContext(ctx, `DELETE FROM scan_handoffs WHERE task_id IN (`+strings.Join(placeholders, ",")+`)`, args...)
+		}
+		if err != nil {
+			return fmt.Errorf("clear handoffs: %w", err)
+		}
+		n, _ = res.RowsAffected()
+		return nil
+	})
+	return int(n), err
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"strings"
 
 	"github.com/mdpsec/huntdeck/internal/config"
 	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
@@ -73,4 +74,44 @@ func bugcrowdCaps(ctx context.Context, cfg config.Config, log *slog.Logger, hand
 		return caps, fmt.Errorf("the bugcrowd platform is not a client")
 	}
 	return client.SubmissionCaps(ctx, handle)
+}
+
+// scanClearCmd forgets the handoffs HuntDeck recorded, so targets become
+// candidates again. It is what makes a re-handoff possible after the scanner's
+// own tasks are deleted: the scanner cannot be driven from here (its key has no
+// delete tool), so the two halves are one command each.
+func scanClearCmd(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("scan-clear", flag.ContinueOnError)
+	tasks := fs.String("task", "", "only this task id (comma separated); default every handoff")
+	pos, code, ok := parseFlags(fs, args, stderr)
+	if !ok {
+		return code
+	}
+	if len(pos) > 0 {
+		fmt.Fprintf(stderr, "scan-clear: unexpected arguments: %v\n", pos)
+		return 2
+	}
+	ctx, stop := signalContext()
+	defer stop()
+	app, ok := openApp(ctx, stderr, false)
+	if !ok {
+		return 1
+	}
+	defer app.close()
+
+	var ids []string
+	if *tasks != "" {
+		for _, id := range strings.Split(*tasks, ",") {
+			if id = strings.TrimSpace(id); id != "" {
+				ids = append(ids, id)
+			}
+		}
+	}
+	n, err := app.store.ClearHandoffs(ctx, ids)
+	if err != nil {
+		fmt.Fprintf(stderr, "scan-clear: %v\n", err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "cleared %d handoff(s); those targets are candidates again\n", n)
+	return 0
 }

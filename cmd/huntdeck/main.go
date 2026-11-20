@@ -33,6 +33,8 @@ Commands:
   backup [--to FILE]  Write one file holding the database, the settings key and the sessions
                                                   [--data DIR] [--no-sessions] [--keep N]
   doctor       Look the data directory over: writability, schema, key, space  [--data DIR]
+  scan-clear  [--task ID,...] Forget the handoff records, so those targets are candidates
+                again; the scanner own tasks are deleted from its own page
   account     Your standing per platform: HackerOne reputation and signal,
                 Bugcrowd submission allowance, Intigriti reputation and rank
   bugcrowd-caps  What Bugcrowd allows this account to submit: the weekly cap,
@@ -77,6 +79,7 @@ var commands = map[string]command{
 	"restore":       restoreCmd,
 	"doctor":        doctorCmd,
 	"account":       accountCmd,
+	"scan-clear":    scanClearCmd,
 	"bugcrowd-caps": bugcrowdCapsCmd,
 }
 
