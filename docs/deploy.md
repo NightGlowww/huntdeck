@@ -159,6 +159,26 @@ $ echo $?
 0
 ```
 
+### What "healthy" means, and what it does not
+
+The image carries a Docker healthcheck that runs `huntdeck healthcheck`: it
+loads the configuration and asks the server's own `/healthz` for 200, inside a
+three-second budget, every thirty seconds. It answers one question — is the web
+server up and able to serve? — and that is the right question for a container
+runtime: a probe that also waited on a poll would restart a working instance
+during a slow platform.
+
+Everything else is `huntdeck doctor`'s to report, and it is deliberately not a
+liveness probe: the schema, the key, the space, the proxy, the scanner's
+headroom, each website login's session, the polls' freshness and the queue's
+age. A container can be `healthy` for days while every poll fails; that shows up
+in the doctor, in `/api/v1/status` and on `/settings`, not in `docker ps`.
+
+For a cron job, `huntdeck doctor --short` prints only the failures and warnings
+and keeps the exit status, so the job stays quiet until there is something to
+say. From outside the host, `scripts/watch.sh` does the same job over HTTP and
+can alert through a webhook when the instance stops answering at all.
+
 ## What keeps script kiddies out
 
 Three layers, each cheap and each visible in the logs:
