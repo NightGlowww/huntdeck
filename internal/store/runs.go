@@ -185,7 +185,7 @@ func (s *Store) RecentRuns(ctx context.Context, limit int) ([]Run, error) {
 const selectRuns = `
 	SELECT id, platform, mode, trigger, status, listing_complete, listing_recent, started_at, finished_at, programs_seen,
 		scopes_fetched, scopes_failed, scopes_unchanged, stats_fetched, stats_failed, disclosures_new, resolutions_new, accepted_new, changes, requests, rate_limited,
-		error
+		error, last_activity
 	FROM poll_runs `
 
 // queryRuns appends where, which is always a constant from this file; values
@@ -200,13 +200,14 @@ func (s *Store) queryRuns(ctx context.Context, where string, args ...any) ([]Run
 	for rows.Next() {
 		var r Run
 		var started string
-		var finished sql.NullString
+		var finished, activity sql.NullString
 		if err := rows.Scan(&r.ID, &r.Platform, &r.Mode, &r.Trigger, &r.Status, &r.ListingComplete, &r.ListingRecent, &started, &finished,
-			&r.ProgramsSeen, &r.ScopesFetched, &r.ScopesFailed, &r.ScopesUnchanged, &r.StatsFetched, &r.StatsFailed, &r.DisclosuresNew, &r.ResolutionsNew, &r.AcceptedNew, &r.Changes, &r.Requests, &r.RateLimited, &r.Error); err != nil {
+			&r.ProgramsSeen, &r.ScopesFetched, &r.ScopesFailed, &r.ScopesUnchanged, &r.StatsFetched, &r.StatsFailed, &r.DisclosuresNew, &r.ResolutionsNew, &r.AcceptedNew, &r.Changes, &r.Requests, &r.RateLimited, &r.Error, &activity); err != nil {
 			return nil, err
 		}
 		r.StartedAt = parseTS(started)
 		r.FinishedAt = parseTSPtr(finished)
+		r.LastActivity = parseTSPtr(activity)
 		out = append(out, r)
 	}
 	return out, rows.Err()

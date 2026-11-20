@@ -54,6 +54,14 @@ func (s *server) liveRuns(ctx context.Context, runs []store.Run) map[int64]liveR
 				l.Usually += "–" + humanize.Duration(hi)
 			}
 		}
+		// The heartbeat is in the row, so a run started by a process that has since
+		// restarted still shows whether it is working - its in-memory progress is
+		// gone. Without this, a row left behind by a dead process reads as a live
+		// poll with nothing to say.
+		if r.LastActivity != nil && !r.LastActivity.IsZero() {
+			idle := max(now.Sub(*r.LastActivity), 0)
+			l.Idle, l.Stalled = humanize.Duration(max(idle, time.Second)), idle >= stalledAfter
+		}
 		if s.Progress != nil {
 			if p, ok := s.Progress(r.ID); ok {
 				l.Known, l.Requests = true, p.Requests
