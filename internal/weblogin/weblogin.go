@@ -32,6 +32,10 @@ import (
 // RetryAfter is how long a failed browser login blocks the next one.
 const RetryAfter = 30 * time.Minute
 
+// LoginBudget is how long one browser login may take: several page
+// steps, each waiting for the page to move, plus a slow proxy.
+const LoginBudget = 4 * time.Minute
+
 // ErrWaiting is wrapped by History.Login's error when the last login
 // failed under RetryAfter ago, so none was tried.
 var ErrWaiting = errors.New("retrying after")
@@ -179,6 +183,15 @@ func (h *History) Login(ctx context.Context, login func(context.Context) error) 
 	if failure != nil && h.Now().Sub(lastFailure) < RetryAfter {
 		return fmt.Errorf("%w (%w %s)", failure, ErrWaiting, lastFailure.Add(RetryAfter).Format(time.Kitchen))
 	}
+	// A login runs longer than the poll that triggered it, and a poll can be
+	// canceled at any moment (a restart, a deadline, another platform giving up).
+	// Cancelling a browser login halfway leaves a filled-in page nobody submits:
+	// that is how "the page didn't move on from email: context canceled" is
+	// produced, and it is not the platform refusing anything. The work is worth
+	// finishing, so it gets its own budget and does not inherit the caller's
+	// cancellation. Values still pass through.
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), LoginBudget)
+	defer cancel()
 	if err := login(ctx); err != nil {
 		h.record(func() {
 			if IsRejection(err) {
