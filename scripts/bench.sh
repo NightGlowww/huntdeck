@@ -41,6 +41,10 @@ if [ -n "$pw" ]; then
 fi
 paths=(
   / /programs /invites /targets /changes /disclosed /queue /stats /settings /api /methodology
+  # The settings tabs render their own data: the polling tab once carried a
+  # request to bugcrowd.com inside the render and went from 9 ms to 1.6 s
+  # without any other route noticing.
+  "/settings?tab=polling" "/settings?tab=accounts"
   /programs/hackerone/1win_com
   "/programs/hackerone/1win_com?tab=scope"
   "/programs/hackerone/1win_com?tab=policy"
