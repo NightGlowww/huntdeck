@@ -72,6 +72,17 @@ func seedCmd(args []string, stdout, stderr io.Writer) int {
 // (downloadSeed); one that can't be downloaded or loaded is skipped with a
 // warning, and the install starts empty.
 func autoSeed(ctx context.Context, st *store.Store, dataDir, seedURL string, client *http.Client, log *slog.Logger) error {
+	// A marker left by an earlier version still holds the whole archive: emptying
+	// it here reclaims that, and the marker is only ever checked for existence.
+	for _, name := range seedNames {
+		if info, err := os.Stat(filepath.Join(dataDir, name+".loaded")); err == nil && info.Size() > 0 {
+			if err := os.Truncate(filepath.Join(dataDir, name+".loaded"), 0); err != nil {
+				log.Warn("seed marker not truncated", "path", name+".loaded", "err", err)
+			} else {
+				log.Info("seed marker emptied", "path", name+".loaded", "freed_mb", info.Size()>>20)
+			}
+		}
+	}
 	downloaded := false
 	if seedURL != "" && !slices.ContainsFunc(seedNames, func(n string) bool {
 		_, err := os.Stat(filepath.Join(dataDir, n))
