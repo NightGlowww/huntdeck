@@ -322,7 +322,7 @@ func doctorFreshness(ctx context.Context, path string, ok, warn, bad func(string
 	checkDecisionModel(ctx, s, filepath.Dir(path), ok, warn)
 	checkScanner(ctx, s, filepath.Dir(path), ok, warn)
 	checkProxy(ctx, s, filepath.Dir(path), ok, warn)
-	checkWebLogins(filepath.Dir(path), ok, warn)
+	checkWebLogins(ctx, s, filepath.Dir(path), ok, warn)
 
 	if checked, err := s.PlatformsChecked(ctx); err == nil && len(checked) > 0 {
 		newest, oldest := time.Time{}, time.Time{}
@@ -596,7 +596,17 @@ func proxyGet(ctx context.Context, c *http.Client, url string) (*http.Response, 
 // Hours have gone into diagnosing exactly that from a red line on the accounts
 // page, so the doctor says it in one place: is there a session, and if the last
 // attempt failed, when will the next one be.
-func checkWebLogins(dir string, ok, warn func(string, ...any)) {
+func checkWebLogins(ctx context.Context, s *store.Store, dir string, ok, warn func(string, ...any)) {
+	// A login that is no longer configured is not a failure: the file it left is a
+	// record of an earlier setup. Reading the configuration is what separates
+	// "bugcrowd has been failing for two days" from "bugcrowd's login was removed".
+	cfg, cfgErr := overrides.New(s, dir, config.OSSource).Config(ctx)
+	configured := map[string]bool{
+		"hackerone": cfg.HackerOne.Email != "",
+		"bugcrowd":  cfg.Bugcrowd.Email != "",
+		"intigriti": cfg.Intigriti.Email != "",
+		"yeswehack": cfg.YesWeHack.Email != "",
+	}
 	sess := filepath.Join(dir, "sessions")
 	entries, err := os.ReadDir(sess)
 	if err != nil {
@@ -619,6 +629,10 @@ func checkWebLogins(dir string, ok, warn func(string, ...any)) {
 		}
 		var st state
 		_ = json.Unmarshal(raw, &st)
+		if cfgErr == nil && !configured[platform] {
+			ok("web login %s: not configured now (an earlier login left a record)", platform)
+			continue
+		}
 		reported++
 		if st.Error == "" {
 			// No recorded failure is not the same as a success: the file is also
