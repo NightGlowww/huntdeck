@@ -65,6 +65,10 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	// waiting" over a database error, which reads as a quiet day.
 	if d.Waiting, err = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 400); err != nil {
 		d.WaitingError = "could not read the candidates: " + err.Error()
+	} else {
+		// A host in two programs is one row to a reader, as it is one task to the
+		// handoff: the same name twice reads as a bug in the list.
+		d.Waiting = firstPerTarget(d.Waiting)
 	}
 	if d.HandedOff, d.LastHandoff, err = s.Store.ScanHandoffCount(r.Context()); err != nil && d.WaitingError == "" {
 		d.WaitingError = "could not read the handoff count: " + err.Error()

@@ -4,14 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/mdpsec/huntdeck/internal/scanhandoff"
-	"github.com/mdpsec/huntdeck/internal/scopesentry"
 	"io"
 	"log/slog"
 	"strings"
 
 	"github.com/mdpsec/huntdeck/internal/config"
 	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
+	"github.com/mdpsec/huntdeck/internal/scanhandoff"
+	"github.com/mdpsec/huntdeck/internal/scopesentry"
 )
 
 // bugcrowdCaps prints what Bugcrowd allows this account to submit: the weekly
