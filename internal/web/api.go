@@ -96,7 +96,10 @@ func (s *server) apiTargets(w http.ResponseWriter, r *http.Request) {
 	// silently ignored the rest, so sort=new came back in value order and looked
 	// sorted to a caller who did not check. Same three, and anything else is refused
 	// rather than ignored.
-	best := true
+	// Only an explicit sort uses the scored listing; without one this stays the
+	// plain target list it always was (a scored listing drops targets too old to
+	// score, which is not what "every domain" means).
+	best := q.Get("sort") != ""
 	switch q.Get("sort") {
 	case "", "best", "score":
 	case "new":
