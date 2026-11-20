@@ -26,4 +26,7 @@ type RuleVerdict struct {
 	Key   string
 	Label string
 	Break float64
+	// Quote is the policy sentence that states the rule, when the model named
+	// one with confidence. Filled only for the rules that were flagged.
+	Quote string
 }

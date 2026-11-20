@@ -6,7 +6,7 @@
     <span class="aside">{{T "a decision model reads the text above"}}</span></div>
   <div class="panel-body">
     {{if .PolicyError}}<p class="flash err">{{if eq .PolicyError "nomodel"}}{{T "No decision model is configured: set its key in Settings > Accounts > Decision model."}}{{else}}{{T "The check could not run: try again, or read the policy yourself."}}{{end}}</p>{{end}}
-    {{if .PolicyCall}}<p class="flash {{if eq .PolicyCall "forbidden"}}err{{else if eq .PolicyCall "allowed"}}ok{{else}}warn{{end}}"><b>{{.PolicyCall}}</b> · {{TF "P(complies) %s" .PolicyP}}<br>{{if .PolicyRule}}{{TF "worst rule: %s" .PolicyRule}} · {{end}}{{.PolicyWhy}}</p>{{end}}
+    {{if .PolicyCall}}<p class="flash {{if eq .PolicyCall "forbidden"}}err{{else if eq .PolicyCall "allowed"}}ok{{else}}warn{{end}}"><b>{{.PolicyCall}}</b> · {{TF "P(complies) %s" .PolicyP}}<br>{{if .PolicyRule}}{{TF "worst rule: %s" .PolicyRule}} · {{end}}{{.PolicyWhy}}{{if .PolicyQuote}}<br><q>{{.PolicyQuote}}</q>{{end}}</p>{{end}}
     <form method="post" action="/programs/{{.P.Platform}}/{{.P.Handle}}/policy-check" class="policy-check-form" data-busy="{{T "Reading the policy…"}}" data-stay-busy>
       <label class="sr-only" for="plan">{{T "What you plan to do"}}</label>
       <input id="plan" type="text" name="plan" maxlength="600" spellcheck="false"

@@ -97,6 +97,7 @@ type programData struct {
 	PolicyCall    string
 	PolicyP       string
 	PolicyRule    string
+	PolicyQuote   string
 	PolicyWhy     string
 	PolicyError   string
 	// PojiaFailed says the fetch failed and nothing is cached, so the panel
@@ -171,6 +172,7 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 	d.PolicyCall = q.Get("policy_call")
 	d.PolicyP = q.Get("policy_p")
 	d.PolicyRule = q.Get("policy_rule")
+	d.PolicyQuote = q.Get("policy_quote")
 	d.PolicyWhy = q.Get("policy_why")
 	d.PolicyError = q.Get("policy_error")
 

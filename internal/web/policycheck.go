@@ -53,6 +53,7 @@ func (s *server) programPolicyCheck(w http.ResponseWriter, r *http.Request) {
 	q := "&policy_call=" + a.Call +
 		"&policy_p=" + strconv.FormatFloat(worst.Break, 'f', 2, 64) +
 		"&policy_rule=" + worst.Key +
+		"&policy_quote=" + urlQuery(worst.Quote) +
 		"&policy_why=" + urlQuery(a.Why)
 	http.Redirect(w, r, back+q, http.StatusSeeOther)
 }

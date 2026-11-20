@@ -110,6 +110,17 @@ func Check(ctx context.Context, c *jev.Client, program, policy, plan string) (An
 	}
 	a := classify(known, c.Model)
 	a.Unknown = unknown
+	// Cite the sentence only for the rules that were flagged: a quote for
+	// every rule would triple the cost to say nothing new.
+	for i := range a.Rules {
+		if a.Rules[i].Break < breakPossible {
+			continue
+		}
+		quote, _, err := Cite(ctx, c, policy, a.Rules[i].Label)
+		if err == nil {
+			a.Rules[i].Quote = quote
+		}
+	}
 	return a, nil
 }
 
