@@ -80,3 +80,50 @@
 .scan-list li { padding: 3px 0; border-bottom: 1px solid var(--border-weak, var(--border)); font-size: calc(12.5px * var(--fs, 1)); }
 .scan-list li:last-child { border-bottom: 0; }
 @media (max-width: 700px) { .scan-row { grid-template-columns: 1fr; gap: 4px; } }
+
+/* ---------- MCP and model workspaces ---------- */
+.mcp-page-head { display: grid; gap: 16px; }
+.mcp-page-head .connection-setup { border-color: color-mix(in srgb, var(--accent) 22%, var(--border)); }
+.connection-setup .panel-head { min-height: 58px; padding: 14px 20px; background: color-mix(in srgb, var(--accent-weak) 38%, var(--surface)); }
+.connection-setup .panel-head h2 { font-size: calc(17px * var(--fs, 1)); }
+.connection-setup .panel-body { padding: 18px 20px 20px; }
+.connection-instructions { max-width: 62ch; margin-bottom: 14px; }
+.connection-example { box-shadow: 0 8px 24px rgb(30 20 80 / .06); }
+.mcp-secondary { margin-top: 16px; overflow: hidden; }
+.mcp-secondary > summary { list-style: none; cursor: pointer; }
+.mcp-secondary > summary::-webkit-details-marker { display: none; }
+.mcp-secondary > summary .aside { margin-left: auto; }
+.mcp-secondary > summary .aside .i { margin-left: 8px; transition: transform .16s ease; }
+.mcp-secondary[open] > summary .aside .i { transform: rotate(90deg); }
+.mcp-secondary .panel-body { padding-top: 14px; }
+.mcp-index { max-height: 86px; overflow-y: auto; padding: 4px 2px 8px; scrollbar-width: thin; }
+.mcp-index a { background: var(--surface-2); }
+.mcp-tool { padding: 0; overflow: hidden; }
+.mcp-tool > summary { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; cursor: pointer; list-style: none; }
+.mcp-tool > summary::-webkit-details-marker { display: none; }
+.mcp-tool > summary:hover { background: var(--surface-2); }
+.mcp-tool > summary > .i { flex: none; margin-left: auto; color: var(--muted); transition: transform .16s ease; }
+.mcp-tool[open] > summary { border-bottom: 1px solid var(--border); }
+.mcp-tool[open] > summary > .i { transform: rotate(90deg); }
+.mcp-tool-name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mcp-tool-body { padding: 12px 14px 14px; }
+.mcp-tool-body > p { margin-bottom: 10px; }
+
+.llm-page { display: grid; gap: 16px; }
+.llm-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 4px 2px 2px; }
+.llm-eyebrow { display: block; margin-bottom: 5px; color: var(--accent); font-size: calc(11px * var(--fs, 1)); font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.llm-hero h1 { font-size: calc(26px * var(--fs, 1)); line-height: 1.2; }
+.llm-hero p { max-width: 72ch; margin: 8px 0 0; color: var(--muted); line-height: 1.55; }
+.llm-hero-state { display: flex; align-items: center; gap: 8px; flex: none; padding-top: 24px; color: var(--muted); }
+.llm-hero-state code { color: var(--text-2); }
+.llm-config .acct-sec { max-width: 980px; }
+.llm-config .acct-field { grid-template-columns: minmax(180px, 220px) minmax(0, 1fr) auto; }
+.llm-config .llm-actions { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+@media (max-width: 700px) {
+  .connection-setup .panel-head, .connection-setup .panel-body { padding-inline: 14px; }
+  .llm-hero { display: grid; gap: 8px; }
+  .llm-hero-state { padding-top: 0; }
+  .llm-hero h1 { font-size: calc(22px * var(--fs, 1)); }
+  .llm-config .acct-field { grid-template-columns: minmax(0, 1fr) auto; }
+}

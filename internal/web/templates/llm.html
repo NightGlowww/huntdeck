@@ -1,9 +1,13 @@
-{{define "content"}}{{with .Data}}
-<p class="lead">{{T "An optional OpenAI-compatible model. It has one job here: read each program's policy once and state the rules it sets, instead of leaving you to read them. Off unless you configure it."}}</p>
+{{define "content"}}{{with .Data}}<div class="llm-page">
+<header class="llm-hero">
+  <div><span class="llm-eyebrow">{{T "Optional capabilities"}}</span><h1>{{T "AI policy extraction"}}</h1>
+    <p>{{T "An optional OpenAI-compatible model. It has one job here: read each program's policy once and state the rules it sets, instead of leaving you to read them. Off unless you configure it."}}</p></div>
+  <div class="llm-hero-state">{{if .Configured}}<span class="chip ok">{{T "configured"}}</span><code>{{.Model}}</code>{{else}}<span class="chip">{{T "off"}}</span>{{end}}</div>
+</header>
 
-<section class="panel">
+<section class="panel llm-config">
   <div class="panel-head"><h2>{{T "Endpoint and key"}}</h2>
-    <span class="aside">{{if .Configured}}<span class="chip ok">{{T "configured"}}</span> <code>{{.Model}}</code>{{else}}<span class="chip">{{T "off"}}</span>{{end}}</span></div>
+    <span class="aside">{{T "three values"}}</span></div>
   <div class="panel-body">
     <form id="llm-save" method="post" action="/settings/accounts" autocomplete="off">
       <input type="hidden" name="group" value="ai">
@@ -25,4 +29,4 @@
     <p><a class="button small secondary" href="/settings">{{T "Run it from the polling settings"}}</a></p>
     <p class="muted small">{{T "Nothing else calls the model: no scoring, no summaries, no sending program data anywhere you did not configure."}}</p>
   </div>
-</section>{{end}}{{end}}
+</section></div>{{end}}{{end}}

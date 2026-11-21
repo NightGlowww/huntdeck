@@ -1,4 +1,5 @@
 {{define "content"}}{{with .Data}}
+<div class="mcp-page-head">
 <section class="panel connection-setup">
   <div class="panel-head">
     <h2>{{T "Client configuration"}}</h2>
@@ -25,6 +26,7 @@
     </div>
   </div>
 </section>
+</div>
 
 <section class="panel credentials" id="mcp-keys">
   <details{{if or .ShowAll .Flash}} open{{end}}>
@@ -65,30 +67,32 @@
   </details>
 </section>
 
-<section class="panel">
-  <div class="panel-head"><h2>{{T "Running it"}}</h2><span class="aside">{{T "one process, no port"}}</span></div>
+<details class="panel mcp-secondary">
+  <summary class="panel-head"><h2>{{T "Running it"}}</h2><span class="aside">{{T "one process, no port"}}<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></span></summary>
   <div class="panel-body">
     <div class="ex-head"><span>{{T "Command"}}</span><button type="button" class="ghost small" data-copy="#mcp-cmd"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
     <pre class="code"><code id="mcp-cmd">HUNTDECK_URL={{.Base}} HUNTDECK_TOKEN={{if .NewToken}}…just minted above{{else}}mcp_…{{end}} huntdeck-mcp</code></pre>
     <p class="muted small">{{T "The same server as a stdio process, for a terminal agent that spawns commands; a client in another app uses the HTTP shape above."}}</p>
   </div>
-</section>
+</details>
 
 <section class="panel">
   <div class="panel-head"><h2>{{T "Tools"}}</h2><span class="aside">{{TF "%d in all" (len .Tools)}}</span></div>
   <div class="panel-body">
     <p class="muted small">{{T "This list comes from the same registry the server answers tools/list from, so it cannot list a tool that does not exist or miss one that does. A server started with HUNTDECK_MCP_READONLY=1 leaves out the ones marked as changing data."}}</p>
     <ul class="mcp-index">{{range .Tools}}<li><a href="#{{.Name}}">{{.Name}}</a></li>{{end}}</ul>
-    {{range .Tools}}
-    <div class="mcp-tool" id="{{.Name}}">
-      <h3><code>{{.Name}}</code>{{if .Write}} <span class="chip">{{T "changes data"}}</span>{{end}}</h3>
-      <p>{{.Description}}</p>
-      {{if .Arguments}}
-      <table class="mcp-args"><thead><tr><th>{{T "Argument"}}</th><th>{{T "Type"}}</th><th>{{T "What it is for"}}</th></tr></thead><tbody>
-        {{range .Arguments}}<tr><td><code>{{.Name}}</code>{{if .Required}} <span class="chip small">{{T "required"}}</span>{{end}}</td><td>{{.Type}}</td><td>{{.What}}</td></tr>{{end}}
-      </tbody></table>
-      {{else}}<p class="muted small">{{T "No arguments."}}</p>{{end}}
-    </div>
+    {{range $i, $tool := .Tools}}
+    <details class="mcp-tool" id="{{$tool.Name}}"{{if eq $i 0}} open{{end}}>
+      <summary><span class="mcp-tool-name"><code>{{$tool.Name}}</code>{{if $tool.Write}} <span class="chip">{{T "changes data"}}</span>{{end}}</span><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <div class="mcp-tool-body">
+        <p>{{$tool.Description}}</p>
+        {{if $tool.Arguments}}
+        <table class="mcp-args"><thead><tr><th>{{T "Argument"}}</th><th>{{T "Type"}}</th><th>{{T "What it is for"}}</th></tr></thead><tbody>
+          {{range $tool.Arguments}}<tr><td><code>{{.Name}}</code>{{if .Required}} <span class="chip small">{{T "required"}}</span>{{end}}</td><td>{{.Type}}</td><td>{{.What}}</td></tr>{{end}}
+        </tbody></table>
+        {{else}}<p class="muted small">{{T "No arguments."}}</p>{{end}}
+      </div>
+    </details>
     {{end}}
   </div>
 </section>{{end}}{{end}}
