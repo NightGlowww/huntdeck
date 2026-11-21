@@ -255,6 +255,15 @@ func translateChartText(lang string, messages *i18n.Bundle, value string) string
 		{"resolved", "已解决"},
 		{"shown", "已展示"},
 		{"so far", "截至目前"},
+		{"saved ", "已保存 "},
+		{"HuntDeck saves it daily: its line starts with the next day's", "HuntDeck 每天保存，曲线从次日的"},
+	} {
+		value = strings.ReplaceAll(value, pair.from, pair.to)
+	}
+	for _, pair := range []struct{ from, to string }{
+		{"Jan ", "1 月 "}, {"Feb ", "2 月 "}, {"Mar ", "3 月 "}, {"Apr ", "4 月 "},
+		{"May ", "5 月 "}, {"Jun ", "6 月 "}, {"Jul ", "7 月 "}, {"Aug ", "8 月 "},
+		{"Sep ", "9 月 "}, {"Oct ", "10 月 "}, {"Nov ", "11 月 "}, {"Dec ", "12 月 "},
 	} {
 		value = strings.ReplaceAll(value, pair.from, pair.to)
 	}
