@@ -222,6 +222,13 @@ func (t *Tx) queueOutbox(ctx context.Context, m OutboxMessage) error {
 	return err
 }
 
+// QueueOutboxAndPending queues outbox messages and digest events together, the
+// way QueueRun does for a poll; a handoff report uses the same path so both
+// kinds of channel are covered in one write.
+func (s *Store) QueueOutboxAndPending(ctx context.Context, outbox []OutboxMessage, pending []PendingEvent) error {
+	return s.Write(ctx, func(tx *Tx) error { return tx.queue(ctx, outbox, pending) })
+}
+
 // QueueOutbox queues one message (a test, say).
 func (s *Store) QueueOutbox(ctx context.Context, m OutboxMessage) error {
 	return s.Write(ctx, func(tx *Tx) error { return tx.queueOutbox(ctx, m) })

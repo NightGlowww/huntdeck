@@ -48,18 +48,19 @@ func ReportHandoff(ctx context.Context, st *store.Store, log *slog.Logger, sum s
 				matched = append(matched, m)
 			}
 		}
-		if len(matched) == 0 || !c.Instant {
+		if len(matched) == 0 {
 			continue
 		}
-		outbox, _, err := route([]store.NotifyChannel{c}, matched)
+		// route already knows both paths: a channel that sends at once gets an
+		// outbox row, one with a digest gets pending events for its slot. Using
+		// it keeps a handoff's behaviour identical to a poll's.
+		outbox, pending, err := route([]store.NotifyChannel{c}, matched)
 		if err != nil {
 			log.WarnContext(ctx, "scan: cannot route the handoff report", "err", err)
 			continue
 		}
-		for _, m := range outbox {
-			if err := st.QueueOutbox(ctx, m); err != nil {
-				log.WarnContext(ctx, "scan: cannot queue the handoff report", "err", err)
-			}
+		if err := st.QueueOutboxAndPending(ctx, outbox, pending); err != nil {
+			log.WarnContext(ctx, "scan: cannot queue the handoff report", "err", err)
 		}
 	}
 }

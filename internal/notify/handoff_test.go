@@ -107,3 +107,33 @@ type errBlocked struct{}
 func (e errBlocked) Error() string {
 	return "the decision model says block (confidence 0.93): no scan tasks created"
 }
+
+// A channel with a digest gets the event as a pending row, so the daily
+// summary includes handoffs like everything else.
+func TestReportHandoffDigest(t *testing.T) {
+	ctx := context.Background()
+	st := handoffEnv(t)
+	log := slog.New(slog.DiscardHandler)
+
+	ch, err := st.SaveNotifyChannel(ctx, store.NotifyChannel{Kind: store.NotifyWebhook, Name: "dig", Enabled: true, DigestAt: "09:00", Rules: Rules{Events: []string{EventScanHandoff}}.JSON()})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ReportHandoff(ctx, st, log, scanhandoff.Summary{Tasks: 1, Targets: 2, Node: "n", Programs: []string{"Acme"}}, nil)
+
+	pending, err := st.PendingEvents(ctx, ch)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pending) != 1 {
+		t.Fatalf("a digest channel has %d pending events, want 1", len(pending))
+	}
+	var ev Event
+	if err := json.Unmarshal([]byte(pending[0].Event), &ev); err != nil {
+		t.Fatal(err)
+	}
+	if ev.Kind != EventScanHandoff {
+		t.Fatalf("pending event kind %q", ev.Kind)
+	}
+}
