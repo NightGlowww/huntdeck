@@ -2,7 +2,7 @@
    A contents rail of endpoints, then a panel each: what it does and its
    parameters, beside its example request and response (Send replaces the
    sample with this HuntDeck's answer). */
-.apid { display: grid; grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.apid { display: grid; grid-template-columns: clamp(230px, 18vw, 280px) minmax(0, 1fr); gap: 24px; align-items: start; }
 .eps { display: grid; gap: 16px; min-width: 0; }
 .eps > .panel + .panel { margin-top: 0; }
 .apid [id] { scroll-margin-top: calc(72px + var(--db-h)); }
@@ -14,9 +14,10 @@
 
 /* The list scrolls under its own search field. On a phone the same directory
    is a native disclosure; the links still work without JavaScript. */
-.apinav { position: sticky; top: calc(72px + var(--db-h)); }
+.apinav { position: sticky; top: calc(72px + var(--db-h)); border: 0; background: transparent; }
+.apinav .api-directory { overflow: hidden; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: 0 8px 24px rgb(20 16 50 / .05); }
 .api-directory summary { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 10px 14px;
-  color: var(--text); font-weight: 650; cursor: pointer; list-style: none; }
+  border-bottom: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-weight: 650; cursor: pointer; list-style: none; }
 .api-directory summary::-webkit-details-marker { display: none; }
 .api-directory summary .i { width: 16px; height: 16px; color: var(--muted); }
 .api-directory summary .dir-chev { width: 13px; height: 13px; margin-left: auto; }
@@ -26,22 +27,22 @@
 .apifilter .i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--muted); pointer-events: none; }
 .apifilter input[type="search"] { width: 100%; height: 36px; padding-inline: 32px 8px; background: var(--surface-2); }
 .apinav .filter-count { display: block; margin: 0 14px 8px; }
-.an-links { max-height: calc(100dvh - 216px - var(--db-h)); overflow: auto; overscroll-behavior: contain; padding: 4px 7px 10px; scrollbar-width: thin; }
-.an-links a { display: flex; align-items: baseline; gap: 8px; padding: 7px 8px; border-radius: 5px; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); line-height: 1.35; }
+.an-links { max-height: calc(100dvh - 216px - var(--db-h)); overflow: auto; overscroll-behavior: contain; padding: 8px; scrollbar-width: thin; }
+.an-links a { display: flex; align-items: baseline; gap: 8px; margin: 2px 0; padding: 8px 9px; border-left: 3px solid transparent; border-radius: 8px; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); line-height: 1.35; }
 .an-links .an-t { min-width: 0; overflow-wrap: anywhere; }
 .an-links a:hover { background: var(--row-hover); color: var(--text); }
-.an-links a.on { background: var(--accent-weak); color: var(--accent); font-weight: 600; }
-.an-g { margin: 12px 8px 4px; color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 650; }
+.an-links a.on { border-left-color: var(--accent); background: var(--accent-weak); color: var(--accent); font-weight: 650; }
+.an-g { margin: 16px 9px 5px; color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .an-links .mth { align-self: flex-start; }
 
-.api-start { overflow: hidden; }
-.api-start-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 18px 20px 0; }
-.api-start-head h2 { margin: 0; font-size: calc(21px * var(--fs, 1)); line-height: 1.25; }
+.api-start { overflow: visible; border: 0; background: transparent; }
+.api-start-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 0 0 14px; }
+.api-start-head h2 { margin: 0; font-size: calc(24px * var(--fs, 1)); line-height: 1.2; letter-spacing: -.02em; }
 .api-resources { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
-.api-resource { display: inline-flex; align-items: center; min-height: 32px; gap: 5px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 550; color: var(--accent); }
+.api-resource { display: inline-flex; align-items: center; min-height: 32px; gap: 5px; padding: 0 10px; border: 1px solid var(--border-input); border-radius: 8px; background: var(--surface); font-size: calc(12.5px * var(--fs, 1)); font-weight: 550; color: var(--accent); }
 .api-resource:hover { text-decoration: underline; }
 .api-resource .i { width: 15px; height: 15px; }
-.api-connect { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 14px 24px; padding: 16px 20px 18px; }
+.api-connect { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 16px 24px; padding: 20px 22px; border: 1px solid var(--border); border-radius: 14px 14px 0 0; background: var(--surface); box-shadow: 0 8px 24px rgb(20 16 50 / .05); }
 .api-connect h3, .apifacts dt { margin: 0 0 5px; font-size: calc(12px * var(--fs, 1)); font-weight: 600; color: var(--muted); }
 .api-auth p, .apifacts dd { margin: 0; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); line-height: 1.55; }
 .api-auth p + p { margin-top: 5px; }
@@ -51,16 +52,17 @@
 .api-url button { display: none; flex: none; }
 .js .api-url button { display: inline-flex; }
 .apifacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 10px 24px;
-  margin: 0; padding: 12px 20px; border-top: 1px solid var(--border); background: var(--surface-2); }
+  margin: 0; padding: 14px 22px; border: 1px solid var(--border); border-top: 0; border-radius: 0 0 14px 14px; background: var(--surface-2); }
 .apifacts dt { margin: 0; }
 .apifacts dd { overflow-wrap: anywhere; }
+.eps > .credentials { border-radius: 14px; box-shadow: 0 8px 24px rgb(20 16 50 / .04); }
 
-.apigroup { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 12px; margin: 12px 0 -5px; color: var(--text);
+.apigroup { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 12px; margin: 28px 0 -5px; color: var(--text);
   font-size: calc(17px * var(--fs, 1)); font-weight: 650; line-height: 1.35; }
 .apigroup span { color: var(--muted); font-size: calc(13px * var(--fs, 1)); font-weight: 400; }
 
-.ep { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46%); scroll-margin-top: calc(72px + var(--db-h)); }
-.ep-doc { min-width: 0; padding: 16px; }
+.ep { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 44%); scroll-margin-top: calc(72px + var(--db-h)); border-radius: 14px; overflow: hidden; box-shadow: 0 8px 24px rgb(20 16 50 / .04); }
+.ep-doc { min-width: 0; padding: 22px; }
 .ep-doc h3 { margin: 0 0 8px; font-size: calc(16px * var(--fs, 1)); }
 .ep-path { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .ep-path code { overflow-wrap: anywhere; font: 600 calc(13.5px * var(--fs, 1)) var(--mono); }
@@ -76,7 +78,7 @@
 .ptyp { color: var(--muted); font-size: calc(11.5px * var(--fs, 1)); }
 .pvals { margin-top: 2px; color: var(--muted); font: calc(12px * var(--fs, 1)) var(--mono); overflow-wrap: anywhere; }
 
-.ep-ex { display: grid; gap: 10px; align-content: start; min-width: 0; padding: 16px; border-left: 1px solid var(--border);
+.ep-ex { display: grid; gap: 10px; align-content: start; min-width: 0; padding: 20px; border-left: 1px solid var(--border);
   border-radius: 0 var(--radius) var(--radius) 0; background: var(--surface-2); }
 .ex-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 26px; color: var(--muted);
   font-size: calc(10.5px * var(--fs, 1)); font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
@@ -84,7 +86,7 @@
 .ex-head .bad { color: var(--bad); }
 .ep-ex .code { margin: 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
   font: calc(12px * var(--fs, 1))/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
-.ep-ex .code.resp { max-height: 28rem; overflow: auto; white-space: pre; scrollbar-width: thin; }
+.ep-ex .code.resp { max-height: 18rem; overflow: auto; white-space: pre; scrollbar-width: thin; }
 /* It scrolls, so it takes focus: arrow keys scroll it. */
 .ep-ex .code.resp:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .try { display: flex; gap: 8px; }
@@ -107,6 +109,12 @@
   .apifacts { padding: 10px 14px; }
   .ep-doc, .ep-ex { padding: 14px; }
   .ptab td { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 900px) {
+  .api-start-head h2 { font-size: calc(21px * var(--fs, 1)); }
+  .api-connect { padding: 16px; }
+  .apifacts { padding: 12px 16px; }
 }
 
 .token-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 4px 0 14px; }

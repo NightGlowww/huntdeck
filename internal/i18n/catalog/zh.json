@@ -1926,5 +1926,9 @@
   ,"Bounties paid · 90 days, estimated": "已付赏金 · 90 天（估算）"
   ,"Valid reports · 90 days": "有效报告 · 90 天"
   ,"Valid reports · 90 days, estimated": "有效报告 · 90 天（估算）"
+  ,"An OpenAI-compatible base URL, e.g. https://api.openai.com/v1 or a local server.": "兼容 OpenAI 的接口地址，例如 https://api.openai.com/v1 或本地服务器。"
+  ,"The model name the endpoint knows, e.g. gpt-4o-mini.": "端点支持的模型名称，例如 gpt-4o-mini。"
+  ,"Sent as a bearer token. Left empty for a local server that needs none.": "作为 Bearer 令牌发送；本地服务器无需令牌时留空。"
+  ,"three values": "三个配置项"
  }
 }

@@ -119,6 +119,10 @@
       "summary": "OpenAPI 描述",
       "description": "本 API 的 OpenAPI 3.1 描述，可用于 Postman、Insomnia、Bruno、客户端生成器或 AI 工具；其中的 server 为你的访问地址。"
     },
+    "queue": {
+      "summary": "狩猎队列",
+      "description": "按目标是否可以今天开工以及每小时价值排序的狩猎队列。"
+    },
     "health": {
       "summary": "健康检查",
       "description": "数据库可用时返回 ok，用于容器健康检查；失败时不说明原因。"

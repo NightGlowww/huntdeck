@@ -99,6 +99,36 @@
   --pf-yeswehack: light-dark(#c8183e, #ff5277);
   --pf-independent: light-dark(#5f6b7a, #a3b1c2);
 }
+/* Blue White: a calm documentation-workbench palette for long API, MCP and
+   model configuration sessions. White surfaces carry the content, while blue
+   supplies hierarchy and action without the purple cast of Midnight. */
+[data-palette="bluewhite"] {
+  --bg:           light-dark(#f3f8fc, #0b1726);
+  --side:         light-dark(#ffffff, #0e2033);
+  --surface:      light-dark(#ffffff, #10243a);
+  --surface-2:    light-dark(#f6faff, #132b44);
+  --surface-3:    light-dark(#e8f1fa, #1a3855);
+  --border:       light-dark(#d5e2ef, #244563);
+  --border-input: light-dark(#718aa4, #6f90ad);
+  --border-2:     light-dark(#bdd0e1, #315574);
+  --text:         light-dark(#102a43, #e8f3ff);
+  --text-2:       light-dark(#274c67, #c7d9e8);
+  --muted:        light-dark(#52708a, #8facbf);
+  --faint:        light-dark(#5e7588, #8ca4b8);
+  --accent:       light-dark(#1769aa, #67b7ff);
+  --on-accent:    light-dark(#ffffff, #07233c);
+  --good:         light-dark(#116149, #54d6a0);
+  --info:         light-dark(#0b63ce, #7dbbff);
+  --warn:         light-dark(#8a5400, #ffd166);
+  --bad:          light-dark(#b42318, #ff8e8e);
+  --priv:         light-dark(#9b2c6f, #f4a6d4);
+  --row-hover:    light-dark(#edf5fc, #152e49);
+  --pf-hackerone: light-dark(#2457b8, #8db6ff);
+  --pf-bugcrowd:  light-dark(#a84a0a, #ffab6b);
+  --pf-intigriti: light-dark(#087568, #5de0ca);
+  --pf-yeswehack: light-dark(#b42343, #ff8a9e);
+  --pf-independent: light-dark(#4b6375, #a9c1d4);
+}
 /* Tints, worked out again wherever a palette is set so they follow it. */
 :root, [data-palette] {
   --ok:          var(--good);

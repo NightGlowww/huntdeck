@@ -21,6 +21,7 @@ var palettes = []palette{
 	{"midnight", "Midnight", "Navy and lavender. The default.", "Navy and lavender"},
 	{"nord", "Nord", "Cool slate grey and frost blue; soft, low glare.", "Slate and frost blue"},
 	{"graphite", "Graphite", "Neutral greys; colour only where it means something.", "Neutral greys"},
+	{"bluewhite", "Blue White", "White surfaces and calm ocean blue for focused work.", "Ocean blue and white"},
 }
 
 func platformLabel(name string) string {
