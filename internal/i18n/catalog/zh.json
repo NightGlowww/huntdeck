@@ -1940,6 +1940,9 @@
   "three values": "三个配置项",
   "already handed to the scanner": "已交给扫描器",
   "Hand them to the scanner": "交给扫描器",
-  ", or work them by hand — a target marked 'already handed to the scanner' is queued there, not done.": "，或手工去挖——标着「已交给扫描器」的目标只是进了扫描队列，不是已经完成。"
+  ", or work them by hand — a target marked 'already handed to the scanner' is queued there, not done.": "，或手工去挖——标着「已交给扫描器」的目标只是进了扫描队列，不是已经完成。",
+  "In scope here means the queue ranks it and the scanner can take it": "在这里显示“在范围内”，意味着队列会给它排名，扫描器也能接下它",
+  "see the hunt queue": "去狩猎队列看",
+  "scan page": "扫描页"
  }
 }
