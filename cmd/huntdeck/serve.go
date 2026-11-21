@@ -386,10 +386,10 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 			// turned that on: off is the default and the honest one.
 			if a.cfg.ScanKey.Reveal() != "" {
 				client := &scopesentry.Client{BaseURL: a.cfg.ScanURL, Key: a.cfg.ScanKey.Reveal()}
-				if n, err := scanhandoff.Run(ctx, a.store, client, false); err != nil && ctx.Err() == nil {
+				if sum, err := scanhandoff.Run(ctx, a.store, client, false); err != nil && ctx.Err() == nil {
 					log.Warn("scan handoff failed", "err", err)
-				} else if n > 0 {
-					log.Info("scan tasks created", "tasks", n)
+				} else if sum.Tasks > 0 {
+					log.Info("scan tasks created", "tasks", sum.Tasks, "targets", sum.Targets, "node", sum.Node)
 				}
 			}
 			select {

@@ -143,19 +143,19 @@ func TestHandoffSendsEachTargetOnce(t *testing.T) {
 	defer srv.Close()
 	client := &scopesentry.Client{BaseURL: srv.URL, Key: "ssk_test"}
 
-	created, err := Run(ctx, st, client, true)
+	sum, err := Run(ctx, st, client, true)
 	if err != nil {
 		t.Fatalf("first run: %v", err)
 	}
-	if created != 2 {
-		t.Fatalf("first run created %d tasks, want 2 (one per target at PerTask=1)", created)
+	if sum.Tasks != 2 {
+		t.Fatalf("first run created %d tasks, want 2 (one per target at PerTask=1)", sum.Tasks)
 	}
-	created, err = Run(ctx, st, client, true)
+	sum, err = Run(ctx, st, client, true)
 	if err != nil {
 		t.Fatalf("second run: %v", err)
 	}
-	if created != 0 {
-		t.Fatalf("second run created %d tasks, want 0: the same targets were queued again", created)
+	if sum.Tasks != 0 {
+		t.Fatalf("second run created %d tasks, want 0: the same targets were queued again", sum.Tasks)
 	}
 	if len(f.names) != 2 {
 		t.Errorf("the scanner was asked for %d tasks in total, want 2", len(f.names))
@@ -194,12 +194,12 @@ func TestHandoffDoesNothingWhileOff(t *testing.T) {
 	f := &fakeScanner{}
 	srv := f.server(t)
 	defer srv.Close()
-	created, err := Run(ctx, st, &scopesentry.Client{BaseURL: srv.URL, Key: "ssk"}, false)
+	sum, err := Run(ctx, st, &scopesentry.Client{BaseURL: srv.URL, Key: "ssk"}, false)
 	if err != nil {
 		t.Fatalf("run: %v", err)
 	}
-	if created != 0 || len(f.names) != 0 {
-		t.Fatalf("created %d tasks while off (scanner saw %d)", created, len(f.names))
+	if sum.Tasks != 0 || len(f.names) != 0 {
+		t.Fatalf("created %d tasks while off (scanner saw %d)", sum.Tasks, len(f.names))
 	}
 }
 

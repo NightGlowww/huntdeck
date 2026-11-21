@@ -28,6 +28,17 @@ type Options struct {
 	Targets []string
 }
 
+// Summary is what one handoff did, for the surfaces that report it: the web
+// page already says it in its own words, and a notification wants the same
+// facts rather than re-reading the table.
+type Summary struct {
+	Tasks    int
+	Targets  int
+	Node     string
+	Blocked  string   // the second opinion's answer, when it stopped the batch
+	Programs []string // the names, one per task created
+}
+
 // MinInterval is the gap a scheduled run leaves between handoffs. The scanner
 // runs one task per node at a time, so a second batch inside this window only
 // fills its queue; the operator's "send now" is not held back by it.
@@ -38,40 +49,40 @@ const MinInterval = 60 * time.Second
 // is to wait, and the page says so in words rather than in red.
 var ErrBusy = errors.New("the scanner is queued: nothing was created, try again when it has caught up")
 
-func Run(ctx context.Context, st *store.Store, client *scopesentry.Client, manual bool) (int, error) {
+func Run(ctx context.Context, st *store.Store, client *scopesentry.Client, manual bool) (Summary, error) {
 	return RunWith(ctx, st, client, manual, Options{})
 }
 
 // RunWith is Run with a second opinion: a decision model is asked about the
 // batch before anything is created, and its block or confirm answer is
 // respected. It can only narrow what the deterministic checks allow.
-func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, manual bool, opt Options) (int, error) {
+func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, manual bool, opt Options) (Summary, error) {
 	cfg, err := st.ScanConfigRow(ctx)
 	if err != nil {
-		return 0, err
+		return Summary{}, err
 	}
 	// A scheduled run leaves a gap: the scanner runs one task per node at a
 	// time, so handing over again before it has started the last batch only
 	// fills its queue. The operator pressing "send now" is not held back.
 	_, last, _ := st.ScanHandoffCount(ctx)
 	if !manual && !last.IsZero() && time.Since(last) < MinInterval {
-		return 0, nil
+		return Summary{}, nil
 	}
 	if !manual && !cfg.Enabled {
-		return 0, nil
+		return Summary{}, nil
 	}
 	if cfg.TemplateID == "" || cfg.NodeName == "" {
-		return 0, fmt.Errorf("pick a template and a node first")
+		return Summary{}, fmt.Errorf("pick a template and a node first")
 	}
 	// The scanner's host has to have room for what we are about to ask of it.
 	if err := CheckHeadroom(ctx, client); err != nil {
-		return 0, err
+		return Summary{}, err
 	}
 	// Where it goes: the configured node when it has room, else the
 	// least-queued online one. A full node is capacity, not failure.
 	node, err := chooseNode(ctx, client, cfg.NodeName)
 	if err != nil {
-		return 0, fmt.Errorf("%w: every online node is at its queue limit", err)
+		return Summary{}, fmt.Errorf("%w: every online node is at its queue limit", err)
 	}
 	if node != cfg.NodeName {
 		slog.InfoContext(ctx, "scan: the configured node has no room", "configured", cfg.NodeName, "using", node)
@@ -92,10 +103,10 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 		}
 	}
 	if err != nil {
-		return 0, err
+		return Summary{}, err
 	}
 	if len(cands) == 0 {
-		return 0, nil
+		return Summary{}, nil
 	}
 	// The second opinion, if one is configured, is asked once about the whole
 	// batch: a per-task question would cost a call each and answer the same
@@ -106,7 +117,7 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 			Tasks: (len(cands) + perTask - 1) / perTask, Targets: len(cands), PerTask: perTask,
 			Template: cfg.TemplateID, Node: node, HostFreePct: free, HostKnown: known,
 		}); err != nil {
-			return 0, err
+			return Summary{}, err
 		}
 	}
 
@@ -115,6 +126,7 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 	// candidates are grouped first, then chunked, so a program's targets stay
 	// together and the name carries the program.
 	created := 0
+	sum := Summary{Node: node}
 	for _, group := range groupByProgram(cands) {
 		for start := 0; start < len(group.items); start += perTask {
 			end := start + perTask
@@ -132,24 +144,27 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 				// The scanner refusing work for capacity is not a fault: stop here
 				// and say so, rather than reporting a failure the operator cannot act on.
 				if scopesentry.IsBusy(err) {
-					return created, fmt.Errorf("%w: %w", ErrBusy, err)
+					return sum, fmt.Errorf("%w: %w", ErrBusy, err)
 				}
-				return created, err
+				return sum, err
 			}
 			// Record before starting, not after. The task exists either way, and a
 			// record that lags behind reality is how the same targets got handed over
 			// twice: thirteen tasks sat parked in the scanner while their targets
 			// stayed eligible for the next handoff. Starting is a separate act.
 			if err := st.MarkHandedOff(ctx, batch, id); err != nil {
-				return created, err
+				return sum, err
 			}
 			if err := client.StartTask(ctx, id); err != nil {
-				return created, fmt.Errorf("task %s created and recorded but not started (start it in the scanner): %w", id, err)
+				return sum, fmt.Errorf("task %s created and recorded but not started (start it in the scanner): %w", id, err)
 			}
 			created++
+			sum.Tasks++
+			sum.Targets += len(batch)
+			sum.Programs = append(sum.Programs, group.label)
 		}
 	}
-	return created, nil
+	return sum, nil
 }
 
 // runOpinion asks the model and turns its answer into a verdict the handoff

@@ -165,14 +165,14 @@ func scanHandoffCmd(args []string, stdout, stderr io.Writer) int {
 			AccountID: app.cfg.JevAccountID, WorkspaceID: app.cfg.JevWorkspaceID,
 		})
 	}
-	n, err := scanhandoff.RunWith(ctx, app.store, client, true, opt)
+	sum, err := scanhandoff.RunWith(ctx, app.store, client, true, opt)
 	if err != nil {
 		fmt.Fprintf(stderr, "scan-handoff: %v\n", err)
-		if n > 0 {
-			fmt.Fprintf(stdout, "created %d task(s) before stopping\n", n)
+		if sum.Tasks > 0 {
+			fmt.Fprintf(stdout, "created %d task(s) before stopping\n", sum.Tasks)
 		}
 		return 1
 	}
-	fmt.Fprintf(stdout, "created %d scan task(s)\n", n)
+	fmt.Fprintf(stdout, "created %d scan task(s) on node %s\n", sum.Tasks, sum.Node)
 	return 0
 }

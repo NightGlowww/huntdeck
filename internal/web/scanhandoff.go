@@ -114,7 +114,7 @@ func (s *server) scanSave(w http.ResponseWriter, r *http.Request) {
 
 // scanNow hands the waiting targets over, once, on demand.
 func (s *server) scanNow(w http.ResponseWriter, r *http.Request) {
-	created, err := s.handOff(r.Context(), true)
+	sum, err := s.handOff(r.Context(), true)
 	if err != nil {
 		// A queued scanner is capacity, not a fault: the page says "wait",
 		// in the warning colour, and does not call it a failure.
@@ -127,14 +127,14 @@ func (s *server) scanNow(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/scan?error="+urlQuery(err.Error()), http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, "/scan?created="+strconv.Itoa(created), http.StatusSeeOther)
+	http.Redirect(w, r, "/scan?created="+strconv.Itoa(sum.Tasks), http.StatusSeeOther)
 }
 
 // handOff runs the shared handoff: the page and the poll loop use one
 // implementation, so they cannot drift.
-func (s *server) handOff(ctx context.Context, manual bool) (int, error) {
+func (s *server) handOff(ctx context.Context, manual bool) (scanhandoff.Summary, error) {
 	if s.ScanKey.Reveal() == "" {
-		return 0, fmt.Errorf("no scanner key configured")
+		return scanhandoff.Summary{}, fmt.Errorf("no scanner key configured")
 	}
 	ctx, cancel := context.WithTimeout(ctx, scanTaskTimeout)
 	defer cancel()
