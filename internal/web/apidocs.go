@@ -30,9 +30,10 @@ type apiDocsData struct {
 	Password bool
 	// Tokens are the API tokens, live and retired; NewToken is the one just
 	// minted, shown once; Flash says what just happened.
-	Tokens   []apiTokenRow
-	NewToken string
-	Flash    string
+	Tokens    []apiTokenRow
+	NewToken  string
+	Flash     string
+	BulkCount int
 }
 
 type apiDocGroup struct {
@@ -83,6 +84,10 @@ func (s *server) apiDocs(w http.ResponseWriter, r *http.Request) {
 // renderAPIDocs builds the page; the token handlers reuse it to show a freshly
 // minted token once, in the body, and a short confirmation otherwise.
 func (s *server) renderAPIDocs(w http.ResponseWriter, r *http.Request, newToken, flash string) {
+	s.renderAPIDocsResult(w, r, newToken, flash, 0)
+}
+
+func (s *server) renderAPIDocsResult(w http.ResponseWriter, r *http.Request, newToken, flash string, bulkCount int) {
 	o := s.openapi
 	// The page's own words (summaries, descriptions, tags) come from the
 	// spec, in English; openapi.zh.json has the Chinese by operation id, tag
@@ -131,7 +136,7 @@ func (s *server) renderAPIDocs(w http.ResponseWriter, r *http.Request, newToken,
 		}
 		groups[op.Tags[0]].Ops = append(groups[op.Tags[0]].Ops, o.docOp(method, path, op, d.Base, platform, handle, zh))
 	}
-	d.NewToken, d.Flash = newToken, flash
+	d.NewToken, d.Flash, d.BulkCount = newToken, flash, bulkCount
 	if tokens, err := s.Store.APITokens(r.Context()); err == nil {
 		d.Tokens = tokenRows(tokens)
 	}

@@ -183,6 +183,23 @@ func (s *Store) DeleteAPITokens(ctx context.Context, kind string, ids []int64) (
 	return total, nil
 }
 
+// DeleteRevokedAPITokens removes only revoked rows for a kind. Live rows are
+// deliberately retained so a bulk cleanup cannot invalidate a client by
+// accident.
+func (s *Store) DeleteRevokedAPITokens(ctx context.Context, kind string, ids []int64) (int, error) {
+	total := 0
+	for _, id := range ids {
+		res, err := s.db.W.ExecContext(ctx, `DELETE FROM api_tokens WHERE id = ? AND kind = ? AND revoked_at IS NOT NULL`, id, kind)
+		if err != nil {
+			return total, fmt.Errorf("delete revoked token %d: %w", id, err)
+		}
+		if n, _ := res.RowsAffected(); n > 0 {
+			total += int(n)
+		}
+	}
+	return total, nil
+}
+
 // DeleteUnusedAPITokens removes keys of a kind that were never used and were
 // made before cutoff. A key that never authenticated cannot be anyone's working
 // client, and one made minutes ago may still be sitting in a paste buffer: the

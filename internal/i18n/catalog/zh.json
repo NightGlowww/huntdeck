@@ -1944,6 +1944,12 @@
   ,"Tech Blue": "科技蓝"
   ,"Electric blue controls, cyan signals and white work surfaces.": "电光蓝控件、青色信号与白色工作面。"
   ,"Electric blue and white": "电光蓝与白色"
+  ,"Delete selected revoked": "删除所选已吊销"
+  ,"Revoke selected": "吊销所选"
+  ,"Delete the selected revoked tokens? Live tokens stay until they are revoked.": "删除所选已吊销令牌？有效令牌会保留，直到先被吊销。"
+  ,"Revoke the selected tokens? Clients using them will lose access immediately.": "吊销所选令牌？正在使用它们的客户端会立即失去访问权限。"
+  ,"Revoked %d selected token(s).": "已吊销 %d 个所选令牌。"
+  ,"Deleted %d revoked token(s).": "已删除 %d 个已吊销令牌。"
   ,"three values": "三个配置项"
  }
 }

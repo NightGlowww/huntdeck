@@ -384,6 +384,8 @@ func (s *server) apiRoutes() []apiRoute {
 		{"POST /api/tokens/revoke", s.revokeAPIToken},
 		{"POST /api/tokens/rotate", s.rotateAPIToken},
 		{"POST /api/tokens/delete", s.deleteAPIToken},
+		{"POST /api/tokens/revoke-bulk", s.revokeAPITokens},
+		{"POST /api/tokens/delete-bulk", s.deleteAPITokens},
 		{"GET /api/v1/changes", s.apiChanges},
 		{"GET /api/v1/disclosed", s.apiDisclosed},
 		{"GET /api/v1/stats", s.apiStats},

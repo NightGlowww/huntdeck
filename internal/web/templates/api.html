@@ -51,6 +51,8 @@
       {{if eq .Flash "token-deleted"}}<p class="flash ok">{{T "Deleted."}}</p>{{end}}
       {{if eq .Flash "token-not-revoked"}}<p class="flash warn">{{T "A live token cannot be deleted: revoke it first, so one click cannot remove something a script still uses."}}</p>{{end}}
       {{if eq .Flash "token-missing"}}<p class="flash warn">{{T "No such token."}}</p>{{end}}
+      {{if eq .Flash "token-bulk-revoked"}}<p class="flash ok">{{TF "Revoked %d selected token(s)." .BulkCount}}</p>{{end}}
+      {{if eq .Flash "token-bulk-deleted"}}<p class="flash ok">{{TF "Deleted %d revoked token(s)." .BulkCount}}</p>{{end}}
       {{if .NewToken}}<div class="connection-example">
         <div class="ex-head"><span>Authorization</span><button type="button" class="small ghost" data-copy="#new-authorization"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
         <pre class="code"><code id="new-authorization">Authorization: Bearer {{.NewToken}}</code></pre>
@@ -61,9 +63,18 @@
         <input type="text" id="token-name" name="name" maxlength="60" placeholder="{{T "what it is for, e.g. the nightly script"}}">
         <button type="submit"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>{{T "Create token"}}</button>
       </form>
-      {{if .Tokens}}<div class="table-wrap"><table class="credential-table cards">
-        <thead><tr><th scope="col">{{T "Name"}}</th><th scope="col">{{T "Created"}}</th><th scope="col">{{T "Last used"}}</th><th scope="col">{{T "State"}}</th><th scope="col">{{T "Actions"}}</th></tr></thead>
+      {{if .Tokens}}<div class="credential-bulk">
+        <label class="credential-select-all"><input type="checkbox" data-select-all> {{T "Select all"}}</label>
+        <span class="credential-selection muted small" data-selbar hidden role="status" aria-live="polite"><span data-selcount></span></span>
+        <form method="post" action="/api/tokens/delete-bulk" id="api-token-delete" data-confirm="{{T "Delete the selected revoked tokens? Live tokens stay until they are revoked."}}">
+          <button type="submit" class="small secondary danger">{{T "Delete selected revoked"}}</button>
+          <button type="submit" formaction="/api/tokens/revoke-bulk" class="small ghost danger" data-confirm="{{T "Revoke the selected tokens? Clients using them will lose access immediately."}}">{{T "Revoke selected"}}</button>
+        </form>
+      </div>
+      <div class="table-wrap"><table class="credential-table cards">
+        <thead><tr><th scope="col"><span class="sr-only">{{T "Select"}}</span></th><th scope="col">{{T "Name"}}</th><th scope="col">{{T "Created"}}</th><th scope="col">{{T "Last used"}}</th><th scope="col">{{T "State"}}</th><th scope="col">{{T "Actions"}}</th></tr></thead>
         <tbody>{{range .Tokens}}<tr>
+          <td class="c-check"><input type="checkbox" class="pick" name="id" value="{{.ID}}" form="api-token-delete" aria-label="{{TF "Select %s" .Name}} #{{.ID}}"></td>
           <td class="c-name">{{.Name}} <span class="credential-id">#{{.ID}}</span></td>
           <td data-label="{{T "Created"}}"><span class="when" title="{{datetime .Created}}" data-ago data-at="{{iso .Created}}">{{ago .Created}}</span></td>
           <td data-label="{{T "Last used"}}">{{if .LastUsed}}<span class="when" title="{{datetime .LastUsed}}" data-ago data-at="{{iso .LastUsed}}">{{ago .LastUsed}}</span>{{else}}<span class="zero">—</span>{{end}}</td>

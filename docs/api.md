@@ -87,6 +87,7 @@ curl -s -H "Authorization: Bearer $HUNTDECK_TOKEN" https://huntdeck.example/api/
 
 Mint one on the API page, or `POST /api/tokens` with `name=`; revoke with `POST /api/tokens/revoke` and the token's `id`; rotate with `POST /api/tokens/rotate` (same `id`: the secret is replaced in place, keeping the name and history); delete a revoked row with `POST /api/tokens/delete`. Only its SHA-256 is stored, so the token is shown
 once; revoking it takes effect on the next request and touches nothing else.
+The API page also supports bulk maintenance with repeated `id` fields: `POST /api/tokens/revoke-bulk` revokes selected live tokens, and `POST /api/tokens/delete-bulk` removes selected revoked rows while leaving live tokens in place until they are revoked.
 A token grants exactly what the access password grants — it is the same gate,
 not an account, and there are no scopes or roles.
 
