@@ -1938,6 +1938,8 @@
   "Revoked %d selected token(s).": "已吊销 %d 个所选令牌。",
   "Deleted %d revoked token(s).": "已删除 %d 个已吊销令牌。",
   "three values": "三个配置项",
-  "already handed to the scanner": "已交给扫描器"
+  "already handed to the scanner": "已交给扫描器",
+  "Hand them to the scanner": "交给扫描器",
+  ", or work them by hand — a target marked 'already handed to the scanner' is queued there, not done.": "，或手工去挖——标着「已交给扫描器」的目标只是进了扫描队列，不是已经完成。"
  }
 }

@@ -1,6 +1,6 @@
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T "Hunt queue"}}</h1>
-<p class="lead">{{T "Targets ranked by whether you can start today and what the work is worth per hour. A hard gate keeps out what cannot be started; the rest is a weighted score of the program's value, the best-case payout, how fast it accepts, how crowded it is, how fresh the target is and how much arranging it needs."}}</p>
+<p class="lead">{{T "Targets ranked by whether you can start today and what the work is worth per hour. A hard gate keeps out what cannot be started; the rest is a weighted score of the program's value, the best-case payout, how fast it accepts, how crowded it is, how fresh the target is and how much arranging it needs."}} <a class="link" href="/scan">{{T "Hand them to the scanner"}}</a>{{T ", or work them by hand — a target marked 'already handed to the scanner' is queued there, not done."}}</p>
 
 {{if .ComputedAt.IsZero}}
   <section class="panel queue-empty" aria-live="polite">
