@@ -42,7 +42,7 @@ func TestAPITokenBulkActions(t *testing.T) {
 	if res.StatusCode != http.StatusOK {
 		t.Fatalf("bulk revoke: %d", res.StatusCode)
 	}
-	res, body = e.do(c, http.MethodPost, "/api/tokens/delete-bulk", url.Values{"id": {fmt.Sprint(ids[0]), fmt.Sprint(ids[1]), fmt.Sprint(ids[2])}}, nil)
+	res, _ = e.do(c, http.MethodPost, "/api/tokens/delete-bulk", url.Values{"id": {fmt.Sprint(ids[0]), fmt.Sprint(ids[1]), fmt.Sprint(ids[2])}}, nil)
 	if res.StatusCode != http.StatusOK {
 		t.Fatalf("bulk delete: %d", res.StatusCode)
 	}
