@@ -3320,6 +3320,52 @@
           }
         }
       }
+    },
+    "/api/tokens/revoke-bulk": {
+      "post": {
+        "tags": ["Tokens"],
+        "operationId": "revokeTokensBulk",
+        "summary": "Revoke selected API tokens",
+        "description": "Retires every selected API token. The rows remain so the page can show their state.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {"type": "array", "items": {"type": "string"}, "description": "One or more token ids from the page."}
+                },
+                "required": ["id"]
+              }
+            }
+          }
+        },
+        "responses": {"200": {"description": "The API page, with a confirmation."}}
+      }
+    },
+    "/api/tokens/delete-bulk": {
+      "post": {
+        "tags": ["Tokens"],
+        "operationId": "deleteTokensBulk",
+        "summary": "Delete selected revoked API tokens",
+        "description": "Removes selected revoked API token rows. Live tokens remain until they are revoked first.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {"type": "array", "items": {"type": "string"}, "description": "One or more token ids from the page."}
+                },
+                "required": ["id"]
+              }
+            }
+          }
+        },
+        "responses": {"200": {"description": "The API page, with a confirmation."}}
+      }
     }
   },
   "components": {
