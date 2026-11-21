@@ -16,7 +16,7 @@
     </fieldset>
     <fieldset class="tm-pals"><legend>{{T "Colours"}}</legend>
       {{- range palettes}}
-      <label><input type="radio" name="tm-palette" value="{{.Key}}"><span class="tm-sw" data-palette="{{.Key}}" aria-hidden="true"><i></i><i></i><i></i></span><span class="tm-name">{{.Name}}<small>{{.Short}}</small></span><svg class="i tm-tick" aria-hidden="true"><use href="#i-check"/></svg></label>
+      <label><input type="radio" name="tm-palette" value="{{.Key}}"><span class="tm-sw" data-palette="{{.Key}}" aria-hidden="true"><i></i><i></i><i></i></span><span class="tm-name">{{T .Name}}<small>{{T .Short}}</small></span><svg class="i tm-tick" aria-hidden="true"><use href="#i-check"/></svg></label>
       {{- end}}
     </fieldset>
   </div>

@@ -1929,6 +1929,18 @@
   ,"An OpenAI-compatible base URL, e.g. https://api.openai.com/v1 or a local server.": "兼容 OpenAI 的接口地址，例如 https://api.openai.com/v1 或本地服务器。"
   ,"The model name the endpoint knows, e.g. gpt-4o-mini.": "端点支持的模型名称，例如 gpt-4o-mini。"
   ,"Sent as a bearer token. Left empty for a local server that needs none.": "作为 Bearer 令牌发送；本地服务器无需令牌时留空。"
+  ,"Midnight": "午夜"
+  ,"Navy and lavender. The default.": "海军蓝与薰衣草紫，默认配色。"
+  ,"Navy and lavender": "海军蓝与薰衣草紫"
+  ,"Nord": "Nord"
+  ,"Cool slate grey and frost blue; soft, low glare.": "冷灰与霜蓝，柔和低眩光。"
+  ,"Slate and frost blue": "灰岩与霜蓝"
+  ,"Graphite": "石墨"
+  ,"Neutral greys; colour only where it means something.": "中性灰，仅在有语义处使用颜色。"
+  ,"Neutral greys": "中性灰"
+  ,"Blue White": "蓝白"
+  ,"White surfaces and calm ocean blue for focused work.": "白色表面与沉静海蓝，适合专注工作。"
+  ,"Ocean blue and white": "海蓝与白色"
   ,"three values": "三个配置项"
  }
 }
