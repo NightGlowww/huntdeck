@@ -1,11 +1,3 @@
-# Changelog
-
-All notable changes to HuntDeck. The format is based on
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
-[Semantic Versioning](https://semver.org/): the API under `/api/v1` and
-`/api/v2`, the configuration variables and the database (upgraded in place on
-start) stay compatible within a major version.
-
 ## [Unreleased]
 
 - Opening `/programs/<platform>`, with or without a trailing slash, redirects
@@ -151,6 +143,13 @@ The 1.1.1-1.1.3 tags were patch releases the same day; their fixes are below.
 - A stray 30 MB cross-compiled binary from the tree; `.gitignore` covers
   build outputs now.
 
+## v1.0.1 (2026-11-21)
+
+- Phones: the Menu button's page list shows the pages' names again, not
+  only their icons.
+- `/programs/<platform>` (such as `/programs/hackerone/`) opens the
+  Programs list narrowed to that platform, instead of a "not found" page.
+- The Add program form's seed checkbox reads "Include in seeds": it has
   always covered every seed.
 
 ## v1.0.0 (2026-11-13)

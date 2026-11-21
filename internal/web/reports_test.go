@@ -147,8 +147,13 @@ func TestAcceptedReports(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, body := e.do(c, http.MethodGet, "/programs/fake/acme?tab=stats", nil, nil)
+	// a1's month: a2 (accepted 20 days ago) shares it late in a month.
+	month := " · 1 accepted (P1 1)"
+	if y1, m1, _ := at(3).Date(); func() bool { y2, m2, _ := at(20).Date(); return y1 == y2 && m1 == m2 }() {
+		month = " · 2 accepted (P1 1, P3 1)"
+	}
 	for _, want := range []string{`id="accepted"`, "Accepted reports <span class=\"count\">3</span>", "Accepted · 90 days</dt><dd>2</dd>",
-		"▲ &#43;1", "Still open</dt><dd>2</dd>", "20d", "$3,000", " · 1 accepted (P1 1)", `<span class="nod">`, `<path class="line rest"`} {
+		"▲ &#43;1", "Still open</dt><dd>2</dd>", "20d", "$3,000", month, `<span class="nod">`, `<path class="line rest"`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("program page lacks %q", want)
 		}
