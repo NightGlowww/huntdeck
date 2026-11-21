@@ -32,3 +32,7 @@
 .vdialog p { margin: 0 0 10px; }
 .vdialog input { width: 100%; }
 .vdialog-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+/* The question a destructive action asks: in the page, because a suppressed
+   window.confirm made every such button do nothing. */
+.vdialog .ask-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }

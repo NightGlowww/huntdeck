@@ -215,13 +215,17 @@
   editBtn.addEventListener("click", () => setEditing(true));
   editBar.querySelector("[data-board-done]").addEventListener("click", () => setEditing(false));
   editBar.querySelector("[data-board-reset]").addEventListener("click", () => {
-    if (!window.confirm(t("Reset this layout to the default?"))) return;
-    layouts[mode() === "wide" ? "wide" : "std"] = defaults(mode());
-    save();
-    render();
-    refresh();
-    announce(t("Layout reset to the default."));
-    if (window.hdToast) hdToast(t("Layout reset to the default."));
+    // In the page: window.confirm is suppressed for a reader who ticked
+    // "prevent additional dialogs", which left this button doing nothing.
+    askInPage(t("Reset this layout to the default?")).then((yes) => {
+      if (!yes) return;
+      layouts[mode() === "wide" ? "wide" : "std"] = defaults(mode());
+      save();
+      render();
+      refresh();
+      announce(t("Layout reset to the default."));
+      if (window.hdToast) hdToast(t("Layout reset to the default."));
+    });
   });
   const fitHeight = (id) => {
     const p = layout().place[id];

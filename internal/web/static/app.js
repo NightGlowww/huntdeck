@@ -84,11 +84,54 @@ document.addEventListener("change", (e) => {
   }
 });
 
-// Forms with data-confirm ask first.
+// Forms with data-confirm ask first - in the page, not with window.confirm.
+// Chrome lets a reader tick "prevent this page from creating additional
+// dialogs"; from then on confirm() returns false without asking, and every
+// destructive button in the app does nothing at all, silently. A dialog
+// element cannot be suppressed that way.
 document.addEventListener("submit", (e) => {
-  const msg = e.target.dataset.confirm;
-  if (msg && !window.confirm(msg)) e.preventDefault();
+  const form = e.target;
+  const msg = form.dataset.confirm;
+  if (!msg || form.dataset.confirmed === "1") return;
+  e.preventDefault();
+  askInPage(msg).then((yes) => {
+    if (!yes) return;
+    form.dataset.confirmed = "1";
+    form.requestSubmit();
+  });
 });
+
+// askInPage puts the question in a dialog the page owns and resolves with the
+// answer. One modal at a time: an older one is closed first.
+function askInPage(message) {
+  return new Promise((resolve) => {
+    const dlg = document.createElement("dialog");
+    dlg.className = "vdialog ask";
+    const p = document.createElement("p");
+    p.textContent = message;
+    const yes = document.createElement("button");
+    yes.className = "button small danger";
+    yes.textContent = t("Yes, do it");
+    const no = document.createElement("button");
+    no.className = "button small secondary";
+    no.textContent = t("Cancel");
+    const row = document.createElement("div");
+    row.className = "ask-actions";
+    row.append(yes, no);
+    dlg.append(p, row);
+    const done = (value) => {
+      if (dlg.open) dlg.close();
+      dlg.remove();
+      resolve(value);
+    };
+    yes.addEventListener("click", () => done(true));
+    no.addEventListener("click", () => done(false));
+    dlg.addEventListener("cancel", (ev) => { ev.preventDefault(); done(false); });
+    document.body.append(dlg);
+    dlg.showModal();
+    yes.focus();
+  });
+}
 
 // A form on its way: mark it busy and stop a second click from sending it
 // twice. The button is disabled on the next tick, after this submit has taken
@@ -613,22 +656,28 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
     const ask = to === "1"
       ? t("Ignore %s programs? They leave the lists, picks and alerts; their pages stay.", refs.length)
       : t("Unignore %s programs? They come back to the lists, picks and alerts.", refs.length);
-    if (!window.confirm(ask)) return;
-    const form = document.createElement("form");
-    form.method = "post";
-    form.action = "/programs/ignore";
-    const add = (name, value) => {
-      const i = document.createElement("input");
-      i.type = "hidden";
-      i.name = name;
-      i.value = value;
-      form.append(i);
+    const send = () => {
+      const form = document.createElement("form");
+      form.method = "post";
+      form.action = "/programs/ignore";
+      const add = (name, value) => {
+        const i = document.createElement("input");
+        i.type = "hidden";
+        i.name = name;
+        i.value = value;
+        form.append(i);
+      };
+      for (const ref of refs) add("p", ref);
+      add("ignored", to);
+      add("back", location.pathname + location.search);
+      document.body.append(form);
+      form.requestSubmit();
     };
-    for (const ref of refs) add("p", ref);
-    add("ignored", to);
-    add("back", location.pathname + location.search);
-    document.body.append(form);
-    form.requestSubmit();
+    // The question goes in the page: a suppressed window.confirm would make
+    // this button do nothing at all.
+    askInPage(ask).then((yes) => {
+      if (yes) send();
+    });
   });
 })();
 

@@ -1791,6 +1791,7 @@
   "Handed over lately": "最近派发的任务",
   "Task": "任务",
   "the last %d": "最近 %d 个",
-  "Nothing has been handed over for %s while %d target(s) wait: the scanner is full, or its last attempt was refused.": "已有 %s 没有派发新任务，而队列里还有 %d 个目标在等：多半是扫描器满了，或上次派发被拒绝。"
+  "Nothing has been handed over for %s while %d target(s) wait: the scanner is full, or its last attempt was refused.": "已有 %s 没有派发新任务，而队列里还有 %d 个目标在等：多半是扫描器满了，或上次派发被拒绝。",
+  "Yes, do it": "确定执行"
  }
 }
