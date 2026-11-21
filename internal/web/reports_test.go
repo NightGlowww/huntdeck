@@ -147,9 +147,9 @@ func TestAcceptedReports(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, body := e.do(c, http.MethodGet, "/programs/fake/acme?tab=stats", nil, nil)
-	// a1's month: a2 (accepted 20 days ago) shares it late in a month.
+	// a1's month: a2 (accepted 40 days ago) may share it near a month boundary.
 	month := " · 1 accepted (P1 1)"
-	if y1, m1, _ := at(3).Date(); func() bool { y2, m2, _ := at(20).Date(); return y1 == y2 && m1 == m2 }() {
+	if y1, m1, _ := at(3).Date(); func() bool { y2, m2, _ := at(40).Date(); return y1 == y2 && m1 == m2 }() {
 		month = " · 2 accepted (P1 1, P3 1)"
 	}
 	for _, want := range []string{`id="accepted"`, "Accepted reports <span class=\"count\">3</span>", "Accepted · 90 days</dt><dd>2</dd>",
