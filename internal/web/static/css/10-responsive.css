@@ -64,6 +64,10 @@
      back only the nav: on a phone they were unreachable. They come with it. */
   .js .sidebar.nav-open .foot { display: grid; gap: 8px; margin-top: 8px; padding: 8px 12px 4px; border-top: 1px solid var(--border); }
 }
+@media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
+  .js .sidebar.nav-open .nav { animation: hd-menu-in .18s ease both; transform-origin: top right; }
+  .js .sidebar.nav-open .foot { animation: hd-fade-up .2s .04s ease both; }
+}
 
 /* A finger needs a target of 24px or more: checkboxes, radios and "view
    diff" links grow to it (the links by padding that doesn't move the

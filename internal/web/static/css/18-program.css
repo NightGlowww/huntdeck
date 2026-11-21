@@ -62,7 +62,8 @@
 /* Tabs under the headline. */
 .ptabs { display: flex; gap: 4px; margin: 16px 0 14px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: none; }
 .ptabs a { display: inline-flex; flex: none; align-items: center; gap: 7px; margin-bottom: -1px; padding: 9px 14px 10px; border-bottom: 2px solid transparent;
-  color: var(--text-2); font-size: calc(13.5px * var(--fs, 1)); font-weight: 600; }
+  color: var(--text-2); font-size: calc(13.5px * var(--fs, 1)); font-weight: 600;
+  transition: background-color .16s ease, border-color .18s ease, color .16s ease; }
 .ptabs a:hover { color: var(--text); }
 .ptabs a.on { border-bottom-color: var(--accent); color: var(--accent); }
 .ptabs .count { min-width: 20px; padding: 0 6px; border-radius: 9px; background: var(--surface-3); color: var(--muted); font: 600 calc(11px * var(--fs, 1))/18px var(--mono); text-align: center; }

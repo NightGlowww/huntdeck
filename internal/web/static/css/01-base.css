@@ -63,6 +63,35 @@ main.content:focus { outline: none; }
   transition: opacity .14s ease, transform .14s ease; }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+/* Motion stays small and functional: controls answer a press, menus arrive
+   from the edge they open toward, and a page settles into place once. */
+button, .button, .tb-btn, .theme-toggle, .nav-toggle, .linkish {
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease,
+    box-shadow .18s ease, transform .12s ease;
+}
+button:active:not(:disabled), .button:active, .tb-btn:active, .theme-toggle:active,
+.nav-toggle:active, .linkish:active { transform: translateY(1px) scale(.985); }
+.icon-btn:active, button.icon-btn:active { transform: scale(.92); }
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hd-fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes hd-pop {
+    from { opacity: 0; transform: translate(-50%, 8px) scale(.97); }
+    to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  }
+  @keyframes hd-menu-in {
+    from { opacity: 0; transform: translateY(-5px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .page > :is(.panel, .pair, .pair2, .ov, .polgrid, .fgrid, .actbar),
+  .ph, .kpis, .ptabs { animation: hd-fade-up .28s ease both; }
+  .toast.on { animation: hd-pop .18s ease both; }
+  .tb-menu[open] > .menu { animation: hd-menu-in .16s ease both; transform-origin: top right; }
+}
 /* A field's own error, under it (app.js adds it when the form is submitted
    with something wrong). */
 .field-error { margin: 4px 0 0; color: var(--bad); font-size: calc(12px * var(--fs, 1)); }
