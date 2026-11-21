@@ -129,6 +129,36 @@
   --pf-yeswehack: light-dark(#b42343, #ff8a9e);
   --pf-independent: light-dark(#4b6375, #a9c1d4);
 }
+/* Tech Blue: a brighter instrument-panel treatment. Electric blue marks
+   actions and selection, cyan carries information, and the surfaces stay
+   almost white so dense operational pages remain readable. */
+[data-palette="techblue"] {
+  --bg:           light-dark(#eef7ff, #071421);
+  --side:         light-dark(#f8fcff, #091c30);
+  --surface:      light-dark(#ffffff, #0b2036);
+  --surface-2:    light-dark(#f1f8ff, #0d2944);
+  --surface-3:    light-dark(#dceeff, #123a5c);
+  --border:       light-dark(#c8def2, #1b466a);
+  --border-input: light-dark(#5e89ad, #6fa6cf);
+  --border-2:     light-dark(#9fc0dd, #2c6593);
+  --text:         light-dark(#08243f, #e8f6ff);
+  --text-2:       light-dark(#16496e, #c5e1f5);
+  --muted:        light-dark(#3e6a89, #88afcc);
+  --faint:        light-dark(#4e7089, #8fb1c8);
+  --accent:       light-dark(#006fe6, #3bb7ff);
+  --on-accent:    light-dark(#ffffff, #05203a);
+  --good:         light-dark(#087b5a, #3de0aa);
+  --info:         light-dark(#006fe6, #63c9ff);
+  --warn:         light-dark(#8a5100, #ffd166);
+  --bad:          light-dark(#b42318, #ff8f8f);
+  --priv:         light-dark(#9c2d75, #ffacd8);
+  --row-hover:    light-dark(#e6f4ff, #0e2c49);
+  --pf-hackerone: light-dark(#125fc0, #82c7ff);
+  --pf-bugcrowd:  light-dark(#a84a0a, #ffad6b);
+  --pf-intigriti: light-dark(#087568, #5de0ca);
+  --pf-yeswehack: light-dark(#b42343, #ff8a9e);
+  --pf-independent: light-dark(#41647d, #a9c9df);
+}
 /* Tints, worked out again wherever a palette is set so they follow it. */
 :root, [data-palette] {
   --ok:          var(--good);

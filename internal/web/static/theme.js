@@ -10,7 +10,7 @@
     var t = localStorage.getItem("huntdeck-theme");
     if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
     var p = localStorage.getItem("huntdeck-palette");
-    if (p === "nord" || p === "graphite" || p === "bluewhite") document.documentElement.dataset.palette = p;
+    if (p === "nord" || p === "graphite" || p === "bluewhite" || p === "techblue") document.documentElement.dataset.palette = p;
     // A demo's banner, once hidden in this browser, stays hidden.
     if (localStorage.getItem("huntdeck-demo-banner") === "off") document.documentElement.dataset.demoBanner = "off";
     // The filter rail, left open on a narrower screen, opens again.
