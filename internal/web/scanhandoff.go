@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mdpsec/huntdeck/internal/notify"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/mdpsec/huntdeck/internal/humanize"
 	"github.com/mdpsec/huntdeck/internal/jev"
+	"github.com/mdpsec/huntdeck/internal/notify"
 	"github.com/mdpsec/huntdeck/internal/scanhandoff"
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
 	"github.com/mdpsec/huntdeck/internal/store"

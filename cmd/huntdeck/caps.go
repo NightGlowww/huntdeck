@@ -4,12 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/mdpsec/huntdeck/internal/jev"
 	"io"
 	"log/slog"
 	"strings"
 
 	"github.com/mdpsec/huntdeck/internal/config"
+	"github.com/mdpsec/huntdeck/internal/jev"
 	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 	"github.com/mdpsec/huntdeck/internal/scanhandoff"
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
