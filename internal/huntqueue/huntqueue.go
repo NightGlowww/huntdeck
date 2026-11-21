@@ -188,6 +188,11 @@ func personal(in Inputs) float64 {
 
 func reasons(in Inputs) []Reason {
 	out := make([]Reason, 0, 5)
+	// First, so the two-reason row still shows it: a target the scanner already
+	// holds is the thing a reader needs to know before anything else.
+	if in.HandedOff {
+		out = append(out, Reason{Key: "already handed to the scanner"})
+	}
 	if in.PayoutUSD > 0 {
 		out = append(out, Reason{Key: "pays up to $%s", Args: []string{moneyText(in.PayoutUSD)}})
 	}
@@ -203,9 +208,6 @@ func reasons(in Inputs) []Reason {
 	if !in.AddedAt.IsZero() && !in.Now.IsZero() {
 		days := int(in.Now.Sub(in.AddedAt).Hours() / 24)
 		out = append(out, Reason{Key: "target added %s days ago", Args: []string{fmt.Sprint(max(days, 0))}})
-	}
-	if in.HandedOff {
-		out = append(out, Reason{Key: "already handed to the scanner"})
 	}
 	if in.NoAutomation {
 		out = append(out, Reason{Key: "automation banned: hand testing only"})
