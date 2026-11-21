@@ -215,7 +215,15 @@ disagree in either direction.
    state.
 4. **One container.** Nothing that needs a second service (no Postgres,
    Redis or external queue): SQLite is the database and the job queue.
-5. **No accounts.** HuntDeck deliberately has no users, roles or per-user
+5. **The pipeline moves as one piece.** [docs/pipeline.md](docs/pipeline.md)
+   lists every link — queue → handoff → scanner → report — with the test that
+   holds each shut. Touching one link means running that link's tests (named
+   in the doc), and adding a link means adding a guard and a row to the
+   failure catalogue. The links broke six ways in one week: newest-first
+   batch, record after start, a CLI without the second opinion, a suppressed
+   `confirm()`, a marker truncated out of the reasons, a digest channel left
+   out. Every one was silent.
+6. **No accounts.** HuntDeck deliberately has no users, roles or per-user
    identity; don't add any. The gate is the optional single access password
    (`HUNTDECK_PASSWORD`, `internal/web/auth.go`): one password, one signed
    cookie, no identity behind it. `api_tokens` (migration 0065) adds one
