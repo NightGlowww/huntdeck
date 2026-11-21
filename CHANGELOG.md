@@ -1,3 +1,11 @@
+# Changelog
+
+All notable changes to HuntDeck. The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
+[Semantic Versioning](https://semver.org/): the API under `/api/v1` and
+`/api/v2`, the configuration variables and the database (upgraded in place on
+start) stay compatible within a major version.
+
 ## [Unreleased]
 
 - Opening `/programs/<platform>`, with or without a trailing slash, redirects
