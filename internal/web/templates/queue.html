@@ -1,8 +1,19 @@
 {{define "content"}}{{with .Data}}
+<h1 class="m-heading">{{T "Hunt queue"}}</h1>
 <p class="lead">{{T "Targets ranked by whether you can start today and what the work is worth per hour. A hard gate keeps out what cannot be started; the rest is a weighted score of the program's value, the best-case payout, how fast it accepts, how crowded it is, how fresh the target is and how much arranging it needs."}}</p>
 
 {{if .ComputedAt.IsZero}}
-  <p class="empty-state">{{T "The queue has not been built yet: it is rebuilt every half hour while HuntDeck runs."}}</p>
+  <section class="panel queue-empty" aria-live="polite">
+    <div class="empty-state">
+      <svg class="big-i" aria-hidden="true"><use href="#i-star"/></svg>
+      <h2>{{T "Queue is being prepared"}}</h2>
+      <p>{{T "The queue is rebuilt every half hour while HuntDeck runs. It will appear here after the next completed poll."}}</p>
+      <div class="empty-actions">
+        <a class="button secondary" href="/programs">{{T "Browse programs"}}</a>
+        <a class="button ghost" href="/settings">{{T "Open settings"}}</a>
+      </div>
+    </div>
+  </section>
 {{else}}
 {{if .IgnoredWindow}}<p class="board-status warn">{{TF "The window %s was ignored: say a number of days, like 7d." .IgnoredWindow}}</p>{{end}}
 {{if .BelowFloorUnknown}}<p class="board-status muted">{{T "How many targets the floor left out could not be read."}}</p>{{else if .BelowFloor}}<p class="board-status muted">{{TF "Another %s target(s) scored under the floor and are not listed." (num .BelowFloor)}}</p>{{end}}

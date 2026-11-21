@@ -6,21 +6,32 @@ input[type="search"], input[type="text"], input[type="url"], input[type="passwor
 select { padding-right: 8px; }
 textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border-input); border-radius: 6px; background: var(--surface-2); color: var(--text);
   font: calc(12.5px * var(--fs, 1))/1.6 var(--mono); resize: vertical; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
-input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible {
-  outline: 2px solid var(--accent); outline-offset: 1px;
-}
 input[type="checkbox"] { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); }
 button, .button {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 32px; padding: 0 13px; border: 1px solid transparent;
   border-radius: 6px; background: var(--accent); color: var(--on-accent); font-weight: 600; white-space: nowrap; cursor: pointer;
 }
-button:hover, .button:hover { color: var(--on-accent); filter: brightness(1.07); }
+button:hover, .button:hover { color: var(--on-accent); background: color-mix(in srgb, var(--accent) 88%, var(--surface)); }
 button.secondary, .button.secondary { border-color: var(--border-2); background: var(--surface); color: var(--text); }
 button.secondary:hover, .button.secondary:hover { border-color: var(--muted); color: var(--text); filter: none; }
 button.ghost, .button.ghost { background: transparent; color: var(--text-2); }
 button.ghost:hover, .button.ghost:hover { background: var(--surface-3); color: var(--text); filter: none; }
 button.small, .button.small { height: 26px; padding: 0 9px; font-size: calc(12px * var(--fs, 1)); gap: 5px; }
 button.small .i, .button.small .i { width: 14px; height: 14px; }
+/* Destructive actions keep the same control geometry while making their
+   consequence visible before the confirmation step. */
+button.danger, .button.danger { border-color: color-mix(in srgb, var(--bad) 58%, var(--border-input)); color: var(--bad); }
+button.danger:hover, .button.danger:hover { border-color: var(--bad); background: var(--bad-weak); color: var(--bad); filter: none; }
+button.secondary.danger { background: var(--surface); }
+button.secondary.danger:hover { background: var(--bad-weak); }
+button.ghost.danger { background: transparent; }
+button.ghost.danger:hover { background: var(--bad-weak); }
+.vdialog .danger { background: var(--bad); border-color: var(--bad); color: #fff; }
+.vdialog .danger:hover { background: color-mix(in srgb, var(--bad) 86%, #000); color: #fff; }
+@media (min-width: 701px) {
+  :root[data-fs="lg"] button.small, :root[data-fs="xl"] button.small,
+  :root[data-fs="lg"] .button.small, :root[data-fs="xl"] .button.small { min-height: 32px; height: auto; padding-block: 5px; }
+}
 .button.disabled { opacity: .45; pointer-events: none; }
 form.inline { display: inline-flex; gap: 6px; }
 input.interval { width: 76px; height: 28px; padding: 0 8px; font: calc(12.5px * var(--fs, 1)) var(--mono); }

@@ -12,7 +12,7 @@
           <input type="search" name="q" value="{{$s.Query}}" placeholder="{{T "Filter assets and notes"}}" aria-label="{{T "Filter assets and notes"}}" data-filter-rows="#scope-rows"></label>
       </form>
       <span class="grow"></span>
-      {{with $s.Same}}<span class="muted small">{{.}}</span>{{end}}
+      {{with $s.Same}}<span class="muted small">{{scopeSame .}}</span>{{end}}
       <button type="button" class="link small" data-copy-url="{{$s.CopyURL}}" title="{{T "These rows as plain text, one per line"}}">{{T "Copy targets"}}</button>
       <a class="link small" href="{{$s.CopyURL}}" download="scope.txt" data-export title="{{T "These rows as a .txt file"}}">{{T "Download .txt"}}</a>
       {{if ne $s.Show "removed"}}<a class="link small" href="{{$s.OrderURL}}" title="{{T "Switch the order"}}">{{if eq $s.Order "added"}}{{T "newest first"}}{{else}}{{T "platform order"}}{{end}}</a>{{else}}<span class="muted small">{{T "newest first"}}</span>{{end}}
@@ -28,12 +28,12 @@
       <tbody>
       {{range $s.Rows}}
         <tr>
-          <td class="asset">{{template "asset" .Identifier}}{{if newEntry . $p}} <span class="chip new" title="{{TF "Added %s" (datetime (or .AddedAt .FirstSeenAt))}}">{{T "new"}}</span>{{end}}{{if .Credentials}} <span class="chip creds" title="{{T "Test credentials available from the platform for this asset"}}">{{T "creds"}}</span>{{end}}{{with expandsTo .}}<div class="expands" title="{{.Title}}"><span class="muted">{{T "covers"}}</span> {{.Text}}</div>{{end}}</td>
-          <td><span class="chip" title="{{.PlatformAssetType}}">{{T .AssetType}}</span></td>
-          {{if $s.Bounty}}<td class="sc-bounty">{{if .BountyEligible}}<span class="chip yes">{{T "bounty"}}</span>{{else}}<span class="zero" title="{{T "Not bounty-eligible"}}">{{T "no bounty"}}</span>{{end}}</td>{{end}}
-          {{if $s.Severity}}<td class="sc-sev">{{with .MaxSeverity}}{{if ne . "none"}}<span class="sev {{.}}">{{.}}</span>{{else}}<span class="zero" title="{{T "No maximum severity"}}">—</span>{{end}}{{else}}<span class="zero" title="{{T "No maximum severity given"}}">—</span>{{end}}</td>{{end}}
-          <td class="sc-added nowrap">{{if eq $s.Show "removed"}}{{with .RemovedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{end}}{{else}}{{$byPlatform := .AddedByPlatform}}{{$bound := .AddedBound}}{{with .AddedAt}}<span class="when{{if and (recent .) (not $bound)}} fresh{{end}}" title="{{if $byPlatform}}{{TF "Added to the program %s" (datetime .)}}{{template "age-ago" .}}{{else if $bound}}{{TF "In scope by %s" (datetime .)}}{{template "age-ago" .}}{{T ", where the platform's history starts"}}{{else}}{{TF "Added %s" (datetime .)}}{{template "age-ago" .}} {{T "(from the platform's scope history, or when HuntDeck saw it appear)"}}{{end}}">{{if $bound}}≤ {{end}}{{date .}}</span>{{else}}<span class="zero" title="{{T "Already in scope when HuntDeck started tracking; the platform doesn't date its assets"}}">—</span>{{end}}{{end}}</td>
-          <td class="sc-notes notes">{{with .Instruction}}{{$note := .}}{{with notePreview .}}<details class="note"><summary>{{.}}</summary>{{with noteRest $note}}<div class="pre">{{.}}</div>{{end}}</details>{{else}}<span class="note1">{{$note}}</span>{{end}}{{end}}</td>
+          <td class="asset" data-label="{{T "Asset"}}">{{template "asset" .Identifier}}{{if newEntry . $p}} <span class="chip new" title="{{TF "Added %s" (datetime (or .AddedAt .FirstSeenAt))}}">{{T "new"}}</span>{{end}}{{if .Credentials}} <span class="chip creds" title="{{T "Test credentials available from the platform for this asset"}}">{{T "creds"}}</span>{{end}}{{with expandsTo .}}<div class="expands" title="{{.Title}}"><span class="muted">{{T "covers"}}</span> {{.Text}}</div>{{end}}</td>
+          <td data-label="{{T "Type"}}"><span class="chip" title="{{.PlatformAssetType}}">{{T .AssetType}}</span></td>
+          {{if $s.Bounty}}<td class="sc-bounty" data-label="{{T "Bounty"}}">{{if .BountyEligible}}<span class="chip yes">{{T "bounty"}}</span>{{else}}<span class="zero" title="{{T "Not bounty-eligible"}}">{{T "no bounty"}}</span>{{end}}</td>{{end}}
+          {{if $s.Severity}}<td class="sc-sev" data-label="{{T "Severity"}}">{{with .MaxSeverity}}{{if ne . "none"}}<span class="sev {{.}}">{{T .}}</span>{{else}}<span class="zero" title="{{T "No maximum severity"}}">—</span>{{end}}{{else}}<span class="zero" title="{{T "No maximum severity given"}}">—</span>{{end}}</td>{{end}}
+          <td class="sc-added nowrap" data-label="{{if eq $s.Show "removed"}}{{T "Removed"}}{{else}}{{T "Added"}}{{end}}">{{if eq $s.Show "removed"}}{{with .RemovedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{end}}{{else}}{{$byPlatform := .AddedByPlatform}}{{$bound := .AddedBound}}{{with .AddedAt}}<span class="when{{if and (recent .) (not $bound)}} fresh{{end}}" title="{{if $byPlatform}}{{TF "Added to the program %s" (datetime .)}}{{template "age-ago" .}}{{else if $bound}}{{TF "In scope by %s" (datetime .)}}{{template "age-ago" .}}{{T ", where the platform's history starts"}}{{else}}{{TF "Added %s" (datetime .)}}{{template "age-ago" .}} {{T "(from the platform's scope history, or when HuntDeck saw it appear)"}}{{end}}">{{if $bound}}≤ {{end}}{{date .}}</span>{{else}}<span class="zero" title="{{T "Already in scope when HuntDeck started tracking; the platform doesn't date its assets"}}">—</span>{{end}}{{end}}</td>
+          <td class="sc-notes notes" data-label="{{T "Notes"}}">{{with .Instruction}}{{$note := .}}{{with notePreview .}}<details class="note"><summary>{{.}}</summary>{{with noteRest $note}}<div class="pre">{{.}}</div>{{end}}</details>{{else}}<span class="note1">{{$note}}</span>{{end}}{{end}}</td>
         </tr>
       {{end}}
       </tbody>
@@ -49,4 +49,4 @@
 {{end}}{{end}}
 
 {{/* ", 7y 3mo ago" (or ", today") after a date in a tooltip. */}}
-{{define "age-ago"}}, {{age .}}{{if ne (age .) "today"}} {{T "ago"}}{{end}}{{end}}
+{{define "age-ago"}}, {{ageLang .}}{{if ne (age .) "today"}} {{T "ago"}}{{end}}{{end}}

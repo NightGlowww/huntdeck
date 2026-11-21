@@ -1,9 +1,9 @@
-{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/programs">{{T "Programs"}}</a><span class="sep">/</span><a href="/programs?platform=independent&amp;state=all">Independent</a><span class="sep">/</span><span class="here" title="{{T .Title}}">{{T .Title}}</span></nav>{{end}}{{end}}
+{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/programs">{{T "Programs"}}</a><span class="sep">/</span><a href="/programs?platform=independent&amp;state=all">{{T "Independent"}}</a><span class="sep">/</span><span class="here" title="{{T .Title}}">{{T .Title}}</span></nav>{{end}}{{end}}
 
 {{/* Add or edit a program that isn't on a supported platform (ownprograms.go). */}}
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T .Title}}</h1>
-{{if .ReadOnly}}<div class="demo-tour" role="note"><b>{{T "Self-hosted"}}</b><span>{{if .Handle}}On your own HuntDeck, this form edits a program you added by hand: its scope, bounties and rules, with each save shown on its Changes tab.{{else}}On your own HuntDeck, this form adds programs that aren't on a supported platform, such as ones companies run themselves.{{end}} Here it can't be saved.{{with repoURL}} <a class="link" href="{{.}}" target="_blank" rel="noopener noreferrer">Self-host HuntDeck</a>{{end}}</span></div>{{end}}
+{{if .ReadOnly}}<div class="demo-tour" role="note"><b>{{T "Self-hosted"}}</b><span>{{if .Handle}}{{fixedT "On your own HuntDeck, this form edits a program you added by hand: its scope, bounties and rules, with each save shown on its Changes tab."}}{{else}}{{fixedT "On your own HuntDeck, this form adds programs that aren't on a supported platform, such as ones companies run themselves."}}{{end}} {{fixedT "Here it can't be saved."}}{{with repoURL}} <a class="link" href="{{.}}" target="_blank" rel="noopener noreferrer">{{T "Self-host HuntDeck"}}</a>{{end}}</span></div>{{end}}
 <form method="post" action="{{.Action}}" class="channel-form own-form">
   <section class="panel">
     <div class="panel-head"><h2>{{T "Program"}}</h2><span class="aside">{{T "not on HackerOne, Bugcrowd, Intigriti or YesWeHack"}}</span></div>
@@ -57,7 +57,7 @@
   <div class="actbar">
     <button type="submit" class="act-save">{{if .Handle}}{{T "Save"}}{{else}}{{T "Add program"}}{{end}}</button>
     <a class="button ghost act-cancel" href="{{.Back}}">{{T "Cancel"}}</a>
-    {{if and .Handle (not .ReadOnly)}}<button type="submit" form="remove-program" class="ghost act-delete">{{T "Remove"}}</button>{{end}}
+    {{if and .Handle (not .ReadOnly)}}<button type="submit" form="remove-program" class="ghost danger act-delete">{{T "Remove"}}</button>{{end}}
   </div>
 </form>
 {{if and .Handle (not .ReadOnly)}}<form method="post" action="/programs/independent/{{.Handle}}/remove" id="remove-program" data-confirm="{{TF "Remove %s? Its history stays, under Status › Removed." .Name}}"></form>{{end}}

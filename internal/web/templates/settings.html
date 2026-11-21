@@ -20,11 +20,11 @@
             <input type="hidden" name="platform" value="{{$p.Name}}">
             <button type="submit" class="ghost small" title="{{TF "Use the intervals from .env (quick %s, full %s) and enable the platform" (interval $p.Default.Quick) (interval $p.Default.Full)}}">{{T "Reset"}}</button>
           </form>{{end}}</td>
-        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="enabled_{{$p.Name}}" value="1" form="sched" aria-label="Enable {{$p.Name}}"{{if $p.Enabled}} checked{{end}}> <span class="muted small">{{if $p.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
+        <td data-label="{{T "Enabled"}}"><label class="toggle"><input type="checkbox" name="enabled_{{$p.Name}}" value="1" form="sched" aria-label="{{TF "Enable %s" $p.Name}}"{{if $p.Enabled}} checked{{end}}> <span class="muted small">{{if $p.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
         <td class="c-wide">{{if $p.SignIn}}<div class="signins">{{range $p.SignIn}}{{template "signin" .}}{{end}}</div>{{else}}<span class="zero">—</span>{{end}}</td>
-<span class="ival-hint" aria-live="polite"></span>        <td data-label="Quick poll"><div class="pollc"><input type="text" class="interval" data-kind="quick" name="quick_{{$p.Name}}" value="{{interval $p.Quick}}" form="sched" aria-label="{{TF "%s quick poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
+<span class="ival-hint" aria-live="polite"></span>        <td data-label="{{T "Quick poll"}}"><div class="pollc"><input type="text" class="interval" data-kind="quick" name="quick_{{$p.Name}}" value="{{interval $p.Quick}}" form="sched" aria-label="{{TF "%s quick poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
           title="{{TF "every %s" (interval $p.Quick)}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Quick)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "quick")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}{{with $p.NextQuick}}<span class="muted small next-due">{{TF "next about %s" .}}</span>{{end}}</div></td>
-<span class="ival-hint" aria-live="polite"></span>        <td data-label="Full poll"><div class="pollc"><input type="text" class="interval" data-kind="full" name="full_{{$p.Name}}" value="{{interval $p.Full}}" form="sched" aria-label="{{TF "%s full poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
+<span class="ival-hint" aria-live="polite"></span>        <td data-label="{{T "Full poll"}}"><div class="pollc"><input type="text" class="interval" data-kind="full" name="full_{{$p.Name}}" value="{{interval $p.Full}}" form="sched" aria-label="{{TF "%s full poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
           title="{{TF "every %s" (interval $p.Full)}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Full)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "full")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}{{with $p.NextFull}}<span class="muted small next-due">{{TF "next about %s" .}}</span>{{end}}</div></td>
         <td class="c-side num">
           {{if $p.Enabled}}<form method="post" action="/settings/poll" class="inline" data-busy="{{T "Polling…"}}">
@@ -41,7 +41,7 @@
             <input type="hidden" name="platform" value="{{$w.Name}}">
             <button type="submit" class="ghost small" title="{{T "Back to on, once a day"}}">{{T "Reset"}}</button>
           </form>{{end}}</td>
-        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="web_enabled_{{$w.Name}}" value="1" form="sched" aria-label="{{TF "Enable the %s browser sync" $w.Name}}"{{if $w.Enabled}} checked{{end}}> <span class="muted small">{{if $w.Enabled}}on{{else}}off{{end}}</span></label></td>
+        <td data-label="{{T "Enabled"}}"><label class="toggle"><input type="checkbox" name="web_enabled_{{$w.Name}}" value="1" form="sched" aria-label="{{TF "Enable the %s browser sync" $w.Name}}"{{if $w.Enabled}} checked{{end}}> <span class="muted small">{{if $w.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
         <td colspan="3" class="c-wide"><div class="pollc subc"><span class="muted small" title="{{TF "Reads for each program: %s" $w.PullsText}}">{{T "uses the website login, every"}}</span>
           <input type="text" class="interval" name="web_interval_{{$w.Name}}" value="{{interval $w.Interval}}" form="sched" aria-label="{{TF "%s browser sync interval" $w.Name}}" spellcheck="false" autocomplete="off" maxlength="12"><span class="ival-hint" aria-live="polite"></span><span class="ival-hint" aria-live="polite"></span>
           <span class="muted small">{{T "last run"}}</span>{{with $w.Last}}<span>{{template "lastrun" .}}</span>{{else}}<span class="zero">{{T "never"}}</span>{{end}}</div></td>
@@ -100,9 +100,9 @@
         <td class="run-status"><span class="chips"><span class="chip {{.DisplayStatus}}"{{if eq .DisplayStatus "interrupted"}} title="{{T "Stopped by a restart or shutdown"}}"{{end}}>{{T .DisplayStatus}}</span>{{if .ListingRecent}}<span class="chip" title="{{T "Quick poll that read only the newest programs; the complete listing, which finds invites and removals, runs every two hours"}}">{{T "newest only"}}</span>{{else if and (not .ListingComplete) (ne .Status "running") (ne .Trigger "program")}}<span class="chip" title="{{T "Programs aren't marked removed when the listing is incomplete"}}">{{T "partial list"}}</span>{{end}}{{if and (eq .Status "running") $live.Stalled}}<span class="chip stalled" title="{{TF "No request answered and no program done for %s: it may be stuck. Restart now (Accounts) stops it; it keeps what it saved" $live.Idle}}">{{TF "no activity %s" $live.Idle}}</span>{{end}}</span>
           {{if eq .Status "running"}}<span class="run-prog small">{{if $live.Known}}<b>{{$live.Step}}</b>{{with $live.Left}} · {{.}}{{end}}{{if not $live.Stalled}} · <span class="muted" title="{{T "When it last had a request answered or a program done"}}">{{TF "last activity %s ago" $live.Idle}}</span>{{end}}{{else}}<span class="muted">{{T "Running in another process: no progress to show"}}</span>{{end}}</span>{{end}}
           {{if ne .DisplayStatus "interrupted"}}{{with .Error}}<span class="muted small run-err" title="{{.}}">{{.}}</span>{{end}}{{end}}</td>
-        <td class="num">{{if eq .Status "running"}}{{$live.Running}} so far{{with $live.Usually}}<span class="muted small run-usual">{{.}}</span>{{end}}{{else}}{{runTook .}}{{end}}</td>
+        <td class="num">{{if eq .Status "running"}}{{$live.Running}} {{T "so far"}}{{with $live.Usually}}<span class="muted small run-usual">{{.}}</span>{{end}}{{else}}{{runTook .}}{{end}}</td>
         <td class="num">{{num .ProgramsSeen}}</td>
-        <td class="num">{{num .ScopesFetched}}{{if .ScopesFailed}} <span class="chip failed">{{.ScopesFailed}} failed</span>{{end}}<span class="muted small">{{if .ScopesUnchanged}}<span title="{{T "Not downloaded: the platform says these haven't changed since the last download"}}"> · {{num .ScopesUnchanged}} unchanged</span>{{end}}{{if .DisclosuresNew}} · {{num .DisclosuresNew}} new disclosed{{end}}{{if .ResolutionsNew}} · {{num .ResolutionsNew}} new resolved{{end}}{{if .StatsFetched}} · {{num .StatsFetched}} program stats{{end}}</span>{{if .StatsFailed}} <span class="chip failed">{{.StatsFailed}} stats failed</span>{{end}}</td>
+        <td class="num">{{num .ScopesFetched}}{{if .ScopesFailed}} <span class="chip failed">{{.ScopesFailed}} {{T "failed"}}</span>{{end}}<span class="muted small">{{if .ScopesUnchanged}}<span title="{{T "Not downloaded: the platform says these haven't changed since the last download"}}"> · {{num .ScopesUnchanged}} {{T "unchanged"}}</span>{{end}}{{if .DisclosuresNew}} · {{num .DisclosuresNew}} {{T "new disclosed"}}{{end}}{{if .ResolutionsNew}} · {{num .ResolutionsNew}} {{T "new resolved"}}{{end}}{{if .StatsFetched}} · {{num .StatsFetched}} {{T "program stats"}}{{end}}</span>{{if .StatsFailed}} <span class="chip failed">{{.StatsFailed}} {{T "stats failed"}}</span>{{end}}</td>
         <td class="num">{{if .Changes}}{{num .Changes}}{{else}}<span class="zero">0</span>{{end}}</td>
         <td class="num">{{if and (eq .Status "running") $live.Known}}{{num $live.Requests}}{{else}}{{num .Requests}}{{end}}{{if .RateLimited}} <span class="muted small">({{.RateLimited}} × 429)</span>{{end}}</td>
       </tr>
@@ -168,12 +168,12 @@
     <div class="zone-field">
       <label for="timezone-input"><span>{{T "Time zone"}}</span></label>
       {{template "zone-picker" .Zone}}
-      <span class="muted small" id="timezone-now">Now {{.Zone.Now}}.{{if .Zone.Overrode}} Default: {{.Zone.Default}}.{{else}} The default, from <code>HUNTDECK_TIMEZONE</code>.{{end}}
+      <span class="muted small" id="timezone-now">{{TF "Now %s." .Zone.Now}}{{if .Zone.Overrode}} {{TF "Default: %s." .Zone.Default}}{{else}} {{T "The default, from"}} <code>HUNTDECK_TIMEZONE</code>.{{end}}
         <button type="button" class="linkish" data-combo-fill-tz="timezone-input" hidden>{{T "Use this browser's:"}} <b></b></button></span>
     </div>
     <div class="zone-actions">
       <button type="submit" class="small">{{T "Save time zone"}}</button>
-      {{if .Zone.Overrode}}<button type="submit" name="reset" value="1" class="small secondary" formnovalidate>Reset to {{.Zone.Default}}</button>{{end}}
+      {{if .Zone.Overrode}}<button type="submit" name="reset" value="1" class="small secondary" formnovalidate>{{TF "Reset to %s" .Zone.Default}}</button>{{end}}
     </div>
   </form>
   <script src="{{static "combo.js"}}" defer></script>
@@ -207,7 +207,7 @@
 {{end}}{{end}}
 
 {{define "signin"}}<div class="signin" title="{{T .NameKey}}: {{T .LabelKey}}{{range .Parts}} · {{T .TextKey}}{{with .When}} {{datetime .}}{{end}}{{with .In}} {{datetime .}}{{end}}{{with .At}} {{datetime .}}{{end}}{{end}}"><span class="chip {{.State}}">{{T .LabelKey}}</span><span class="sn">{{T .NameKey}}</span>{{with .Parts}}<span class="muted small sp">{{range $i, $p := .}}{{if $i}} · {{end}}{{T $p.TextKey}}{{with $p.When}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{with $p.In}} <span title="{{datetime .}}">{{until .}}</span>{{end}}{{with $p.At}} {{datetime .}}{{end}}{{end}}</span>{{end}}{{with .Watch}} <a class="link small" href="{{.}}" title="{{T "See the login browser: watch a login, or finish one by hand"}}">watch</a>{{end}}</div>{{with .Problem}}<div class="signin-why small">{{.}}</div>{{end}}{{end}}
-{{define "lastrun"}}<span class="chip {{.DisplayStatus}}"{{with .Error}} title="{{.}}"{{end}}>{{T .DisplayStatus}}</span> <span class="muted" title="{{datetime .StartedAt}} · took {{runTook .}}">{{ago .StartedAt}}<span class="took"> · {{runTook .}}</span></span>{{end}}
+{{define "lastrun"}}<span class="chip {{.DisplayStatus}}"{{with .Error}} title="{{.}}"{{end}}>{{T .DisplayStatus}}</span> <span class="muted" title="{{datetime .StartedAt}} · {{TF "took %s" (runTook .)}}">{{ago .StartedAt}}<span class="took"> · {{runTook .}}</span></span>{{end}}
 
 {{define "settings-textsize"}}
 <section class="panel" id="textsize">

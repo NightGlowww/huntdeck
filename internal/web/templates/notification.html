@@ -89,7 +89,7 @@
     <a class="button ghost act-cancel" href="/settings/notifications">{{T "Cancel"}}</a>
     <button type="submit" class="secondary act-test" formaction="/settings/notifications{{if .ID}}/{{.ID}}{{end}}/test" formnovalidate data-test>{{T "Send a test"}}</button>
     <span class="act-result muted small" data-test-result role="status"></span>
-    {{if .ID}}<button type="submit" form="delete-channel" class="ghost act-delete">{{T "Delete"}}</button>{{end}}
+    {{if .ID}}<button type="submit" form="delete-channel" class="ghost danger act-delete">{{T "Delete"}}</button>{{end}}
   </div>
 </form>
 

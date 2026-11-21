@@ -109,6 +109,10 @@
   .polgrid > aside { grid-column: auto; }
   .toc { position: static; max-height: 320px; }
 }
+@media (max-width: 700px) {
+  .toc { max-height: none; }
+  .toc-list { max-height: 168px; }
+}
 
 /* ---------- the Overview's panels ---------- */
 
@@ -197,9 +201,17 @@
   .scope-table:has(th.sc-bounty):has(th.sc-sev) .sc-notes { display: none; }
 }
 @media (max-width: 700px) {
-  /* A phone: asset and type; the rest is a tap away on the platform. */
-  .scope-table :is(.sc-bounty, .sc-sev, .sc-added, .sc-notes) { display: none; }
-  .scope-table th.sc-asset { width: auto; }
+  /* A phone keeps the decision-making fields visible as compact cards. */
+  .scope-table thead { display: none; }
+  .scope-table, .scope-table tbody, .scope-table tr, .scope-table td { display: block; width: auto; }
+  .scope-table tr { padding: 10px 12px; border-top: 1px solid var(--border); }
+  .scope-table tr:first-child { border-top: 0; }
+  .scope-table td { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; align-items: start; padding: 5px 0; border: 0; }
+  .scope-table td::before { content: attr(data-label); color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 650; letter-spacing: .05em; text-transform: uppercase; }
+  .scope-table td.asset { font-weight: 600; }
+  .scope-table td.asset::before { font-weight: 650; }
+  .scope-table td.notes { white-space: normal; }
+  .scope-table td.notes .note1, .scope-table td.notes .note > summary { white-space: normal; overflow-wrap: anywhere; }
   .scope-bar .seg em { display: none; } /* the counts are on the tab and the type chips */
 }
 

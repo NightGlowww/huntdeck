@@ -9,26 +9,26 @@
   <table class="bounty-sev">
     <tbody>
     {{range .SeverityRanges}}{{$r := .}}
-      <tr><td><span class="sev {{.Severity}}">{{.Severity}}</span></td>
-        <td class="num nowrap">{{with reward .Min .Max $c}}<span title="{{rewardFull $r.Min $r.Max $c}}">{{.}}</span>{{else}}<span class="zero">no bounty</span>{{end}}
+      <tr><td><span class="sev {{.Severity}}">{{T .Severity}}</span></td>
+        <td class="num nowrap">{{with reward .Min .Max $c}}<span title="{{rewardFull $r.Min $r.Max $c}}">{{.}}</span>{{else}}<span class="zero">{{T "no bounty"}}</span>{{end}}
           {{if or .AvgBounty .SharePct}}<div class="sev-meta" title="{{T "90-day average bounty"}}{{with .AvgBounty}} ({{amountFull . $c}}){{end}}{{T ", and this severity's share of resolved reports"}}">{{with amount .AvgBounty $c}}{{T "avg"}} {{.}}{{end}}{{if and .AvgBounty .SharePct}} · {{end}}{{with .SharePct}}{{intv .}}% {{T "of reports"}}{{end}}</div>{{end}}</td></tr>
     {{end}}
     </tbody>
   </table>
   {{if gt (len .Rewards) 1}}
   <details class="by-asset" id="by-asset">
-    <summary><svg class="i chev"><use href="#i-chev"/></svg>By asset <span class="count">{{len .Rewards}}</span></summary>
+    <summary><svg class="i chev"><use href="#i-chev"/></svg>{{T "By asset"}} <span class="count">{{len .Rewards}}</span></summary>
     <div class="table-wrap">
     <table>
-      <thead><tr><th>Applies to</th><th class="num"><span class="sev low">Low</span></th><th class="num"><span class="sev medium">Med</span></th>
-        <th class="num"><span class="sev high">High</span></th><th class="num"><span class="sev critical">Crit</span></th></tr></thead>
+      <thead><tr><th>{{T "Applies to"}}</th><th class="num"><span class="sev low">{{T "low"}}</span></th><th class="num"><span class="sev medium">{{T "medium"}}</span></th>
+        <th class="num"><span class="sev high">{{T "high"}}</span></th><th class="num"><span class="sev critical">{{T "critical"}}</span></th></tr></thead>
       <tbody>
       {{range .Rewards}}{{$r := .}}
-        <tr><td class="asset">{{with .Scope}}{{.}}{{else}}<span class="muted">Default</span>{{end}}</td>
-          <td class="num nowrap">{{with reward .Low.Min .Low.Max $c}}<span title="{{rewardFull $r.Low.Min $r.Low.Max $c}}">{{.}}</span>{{else}}<span class="zero" title="No bounty">none</span>{{end}}</td>
-          <td class="num nowrap">{{with reward .Medium.Min .Medium.Max $c}}<span title="{{rewardFull $r.Medium.Min $r.Medium.Max $c}}">{{.}}</span>{{else}}<span class="zero" title="No bounty">none</span>{{end}}</td>
-          <td class="num nowrap">{{with reward .High.Min .High.Max $c}}<span title="{{rewardFull $r.High.Min $r.High.Max $c}}">{{.}}</span>{{else}}<span class="zero" title="No bounty">none</span>{{end}}</td>
-          <td class="num nowrap">{{with reward .Critical.Min .Critical.Max $c}}<span title="{{rewardFull $r.Critical.Min $r.Critical.Max $c}}">{{.}}</span>{{else}}<span class="zero" title="No bounty">none</span>{{end}}</td></tr>
+        <tr><td class="asset">{{with .Scope}}{{.}}{{else}}<span class="muted">{{T "Default"}}</span>{{end}}</td>
+          <td class="num nowrap">{{with reward .Low.Min .Low.Max $c}}<span title="{{rewardFull $r.Low.Min $r.Low.Max $c}}">{{.}}</span>{{else}}<span class="zero" title="{{T "no bounty"}}">{{T "none"}}</span>{{end}}</td>
+          <td class="num nowrap">{{with reward .Medium.Min .Medium.Max $c}}<span title="{{rewardFull $r.Medium.Min $r.Medium.Max $c}}">{{.}}</span>{{else}}<span class="zero" title="{{T "no bounty"}}">{{T "none"}}</span>{{end}}</td>
+          <td class="num nowrap">{{with reward .High.Min .High.Max $c}}<span title="{{rewardFull $r.High.Min $r.High.Max $c}}">{{.}}</span>{{else}}<span class="zero" title="{{T "no bounty"}}">{{T "none"}}</span>{{end}}</td>
+          <td class="num nowrap">{{with reward .Critical.Min .Critical.Max $c}}<span title="{{rewardFull $r.Critical.Min $r.Critical.Max $c}}">{{.}}</span>{{else}}<span class="zero" title="{{T "no bounty"}}">{{T "none"}}</span>{{end}}</td></tr>
       {{end}}
       </tbody>
     </table>
@@ -49,7 +49,7 @@
   {{range .Before}}
     <li{{if .Alert}} class="alert"{{end}}><svg class="i" aria-hidden="true"><use href="#{{if or (eq .Kind "req") (eq .Kind "warn")}}i-info{{else if or (eq .Kind "auto") (eq .Kind "rate")}}i-activity{{else if eq .Kind "email"}}i-file{{else if eq .Kind "creds"}}i-target{{else}}i-sliders{{end}}"/></svg>
       <div><b>{{.Title}}</b>{{with .Detail}}<span>{{.}}</span>{{end}}</div>
-      {{with .Copy}}<button type="button" class="icon-btn" data-copy-text="{{.}}" title="Copy" aria-label="Copy {{.}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button>{{end}}</li>
+      {{with .Copy}}<button type="button" class="icon-btn" data-copy-text="{{.}}" title="{{T "Copy"}}" aria-label="{{T "Copy"}} {{.}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button>{{end}}</li>
   {{end}}
   </ul>
   {{end}}
@@ -94,14 +94,14 @@
 {{define "program-recent"}}{{with .Feed}}{{if .Changes}}
 <section class="panel pchanges">
   <div class="panel-head"><h2>{{T "Recent changes"}}{{if not .Segments}} <span class="count">{{num .Total}}</span>{{end}}</h2>
-    {{if or .Segments (gt .Total (len .Changes))}}<span class="aside">{{template "feed-segs" .}}{{if gt .Total (len .Changes)}}<a class="link" href="?tab=changes{{if .Segments}}&amp;feed={{.Show}}{{end}}">All {{if eq .Show "announcements"}}announcements{{else}}changes{{end}} →</a>{{end}}</span>{{end}}</div>
+    {{if or .Segments (gt .Total (len .Changes))}}<span class="aside">{{template "feed-segs" .}}{{if gt .Total (len .Changes)}}<a class="link" href="?tab=changes{{if .Segments}}&amp;feed={{.Show}}{{end}}">{{T "All"}} {{if eq .Show "announcements"}}{{T "announcements"}}{{else}}{{T "changes"}}{{end}} →</a>{{end}}</span>{{end}}</div>
   {{template "change-feed" .Rows}}
 </section>
 {{end}}{{end}}{{end}}
 
 {{/* Segments switching a change feed between all changes, scope and
    program changes, and announcements. */}}
-{{define "feed-segs"}}{{with .Segments}}<nav class="seg" aria-label="{{T "Which changes"}}">{{range .}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}">{{.Label}} <em>{{num .Count}}</em></a>{{end}}</nav>{{end}}{{end}}
+{{define "feed-segs"}}{{with .Segments}}<nav class="seg" aria-label="{{T "Which changes"}}">{{range .}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}">{{T .Label}} <em>{{num .Count}}</em></a>{{end}}</nav>{{end}}{{end}}
 
 {{/* One change (feedRow) of a list. */}}
 {{define "feed-row"}}<li data-at="{{iso .OccurredAt}}"><span class="when{{if fresh .OccurredAt}} fresh{{end}}" title="{{datetime .OccurredAt}}">{{date .OccurredAt}}</span>

@@ -1505,6 +1505,23 @@
   "gate scope_unavailable": "没有范围条目",
   "gate removed": "项目已移除",
   "Hunt queue": "狩猎队列",
+  "first response": "首次响应",
+  "to validate": "验证用时",
+  "No scope entered yet.": "还没有填写范围。",
+  "HuntDeck knows only what's entered here: it doesn't fetch the program's page or poll it.": "HuntDeck 只知道你在这里填写的内容，不会抓取项目页面，也不会轮询它。",
+  "added in the last 30 days": "过去 30 天新增",
+  "out": "范围外",
+  "Applies to": "适用范围",
+  "the newest %d": "最新 %d 条",
+  "complete since %s": "完整记录始于 %s",
+  "re-read": "重新读取",
+  "made public on %s": "在 %s 上公开",
+  "latest %s": "最近一条 %s",
+  "Showing the newest %d; all %d are kept.": "显示最新 %d 条；共保留 %d 条。",
+  "Queue is being prepared": "队列正在准备中",
+  "The queue is rebuilt every half hour while HuntDeck runs. It will appear here after the next completed poll.": "HuntDeck 运行时每半小时重建一次队列。下一轮抓取完成后，队列会显示在这里。",
+  "Browse programs": "浏览项目",
+  "Open settings": "打开设置",
   "Targets ranked by whether you can start today and what the work is worth per hour. A hard gate keeps out what cannot be started; the rest is a weighted score of the program's value, the best-case payout, how fast it accepts, how crowded it is, how fresh the target is and how much arranging it needs.": "按「今天能不能动手、每小时值多少」排序的目标。硬性门槛先排除不能开工的；其余按程序价值、最高赏金、接受速度、拥挤程度、目标新鲜度和准备成本加权。",
   "The queue has not been built yet: it is rebuilt every half hour while HuntDeck runs.": "队列还没生成：HuntDeck 运行时每半小时重建一次。",
   "Built %s": "生成于 %s",
@@ -1818,6 +1835,96 @@
   "Delete this active key? Clients using it will lose access immediately.": "删除这枚有效密钥？使用它的客户端会立即失去访问权限。",
   "No connection keys yet.": "还没有连接密钥。",
   "No unused keys older than one hour.": "没有超过一小时且从未使用的密钥。",
-  "Select": "选择"
+  "Select": "选择",
+  "Export scope": "导出范围",
+  "This is the last scope HuntDeck saw.": "这是 HuntDeck 上次看到的范围。",
+  "This usually means its terms or a compliance step need accepting on the platform. Full polls keep checking.": "这通常表示需要先在平台接受条款或完成合规步骤。全量轮询会继续检查。",
+  "%s didn't show this program's scope when last checked (%s).": "上次检查时，%s 没有显示这个项目的范围（%s）。",
+  "Valid submissions": "有效提交",
+  "Reports resolved": "已解决报告",
+  "of 4": "共 4 级",
+  "distinct": "去重",
+  "unrated": "未评级",
+  "paid": "已付费",
+  "accepted since": "自接收起",
+  "Submitted": "提交时间",
+  "by %s": "报告人 %s",
+  "%s bounty reports × the average; amounts hidden": "%s 份赏金报告 × 平均值；金额未公开",
+  "%s's own count": "%s 的平台统计总数",
+  "Independent": "独立项目",
+  "On your own HuntDeck, this form edits a program you added by hand: its scope, bounties and rules, with each save shown on its Changes tab.": "在你自己的 HuntDeck 中，这个表单用于编辑手动添加的项目，包括范围、赏金和规则；每次保存都会显示在「变更」页。",
+  "On your own HuntDeck, this form adds programs that aren't on a supported platform, such as ones companies run themselves.": "在你自己的 HuntDeck 中，这个表单用于添加不在受支持平台上的项目，例如公司自行运行的项目。",
+  "Here it can't be saved.": "在这里无法保存。",
+  "Self-host HuntDeck": "自行部署 HuntDeck"
+  ,"First response: %s": "首次响应：%s"
+  ,"To validate: %s": "验证用时：%s"
+  ,"up to %s": "最高 %s"
+  ,"HackerOne's average bounty: %s": "HackerOne 平均赏金：%s"
+  ,"Bugcrowd's average payout over the last 3 months: %s": "Bugcrowd 近 3 个月平均支出：%s"
+  ,"YesWeHack's average reward: %s": "YesWeHack 平均奖励：%s"
+  ,"Intigriti's average payout: %s": "Intigriti 平均支出：%s"
+  ,"Average bounty: %s": "平均赏金：%s"
+  ,"Hunters": "研究者数"
+  ,"Hunters joined": "已加入的研究者"
+  ,"Hunters ranked": "上榜研究者"
+  ,"Hunters contributed": "有贡献的研究者"
+  ,"Researchers on the program": "项目上的研究者"
+  ,"Researchers who joined the program": "加入项目的研究者"
+  ,"Researchers on the program's ranking: those who scored on it": "项目排行榜上的研究者，即在项目上获得积分的人"
+  ,"Researchers who contributed a report the program accepted": "提交过被项目接收报告的研究者"
+  ,"Valid reports in the last 90 days": "近 90 天有效报告"
+  ,"Valid reports in the last 90 days: reports resolved on HackerOne Hacktivity": "近 90 天有效报告：HackerOne Hacktivity 上已解决的报告"
+  ,"Valid reports in the last 90 days: accepted reports resolved on Bugcrowd CrowdStream": "近 90 天有效报告：Bugcrowd CrowdStream 上已接收并解决的报告"
+  ,"Estimate of valid reports in 90 days: %s reports received in 90 days × %s%% of its reports accepted all time (%s of %s). %s doesn't list its reports, so none are counted as resolved; see Methodology.": "近 90 天有效报告估算：近 90 天收到的 %s 份报告 × 历史接收率 %s%%（%s / %s）。%s 不公开报告，因此没有报告会按已解决计入；详见评分方法。"
+  ,"No assets in scope": "没有范围内资产"
+  ,"in-scope entry": "范围内条目"
+  ,"in-scope entries": "范围内条目"
+  ,"app": "应用"
+  ,"apps": "应用"
+  ,"other": "其他"
+  ,"they name": "它们指向"
+  ,"it names": "它指向"
+  ,"and": "和"
+  ,"none resolved": "无已解决"
+  ,"bounties × the average": "份赏金 × 平均值"
+  ,"median to resolve": "解决时间中位数"
+  ,"no data": "暂无数据"
+  ,"resolved": "已解决"
+  ,"submitted": "已提交"
+  ,"accepted": "已接收"
+  ,"shown": "已展示"
+  ,"Reports resolved per month": "每月已解决报告"
+  ,"Resolved reports by the month they were submitted": "按提交月份统计的已解决报告"
+  ,"Reports accepted per month": "每月已接收报告"
+  ,"Accepted reports resolved per month": "每月已解决的已接收报告"
+  ,"Accepted reports by the month they were submitted": "按提交月份统计的已接收报告"
+  ,"Median days to resolve, by the month resolved": "按解决月份统计的解决时间中位数"
+  ,"Bounties per month, shown on CrowdStream, by the month accepted": "按接收月份统计的每月赏金（CrowdStream 展示）"
+  ,"Bounties per month, estimated at the program's average bounty": "按项目平均赏金估算的每月赏金"
+  ,"Bounties per month, shown on Hacktivity": "每月赏金（Hacktivity 展示）"
+  ,"All bounty-eligible": "全部符合赏金条件"
+  ,"No bounties": "无赏金"
+  ,"All bounty-eligible, up to %s": "全部符合赏金条件，最高 %s"
+  ,"Up to %s": "最高 %s"
+  ,"Scope & program": "范围与项目"
+  ,"Enable %s": "启用 %s"
+  ,"Now %s.": "现在是 %s。"
+  ,"Default: %s.": "默认值：%s。"
+  ,"The default, from": "默认值来自"
+  ,"Reset to %s": "重置为 %s"
+  ,"so far": "截至目前"
+  ,"failed": "失败"
+  ,"unchanged": "未变化"
+  ,"new disclosed": "新披露"
+  ,"new resolved": "新解决"
+  ,"program stats": "项目统计"
+  ,"stats failed": "统计失败"
+  ,"took %s": "耗时 %s"
+  ,"today": "今天"
+  ,"undisclosed ones on %s CrowdStream": "在 %s CrowdStream 上未披露的报告"
+  ,"Bounties paid · 90 days": "已付赏金 · 90 天"
+  ,"Bounties paid · 90 days, estimated": "已付赏金 · 90 天（估算）"
+  ,"Valid reports · 90 days": "有效报告 · 90 天"
+  ,"Valid reports · 90 days, estimated": "有效报告 · 90 天（估算）"
  }
 }

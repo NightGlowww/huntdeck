@@ -33,7 +33,7 @@
 
 {{define "nomoney"}}{{if .OffersBounty}}{{template "nodata" .}}{{else}}<span class="zero" title="{{T "Pays no bounties"}}">—</span>{{end}}{{end}}
 
-{{define "trend"}}{{if .Line}}<span class="tchart {{.Tone}}{{if .Provisional}} provisional{{end}}" title="{{.Summary}}" data-days="{{.Days}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{TF "%s, last 90 days: %s" .Heading .Summary}}"><path class="area" d="{{.Area}}"/>{{with .Gap}}<path class="gap" d="{{.}}"/>{{end}}<path class="line" d="{{.Line}}"/></svg></span>{{else if .Collecting}}<span class="tchart flat collecting" title="{{.Collecting}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{.Collecting}}"><path class="line" d="M0 15 L100 15"/><path class="today" d="M100 15 L100 15"/></svg></span>{{end}}{{end}}
+{{define "trend"}}{{if .Line}}<span class="tchart {{.Tone}}{{if .Provisional}} provisional{{end}}" title="{{trendSummary .Heading .Summary}}" data-days="{{chartDays .Days}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{TF "%s, last 90 days: %s" (trendHeading .Heading) (trendSummary .Heading .Summary)}}"><path class="area" d="{{.Area}}"/>{{with .Gap}}<path class="gap" d="{{.}}"/>{{end}}<path class="line" d="{{.Line}}"/></svg></span>{{else if .Collecting}}<span class="tchart flat collecting" title="{{translateChartText .Collecting}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" aria-label="{{translateChartText .Collecting}}" role="img"><path class="line" d="M0 15 L100 15"/><path class="today" d="M100 15 L100 15"/></svg></span>{{end}}{{end}}
 
 {{/* The trend charts' fills (16-trends.css), once per page. */}}
 {{define "spark-defs"}}<svg class="spark-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>
@@ -49,7 +49,7 @@
 {{define "line-chart"}}
 <div class="mchart">
   <div class="mc-plot">
-    <span class="tchart {{.Tone}}" data-days="{{.Days}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{.Label}}">
+    <span class="tchart {{.Tone}}" data-days="{{chartDays .Days}}"><svg viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="{{chartLabel .Label}}">
       <line class="mc-grid" x1="0" x2="100" y1="3" y2="3"/>{{if .HalfLabel}}<line class="mc-grid" x1="0" x2="100" y1="16.5" y2="16.5"/>{{end}}<line class="mc-base" x1="0" x2="100" y1="30" y2="30"/>
       {{with .Area}}<path class="area" d="{{.}}"/>{{end}}{{with .RestArea}}<path class="area rest" d="{{.}}"/>{{end}}
       {{with .Line}}<path class="line" d="{{.}}"/>{{end}}{{with .Rest}}<path class="line rest" d="{{.}}"/>{{end}}

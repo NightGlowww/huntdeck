@@ -10,6 +10,13 @@ table.fixed.flist td.asset { white-space: nowrap; }
 .flist td .view { margin-left: 8px; }
 .flist .c-report .small { margin-left: 4px; }
 
+.queue-empty { max-width: 760px; }
+.queue-empty .empty-state { padding: 48px 24px 44px; }
+.queue-empty .big-i { color: var(--accent); }
+.queue-empty h2 { margin-bottom: 8px; }
+.queue-empty p { max-width: 54ch; }
+.empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
+
 .tlist th.c-prog { width: 300px; }
 .tlist th.c-bounty { width: 190px; }
 .tlist td.c-bounty .amt { font: calc(12.5px * var(--fs, 1)) var(--mono); font-variant-numeric: tabular-nums; }

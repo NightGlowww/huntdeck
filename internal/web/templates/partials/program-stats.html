@@ -39,7 +39,7 @@
         <dd class="d muted">{{TF "in %s" (T .MonthName)}}{{with .MonthNoteKey}} · {{T .}}{{end}}</dd>
         <dd class="d muted">{{with .Median90d}}{{TF "%s over 90 days" (days .)}}{{else}}{{T "none in 90 days"}}{{end}}{{with .MedianDelta}}, <span class="{{if eq $.Resolved.MedianDir "down"}}good{{else if eq $.Resolved.MedianDir "up"}}bad{{end}}">{{if eq $.Resolved.MedianDir "up"}}▲ {{else if eq $.Resolved.MedianDir "down"}}▼ {{end}}{{.}}</span> {{T "vs the 90 before"}}{{end}}</dd></div>
       {{if $p.OffersBounty}}{{with .BountyAverage}}<div><dt title="{{TF "The program hides its bounty amounts: its reports that got a bounty in the last 90 days, each counted at its average bounty (%s)" (moneyFull . $p.Currency)}}">{{T "Bounties · 90 days"}}</dt><dd>{{if $.Resolved.Bounties90d}}<span title="{{TF "≈%s: estimated at the average bounty" (money $.Resolved.Bounties90d $p.Currency)}}">≈{{money $.Resolved.Bounties90d $p.Currency}}</span>{{else}}<span class="zero" title="{{T "No bounties in the last 90 days"}}">{{money 0.0 $p.Currency}}</span>{{end}}</dd>
-        <dd class="d muted">{{num $.Resolved.Rewarded90d}} {{if eq $.Resolved.Rewarded90d 1}}bounty{{else}}bounties{{end}} × the average; amounts hidden</dd></div>{{else}}<div><dt title="{{T "Bounties shown on Hacktivity for reports resolved in the last 90 days; many bounties aren't shown"}}">{{T "Bounties · 90 days"}}</dt><dd>{{if .Bounties90d}}<span title="{{TF "%s shown on Hacktivity" (moneyFull .Bounties90d $p.Currency)}}">{{money .Bounties90d $p.Currency}}</span>{{else}}<span class="zero" title="{{T "No bounties shown in the last 90 days"}}">{{money 0.0 $p.Currency}}</span>{{end}}</dd></div>{{end}}{{end}}
+        <dd class="d muted">{{TF "%s bounty reports × the average; amounts hidden" (num $.Resolved.Rewarded90d)}}</dd></div>{{else}}<div><dt title="{{T "Bounties shown on Hacktivity for reports resolved in the last 90 days; many bounties aren't shown"}}">{{T "Bounties · 90 days"}}</dt><dd>{{if .Bounties90d}}<span title="{{TF "%s shown on Hacktivity" (moneyFull .Bounties90d $p.Currency)}}">{{money .Bounties90d $p.Currency}}</span>{{else}}<span class="zero" title="{{T "No bounties shown in the last 90 days"}}">{{money 0.0 $p.Currency}}</span>{{end}}</dd></div>{{end}}{{end}}
       <div><dt>{{T "Latest resolved"}}</dt><dd>{{with .Last}}<span title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">{{T "none yet"}}</span>{{end}}</dd></div>
       {{template "platform-count" $}}
     </dl>
@@ -63,7 +63,7 @@
 {{with .Accepted}}{{if or .Total .Since .SyncedAt}}
 <section class="panel" id="accepted">
   <div class="panel-head"><h2>{{T "Accepted reports"}} <span class="count">{{num .Total}}</span></h2>
-    <span class="aside">undisclosed ones on {{platformLabel $p.Platform}} CrowdStream{{with .Since}} · complete since {{date .}}{{end}}{{with .SyncedAt}} · re-read <span title="{{datetime .}}">{{ago .}}</span>{{end}}</span></div>
+    <span class="aside">{{TF "undisclosed ones on %s CrowdStream" (platformLabel $p.Platform)}}{{with .Since}} · {{TF "complete since %s" (date .)}}{{end}}{{with .SyncedAt}} · {{T "re-read"}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}</span></div>
   {{if .Total}}
   <div class="resolved-body">
     <div class="rb-side">
@@ -72,7 +72,7 @@
         {{if .CountDelta}}<dd class="d">{{if .CountDir}}{{if eq .CountDir "up"}}▲{{else}}▼{{end}} {{end}}{{.CountDelta}} <span class="muted">{{TF "vs the 90 days before (%s)" (num .Prev90d)}}</span></dd>{{end}}</div>
       <div><dt title="{{T "Accepted reports resolved in the last 90 days"}}">{{T "Resolved · 90 days"}}</dt><dd>{{num .Resolved90d}}</dd></div>
       <div><dt title="{{T "Median days from submission to acceptance, reports accepted in the last 90 days"}}">{{T "Median time to accept"}}</dt><dd>{{with .MedianAccept90d}}{{days .}}{{else}}<span class="zero" title="{{T "None accepted in the last 90 days with exact dates"}}">{{T "none"}}</span>{{end}}</dd></div>
-      <div><dt title="{{T "Median days from submission to resolution, reports resolved in the last 90 days"}}">{{T "Median time to resolve"}}</dt><dd>{{with .MedianResolve90d}}{{days .}}{{else}}<span class="zero" title="{{T "None resolved in the last 90 days with exact dates"}}">none</span>{{end}}</dd></div>
+      <div><dt title="{{T "Median days from submission to resolution, reports resolved in the last 90 days"}}">{{T "Median time to resolve"}}</dt><dd>{{with .MedianResolve90d}}{{days .}}{{else}}<span class="zero" title="{{T "None resolved in the last 90 days with exact dates"}}">{{T "none"}}</span>{{end}}</dd></div>
       <div><dt title="{{T "Accepted reports not resolved yet"}}">{{T "Still open"}}</dt><dd>{{num .Open}}</dd></div>
       {{template "platform-count" $}}
       {{if $p.OffersBounty}}<div><dt title="{{T "Bounties shown on CrowdStream for reports accepted in the last 90 days; many aren't shown"}}">{{T "Bounties · 90 days"}}</dt><dd>{{if .Bounties90d}}<span title="{{TF "%s shown on CrowdStream" (moneyFull .Bounties90d $p.Currency)}}">{{money .Bounties90d $p.Currency}}</span>{{else}}<span class="zero" title="{{T "No bounties shown in the last 90 days"}}">{{money 0.0 $p.Currency}}</span>{{end}}</dd></div>{{end}}
@@ -83,7 +83,7 @@
       <div class="cg"><h3>{{T "Accepted per month"}} <span class="muted">· hover for priorities · {{template "month-open" .Accepted}}</span></h3>{{template "line-chart" .Accepted}}</div>
       {{with .Bounties}}<div class="cg"><h3 title="{{T "Bounties shown on CrowdStream for the month's accepted reports; many aren't shown"}}">{{T "Bounties per month"}}<span class="muted">· {{T "shown on CrowdStream"}} · {{template "month-open" .}}</span></h3>{{template "line-chart" .}}</div>{{end}}
       <div class="cg"><h3 title="{{T "Accepted reports by the month they were resolved"}}">{{T "Resolved per month"}}<span class="muted">· {{template "month-open" .Resolved}}</span></h3>{{template "line-chart" .Resolved}}</div>
-      <div class="cg"><h3 title="{{T "Accepted reports counted by the month they were submitted: valid reports coming in. Duplicates and N/A never appear. Recent months grow as their reports get accepted."}}">{{T "Submitted per month"}}<span class="muted">· accepted since · {{template "month-open" .Submitted}}</span></h3>{{template "line-chart" .Submitted}}</div>
+      <div class="cg"><h3 title="{{T "Accepted reports counted by the month they were submitted: valid reports coming in. Duplicates and N/A never appear. Recent months grow as their reports get accepted."}}">{{T "Submitted per month"}}<span class="muted">· {{T "accepted since"}} · {{template "month-open" .Submitted}}</span></h3>{{template "line-chart" .Submitted}}</div>
     </div>
   </div>
   {{else}}
@@ -96,31 +96,31 @@
 {{define "program-disclosed"}}{{$p := .P}}
 {{with .DisclosedSum}}{{if .Total}}{{$ds := .}}
     <section class="panel" id="disclosed">
-      <div class="panel-head"><h2>{{T "Disclosed reports"}} <span class="count">{{num .Total}}</span></h2><span class="aside">made public on {{platformLabel $p.Platform}}{{with .Latest}}, latest {{date .}}{{end}}</span></div>
+      <div class="panel-head"><h2>{{T "Disclosed reports"}} <span class="count">{{num .Total}}</span></h2><span class="aside">{{TF "made public on %s" (platformLabel $p.Platform)}}{{with .Latest}}, {{TF "latest %s" (date .)}}{{end}}</span></div>
       <div class="panel-body disclosed-sum">
-        <span class="chips">{{range .BySeverity}}<span class="chip" title="{{num .Count}} {{if .Name}}{{.Name}}{{else}}unrated{{end}}"><span class="sev {{.Name}}">{{if .Name}}{{.Name}}{{else}}unrated{{end}}</span>&nbsp;{{num .Count}}</span>{{end}}{{if .Paid}}<span class="chip yes" title="{{T "Reports with a public bounty, and what they paid in total"}}">{{num .Paid}} paid · {{money .Bounties $p.Currency}}</span>{{end}}</span>
+        <span class="chips">{{range .BySeverity}}<span class="chip" title="{{num .Count}} {{if .Name}}{{T .Name}}{{else}}{{T "unrated"}}{{end}}"><span class="sev {{.Name}}">{{if .Name}}{{T .Name}}{{else}}{{T "unrated"}}{{end}}</span>&nbsp;{{num .Count}}</span>{{end}}{{if .Paid}}<span class="chip yes" title="{{T "Reports with a public bounty, and what they paid in total"}}">{{num .Paid}} {{T "paid"}} · {{money .Bounties $p.Currency}}</span>{{end}}</span>
         {{with .Weaknesses}}<div class="weak"><span class="muted">{{T "Most common:"}}</span> {{range $i, $w := .}}{{if $i}} · {{end}}{{$w.Name}} <b>{{num $w.Count}}</b>{{end}}</div>{{end}}
       </div>
       <div class="table-wrap">
       <table class="fixed cards pdisclosed">
         <colgroup><col class="w-date-s"><col class="w-sev"><col><col class="w-weak">{{if $p.OffersBounty}}<col class="w-num-m">{{end}}<col class="w-num-s"></colgroup>
-        <thead><tr><th>Disclosed</th><th>Severity</th><th>Report</th><th>Weakness</th>{{if $p.OffersBounty}}<th class="num">Bounty</th>{{end}}<th class="num">Votes</th></tr></thead>
+        <thead><tr><th>{{T "Disclosed"}}</th><th>{{T "Severity"}}</th><th>{{T "Report"}}</th><th>{{T "Weakness"}}</th>{{if $p.OffersBounty}}<th class="num">{{T "Bounty"}}</th>{{end}}<th class="num">{{T "Votes"}}</th></tr></thead>
         <tbody>
         {{range $.Disclosed}}
           <tr>
-            <td class="c-date nowrap"><span class="when" title="disclosed {{datetime .DisclosedAt}}{{with .SubmittedAt}}&#10;submitted {{datetime .}}{{end}}">{{date .DisclosedAt}}</span></td>
-            <td class="c-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{.Severity}}</span>{{else}}<span class="zero">{{if .Severity}}none{{else}}—{{end}}</span>{{end}}</td>
+            <td class="c-date nowrap"><span class="when" title="{{T "Disclosed"}} {{datetime .DisclosedAt}}{{with .SubmittedAt}}&#10;{{T "Submitted"}} {{datetime .}}{{end}}">{{date .DisclosedAt}}</span></td>
+            <td class="c-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{T .Severity}}</span>{{else}}<span class="zero">{{if .Severity}}{{T "none"}}{{else}}—{{end}}</span>{{end}}</td>
             <td class="asset c-report"><a class="link" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow"{{with .Summary}} title="{{.}}"{{end}}>{{.Title}}</a>
-              <div class="muted small">{{with .Reporter}}by {{.}}{{end}}{{with .Substate}}{{if ne . "resolved"}} · {{.}}{{end}}{{end}}{{range .CVEIDs}} · {{.}}{{end}}</div></td>
+              <div class="muted small">{{with .Reporter}}{{TF "by %s" .}}{{end}}{{with .Substate}}{{if ne . "resolved"}} · {{.}}{{end}}{{end}}{{range .CVEIDs}} · {{.}}{{end}}</div></td>
             <td class="c-weak small" title="{{.Weakness}}">{{with .Weakness}}{{.}}{{else}}<span class="zero" title="{{T "No weakness given"}}">—</span>{{end}}</td>
-            {{if $p.OffersBounty}}<td class="c-bounty num nowrap" data-label="Bounty">{{with .Bounty}}<span title="{{amountFull . $p.Currency}}">{{amount . $p.Currency}}</span>{{else}}<span class="zero" title="{{T "Bounty not shown"}}">—</span>{{end}}</td>{{end}}
-            <td class="c-votes num" data-label="Votes">{{if .Votes}}{{num .Votes}}{{else}}<span class="zero">0</span>{{end}}</td>
+            {{if $p.OffersBounty}}<td class="c-bounty num nowrap" data-label="{{T "Bounty"}}">{{with .Bounty}}<span title="{{amountFull . $p.Currency}}">{{amount . $p.Currency}}</span>{{else}}<span class="zero" title="{{T "Bounty not shown"}}">—</span>{{end}}</td>{{end}}
+            <td class="c-votes num" data-label="{{T "Votes"}}">{{if .Votes}}{{num .Votes}}{{else}}<span class="zero">0</span>{{end}}</td>
           </tr>
         {{end}}
         </tbody>
       </table>
       </div>
-      {{if gt .Total (len $.Disclosed)}}<div class="note-bar">Showing the newest {{len $.Disclosed}}; all {{num .Total}} are kept.{{if eq $p.Platform "hackerone"}} <a class="link" href="https://hackerone.com/{{$p.Handle}}/hacktivity" target="_blank" rel="noopener noreferrer nofollow">Hacktivity on HackerOne</a>{{end}}</div>{{end}}
+      {{if gt .Total (len $.Disclosed)}}<div class="note-bar">{{TF "Showing the newest %d; all %d are kept." (len $.Disclosed) .Total}}{{if eq $p.Platform "hackerone"}} <a class="link" href="https://hackerone.com/{{$p.Handle}}/hacktivity" target="_blank" rel="noopener noreferrer nofollow">Hacktivity on HackerOne</a>{{end}}</div>{{end}}
     </section>
     {{end}}{{end}}
 {{end}}
@@ -129,5 +129,5 @@
    HuntDeck lists: the two are counted differently and rarely agree. */}}
 {{define "platform-count"}}{{$p := .P}}{{with $p.PublicStats}}{{with count .ResolvedReports}}
       <div><dt title="{{$kind := "resolved report"}}{{if eq $p.Platform "bugcrowd"}}{{$kind = "valid submission"}}{{end}}{{TF "%s's own count of every %s. It won't match the list above: they're counted differently, and programs can keep reports off it." (platformLabel $p.Platform) (T $kind)}}">{{if eq $p.Platform "bugcrowd"}}{{T "Valid"}}{{else}}{{T "Resolved"}}{{end}} · {{T "all time"}}</dt><dd>{{.}}</dd>
-        <dd class="d"><span class="muted">{{platformLabel $p.Platform}}'s own count</span></dd></div>
+        <dd class="d"><span class="muted">{{TF "%s's own count" (platformLabel $p.Platform)}}</span></dd></div>
 {{end}}{{end}}{{end}}

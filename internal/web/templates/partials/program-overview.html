@@ -47,8 +47,8 @@
 <div class="ov">
   <div class="stack">
     <section class="panel fresh-list own-scope-list">
-      <div class="panel-head"><h2>In scope <span class="count">{{num (len .InScope)}}</span></h2>
-        <span class="aside"><a class="link" href="?tab=scope">{{if gt (len .InScope) (len .ScopePreview)}}All {{num (len .InScope)}}{{else}}Scope{{end}}{{with .OutOfScope}}, and {{num (len .)}} out of scope{{end}} →</a></span></div>
+      <div class="panel-head"><h2>{{T "In scope"}} <span class="count">{{num (len .InScope)}}</span></h2>
+        <span class="aside"><a class="link" href="?tab=scope">{{if gt (len .InScope) (len .ScopePreview)}}{{T "All"}} {{num (len .InScope)}}{{else}}{{T "Scope"}}{{end}}{{with .OutOfScope}}, {{T "and"}} {{num (len .)}} {{T "out of scope"}}{{end}} →</a></span></div>
       {{if .InScope}}
       <table class="fixed">
         <tbody>
@@ -58,7 +58,7 @@
         {{end}}
         </tbody>
       </table>
-      {{else}}<div class="empty-state small">No scope entered yet.{{if not readOnly}} <a class="link" href="/programs/independent/{{$p.Handle}}/edit">{{T "Add some"}}</a>{{end}}</div>{{end}}
+      {{else}}<div class="empty-state small">{{T "No scope entered yet."}}{{if not readOnly}} <a class="link" href="/programs/independent/{{$p.Handle}}/edit">{{T "Add some"}}</a>{{end}}</div>{{end}}
     </section>
     {{with .Rules}}
     <section class="panel prose">
@@ -74,12 +74,12 @@
       <div class="panel-body">
         <dl class="facts">
           {{with website $p.URL}}<dt>{{T "Page"}}</dt><dd><a class="link" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{.Label}}</a></dd>{{end}}
-          <dt>{{T "Bounty"}}</dt><dd>{{if $p.OffersBounty}}{{template "m-bounty" .Row}}{{else}}VDP: no bounties{{end}}</dd>
-          <dt>{{T "Scope"}}</dt><dd title="{{assetsTitle .Row.ProgramListItem}}">{{num (len .InScope)}} in scope{{with .Wildcards}} · {{num (len .)}} {{plural (len .) "wildcard" "wildcards"}}{{end}}{{with .Domains}} · {{num (len .)}} {{plural (len .) "domain" "domains"}}{{end}}{{with .OutOfScope}}<span class="muted"> · {{num (len .)}} out</span>{{end}}</dd>
+          <dt>{{T "Bounty"}}</dt><dd>{{if $p.OffersBounty}}{{template "m-bounty" .Row}}{{else}}VDP: {{T "no bounties"}}{{end}}</dd>
+          <dt>{{T "Scope"}}</dt><dd title="{{assetsTitle .Row.ProgramListItem}}">{{num (len .InScope)}} {{T "in scope"}}{{with .Wildcards}} · {{num (len .)}} {{T (plural (len .) "wildcard" "wildcards")}}{{end}}{{with .Domains}} · {{num (len .)}} {{T (plural (len .) "domain" "domains")}}{{end}}{{with .OutOfScope}}<span class="muted"> · {{num (len .)}} {{T "out"}}</span>{{end}}</dd>
           <dt>{{T "Added"}}</dt><dd><span title="{{datetime $p.FirstSeenAt}}">{{date $p.FirstSeenAt}}</span></dd>
           {{with $p.ScopeCheckedAt}}<dt>{{T "Saved"}}</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd>{{end}}
         </dl>
-        <p class="muted small own-note">HuntDeck knows only what's entered here: it doesn't fetch the program's page or poll it.{{if not readOnly}} <a class="link" href="/programs/independent/{{$p.Handle}}/edit">{{T "Edit"}}</a>{{end}}</p>
+        <p class="muted small own-note">{{T "HuntDeck knows only what's entered here: it doesn't fetch the program's page or poll it."}}{{if not readOnly}} <a class="link" href="/programs/independent/{{$p.Handle}}/edit">{{T "Edit"}}</a>{{end}}</p>
       </div>
     </section>
     {{template "program-before" .}}
@@ -99,7 +99,7 @@
     {{if $p.OffersBounty}}{{with amount .PaidPerReport $c}}<div><dt>{{T "Paid per report"}}</dt><dd title="{{amountFull $p.PublicStats.PaidPerReport $c}}">{{.}}</dd></div>{{end}}
     {{if topBeyondTable .}}<div><dt title="{{T "More than its bounty table pays"}}">{{T "Top bounty"}}</dt><dd title="{{amountRangeFull .TopBountyLow .TopBountyHigh $c}}">{{amountRange .TopBountyLow .TopBountyHigh $c}}</dd></div>{{end}}{{end}}
     {{if $p.OffersBounty}}{{with count .RewardedReports}}<div><dt>{{T "Rewarded reports"}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}
-    {{if not (or $.Resolved.Total $.Accepted.Total)}}{{with count .ResolvedReports}}<div><dt>{{if eq $p.Platform "bugcrowd"}}Valid submissions{{else}}Reports resolved{{end}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}
+    {{if not (or $.Resolved.Total $.Accepted.Total)}}{{with count .ResolvedReports}}<div><dt>{{if eq $p.Platform "bugcrowd"}}{{T "Valid submissions"}}{{else}}{{T "Reports resolved"}}{{end}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}
     {{with count .TotalReports}}<div><dt title="{{T "Every report submitted, valid or not"}}">{{T "Reports submitted"}}</dt><dd>{{.}}</dd></div>{{end}}
     {{with count .AcceptedReports}}<div><dt title="{{T "Reports accepted as valid, all time"}}">{{T "Reports accepted"}}</dt><dd>{{.}}</dd></div>{{end}}
     {{with .AcceptedShare}}<div><dt title="{{T "Reports accepted out of every report submitted, all time: the rest were duplicates, out of scope or invalid"}}">{{T "Accepted share"}}</dt><dd>{{.}}</dd></div>{{end}}
@@ -111,8 +111,8 @@
     {{if and .Points90d .PointsAll}}<div><dt title="{{T "Reputation points researchers earned on the program in the last 90 days, of all they have earned on it: a fixed number per accepted report by severity, a fifth of it for a duplicate. HuntDeck estimates the 90-day figures from this share until it has saved 90 days of totals"}}">{{T "Leaderboard · 90 days"}}</dt><dd>{{count .Points90d}} of {{count .PointsAll}} points</dd></div>{{end}}
     {{with .LastSubmissionAt}}<div><dt title="{{T "The latest report anyone sent the program"}}">{{T "Last report"}}</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd></div>{{end}}
     {{with .LastAcceptedAt}}<div><dt title="{{T "The latest report the program accepted, from its recent activity"}}">{{T "Last accepted"}}</dt><dd><span title="{{datetime .}}">{{ago .}}</span></dd></div>{{end}}
-    {{with .ScopeRank}}<div><dt title="{{T "Bugcrowd's own rating of how much the scope offers, 1 to 4"}}">{{T "Scope rank"}}</dt><dd>{{.}} of 4</dd></div>{{end}}
-    {{with count .KnownIssues}}<div><dt title="{{T "Findings already reported to the program, listed on its Known issues page: a report matching one is a duplicate"}}">{{T "Known issues"}}</dt><dd>{{.}}{{with count $p.PublicStats.KnownIssuesUnique}} · {{.}} distinct{{end}}</dd></div>{{end}}
+    {{with .ScopeRank}}<div><dt title="{{T "Bugcrowd's own rating of how much the scope offers, 1 to 4"}}">{{T "Scope rank"}}</dt><dd>{{.}} {{T "of 4"}}</dd></div>{{end}}
+    {{with count .KnownIssues}}<div><dt title="{{T "Findings already reported to the program, listed on its Known issues page: a report matching one is a duplicate"}}">{{T "Known issues"}}</dt><dd>{{.}}{{with count $p.PublicStats.KnownIssuesUnique}} · {{.}} {{T "distinct"}}{{end}}</dd></div>{{end}}
     {{if .FirstResponseHours}}{{with hours .ValidationHours}}{{if eq $p.Platform "intigriti"}}<div><dt title="{{T "Average time for the company to accept or reject a report, over the last 90 days"}}">{{T "Time to decide"}}</dt><dd>{{.}}</dd></div>{{else}}<div><dt title="{{T "75% of submissions are accepted or rejected within this time"}}">{{T "Validation within"}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}{{end}}
     {{with hours .TriageHours}}<div><dt title="{{T "Average time to triage"}}">{{T "Time to triage"}}</dt><dd>{{.}}</dd></div>{{end}}
     {{if $p.OffersBounty}}{{with hours .BountyHours}}<div><dt title="{{T "Average time to bounty"}}">{{T "Time to bounty"}}</dt><dd>{{.}}</dd></div>{{end}}{{end}}
@@ -125,13 +125,13 @@
 {{define "program-fresh"}}{{$p := .P}}{{with .Fresh}}
 <section class="panel fresh-list">
   <div class="panel-head"><h2>{{T "New in scope"}} <span class="count">{{num $.FreshTotal}}</span></h2>
-    <span class="aside">added in the last 30 days{{if gt $.FreshTotal (len .)}} · <a class="link" href="?tab=scope&amp;order=added">All {{num $.FreshTotal}}, newest first →</a>{{end}}</span></div>
+    <span class="aside">{{T "added in the last 30 days"}}{{if gt $.FreshTotal (len .)}} · <a class="link" href="?tab=scope&amp;order=added">{{T "All"}} {{num $.FreshTotal}}, {{T "newest first"}} →</a>{{end}}</span></div>
   <table class="fixed">
     <tbody>
     {{range .}}
       <tr><td class="asset">{{template "asset" .Identifier}}{{if .Credentials}} <span class="chip creds" title="{{T "Test credentials available from the platform for this asset"}}">{{T "creds"}}</span>{{end}}</td>
         <td class="fl-type"><span class="chip" title="{{.PlatformAssetType}}">{{.AssetType}}</span></td>
-        <td class="fl-when nowrap">{{with .AddedAt}}<span class="when{{if recent .}} fresh{{end}}" title="Added {{datetime .}}">{{date .}}</span> <span class="muted small">{{age .}}</span>{{end}}</td></tr>
+        <td class="fl-when nowrap">{{with .AddedAt}}<span class="when{{if recent .}} fresh{{end}}" title="{{T "Added"}} {{datetime .}}">{{date .}}</span> <span class="muted small">{{age .}}</span>{{end}}</td></tr>
     {{end}}
     </tbody>
   </table>
@@ -146,8 +146,8 @@
   <table class="fixed">
     <tbody>
     {{range .}}
-      <tr><td class="ld-when nowrap"><span class="when" title="disclosed {{datetime .DisclosedAt}}">{{date .DisclosedAt}}</span></td>
-        <td class="ld-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{.Severity}}</span>{{else}}<span class="zero" title="{{T "Not rated"}}">—</span>{{end}}</td>
+      <tr><td class="ld-when nowrap"><span class="when" title="{{T "Disclosed"}} {{datetime .DisclosedAt}}">{{date .DisclosedAt}}</span></td>
+        <td class="ld-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{T .Severity}}</span>{{else}}<span class="zero" title="{{T "Not rated"}}">—</span>{{end}}</td>
         <td class="ld-title"><a class="link" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow"{{with .Summary}} title="{{.}}"{{end}}>{{.Title}}</a></td>
         {{if $p.OffersBounty}}<td class="ld-bounty num nowrap">{{with .Bounty}}<span title="{{amountFull . $p.Currency}}">{{amount . $p.Currency}}</span>{{end}}</td>{{end}}</tr>
     {{end}}

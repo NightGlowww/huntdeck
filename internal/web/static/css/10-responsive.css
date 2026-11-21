@@ -70,7 +70,8 @@
    line). Mice keep them small. */
 @media (pointer: coarse) {
   input:is([type="checkbox"], [type="radio"]) { flex: none; width: 24px; height: 24px; }
-  .feed .view, td .view { display: inline-block; margin-block: -5px; padding: 5px 2px; }
+  button.small, .button.small { min-height: 32px; height: auto; padding-block: 3px; }
+  .feed .view, td .view { display: inline-flex; align-items: center; min-height: 32px; margin-block: -5px; padding: 5px 2px; }
 }
 
 /* 320 px is the width a 400% zoom on a 1280 px screen leaves (WCAG 1.4.10):

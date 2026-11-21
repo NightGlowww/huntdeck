@@ -44,7 +44,7 @@
     {{template "program-copylists" .}}
     {{end}}
     <details class="tb-menu" data-menu>
-      <summary class="button secondary"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Burp / ZAP / Caido<svg class="i chev-d"><use href="#i-chev"/></svg></summary>
+      <summary class="button secondary"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>{{T "Export scope"}} <span class="muted">Burp / ZAP / Caido</span><svg class="i chev-d"><use href="#i-chev"/></svg></summary>
       <div class="menu">
         <a href="/api/v1/programs/{{$p.Platform}}/{{$p.Handle}}/scope.burp.json" title="{{T "Settings › Project › Scope, or Project options › Load"}}"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>{{T "Burp scope"}}</a>
         <a href="/api/v1/programs/{{$p.Platform}}/{{$p.Handle}}/scope.zap.context" title="{{T "File › Import Context"}}"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>{{T "ZAP context"}}</a>
@@ -60,8 +60,8 @@
     <a class="button" href="{{$p.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{if $own}}{{T "Open program page"}}{{else}}{{TF "Open on %s" (platformLabel $p.Platform)}}{{end}}<svg class="i" aria-hidden="true"><use href="#i-external"/></svg></a>
   </div>
 </header>
-{{with $p.ScopeUnavailableAt}}<p class="flash err" role="status">{{platformLabel $p.Platform}} wouldn't show this program's scope when last checked ({{ago .}}){{if $.Data.InScope}}, so this is the last scope HuntDeck saw{{end}}.
-  This usually means its terms or a compliance step need accepting on the platform. Full polls keep checking.</p>{{end}}
+{{with $p.ScopeUnavailableAt}}<p class="flash err" role="status">{{TF "%s didn't show this program's scope when last checked (%s)." (platformLabel $p.Platform) (ago .)}}{{if $.Data.InScope}} {{T "This is the last scope HuntDeck saw."}}{{end}}
+  {{T "This usually means its terms or a compliance step need accepting on the platform. Full polls keep checking."}}</p>{{end}}
 {{end}}{{end}}
 
 {{/* The in-scope targets, for the copy buttons. */}}
@@ -95,7 +95,7 @@
   <div class="kpi"><span class="l">{{T "Received · 90 days"}}</span><span class="v">{{template "m-comp" $r}}</span>{{template "trend" $r.Trends.Received}}</div>
   <div class="kpi"><span class="l">{{T "Valid · 90 days"}}</span><span class="v">{{template "m-resolved" $r}}</span>{{template "trend" $r.Trends.Resolved}}</div>
   <div class="kpi"><span class="l">{{T "Response"}}</span><span class="v">{{template "m-resp" $r}}</span>
-    <span class="h">{{$kind := responseKind $r.ProgramListItem}}{{$kind}}{{with $p.PublicStats}}{{with .ResponseEfficiency}}{{if $kind}} · {{end}}<span title="{{T "Reports answered within the program's response targets"}}">{{intv .}}% {{T "on time"}}</span>{{end}}{{end}}</span></div>
+    <span class="h">{{$kind := responseKind $r.ProgramListItem}}{{if $kind}}{{T $kind}}{{end}}{{with $p.PublicStats}}{{with .ResponseEfficiency}}{{if $kind}} · {{end}}<span title="{{T "Reports answered within the program's response targets"}}">{{intv .}}% {{T "on time"}}</span>{{end}}{{end}}</span></div>
   <div class="kpi"><span class="l">{{T "Assets in scope"}}</span><span class="v">{{template "m-scope" $r}}</span>
     <span class="h">{{if $r.Fresh}}<span class="fresh">+{{num $r.Fresh}}</span> {{T "in 30 days"}}{{if .Wildcards}} · {{end}}{{end}}<span title="{{assetsTitle $r.ProgramListItem}}">{{with .Wildcards}}{{num (len .)}} {{plural (len .) "wildcard" "wildcards"}}{{else}}{{if not $r.Fresh}}{{with .Domains}}{{num (len .)}} {{plural (len .) "domain" "domains"}}{{end}}{{end}}{{end}}</span></span></div>
 </section>

@@ -1,8 +1,8 @@
 {{/* The program page's Changes tab: everything HuntDeck saw change. */}}
 {{define "program-changes"}}{{with .Data.Feed}}
 <section class="panel pchanges">
-  <div class="panel-head"><h2>Changes{{if not .Segments}} <span class="count">{{num .Total}}</span>{{end}}</h2>
-    <span class="aside">{{template "feed-segs" .}}{{if gt .Total (len .Changes)}}<span>the newest {{len .Changes}}</span>{{end}}<a class="link" href="{{$.Feed}}" data-export title="{{T "These changes in a feed reader (Atom)"}}"><svg class="i" aria-hidden="true"><use href="#i-rss"/></svg> Feed</a></span></div>
+  <div class="panel-head"><h2>{{T "Changes"}}{{if not .Segments}} <span class="count">{{num .Total}}</span>{{end}}</h2>
+    <span class="aside">{{template "feed-segs" .}}{{if gt .Total (len .Changes)}}<span>{{TF "the newest %d" (len .Changes)}}</span>{{end}}<a class="link" href="{{$.Feed}}" data-export title="{{T "These changes in a feed reader (Atom)"}}"><svg class="i" aria-hidden="true"><use href="#i-rss"/></svg> {{T "Feed"}}</a></span></div>
   {{template "change-feed" .Rows}}
 </section>
 {{end}}{{end}}

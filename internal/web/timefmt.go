@@ -54,3 +54,11 @@ func untilLang(lang string, m *i18n.Bundle, t time.Time) string {
 	}
 	return m.TF(lang, "in %s", span)
 }
+
+func ageLang(lang string, m *i18n.Bundle, t time.Time) string {
+	ageValue := age(t)
+	if ageValue == "today" {
+		return m.T(lang, "today")
+	}
+	return ageValue
+}

@@ -155,6 +155,8 @@ var funcs = template.FuncMap{
 	"validEstimateTitle": validEstimateTitle,
 	"validTitle":         validTitle,
 	"validMonthTitle":    validMonthTitle,
+	"chartLabel":         func(label string) string { return label },
+	"chartDays":          func(days string) string { return days },
 	"bountiesTitle":      bountiesTitle,
 	"hiddenName":         scope.HiddenName,
 	"plink":              plink,
@@ -253,9 +255,26 @@ func loadTemplates(zone func() *time.Location, version string, readOnly bool, li
 	out := map[string]map[string]*template.Template{}
 	for _, lang := range langs {
 		localized := template.FuncMap{
-			"T":    func(msg string) string { return messages.T(lang, msg) },
-			"TF":   func(msg string, args ...any) string { return messages.TF(lang, msg, args...) },
-			"Lang": func() string { return lang },
+			"T":  func(msg string) string { return messages.T(lang, msg) },
+			"TF": func(msg string, args ...any) string { return messages.TF(lang, msg, args...) },
+			// fixedT is reserved for fixed, catalog-owned copy whose apostrophes
+			// must remain text in the English source template. It is never used
+			// with user-controlled values.
+			"fixedT":             func(msg string) template.HTML { return template.HTML(messages.T(lang, msg)) },
+			"Lang":               func() string { return lang },
+			"response":           func(p store.ProgramListItem) *responseTime { return responseLang(lang, messages, p) },
+			"avgBountyTitle":     func(p store.ProgramListItem) string { return avgBountyTitleLang(lang, messages, p) },
+			"huntersLabel":       func(platform string) string { return huntersLabelLang(lang, messages, platform) },
+			"huntersHint":        func(platform string) string { return huntersHintLang(lang, messages, platform) },
+			"validTitle":         func(platform string) string { return validTitleLang(lang, messages, platform) },
+			"validEstimateTitle": func(p store.ProgramListItem) string { return validEstimateTitleLang(lang, messages, p) },
+			"assetsTitle":        func(p store.ProgramListItem) string { return assetsTitleLang(lang, messages, p) },
+			"scopeSame":          func(s string) string { return scopeSameLang(lang, messages, s) },
+			"chartLabel":         func(label string) string { return chartLabelLang(lang, messages, label) },
+			"chartDays":          func(days string) string { return chartDaysLang(lang, messages, days) },
+			"trendHeading":       func(heading string) string { return trendHeadingLang(lang, messages, heading) },
+			"trendSummary":       func(heading, summary string) string { return trendSummaryLang(lang, messages, heading, summary) },
+			"translateChartText": func(value string) string { return translateChartText(lang, messages, value) },
 			// plural picks the singular or the plural message and translates
 			// it: a language without plural forms holds the same words in both.
 			"plural": func(n int, one, many string) string {
@@ -288,6 +307,7 @@ func loadTemplates(zone func() *time.Location, version string, readOnly bool, li
 				}
 				return figText(lang, humanize.Days(*v))
 			},
+			"ageLang": func(t time.Time) string { return ageLang(lang, messages, t) },
 			// Changes read in the page's language too: "+ scope" / "+ 范围",
 			// "Scope added: x" / "范围新增：x".
 			"change":    func(c store.ChangeView) string { return describeChangeLang(lang, messages, c) },
