@@ -56,6 +56,7 @@ type Inputs struct {
 	Flips        int  // pause/reopen flips in the window
 	NeedsCreds   bool // credentials must be requested
 	NoAutomation bool // automation banned: hand testing only
+	HandedOff    bool // the scanner already has this target
 
 	// Platform ranks, 0..1, when the caller has them (1 = cleanest / fastest).
 	// Zero means "no rank": the absolute value is used instead.
@@ -202,6 +203,9 @@ func reasons(in Inputs) []Reason {
 	if !in.AddedAt.IsZero() && !in.Now.IsZero() {
 		days := int(in.Now.Sub(in.AddedAt).Hours() / 24)
 		out = append(out, Reason{Key: "target added %s days ago", Args: []string{fmt.Sprint(max(days, 0))}})
+	}
+	if in.HandedOff {
+		out = append(out, Reason{Key: "already handed to the scanner"})
 	}
 	if in.NoAutomation {
 		out = append(out, Reason{Key: "automation banned: hand testing only"})

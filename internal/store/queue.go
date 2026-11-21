@@ -30,6 +30,7 @@ type QueueInput struct {
 	InScope      int
 	Flips        int
 	AddedAt      time.Time
+	HandedOff    bool // already handed to the scanner; the queue says so
 	NeedsCreds   bool // the program hands out test credentials on request
 	NoAutomation bool // the program bans automated tools: hand testing only
 }
@@ -80,6 +81,10 @@ SELECT t.program_id, p.platform, p.handle, p.name, t.kind, t.value, t.apex, t.sc
        COALESCE((SELECT COUNT(*) FROM changes c
                   WHERE c.program_id = t.program_id AND c.kind = 'state_changed'
                     AND c.occurred_at >= date('now', '-30 day')), 0) AS flips,
+       -- Whether this exact target was already handed to the scanner: the queue
+       -- should say "scanned" rather than rank it as if it were untouched.
+       EXISTS(SELECT 1 FROM scan_handoffs h
+               WHERE h.target = t.value OR h.target = t.apex) AS handed_off,
        t.added_at
   FROM target_scores t
   JOIN programs p ON p.id = t.program_id
@@ -102,10 +107,10 @@ SELECT t.program_id, p.platform, p.handle, p.name, t.kind, t.value, t.apex, t.sc
 		var in QueueInput
 		var added, currency string
 		var payout float64
-		var noAuto, needsCreds int
+		var noAuto, needsCreds, handedOff int
 		if err := rows.Scan(&in.ProgramID, &in.Platform, &in.Handle, &in.Name, &in.Kind, &in.Value, &in.Apex,
 			&in.TargetScore, &in.ProgramValue, &payout, &currency, &in.SpeedDays, &in.Disclosed365, &in.InScope, &noAuto, &needsCreds,
-			&in.Flips, &added); err != nil {
+			&in.Flips, &handedOff, &added); err != nil {
 			return nil, fmt.Errorf("queue candidates: %w", err)
 		}
 		in.AddedAt, _ = time.Parse(time.RFC3339, added)
@@ -113,6 +118,7 @@ SELECT t.program_id, p.platform, p.handle, p.name, t.kind, t.value, t.apex, t.sc
 		// to start today.
 		in.NoAutomation = noAuto == 1
 		in.NeedsCreds = needsCreds == 1
+		in.HandedOff = handedOff == 1
 		// Every comparison in the queue is in dollars: the same number in yen and
 		// in dollars is not the same bounty.
 		in.PayoutUSD = ToUSD(payout, currency)
@@ -240,6 +246,7 @@ func (s *Store) RefreshHuntQueue(ctx context.Context, now time.Time) error {
 			Flips:        in.Flips,
 			NeedsCreds:   in.NeedsCreds,
 			NoAutomation: in.NoAutomation,
+			HandedOff:    in.HandedOff,
 		})
 		reasons, _ := json.Marshal(res.Reasons)
 		// A target scoring below the floor is not a candidate for today; keeping

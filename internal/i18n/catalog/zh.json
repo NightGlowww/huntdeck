@@ -249,7 +249,7 @@
   "Last 90 days": "近 90 天",
   "Response": "响应",
   "Assets": "资产",
-  "Hunters": "猎人",
+  "Hunters": "研究者数",
   "New · 30d": "新增 · 30 天",
   "Launched": "上线时间",
   "Scope changed": "范围变更",
@@ -769,7 +769,7 @@
   "October": "10 月",
   "November": "11 月",
   "December": "12 月",
-  "paid": "付费",
+  "paid": "已付费",
   "free": "免费",
   "pay bounties": "个提供赏金",
   "Paid programs": "付费项目",
@@ -1630,7 +1630,7 @@
   "public programs only": "仅公开项目",
   "refused": "被拒绝",
   "not retried until a restart": "重启前不再重试",
-  "accepted": "已接受",
+  "accepted": "已接收",
   "signed in": "已登录",
   "expires": "到期",
   "accepted at the last poll": "上次轮询时已接受",
@@ -1845,7 +1845,6 @@
   "of 4": "共 4 级",
   "distinct": "去重",
   "unrated": "未评级",
-  "paid": "已付费",
   "accepted since": "自接收起",
   "Submitted": "提交时间",
   "by %s": "报告人 %s",
@@ -1855,101 +1854,90 @@
   "On your own HuntDeck, this form edits a program you added by hand: its scope, bounties and rules, with each save shown on its Changes tab.": "在你自己的 HuntDeck 中，这个表单用于编辑手动添加的项目，包括范围、赏金和规则；每次保存都会显示在「变更」页。",
   "On your own HuntDeck, this form adds programs that aren't on a supported platform, such as ones companies run themselves.": "在你自己的 HuntDeck 中，这个表单用于添加不在受支持平台上的项目，例如公司自行运行的项目。",
   "Here it can't be saved.": "在这里无法保存。",
-  "Self-host HuntDeck": "自行部署 HuntDeck"
-  ,"First response: %s": "首次响应：%s"
-  ,"To validate: %s": "验证用时：%s"
-  ,"up to %s": "最高 %s"
-  ,"HackerOne's average bounty: %s": "HackerOne 平均赏金：%s"
-  ,"Bugcrowd's average payout over the last 3 months: %s": "Bugcrowd 近 3 个月平均支出：%s"
-  ,"YesWeHack's average reward: %s": "YesWeHack 平均奖励：%s"
-  ,"Intigriti's average payout: %s": "Intigriti 平均支出：%s"
-  ,"Average bounty: %s": "平均赏金：%s"
-  ,"Hunters": "研究者数"
-  ,"Hunters joined": "已加入的研究者"
-  ,"Hunters ranked": "上榜研究者"
-  ,"Hunters contributed": "有贡献的研究者"
-  ,"Researchers on the program": "项目上的研究者"
-  ,"Researchers who joined the program": "加入项目的研究者"
-  ,"Researchers on the program's ranking: those who scored on it": "项目排行榜上的研究者，即在项目上获得积分的人"
-  ,"Researchers who contributed a report the program accepted": "提交过被项目接收报告的研究者"
-  ,"Valid reports in the last 90 days": "近 90 天有效报告"
-  ,"Valid reports in the last 90 days: reports resolved on HackerOne Hacktivity": "近 90 天有效报告：HackerOne Hacktivity 上已解决的报告"
-  ,"Valid reports in the last 90 days: accepted reports resolved on Bugcrowd CrowdStream": "近 90 天有效报告：Bugcrowd CrowdStream 上已接收并解决的报告"
-  ,"Estimate of valid reports in 90 days: %s reports received in 90 days × %s%% of its reports accepted all time (%s of %s). %s doesn't list its reports, so none are counted as resolved; see Methodology.": "近 90 天有效报告估算：近 90 天收到的 %s 份报告 × 历史接收率 %s%%（%s / %s）。%s 不公开报告，因此没有报告会按已解决计入；详见评分方法。"
-  ,"No assets in scope": "没有范围内资产"
-  ,"in-scope entry": "范围内条目"
-  ,"in-scope entries": "范围内条目"
-  ,"app": "应用"
-  ,"apps": "应用"
-  ,"other": "其他"
-  ,"they name": "它们指向"
-  ,"it names": "它指向"
-  ,"and": "和"
-  ,"none resolved": "无已解决"
-  ,"bounties × the average": "份赏金 × 平均值"
-  ,"median to resolve": "解决时间中位数"
-  ,"no data": "暂无数据"
-  ,"resolved": "已解决"
-  ,"submitted": "已提交"
-  ,"accepted": "已接收"
-  ,"shown": "已展示"
-  ,"Reports resolved per month": "每月已解决报告"
-  ,"Resolved reports by the month they were submitted": "按提交月份统计的已解决报告"
-  ,"Reports accepted per month": "每月已接收报告"
-  ,"Accepted reports resolved per month": "每月已解决的已接收报告"
-  ,"Accepted reports by the month they were submitted": "按提交月份统计的已接收报告"
-  ,"Median days to resolve, by the month resolved": "按解决月份统计的解决时间中位数"
-  ,"Bounties per month, shown on CrowdStream, by the month accepted": "按接收月份统计的每月赏金（CrowdStream 展示）"
-  ,"Bounties per month, estimated at the program's average bounty": "按项目平均赏金估算的每月赏金"
-  ,"Bounties per month, shown on Hacktivity": "每月赏金（Hacktivity 展示）"
-  ,"All bounty-eligible": "全部符合赏金条件"
-  ,"No bounties": "无赏金"
-  ,"All bounty-eligible, up to %s": "全部符合赏金条件，最高 %s"
-  ,"Up to %s": "最高 %s"
-  ,"Scope & program": "范围与项目"
-  ,"Enable %s": "启用 %s"
-  ,"Now %s.": "现在是 %s。"
-  ,"Default: %s.": "默认值：%s。"
-  ,"The default, from": "默认值来自"
-  ,"Reset to %s": "重置为 %s"
-  ,"so far": "截至目前"
-  ,"failed": "失败"
-  ,"unchanged": "未变化"
-  ,"new disclosed": "新披露"
-  ,"new resolved": "新解决"
-  ,"program stats": "项目统计"
-  ,"stats failed": "统计失败"
-  ,"took %s": "耗时 %s"
-  ,"today": "今天"
-  ,"undisclosed ones on %s CrowdStream": "在 %s CrowdStream 上未披露的报告"
-  ,"Bounties paid · 90 days": "已付赏金 · 90 天"
-  ,"Bounties paid · 90 days, estimated": "已付赏金 · 90 天（估算）"
-  ,"Valid reports · 90 days": "有效报告 · 90 天"
-  ,"Valid reports · 90 days, estimated": "有效报告 · 90 天（估算）"
-  ,"An OpenAI-compatible base URL, e.g. https://api.openai.com/v1 or a local server.": "兼容 OpenAI 的接口地址，例如 https://api.openai.com/v1 或本地服务器。"
-  ,"The model name the endpoint knows, e.g. gpt-4o-mini.": "端点支持的模型名称，例如 gpt-4o-mini。"
-  ,"Sent as a bearer token. Left empty for a local server that needs none.": "作为 Bearer 令牌发送；本地服务器无需令牌时留空。"
-  ,"Midnight": "午夜"
-  ,"Navy and lavender. The default.": "海军蓝与薰衣草紫，默认配色。"
-  ,"Navy and lavender": "海军蓝与薰衣草紫"
-  ,"Nord": "Nord"
-  ,"Cool slate grey and frost blue; soft, low glare.": "冷灰与霜蓝，柔和低眩光。"
-  ,"Slate and frost blue": "灰岩与霜蓝"
-  ,"Graphite": "石墨"
-  ,"Neutral greys; colour only where it means something.": "中性灰，仅在有语义处使用颜色。"
-  ,"Neutral greys": "中性灰"
-  ,"Blue White": "蓝白"
-  ,"White surfaces and calm ocean blue for focused work.": "白色表面与沉静海蓝，适合专注工作。"
-  ,"Ocean blue and white": "海蓝与白色"
-  ,"Tech Blue": "科技蓝"
-  ,"Electric blue controls, cyan signals and white work surfaces.": "电光蓝控件、青色信号与白色工作面。"
-  ,"Electric blue and white": "电光蓝与白色"
-  ,"Delete selected revoked": "删除所选已吊销"
-  ,"Revoke selected": "吊销所选"
-  ,"Delete the selected revoked tokens? Live tokens stay until they are revoked.": "删除所选已吊销令牌？有效令牌会保留，直到先被吊销。"
-  ,"Revoke the selected tokens? Clients using them will lose access immediately.": "吊销所选令牌？正在使用它们的客户端会立即失去访问权限。"
-  ,"Revoked %d selected token(s).": "已吊销 %d 个所选令牌。"
-  ,"Deleted %d revoked token(s).": "已删除 %d 个已吊销令牌。"
-  ,"three values": "三个配置项"
+  "Self-host HuntDeck": "自行部署 HuntDeck",
+  "First response: %s": "首次响应：%s",
+  "To validate: %s": "验证用时：%s",
+  "HackerOne's average bounty: %s": "HackerOne 平均赏金：%s",
+  "Bugcrowd's average payout over the last 3 months: %s": "Bugcrowd 近 3 个月平均支出：%s",
+  "YesWeHack's average reward: %s": "YesWeHack 平均奖励：%s",
+  "Intigriti's average payout: %s": "Intigriti 平均支出：%s",
+  "Average bounty: %s": "平均赏金：%s",
+  "Hunters joined": "已加入的研究者",
+  "Hunters ranked": "上榜研究者",
+  "Hunters contributed": "有贡献的研究者",
+  "Researchers on the program": "项目上的研究者",
+  "Researchers who joined the program": "加入项目的研究者",
+  "Researchers on the program's ranking: those who scored on it": "项目排行榜上的研究者，即在项目上获得积分的人",
+  "Researchers who contributed a report the program accepted": "提交过被项目接收报告的研究者",
+  "Valid reports in the last 90 days": "近 90 天有效报告",
+  "Valid reports in the last 90 days: reports resolved on HackerOne Hacktivity": "近 90 天有效报告：HackerOne Hacktivity 上已解决的报告",
+  "Valid reports in the last 90 days: accepted reports resolved on Bugcrowd CrowdStream": "近 90 天有效报告：Bugcrowd CrowdStream 上已接收并解决的报告",
+  "Estimate of valid reports in 90 days: %s reports received in 90 days × %s%% of its reports accepted all time (%s of %s). %s doesn't list its reports, so none are counted as resolved; see Methodology.": "近 90 天有效报告估算：近 90 天收到的 %s 份报告 × 历史接收率 %s%%（%s / %s）。%s 不公开报告，因此没有报告会按已解决计入；详见评分方法。",
+  "No assets in scope": "没有范围内资产",
+  "in-scope entry": "范围内条目",
+  "in-scope entries": "范围内条目",
+  "other": "其他",
+  "they name": "它们指向",
+  "it names": "它指向",
+  "none resolved": "无已解决",
+  "bounties × the average": "份赏金 × 平均值",
+  "median to resolve": "解决时间中位数",
+  "no data": "暂无数据",
+  "resolved": "已解决",
+  "submitted": "已提交",
+  "shown": "已展示",
+  "Reports resolved per month": "每月已解决报告",
+  "Resolved reports by the month they were submitted": "按提交月份统计的已解决报告",
+  "Reports accepted per month": "每月已接收报告",
+  "Accepted reports resolved per month": "每月已解决的已接收报告",
+  "Accepted reports by the month they were submitted": "按提交月份统计的已接收报告",
+  "Median days to resolve, by the month resolved": "按解决月份统计的解决时间中位数",
+  "Bounties per month, shown on CrowdStream, by the month accepted": "按接收月份统计的每月赏金（CrowdStream 展示）",
+  "Bounties per month, estimated at the program's average bounty": "按项目平均赏金估算的每月赏金",
+  "Bounties per month, shown on Hacktivity": "每月赏金（Hacktivity 展示）",
+  "All bounty-eligible": "全部符合赏金条件",
+  "No bounties": "无赏金",
+  "All bounty-eligible, up to %s": "全部符合赏金条件，最高 %s",
+  "Up to %s": "最高 %s",
+  "Scope & program": "范围与项目",
+  "Enable %s": "启用 %s",
+  "Now %s.": "现在是 %s。",
+  "Default: %s.": "默认值：%s。",
+  "The default, from": "默认值来自",
+  "Reset to %s": "重置为 %s",
+  "stats failed": "统计失败",
+  "took %s": "耗时 %s",
+  "today": "今天",
+  "undisclosed ones on %s CrowdStream": "在 %s CrowdStream 上未披露的报告",
+  "Bounties paid · 90 days": "已付赏金 · 90 天",
+  "Bounties paid · 90 days, estimated": "已付赏金 · 90 天（估算）",
+  "Valid reports · 90 days": "有效报告 · 90 天",
+  "Valid reports · 90 days, estimated": "有效报告 · 90 天（估算）",
+  "An OpenAI-compatible base URL, e.g. https://api.openai.com/v1 or a local server.": "兼容 OpenAI 的接口地址，例如 https://api.openai.com/v1 或本地服务器。",
+  "The model name the endpoint knows, e.g. gpt-4o-mini.": "端点支持的模型名称，例如 gpt-4o-mini。",
+  "Sent as a bearer token. Left empty for a local server that needs none.": "作为 Bearer 令牌发送；本地服务器无需令牌时留空。",
+  "Midnight": "午夜",
+  "Navy and lavender. The default.": "海军蓝与薰衣草紫，默认配色。",
+  "Navy and lavender": "海军蓝与薰衣草紫",
+  "Nord": "Nord",
+  "Cool slate grey and frost blue; soft, low glare.": "冷灰与霜蓝，柔和低眩光。",
+  "Slate and frost blue": "灰岩与霜蓝",
+  "Graphite": "石墨",
+  "Neutral greys; colour only where it means something.": "中性灰，仅在有语义处使用颜色。",
+  "Neutral greys": "中性灰",
+  "Blue White": "蓝白",
+  "White surfaces and calm ocean blue for focused work.": "白色表面与沉静海蓝，适合专注工作。",
+  "Ocean blue and white": "海蓝与白色",
+  "Tech Blue": "科技蓝",
+  "Electric blue controls, cyan signals and white work surfaces.": "电光蓝控件、青色信号与白色工作面。",
+  "Electric blue and white": "电光蓝与白色",
+  "Delete selected revoked": "删除所选已吊销",
+  "Revoke selected": "吊销所选",
+  "Delete the selected revoked tokens? Live tokens stay until they are revoked.": "删除所选已吊销令牌？有效令牌会保留，直到先被吊销。",
+  "Revoke the selected tokens? Clients using them will lose access immediately.": "吊销所选令牌？正在使用它们的客户端会立即失去访问权限。",
+  "Revoked %d selected token(s).": "已吊销 %d 个所选令牌。",
+  "Deleted %d revoked token(s).": "已删除 %d 个已吊销令牌。",
+  "three values": "三个配置项",
+  "already handed to the scanner": "已交给扫描器"
  }
 }
