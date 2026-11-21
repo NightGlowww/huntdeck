@@ -4,13 +4,13 @@
 <div class="stack">
 <section class="panel" id="channels">
   <div class="panel-head"><h2>{{T "Channels"}}{{with .Channels}} <span class="count">{{len .}}</span>{{end}}</h2>
-    <span class="actions">
-      <a class="button small" href="/settings/notifications/new?kind=discord">{{T "Add Discord"}}</a>
-      <a class="button secondary small" href="/settings/notifications/new?kind=telegram">{{T "Add Telegram"}}</a>
-      <a class="button secondary small" href="/settings/notifications/new?kind=bark">{{T "Add Bark"}}</a>
-      <a class="button secondary small" href="/settings/notifications/new?kind=serverchan">{{T "Add ServerChan"}}</a>
-      <a class="button secondary small" href="/settings/notifications/new?kind=webhook">{{T "Add webhook"}}</a>
-    </span></div>
+    <span class="actions"><details class="channel-add"><summary class="button small">{{T "Add channel"}}<svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></summary><div class="menu">
+      <a href="/settings/notifications/new?kind=discord">{{T "Discord"}}</a>
+      <a href="/settings/notifications/new?kind=telegram">{{T "Telegram"}}</a>
+      <a href="/settings/notifications/new?kind=bark">{{T "Bark"}}</a>
+      <a href="/settings/notifications/new?kind=serverchan">{{T "ServerChan"}}</a>
+      <a href="/settings/notifications/new?kind=webhook">{{T "Webhook"}}</a>
+    </div></details></span></div>
   {{if .Channels}}
   <div class="nlist">
     {{range .Channels}}

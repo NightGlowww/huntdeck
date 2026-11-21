@@ -1987,5 +1987,11 @@
   "Optional": "可选"
   ,"Runtime, credentials and operator preferences.": "运行环境、凭据和操作员偏好。"
   ,"Deliver operational events through channels you control.": "通过你控制的渠道投递运行事件。"
+  ,"Add channel": "添加渠道"
+  ,"Discord": "Discord"
+  ,"Telegram": "Telegram"
+  ,"Bark": "Bark"
+  ,"ServerChan": "ServerChan"
+  ,"Webhook": "Webhook"
  }
 }
