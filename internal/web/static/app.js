@@ -84,73 +84,89 @@ document.addEventListener("change", (e) => {
   }
 });
 
-// Forms with data-confirm ask first - in the page, not with window.confirm.
-// Chrome lets a reader tick "prevent this page from creating additional
-// dialogs"; from then on confirm() returns false without asking, and every
-// destructive button in the app does nothing at all, silently. A dialog
-// element cannot be suppressed that way.
+// Re-submit with the original button so its name, value and formaction survive
+// confirmation, including buttons associated with a form from outside it.
 document.addEventListener("submit", (e) => {
   const form = e.target;
-  const msg = form.dataset.confirm;
-  if (!msg || form.dataset.confirmed === "1") return;
+  const button = e.submitter;
+  const message = button?.dataset.confirm || form.dataset.confirm;
+  if (!message || e.defaultPrevented || form.dataset.confirmed) return;
   e.preventDefault();
-  askInPage(msg).then((yes) => {
-    if (!yes) return;
+  askInPage(message, button?.textContent.trim(), button?.classList.contains("danger")).then((yes) => {
+    if (!yes || !form.isConnected || (button && button.form !== form)) return;
     form.dataset.confirmed = "1";
-    form.requestSubmit();
+    try {
+      form.requestSubmit(button || undefined);
+    } finally {
+      delete form.dataset.confirmed;
+    }
   });
 });
 
-// askInPage puts the question in a dialog the page owns and resolves with the
-// answer. One modal at a time: an older one is closed first.
-function askInPage(message) {
+function askInPage(message, action, destructive = false) {
+  if (document.querySelector("dialog.ask[open]")) return Promise.resolve(false);
   return new Promise((resolve) => {
     const dlg = document.createElement("dialog");
     dlg.className = "vdialog ask";
     const p = document.createElement("p");
+    p.id = "confirm-question";
     p.textContent = message;
+    dlg.setAttribute("aria-labelledby", p.id);
     const yes = document.createElement("button");
-    yes.className = "button small danger";
-    yes.textContent = t("Yes, do it");
+    yes.className = destructive ? "button danger" : "button";
+    yes.textContent = action || t("Yes, do it");
     const no = document.createElement("button");
-    no.className = "button small secondary";
+    no.className = "button secondary";
     no.textContent = t("Cancel");
+    no.autofocus = true;
     const row = document.createElement("div");
     row.className = "ask-actions";
-    row.append(yes, no);
+    row.append(no, yes);
     dlg.append(p, row);
-    const done = (value) => {
-      if (dlg.open) dlg.close();
+    yes.addEventListener("click", () => dlg.close("confirm"));
+    no.addEventListener("click", () => dlg.close());
+    dlg.addEventListener("close", () => {
       dlg.remove();
-      resolve(value);
-    };
-    yes.addEventListener("click", () => done(true));
-    no.addEventListener("click", () => done(false));
-    dlg.addEventListener("cancel", (ev) => { ev.preventDefault(); done(false); });
+      resolve(dlg.returnValue === "confirm");
+    }, {once: true});
     document.body.append(dlg);
     dlg.showModal();
-    yes.focus();
   });
 }
 
-// A form on its way: mark it busy and stop a second click from sending it
-// twice. The button is disabled on the next tick, after this submit has taken
-// its value, and restored if the page comes back from the back/forward cache.
+// Wait for the submit event to finish: JS-handled forms manage their own
+// state, and native submissions still need the clicked button's value.
+const pendingForms = new Map();
 document.addEventListener("submit", (e) => {
   const form = e.target;
-  if (e.defaultPrevented || form.dataset.noBusy !== undefined) return;
-  const btn = form.querySelector('button[type="submit"]:not([form])');
-  if (!btn || btn.disabled) return;
-  form.setAttribute("aria-busy", "true");
-  btn.classList.add("is-busy");
-  setTimeout(() => { btn.disabled = true; }, 0);
+  if (pendingForms.has(form)) {
+    e.preventDefault();
+    return;
+  }
+  const btn = e.submitter;
+  if (!(btn instanceof HTMLButtonElement) || form.hasAttribute("data-no-busy")) return;
+  setTimeout(() => {
+    if (e.defaultPrevented || btn.disabled || !form.isConnected) return;
+    const content = [...btn.childNodes];
+    if (form.dataset.busy && !form.hasAttribute("data-no-pending")) btn.textContent = form.dataset.busy;
+    btn.disabled = true;
+    btn.classList.add("is-busy");
+    form.setAttribute("aria-busy", "true");
+    let timer;
+    const reset = () => {
+      clearTimeout(timer);
+      btn.replaceChildren(...content);
+      btn.disabled = false;
+      btn.classList.remove("is-busy");
+      form.removeAttribute("aria-busy");
+      pendingForms.delete(form);
+    };
+    pendingForms.set(form, reset);
+    if (!form.hasAttribute("data-stay-busy")) timer = setTimeout(reset, 8000);
+  }, 0);
 });
 window.addEventListener("pageshow", () => {
-  for (const btn of document.querySelectorAll(".is-busy")) {
-    btn.classList.remove("is-busy");
-    btn.disabled = false;
-    if (btn.form) btn.form.removeAttribute("aria-busy");
-  }
+  for (const reset of pendingForms.values()) reset();
 });
 
 // Theme: the top bar's menu sets light or dark ("system" follows the
@@ -619,29 +635,6 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
   document.addEventListener("input", (e) => {
     if (e.target.willValidate && e.target.checkValidity()) clear(e.target);
   }, true);
-  document.addEventListener("submit", (e) => {
-    const form = e.target;
-    if (form.dataset.noPending !== undefined) return;
-    // After the dispatch: a form that was cancelled (a confirm dismissed, a
-    // validation failure) keeps its button as it was, and a button's own
-    // name and value still reach the server before it is disabled.
-    setTimeout(() => {
-      if (e.defaultPrevented) return;
-      const btn = form.querySelector('button[type="submit"]:not([form])') || form.querySelector('button[type="submit"]');
-      if (!btn || btn.disabled) return;
-      btn.dataset.label = btn.textContent;
-      btn.textContent = form.dataset.busy || t("Saving…");
-      btn.setAttribute("aria-busy", "true");
-      setTimeout(() => { btn.disabled = true; }, 0);
-      // A form that comes back to the same page (an error, a message) gets its
-      // button back after a moment. One that navigates away keeps saying what
-      // it is doing: an invite the server takes up to 40 s over must not offer
-      // a button that no longer answers.
-      if (form.dataset.stayBusy === undefined) {
-        setTimeout(() => { btn.disabled = false; btn.removeAttribute("aria-busy"); btn.textContent = btn.dataset.label || btn.textContent; }, 8000);
-      }
-    }, 0);
-  });
 })();
 
 // The Programs list's selection bar: ignore the ticked programs in one go.
@@ -930,8 +923,13 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
   const box = document.querySelector("input[data-filter-api]");
   if (!box) return;
   const nav = box.closest(".apinav");
+  const directory = nav.querySelector("details");
+  const compact = matchMedia("(max-width: 900px)");
+  const fitDirectory = () => { directory.open = !compact.matches; };
+  fitDirectory();
+  compact.addEventListener("change", fitDirectory);
   const count = nav.querySelector(".filter-count");
-  const links = [...nav.querySelectorAll('a[href^="#"]:not(.an-top):not(.an-spec)')];
+  const links = [...nav.querySelectorAll('a[href^="#"]:not(.an-top)')];
   const groups = [...nav.querySelectorAll(".an-g")];
   const sections = [...document.querySelectorAll(".eps > section[id], .eps > h2.apigroup")];
   const apply = () => {

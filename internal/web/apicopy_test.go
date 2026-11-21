@@ -37,6 +37,13 @@ func TestAPIPageCopyMatchesTheGate(t *testing.T) {
 		t.Error("the tokens panel is missing on a password instance")
 	}
 
+	// A translated spec introduction used to describe an open installation
+	// even on the password-protected page.
+	_, zh := withPassword.do(c, http.MethodGet, "/api", nil, http.Header{"Accept-Language": {"zh-CN"}})
+	if strings.Contains(zh, "无需登录，也没有令牌") {
+		t.Error("the Chinese API page claims a password-protected instance is open")
+	}
+
 	open := newTestEnv(t, func(*Deps) {})
 	_, openBody := open.do(open.client(), http.MethodGet, "/api", nil, nil)
 	if !strings.Contains(openBody, "nothing for a token to unlock") {

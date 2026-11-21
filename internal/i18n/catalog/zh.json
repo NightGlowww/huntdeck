@@ -1802,6 +1802,22 @@
   "Task": "任务",
   "the last %d": "最近 %d 个",
   "Nothing has been handed over for %s while %d target(s) wait: the scanner is full, or its last attempt was refused.": "已有 %s 没有派发新任务，而队列里还有 %d 个目标在等：多半是扫描器满了，或上次派发被拒绝。",
-  "Yes, do it": "确定执行"
+  "Yes, do it": "确定执行",
+  "Download the OpenAPI 3.1 specification": "下载 OpenAPI 3.1 规范",
+  "Base URL": "基础地址",
+  "Authentication": "身份验证",
+  "Sign in with the access password. Scripts can use a Bearer token or a session cookie.": "浏览器通过访问密码登录。脚本可使用 Bearer 令牌或会话 Cookie。",
+  "Scripts get a challenge from a terminal. Use Send on this page to try a request.": "从终端发起请求时会遇到验证。可在本页点「发送」试用接口。",
+  "Default": "默认值",
+  "Request body": "请求体",
+  "Actions": "操作",
+  "Scripts can send a Bearer token with the same access as your password.": "脚本可以发送 Bearer 令牌，权限与访问口令相同。",
+  "Add this HTTP connection to your MCP client. Use a separate key for each client.": "将此 HTTP 连接添加到 MCP 客户端。每个客户端使用单独的密钥。",
+  "Connection keys": "连接密钥",
+  "Create connection key": "创建连接密钥",
+  "Delete this active key? Clients using it will lose access immediately.": "删除这枚有效密钥？使用它的客户端会立即失去访问权限。",
+  "No connection keys yet.": "还没有连接密钥。",
+  "No unused keys older than one hour.": "没有超过一小时且从未使用的密钥。",
+  "Select": "选择"
  }
 }

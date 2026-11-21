@@ -2,37 +2,64 @@
    A contents rail of endpoints, then a panel each: what it does and its
    parameters, beside its example request and response (Send replaces the
    sample with this HuntDeck's answer). */
-.apid { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; }
+.apid { display: grid; grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr); gap: 20px; align-items: start; }
 .eps { display: grid; gap: 16px; min-width: 0; }
 .eps > .panel + .panel { margin-top: 0; }
+.apid [id] { scroll-margin-top: calc(72px + var(--db-h)); }
 
 .mth { display: inline-flex; flex: none; align-items: center; justify-content: center; min-width: 40px; height: 19px; padding: 0 6px;
   border-radius: 4px; font: 650 calc(10.5px * var(--fs, 1)) var(--mono); letter-spacing: .04em; }
-.mth.get { background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good); }
-.mth.post { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.mth.get { background: var(--good-weak); color: var(--good); }
+.mth.post { background: var(--accent-weak); color: var(--accent); }
 
-.apinav { position: sticky; top: calc(72px + var(--db-h)); display: flex; flex-direction: column; max-height: calc(100dvh - 88px - var(--db-h)); overflow-y: auto;
-  padding: 10px 8px; scrollbar-width: none; }
-.apinav a { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 5px 8px; border-radius: 6px; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); }
-.apinav a:hover { background: var(--row-hover); color: var(--text); }
-.apinav a.on { background: var(--surface-3); color: var(--text); font-weight: 600; }
-.apinav .an-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.apinav .an-g { margin: 12px 8px 4px; color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
-.apinav .an-spec { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); border-radius: 0; color: var(--accent); }
-.apinav .an-spec .i { width: 15px; height: 15px; }
+/* The list scrolls under its own search field. On a phone the same directory
+   is a native disclosure; the links still work without JavaScript. */
+.apinav { position: sticky; top: calc(72px + var(--db-h)); }
+.api-directory summary { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 10px 14px;
+  color: var(--text); font-weight: 650; cursor: pointer; list-style: none; }
+.api-directory summary::-webkit-details-marker { display: none; }
+.api-directory summary .i { width: 16px; height: 16px; color: var(--muted); }
+.api-directory summary .dir-chev { width: 13px; height: 13px; margin-left: auto; }
+.api-directory[open] .dir-chev { transform: rotate(90deg); }
+.apifilter { display: none; position: relative; margin: 0 10px 9px; }
+.js .apifilter { display: block; }
+.apifilter .i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--muted); pointer-events: none; }
+.apifilter input[type="search"] { width: 100%; height: 36px; padding-inline: 32px 8px; background: var(--surface-2); }
+.apinav .filter-count { display: block; margin: 0 14px 8px; }
+.an-links { max-height: calc(100dvh - 216px - var(--db-h)); overflow: auto; overscroll-behavior: contain; padding: 4px 7px 10px; scrollbar-width: thin; }
+.an-links a { display: flex; align-items: baseline; gap: 8px; padding: 7px 8px; border-radius: 5px; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); line-height: 1.35; }
+.an-links .an-t { min-width: 0; overflow-wrap: anywhere; }
+.an-links a:hover { background: var(--row-hover); color: var(--text); }
+.an-links a.on { background: var(--accent-weak); color: var(--accent); font-weight: 600; }
+.an-g { margin: 12px 8px 4px; color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 650; }
+.an-links .mth { align-self: flex-start; }
 
-.api-lede { margin: 0 0 14px; color: var(--text-2); font-size: calc(13.5px * var(--fs, 1)); line-height: 1.5; }
-.apifacts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 28px; margin: 0; }
-.apifacts dt { color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
-.apifacts dd { margin: 4px 0 0; font-size: calc(13px * var(--fs, 1)); line-height: 1.5; overflow-wrap: anywhere; }
-.apifacts dd code { white-space: nowrap; }
+.api-start { overflow: hidden; }
+.api-start-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 18px 20px 0; }
+.api-start-head h2 { margin: 0; font-size: calc(21px * var(--fs, 1)); line-height: 1.25; }
+.api-resources { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.api-resource { display: inline-flex; align-items: center; min-height: 32px; gap: 5px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 550; color: var(--accent); }
+.api-resource:hover { text-decoration: underline; }
+.api-resource .i { width: 15px; height: 15px; }
+.api-connect { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 14px 24px; padding: 16px 20px 18px; }
+.api-connect h3, .apifacts dt { margin: 0 0 5px; font-size: calc(12px * var(--fs, 1)); font-weight: 600; color: var(--muted); }
+.api-auth p, .apifacts dd { margin: 0; color: var(--text-2); font-size: calc(13px * var(--fs, 1)); line-height: 1.55; }
+.api-auth p + p { margin-top: 5px; }
+.api-url { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 4px 3px 10px; min-height: 36px;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); }
+.api-url code { min-width: 0; padding: 0; background: transparent; color: var(--text); overflow-wrap: anywhere; }
+.api-url button { display: none; flex: none; }
+.js .api-url button { display: inline-flex; }
+.apifacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 10px 24px;
+  margin: 0; padding: 12px 20px; border-top: 1px solid var(--border); background: var(--surface-2); }
+.apifacts dt { margin: 0; }
+.apifacts dd { overflow-wrap: anywhere; }
 
-.apigroup { display: flex; align-items: baseline; gap: 12px; margin: 8px 0 -4px; color: var(--text-2); font-size: calc(11.5px * var(--fs, 1)); font-weight: 650;
-  letter-spacing: .07em; text-transform: uppercase; scroll-margin-top: calc(72px + var(--db-h)); }
-.apigroup span { color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); font-weight: 400; letter-spacing: 0; text-transform: none; }
+.apigroup { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 12px; margin: 12px 0 -5px; color: var(--text);
+  font-size: calc(17px * var(--fs, 1)); font-weight: 650; line-height: 1.35; }
+.apigroup span { color: var(--muted); font-size: calc(13px * var(--fs, 1)); font-weight: 400; }
 
 .ep { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46%); scroll-margin-top: calc(72px + var(--db-h)); }
-#start { scroll-margin-top: calc(72px + var(--db-h)); }
 .ep-doc { min-width: 0; padding: 16px; }
 .ep-doc h3 { margin: 0 0 8px; font-size: calc(16px * var(--fs, 1)); }
 .ep-path { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -57,38 +84,30 @@
 .ex-head .bad { color: var(--bad); }
 .ep-ex .code { margin: 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
   font: calc(12px * var(--fs, 1))/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
-.ep-ex .code.resp { max-height: 560px; overflow: auto; white-space: pre; scrollbar-width: none; }
+.ep-ex .code.resp { max-height: 28rem; overflow: auto; white-space: pre; scrollbar-width: thin; }
 /* It scrolls, so it takes focus: arrow keys scroll it. */
 .ep-ex .code.resp:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .try { display: flex; gap: 8px; }
 .try input { flex: 1; min-width: 0; height: 32px; font: calc(12.5px * var(--fs, 1)) var(--mono); }
 .try button { height: 32px; }
 
-/* Narrower, examples go under each endpoint's parameters; on phones the
-   rail goes and the facts stack. */
-@media (max-width: 1600px) {
+@media (max-width: 1440px) {
   .ep { grid-template-columns: minmax(0, 1fr); }
   .ep-ex { border-top: 1px solid var(--border); border-left: 0; border-radius: 0 0 var(--radius) var(--radius); }
 }
-@media (max-width: 1440px) { .apifacts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 900px) {
-  .apid { grid-template-columns: minmax(0, 1fr); }
-  .apinav { display: none; }
-  .ptab td:first-child { width: 130px; }
+  .apid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .apinav { position: static; }
+  .an-links { max-height: min(44dvh, 22rem); }
+  .ptab td:first-child { width: min(32%, 130px); }
 }
-@media (max-width: 560px) { .apifacts { grid-template-columns: minmax(0, 1fr); } }
-
-/* The endpoint filter sits above the list and reads as part of it: full width,
-   the same inset as the links, and a quiet count under it. */
-.apinav .apifilter { display: block; margin: 4px 6px 8px; }
-.apinav .apifilter input { width: 100%; height: 30px; padding: 0 9px; border: 1px solid var(--border-input);
-  border-radius: 6px; background: var(--surface-2); color: var(--text); font: inherit; font-size: calc(13px * var(--fs, 1)); }
-.apinav .apifilter input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
-.apinav .filter-count { display: block; margin: 0 8px 6px; }
-/* .apinav is a column flexbox, so a block child still shrink-wraps: stretch it
-   or the box floats at the left of a 460px rail. */
-.apinav .apifilter { align-self: stretch; }
-.apinav .apifilter input { display: block; }
+@media (max-width: 560px) {
+  .api-start-head { padding: 14px 14px 0; }
+  .api-connect { padding: 12px 14px 15px; }
+  .apifacts { padding: 10px 14px; }
+  .ep-doc, .ep-ex { padding: 14px; }
+  .ptab td { overflow-wrap: anywhere; }
+}
 
 .token-form { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 4px 0 14px; }
 .token-form label { font-size: calc(12.5px * var(--fs, 1)); font-weight: 550; }
