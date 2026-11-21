@@ -1,4 +1,5 @@
 {{define "content"}}{{with .Data}}
+<header class="page-workbench-head"><div><span class="workbench-kicker">{{T "System"}}</span><h1>{{T "Settings"}}</h1><p>{{T "Runtime, credentials and operator preferences."}}</p></div><a class="button secondary small" href="/system">{{T "System workbench"}}</a></header>
 <nav class="ptabs" aria-label="{{T "Settings sections"}}">
   {{range .Tabs}}<a href="{{.URL}}"{{if .On}} class="on" aria-current="page"{{end}}>{{T .Label}}{{with .Count}} <span class="count">{{.}}</span>{{end}}</a>{{end}}
 </nav>
