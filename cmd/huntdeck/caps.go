@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/mdpsec/huntdeck/internal/jev"
 	"io"
 	"log/slog"
 	"strings"
@@ -152,7 +153,19 @@ func scanHandoffCmd(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 	client := &scopesentry.Client{BaseURL: app.cfg.ScanURL, Key: app.cfg.ScanKey.Reveal()}
-	n, err := scanhandoff.RunWith(ctx, app.store, client, true, scanhandoff.Options{Targets: wanted})
+	opt := scanhandoff.Options{Targets: wanted}
+	// The page's button attaches the decision model's second opinion; the
+	// command did not, so a batch the model would have blocked went out
+	// anyway. Same question either way: it is a batch that can take the
+	// scanner's host down.
+	if app.cfg.JevKey.Reveal() != "" {
+		opt.Opinion = scanhandoff.NewJevOpinion(&jev.Client{
+			BaseURL: app.cfg.JevURL, Key: app.cfg.JevKey.Reveal(), Model: app.cfg.JevModel,
+			Proxy: app.cfg.JevProxy, Provider: app.cfg.JevProvider,
+			AccountID: app.cfg.JevAccountID, WorkspaceID: app.cfg.JevWorkspaceID,
+		})
+	}
+	n, err := scanhandoff.RunWith(ctx, app.store, client, true, opt)
 	if err != nil {
 		fmt.Fprintf(stderr, "scan-handoff: %v\n", err)
 		if n > 0 {
