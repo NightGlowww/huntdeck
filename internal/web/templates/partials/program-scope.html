@@ -16,6 +16,8 @@
       <button type="button" class="link small" data-copy-url="{{$s.CopyURL}}" title="{{T "These rows as plain text, one per line"}}">{{T "Copy targets"}}</button>
       <a class="link small" href="{{$s.CopyURL}}" download="scope.txt" data-export title="{{T "These rows as a .txt file"}}">{{T "Download .txt"}}</a>
       {{if ne $s.Show "removed"}}<a class="link small" href="{{$s.OrderURL}}" title="{{T "Switch the order"}}">{{if eq $s.Order "added"}}{{T "newest first"}}{{else}}{{T "platform order"}}{{end}}</a>{{else}}<span class="muted small">{{T "newest first"}}</span>{{end}}
+      <a class="link small" href="/queue?platform={{$s.Platform}}" title="{{T "The hunt queue ranks this program's targets"}}">{{T "Hunt queue"}}</a>
+      <a class="link small" href="/scan" title="{{T "The scanner takes in-scope targets from here"}}">{{T "Scanner"}}</a>
     </div>
     {{with $s.Types}}<div class="chipbar">{{range .}}<a class="fchip{{if .On}} on{{end}}" href="{{.URL}}"{{if .On}} aria-current="true"{{end}}>{{T .Label}} <em>{{num .Count}}</em></a>{{end}}</div>{{end}}
     {{with $s.SinceLinks}}<div class="chipbar" aria-label="{{T "Added in the last"}}"><span class="chipbar-label">{{T "Added"}}</span>{{range .}}<a class="fchip{{if .On}} on{{end}}" href="{{.URL}}"{{if .On}} aria-current="true"{{end}}>{{T .Label}} <em>{{num .Count}}</em></a>{{end}}</div>{{end}}
