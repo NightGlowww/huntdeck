@@ -24,5 +24,10 @@ func TestSystemAndIntegrationsWorkbenches(t *testing.T) {
 				t.Errorf("%s: missing %q", tc.path, want)
 			}
 		}
+		for _, link := range []string{`href="/system"`, `href="/integrations"`} {
+			if !strings.Contains(body, link) {
+				t.Errorf("%s: missing navigation link %q", tc.path, link)
+			}
+		}
 	}
 }
