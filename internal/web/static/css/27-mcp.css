@@ -113,7 +113,8 @@
 .llm-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 4px 2px 2px; }
 .llm-eyebrow { display: block; margin-bottom: 5px; color: var(--accent); font-size: calc(11px * var(--fs, 1)); font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
 .llm-hero h1 { font-size: calc(26px * var(--fs, 1)); line-height: 1.2; }
-.llm-hero p { max-width: 72ch; margin: 8px 0 0; color: var(--muted); line-height: 1.55; }
+.llm-hero > div:first-child { min-width: 0; flex: 1 1 auto; }
+.llm-hero p { max-width: none; margin: 8px 0 0; color: var(--muted); line-height: 1.55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .llm-hero-state { display: flex; align-items: center; gap: 8px; flex: none; padding-top: 24px; color: var(--muted); }
 .llm-hero-state code { color: var(--text-2); }
 .llm-config .acct-sec { max-width: 980px; }
@@ -125,5 +126,6 @@
   .llm-hero { display: grid; gap: 8px; }
   .llm-hero-state { padding-top: 0; }
   .llm-hero h1 { font-size: calc(22px * var(--fs, 1)); }
+  .llm-hero p { white-space: normal; overflow: visible; text-overflow: clip; }
   .llm-config .acct-field { grid-template-columns: minmax(0, 1fr) auto; }
 }
