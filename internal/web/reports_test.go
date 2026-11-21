@@ -137,9 +137,10 @@ func TestAcceptedReports(t *testing.T) {
 	now := time.Now().UTC()
 	at := func(daysAgo int) time.Time { return now.Add(-time.Duration(daysAgo) * 24 * time.Hour) }
 	ptrAt := func(daysAgo int) *time.Time { v := at(daysAgo); return &v }
+	// Separate the P1 and P3 by more than a calendar month for the chart tooltip.
 	e.fake.SetAccepted(at(182),
 		platform.AcceptedReport{ID: "a1", ProgramHandle: "acme", SubmittedAt: ptrAt(9), AcceptedAt: at(3), Priority: 1, Bounty: ptrTo(3000.0)},
-		platform.AcceptedReport{ID: "a2", ProgramHandle: "acme", SubmittedAt: ptrAt(30), AcceptedAt: at(20), ResolvedAt: ptrAt(10), Priority: 3},
+		platform.AcceptedReport{ID: "a2", ProgramHandle: "acme", SubmittedAt: ptrAt(50), AcceptedAt: at(40), ResolvedAt: ptrAt(30), Priority: 3},
 		platform.AcceptedReport{ID: "a3", ProgramHandle: "acme", SubmittedAt: ptrAt(130), AcceptedAt: at(120), Priority: 4},
 	)
 	if _, err := e.syncer.Poll(ctx, fake.Accepting{Platform: e.fake}, syncer.Options{Mode: syncer.ModeFull, Trigger: "manual"}); err != nil {
