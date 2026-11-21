@@ -1,0 +1,21 @@
+/* Shared workbench shell for System and Integrations. */
+.workbench-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+.workbench-kicker { display: block; margin-bottom: 6px; color: var(--accent); font-size: calc(11px * var(--fs, 1)); font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+.workbench-hero h1 { color: var(--text); font-size: calc(30px * var(--fs, 1)); line-height: 1.15; letter-spacing: -.025em; }
+.workbench-hero p { max-width: 72ch; margin: 9px 0 0; color: var(--muted); font-size: calc(14px * var(--fs, 1)); line-height: 1.55; }
+.workbench-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.workbench-card { display: flex; min-height: 190px; flex-direction: column; padding: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: 0 8px 24px rgb(20 16 50 / .04); }
+.workbench-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.workbench-icon { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--border-2); border-radius: 10px; background: var(--accent-weak); color: var(--accent); }
+.workbench-icon .i { width: 18px; height: 18px; }
+.workbench-status { padding: 4px 8px; border-radius: 999px; background: var(--surface-3); color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 650; }
+.workbench-card h2 { margin-top: 18px; color: var(--text); font-size: calc(17px * var(--fs, 1)); }
+.workbench-card p { min-height: 48px; margin: 7px 0 18px; color: var(--text-2); line-height: 1.5; }
+.workbench-card .button { align-self: flex-start; margin-top: auto; }
+@media (max-width: 1100px) { .workbench-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  .workbench-hero { margin-bottom: 16px; }
+  .workbench-hero h1 { font-size: calc(23px * var(--fs, 1)); }
+  .workbench-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .workbench-card { min-height: 160px; padding: 16px; }
+}

@@ -111,11 +111,11 @@
       <a href="/queue"{{if eq .Nav "queue"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-star"/></svg><span class="label">{{T "Hunt queue"}}</span></a>
       <a href="/changes"{{if eq .Nav "changes"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-activity"/></svg><span class="label">{{T "Changes"}}</span></a>
       <a href="/disclosed"{{if eq .Nav "disclosed"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="label">{{T "Disclosed"}}</span></a>
-      <div class="group">{{T "System"}}</div>
+      <a class="nav-group-link" href="/system"{{if eq .Nav "system"}} aria-current="page"{{end}}>{{T "System"}}</a>
       <a href="/methodology"{{if eq .Nav "methodology"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span class="label">{{T "Methodology"}}</span></a>
             <a href="/settings/notifications"{{if eq .Nav "notifications"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg><span class="label">{{T "Notifications"}}</span></a>
             <a href="/settings"{{if eq .Nav "settings"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">{{T "Settings"}}</span></a>
-			<div class="group">{{T "Integrations"}}</div>
+			<a class="nav-group-link" href="/integrations"{{if eq .Nav "integrations"}} aria-current="page"{{end}}>{{T "Integrations"}}</a>
       <a href="/api"{{if eq .Nav "api"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-code"/></svg><span class="label">{{T "API"}}</span></a>
       <a href="/mcp"{{if eq .Nav "mcp"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-plug"/></svg><span class="label">{{T "MCP"}}</span></a>
       <a href="/pojia"{{if eq .Nav "pojia"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="label">{{T "POJIA"}}</span></a>

@@ -1,0 +1,14 @@
+{{define "content"}}{{with .Data}}
+<header class="workbench-hero">
+  <div><span class="workbench-kicker">{{if eq $.Nav "system"}}{{T "System"}}{{else}}{{T "Integrations"}}{{end}}</span><h1>{{T .Title}}</h1><p>{{T .Description}}</p></div>
+</header>
+<section class="workbench-grid" aria-label="{{T .Title}}">
+{{range .Cards}}
+<article class="workbench-card">
+  <div class="workbench-card-top"><span class="workbench-icon"><svg class="i" aria-hidden="true"><use href="#i-{{.Icon}}"/></svg></span><span class="workbench-status">{{T .Status}}</span></div>
+  <h2>{{T .Title}}</h2><p>{{T .Description}}</p>
+  <a class="button secondary small" href="{{.ActionURL}}">{{T .Action}}<svg class="i" aria-hidden="true"><use href="#i-external"/></svg></a>
+</article>
+{{end}}
+</section>
+{{end}}{{end}}
