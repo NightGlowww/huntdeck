@@ -255,12 +255,8 @@ func loadTemplates(zone func() *time.Location, version string, readOnly bool, li
 	out := map[string]map[string]*template.Template{}
 	for _, lang := range langs {
 		localized := template.FuncMap{
-			"T":  func(msg string) string { return messages.T(lang, msg) },
-			"TF": func(msg string, args ...any) string { return messages.TF(lang, msg, args...) },
-			// fixedT is reserved for fixed, catalog-owned copy whose apostrophes
-			// must remain text in the English source template. It is never used
-			// with user-controlled values.
-			"fixedT":             func(msg string) template.HTML { return template.HTML(messages.T(lang, msg)) },
+			"T":                  func(msg string) string { return messages.T(lang, msg) },
+			"TF":                 func(msg string, args ...any) string { return messages.TF(lang, msg, args...) },
 			"Lang":               func() string { return lang },
 			"response":           func(p store.ProgramListItem) *responseTime { return responseLang(lang, messages, p) },
 			"avgBountyTitle":     func(p store.ProgramListItem) string { return avgBountyTitleLang(lang, messages, p) },

@@ -187,7 +187,7 @@ func TestOwnProgramsReadOnly(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, body := e.do(c, http.MethodGet, "/programs/independent/new", nil, nil); !strings.Contains(body, "this form adds programs") ||
-		!strings.Contains(body, "Here it can't be saved.") || strings.Contains(body, "Include in seeds") {
+		!strings.Contains(body, "Here it can&#39;t be saved.") || strings.Contains(body, "Include in seeds") {
 		t.Error("the add form doesn't say it can't be saved, or offers seeds")
 	}
 	_, body := e.do(c, http.MethodGet, "/programs/independent/initech/edit", nil, nil)

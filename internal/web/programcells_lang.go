@@ -187,9 +187,8 @@ func trendSummaryLang(lang string, messages *i18n.Bundle, heading, summary strin
 	if lang != i18n.Chinese || summary == "" {
 		return summary
 	}
-	value := summary
 	if i := strings.Index(summary, " now, "); i >= 0 {
-		value = summary[:i]
+		value := summary[:i]
 		rest := summary[i+6:]
 		if j := strings.Index(rest, " on "); j >= 0 {
 			change := rest[:j]
