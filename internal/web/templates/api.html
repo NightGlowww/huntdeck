@@ -99,9 +99,13 @@
 <h2 class="apigroup" id="{{.ID}}">{{.Name}}<span>{{.Description}}</span></h2>
 {{range .Ops}}
 <section class="panel ep" id="{{.ID}}">
+<details class="ep-disclosure"{{if eq .ID "board"}} open{{end}}>
+  <summary class="ep-summary">
+    <span class="ep-summary-main"><span class="ep-path"><span class="mth {{lower .Method}}">{{.Method}}</span><code>{{.Path}}</code></span><b>{{.Summary}}</b></span>
+    <svg class="i" aria-hidden="true"><use href="#i-chev"/></svg>
+  </summary>
+  <div class="ep-layout">
   <div class="ep-doc">
-    <h3>{{.Summary}}</h3>
-    <div class="ep-path"><span class="mth {{lower .Method}}">{{.Method}}</span><code>{{.Path}}</code></div>
     <p class="ep-desc">{{.Description}}</p>
     {{if .Params}}<table class="ptab">
       <tbody>{{range .Params}}
@@ -124,6 +128,8 @@
     {{else if .Live}}<div class="ex-head"><span data-try-label>{{T "Response"}}</span><span class="muted small" data-try-note></span></div>
     <pre class="code resp" data-try-out tabindex="0" aria-label="{{TF "Response for %s" .ID}}" hidden></pre>{{end}}
   </div>
+  </div>
+</details>
 </section>
 {{end}}{{end}}{{end}}
 </div>
