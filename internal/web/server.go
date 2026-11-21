@@ -272,6 +272,8 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("GET /invites", s.invites)
 	mux.HandleFunc("POST /invites/{platform}/{handle}/accept", s.acceptInvite)
 	mux.HandleFunc("GET /programs/{platform}/{handle}", s.program)
+	mux.HandleFunc("GET /programs/{platform}", s.programsOfPlatform)
+	mux.HandleFunc("GET /programs/{platform}/{$}", s.programsOfPlatform)
 	mux.HandleFunc("GET /programs/independent/new", s.newOwnProgram)
 	mux.HandleFunc("POST /programs/independent/new", s.saveOwnProgram)
 	mux.HandleFunc("GET /programs/independent/{handle}/edit", s.editOwnProgram)

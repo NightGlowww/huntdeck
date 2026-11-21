@@ -56,12 +56,12 @@ func TestFeedbackPage(t *testing.T) {
 		t.Errorf("without a page: %q", d.Mailto)
 	}
 
-	// Pages link to it from the nav, and a demo from its banner too; the
-	// page offers Gmail, Outlook.com and the mail app.
+	// Pages link to it from the nav (once: a demo's banner has only the
+	// link to the source); the page offers Gmail, Outlook.com and the mail app.
 	e := newTestEnv(t, func(d *Deps) { d.ReadOnly, d.FeedbackEmail = true, "hello@example.com" })
 	_, body := e.do(e.client(), http.MethodGet, "/stats", nil, nil)
-	if n := strings.Count(body, `href="/feedback?from=%2Fstats"`); n != 2 {
-		t.Errorf("a demo page has %d feedback links, want 2 (nav, banner)", n)
+	if n := strings.Count(body, `href="/feedback?from=%2Fstats"`); n != 1 {
+		t.Errorf("a demo page has %d feedback links, want 1 (nav)", n)
 	}
 	code, body := e.do(e.client(), http.MethodGet, "/feedback?from=%2Fstats", nil, nil)
 	if code.StatusCode != http.StatusOK || !strings.Contains(body, "https://mail.google.com/mail/?view=cm") ||

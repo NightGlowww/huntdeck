@@ -65,3 +65,27 @@ func TestProgramsSeveralPlatforms(t *testing.T) {
 		t.Errorf("API platforms = %q", got)
 	}
 }
+
+// /programs/<platform>, an address people guess from a program's, goes to
+// the Programs list narrowed to that platform.
+func TestProgramsOfPlatform(t *testing.T) {
+	e := newTestEnv(t)
+	c := e.client()
+	c.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	for _, tt := range []struct {
+		path, want string
+		code       int
+	}{
+		{"/programs/fake", "/programs?platform=fake", http.StatusMovedPermanently},
+		{"/programs/fake/", "/programs?platform=fake", http.StatusMovedPermanently},
+		{"/programs/FAKE/", "/programs?platform=fake", http.StatusMovedPermanently},
+		{"/programs/nope/", "", http.StatusNotFound},
+		{"/programs/hackerone/", "", http.StatusNotFound}, // not configured here
+		{"/programs/fake/acme", "", http.StatusOK},        // a program is still a program
+	} {
+		res, _ := e.do(c, http.MethodGet, tt.path, nil, nil)
+		if res.StatusCode != tt.code || res.Header.Get("Location") != tt.want {
+			t.Errorf("%s: %d %q, want %d %q", tt.path, res.StatusCode, res.Header.Get("Location"), tt.code, tt.want)
+		}
+	}
+}

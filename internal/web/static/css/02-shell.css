@@ -42,13 +42,15 @@
   letter-spacing: .02em; text-transform: uppercase; }
 .demo-banner .db-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .demo-banner .db-short { display: none; }
-@media (max-width: 1679px) { .demo-banner .db-long { display: none; } .demo-banner .db-short { display: inline; } }
-/* The accent darkened toward the text: on the banner's tint the accent
-   alone falls short of 4.5:1. Padded to a 26px tap target. */
-.demo-banner .db-fb { flex: none; padding: 4px 0; color: color-mix(in srgb, var(--accent) 75%, var(--text)); font-weight: 600; text-decoration: underline;
-  text-underline-offset: 3px; white-space: nowrap; }
-.demo-banner .db-follow { display: inline-flex; align-items: center; gap: 5px; }
-.demo-banner .db-follow .i { width: 13px; height: 13px; }
+@media (max-width: 1279px) { .demo-banner .db-long { display: none; } .demo-banner .db-short { display: inline; } }
+/* The one call to action: a small button in the accent, darkened toward
+   the text where it's text (the accent alone falls short of 4.5:1 on the
+   banner's tint). 28px tall: a comfortable tap target. */
+.demo-banner .db-cta { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border)); background: var(--surface); color: color-mix(in srgb, var(--accent) 75%, var(--text));
+  font-weight: 600; text-decoration: none; white-space: nowrap; }
+.demo-banner .db-cta:hover { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.demo-banner .db-cta .i { width: 14px; height: 14px; }
 .demo-banner .db-x { display: none; flex: none; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted);
   font-size: calc(19px * var(--fs, 1)); line-height: 1; cursor: pointer; }
 .js .demo-banner .db-x { display: block; }

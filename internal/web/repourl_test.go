@@ -7,7 +7,7 @@ import (
 )
 
 // HuntDeck Public links to the source repository, for visitors to run their
-// own copy: in the banner, the sidebar, the notes on the pages it shows
+// own copy: in the banner (its one call to action), the sidebar, the notes on the pages it shows
 // empty, the feedback page, llms.txt and the site's structured data. A full
 // install never does.
 func TestRepoURL(t *testing.T) {
@@ -19,10 +19,10 @@ func TestRepoURL(t *testing.T) {
 		path string
 		want []string
 	}{
-		{"/", []string{`href="` + repo + `"`, "Self-host HuntDeck", `<span class="db-long">github.com/example/huntdeck</span>`, "Get HuntDeck", "free to self-host", `"sameAs":["` + repo + `"]`}},
+		{"/", []string{`<a class="db-cta" href="` + repo + `"`, "Self-host free", "Get HuntDeck", `"sameAs":["` + repo + `"]`}},
 		{"/settings", []string{`<b>Self-hosted</b>`, `Self-host HuntDeck</a></span></p>`}},
 		{"/feedback", []string{`href="` + repo + `/issues"`}},
-		{"/programs", []string{`<a class="db-fb" href="` + repo + `/issues/new" target="_blank"`, "Open an issue on GitHub"}},
+		{"/programs", []string{`<a href="` + repo + `/issues/new" target="_blank"`, "Open an issue on GitHub"}},
 		{"/.well-known/security.txt", []string{"Contact: " + repo + "/security/advisories/new\n"}},
 		{"/llms.txt", []string{"[Self-host HuntDeck](" + repo + ")", "This site is HuntDeck Public"}},
 	}
@@ -33,6 +33,11 @@ func TestRepoURL(t *testing.T) {
 				t.Errorf("%s lacks %s", tt.path, want)
 			}
 		}
+	}
+	// The banner is the sentence and the repository: feedback and the X
+	// account are in the sidebar.
+	if _, body := e.do(e.client(), http.MethodGet, "/", nil, nil); strings.Contains(body, "Send feedback") || strings.Contains(body, "db-fb") {
+		t.Error("the banner still has a feedback link")
 	}
 	full := newTestEnv(t, func(d *Deps) { d.RepoURL = repo })
 	if _, body := full.do(full.client(), http.MethodGet, "/", nil, nil); strings.Contains(body, repo) {

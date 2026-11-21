@@ -249,9 +249,6 @@ func loadTemplates(zone func() *time.Location, version string, readOnly bool, li
 		// repoURL is HuntDeck's source repository, if any (Deps.RepoURL);
 		// a full install shows none.
 		"repoURL": func() string { return links.RepoURL },
-		// repoName is that address as shown: no scheme, e.g.
-		// github.com/mdpsec/huntdeck.
-		"repoName": func() string { return strings.TrimPrefix(strings.TrimPrefix(links.RepoURL, "https://"), "www.") },
 	}
 	out := map[string]map[string]*template.Template{}
 	for _, lang := range langs {

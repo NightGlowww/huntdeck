@@ -8,6 +8,11 @@ start) stay compatible within a major version.
 
 ## [Unreleased]
 
+- Opening `/programs/<platform>`, with or without a trailing slash, redirects
+  to the Programs list filtered to that platform.
+- HuntDeck Public has a shorter banner with a single self-hosting link.
+  Feedback and the optional X account link are in the sidebar.
+
 ## v1.3.0 (2026-11-19)
 
 ### Added

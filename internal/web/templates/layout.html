@@ -88,7 +88,14 @@
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17h-8l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5Z"/></symbol>
 </svg>
 {{- if readOnly}}
-<div class="demo-banner" role="note"><span class="db-in"><b>HuntDeck Public</b><span class="db-text"><span class="db-long">Every public program on all four platforms, {{if .Updated.IsZero}}refreshed regularly{{else}}updated {{ago .Updated}}{{end}}. {{if repoURL}}HuntDeck is free to self-host: your own copy adds your private programs and invites.{{else}}Public programs only: your own HuntDeck adds your private programs and invites.{{end}}</span><span class="db-short">Public programs, {{if .Updated.IsZero}}refreshed regularly{{else}}updated {{ago .Updated}}{{end}}. Your private ones stay in your own copy.</span></span>{{with repoURL}}<a class="db-fb db-follow" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "HuntDeck's source: run your own copy, with your private programs and invites"}}"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span class="db-long">{{repoName}}</span><span class="db-short">Self-host HuntDeck</span></a>{{end}}{{with .Feedback}}<a class="db-fb" href="{{.}}"{{if $.FeedbackOut}} target="_blank" rel="noopener noreferrer" title="{{T "Found a bug, or have an idea? Open an issue on GitHub"}}"{{end}}>{{T "Send feedback"}}</a>{{end}}{{with xAccount}}<a class="db-fb db-follow" href="https://x.com/{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "News and launch updates on X"}}"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg>Follow @{{.}}</a>{{end}}</span><button type="button" class="db-x" data-demo-banner-hide aria-label="{{T "Hide this note"}}" title="{{T "Hide this note"}}">×</button></div>
+<div class="demo-banner" role="note">
+  <span class="db-in">
+    <b>HuntDeck Public</b>
+    <span class="db-text"><span class="db-long">{{T "Every public program on all four platforms, "}}</span><span class="db-short">{{T "Public programs, "}}</span>{{if .Updated.IsZero}}{{T "refreshed regularly."}}{{else}}{{T "updated"}} <span data-ago data-at="{{iso .Updated}}">{{ago .Updated}}</span>{{T "."}}{{end}}{{if not repoURL}} {{T "Your own HuntDeck adds your private programs and invites."}}{{end}}</span>
+    {{with repoURL}}<a class="db-cta" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "HuntDeck's source: run your own copy, with your private programs and invites"}}"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span><span class="db-long">{{T "Self-host free on GitHub"}}</span><span class="db-short">{{T "Self-host free"}}</span><span aria-hidden="true"> →</span></span></a>{{end}}
+  </span>
+  <button type="button" class="db-x" data-demo-banner-hide aria-label="{{T "Hide this note"}}" title="{{T "Hide this note"}}">×</button>
+</div>
 {{- end}}
 <div class="shell">
   <aside class="sidebar">
@@ -119,7 +126,7 @@
     </nav>
     <div class="spacer"></div>
     <div class="foot">
-      {{if readOnly}}<div class="demo-note" title="{{T "HuntDeck Public: a read-only HuntDeck with live public platform data"}}{{if not .Updated.IsZero}}{{TF ", last refreshed from the platforms %s" (datetime .Updated)}}{{end}}{{T ": nothing private, nothing of anyone's account, and nothing can be changed"}}"><b>Public</b><span class="dn-more"> · {{T "live data"}}</span>{{with repoURL}}<a class="dn-get" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "HuntDeck's source: run your own copy, with your private programs and invites"}}"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span class="dn-more">Get HuntDeck</span></a>{{end}}</div>{{end}}
+      {{if readOnly}}<div class="demo-note" title="{{T "HuntDeck Public: a read-only HuntDeck with live public platform data"}}{{if not .Updated.IsZero}}{{TF ", last refreshed from the platforms %s" (datetime .Updated)}}{{end}}{{T ": nothing private, nothing of anyone's account, and nothing can be changed"}}"><b>{{T "Public"}}</b><span class="dn-more"> · {{T "live data"}}</span>{{with repoURL}}<a class="dn-get" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "HuntDeck's source: run your own copy, with your private programs and invites"}}"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span class="dn-more">{{T "Get HuntDeck"}}</span></a>{{end}}{{with xAccount}}<a class="dn-get" href="https://x.com/{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "News and launch updates on X"}}"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg><span class="dn-more">{{TF "Follow @%s" .}}</span></a>{{end}}</div>{{end}}
       {{- if gt (len .Langs) 1}}
       <form class="lang-switch" method="post" action="/settings/language" aria-label="{{T "Language"}}">
         <input type="hidden" name="next" value="{{.Path}}">

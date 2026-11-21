@@ -1,6 +1,8 @@
 package web
 
 import (
+	"net/http"
+	"net/url"
 	"slices"
 	"strings"
 )
@@ -55,4 +57,18 @@ func (d programsData) platformOptions() []railOption {
 			URL: d.queryWith("platform", strings.Join(next, ","))})
 	}
 	return out
+}
+
+// programsOfPlatform answers /programs/<platform>, with or without a
+// trailing slash: an address people guess from a program's
+// (/programs/<platform>/<handle>). It sends them to the Programs list
+// narrowed to that platform, and is a 404 for a platform HuntDeck doesn't
+// list.
+func (s *server) programsOfPlatform(w http.ResponseWriter, r *http.Request) {
+	name := canonicalPlatform(r.PathValue("platform"))
+	if !slices.Contains(s.listPlatforms(r.Context()), name) {
+		s.renderError(w, r, http.StatusNotFound, "No such platform.")
+		return
+	}
+	http.Redirect(w, r, "/programs?platform="+url.QueryEscape(name), http.StatusMovedPermanently)
 }
