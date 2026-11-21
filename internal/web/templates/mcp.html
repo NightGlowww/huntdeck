@@ -36,6 +36,7 @@
       {{if .Keys}}
       <div class="credential-bulk">
         <label class="credential-select-all"><input type="checkbox" data-select-all> {{T "Select all"}}</label>
+        <span class="credential-selection muted small" data-selbar hidden role="status" aria-live="polite"><span data-selcount></span></span>
         <form method="post" action="/mcp/delete" id="mcp-delete" data-confirm="{{T "Delete the ticked keys from the list?"}}">
           <button type="submit" class="small secondary danger">{{T "Delete selected"}}</button>
         </form>
