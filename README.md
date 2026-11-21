@@ -154,6 +154,8 @@ for each platform, including request budgets: [docs/platforms.md](docs/platforms
   targets, scope checks, changes, disclosed reports)
 - [Notifications](docs/notifications.md): Discord, Telegram, Bark (iOS),
   ServerChan (WeChat), webhooks, and their rules
+- [The pipeline](docs/pipeline.md): scope in, findings out — every link, the
+  code that owns it, and the test that holds it shut
 - [Platforms](docs/platforms.md): what's read from each platform, and how
 - [Seeds](docs/seeds.md): the starter seed, and sharing your public data
 - [Custom sources](docs/custom-sources.md) and
