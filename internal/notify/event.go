@@ -38,6 +38,8 @@ const (
 	EventRewardsChanged    = "rewards_changed"
 	EventPolicyChanged     = "policy_changed"
 	EventAnnouncement      = "announcement"
+	EventScanHandoff       = "scan_handoff" // targets were handed to the scanner
+	EventScanBlocked       = "scan_blocked" // the second opinion or a check stopped a batch
 	EventPlatformProblem   = "platform_problem"
 	EventPlatformRecovered = "platform_recovered"
 	EventTest              = "test"
@@ -69,6 +71,8 @@ var EventKinds = []EventKind{
 	{EventReopened, "Program reopened", "reopened", "Back open after being paused or closed", GroupOpportunities, true},
 	{EventBountyRaised, "Bounties raised", "bounties raised", "A higher top bounty, or a program that starts paying", GroupOpportunities, true},
 	{EventAnnouncement, "Program announcements", "announcements", "A program posted news for researchers, such as a bonus or new targets (Bugcrowd)", GroupOpportunities, false},
+	{EventScanHandoff, "Scan handoff", "scan handoffs", "Targets were handed to the scanner", GroupOpportunities, false},
+	{EventScanBlocked, "Scan blocked", "scan blocks", "A check or the decision model stopped a scan batch", GroupOpportunities, false},
 	{EventScopeRemoved, "Scope removed", "scope removed", "In-scope assets taken out", GroupWatching, false},
 	{EventScopeOut, "Out-of-scope changes", "out-of-scope changes", "Assets added to or removed from the out-of-scope list", GroupWatching, false},
 	{EventScopeChanged, "Scope edited", "scope edits", "An asset's bounty eligibility or scope side changed", GroupWatching, false},

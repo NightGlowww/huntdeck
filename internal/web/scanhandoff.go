@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mdpsec/huntdeck/internal/notify"
 	"net/http"
 	"strconv"
 	"strings"
@@ -115,6 +116,7 @@ func (s *server) scanSave(w http.ResponseWriter, r *http.Request) {
 // scanNow hands the waiting targets over, once, on demand.
 func (s *server) scanNow(w http.ResponseWriter, r *http.Request) {
 	sum, err := s.handOff(r.Context(), true)
+	notify.ReportHandoff(r.Context(), s.Store, s.Log, sum, err)
 	if err != nil {
 		// A queued scanner is capacity, not a fault: the page says "wait",
 		// in the warning colour, and does not call it a failure.

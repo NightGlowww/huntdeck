@@ -65,7 +65,7 @@ type renderer struct {
 var emoji = map[string]string{
 	EventInvite: "🔒", EventLaunch: "🚀", EventScopeAdded: "🎯", EventScopeRemoved: "➖", EventScopeOut: "🚫",
 	EventScopeChanged: "✏️", EventReopened: "▶️", EventPaused: "⏸️", EventRemoved: "🗑️", EventBountyRaised: "💰",
-	EventRewardsChanged: "💱", EventPolicyChanged: "📝", EventAnnouncement: "📣", EventPlatformProblem: "⚠️", EventPlatformRecovered: "✅", EventTest: "🔔",
+	EventRewardsChanged: "💱", EventPolicyChanged: "📝", EventAnnouncement: "📣", EventScanHandoff: "🛰️", EventScanBlocked: "🛑", EventPlatformProblem: "⚠️", EventPlatformRecovered: "✅", EventTest: "🔔",
 }
 
 // parts renders a message's events as one or more messages under limit.
@@ -300,6 +300,13 @@ func title(e Event, tr Text) string {
 		return text(tr, "Bounty table changed")
 	case EventPolicyChanged:
 		return text(tr, "Rules edited")
+	case EventScanHandoff:
+		if e.Detail != "" {
+			return text(tr, "Scan handoff: %s", e.Detail)
+		}
+		return text(tr, "Targets handed to the scanner")
+	case EventScanBlocked:
+		return text(tr, "Scan batch blocked")
 	case EventAnnouncement:
 		return text(tr, "Announcement")
 	case EventPlatformProblem:
