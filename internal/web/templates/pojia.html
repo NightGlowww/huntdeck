@@ -1,7 +1,14 @@
 {{define "content"}}{{with .Data}}
 <header class="page-workbench-head"><div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "POJIA"}}</h1><p>{{T "Search disclosed reports and discovery paths."}}</p></div><a class="button secondary small" href="/integrations">{{T "Integrations workbench"}}</a></header>
 {{if .Off}}
-<p class="empty-state">{{T "POJIA indexes disclosed bug bounty reports. Set its API key under Settings > Accounts to search them here."}}</p>
+<section class="panel integration-empty">
+  <div class="panel-head"><h2>{{T "Research index"}}</h2><span class="aside">{{T "not configured"}}</span></div>
+  <div class="panel-body">
+    <div class="integration-empty-hero"><span class="workbench-icon"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span><div><h3>{{T "Connect POJIA to search disclosed reports"}}</h3><p>{{T "Use discovery paths, payloads, CVEs and similar reports as a research workspace."}}</p></div></div>
+    <div class="integration-empty-grid"><div><b>{{T "Search"}}</b><span>{{T "keywords, CVEs and programs"}}</span></div><div><b>{{T "Explore"}}</b><span>{{T "classes and payloads"}}</span></div><div><b>{{T "Review"}}</b><span>{{T "report detail and fixes"}}</span></div></div>
+    <p><a class="button small" href="/settings?tab=accounts#acct-pojia">{{T "Configure POJIA"}}</a></p>
+  </div>
+</section>
 {{else}}
 <p class="lead">{{T "Search how bugs were actually found: disclosed reports with their discovery paths, payloads and fixes, from POJIA's index."}}</p>
 

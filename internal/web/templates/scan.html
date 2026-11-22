@@ -2,11 +2,12 @@
 <header class="page-workbench-head"><div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "Scan handoff"}}</h1><p>{{T "Send new targets to ScopeSentry with task history."}}</p></div><a class="button secondary small" href="/integrations">{{T "Integrations workbench"}}</a></header>
 {{if .WaitingError}}<p class="flash err">{{.WaitingError}}</p>{{end}}
 {{if .Off}}
-<section class="panel">
+<section class="panel integration-empty">
   <div class="panel-head"><h2>{{T "Connect a scanner"}}</h2><span class="aside">{{T "not connected"}}</span></div>
   <div class="panel-body">
-    <p>{{T "HuntDeck can hand the targets it finds to a ScopeSentry instance, which scans them: one scan task per batch of new in-scope targets, each target recorded so a re-poll does not queue it again."}}</p>
-    <p class="muted small">{{T "To connect one, set its endpoint and an ssk_ key in Settings > Accounts > Scan handoff. The key needs task:write, task:read, node:read and template:read, and nothing wider."}}</p>
+    <div class="integration-empty-hero"><span class="workbench-icon"><svg class="i" aria-hidden="true"><use href="#i-target"/></svg></span><div><h3>{{T "Scanner handoff is not configured"}}</h3><p>{{T "New in-scope targets can be handed to ScopeSentry once its connection is ready."}}</p></div></div>
+    <div class="integration-empty-grid"><div><b>{{T "Data flow"}}</b><span>{{T "polls → waiting targets → scan tasks"}}</span></div><div><b>{{T "Required"}}</b><span>{{T "endpoint + ssk_ key"}}</span></div><div><b>{{T "Safety"}}</b><span>{{T "one handoff per target"}}</span></div></div>
+    <p class="muted small">{{T "The key needs task:write, task:read, node:read and template:read, and nothing wider."}}</p>
     <p><a class="button small" href="/settings?tab=accounts#acct-scan">{{T "Open the scanner settings"}}</a></p>
   </div>
 </section>

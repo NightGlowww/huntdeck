@@ -27,6 +27,14 @@
 .page-workbench-head h1 { color: var(--text); font-size: calc(24px * var(--fs, 1)); line-height: 1.2; }
 .page-workbench-head p { margin: 7px 0 0; color: var(--muted); line-height: 1.5; }
 .page-workbench-head .button { flex: none; }
+.integration-empty { overflow: hidden; }
+.integration-empty-hero { display: flex; align-items: flex-start; gap: 14px; }
+.integration-empty-hero h3 { color: var(--text); font-size: calc(17px * var(--fs, 1)); }
+.integration-empty-hero p { margin: 5px 0 0; color: var(--muted); line-height: 1.5; }
+.integration-empty-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 20px 0 16px; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--border); }
+.integration-empty-grid > div { display: grid; gap: 3px; padding: 11px 12px; background: var(--surface-2); }
+.integration-empty-grid b { color: var(--text-2); font-size: calc(11px * var(--fs, 1)); }
+.integration-empty-grid span { color: var(--muted); font-size: calc(11.5px * var(--fs, 1)); }
 .channel-add { position: relative; }
 .channel-add > summary { list-style: none; cursor: pointer; }
 .channel-add > summary::-webkit-details-marker { display: none; }
@@ -43,4 +51,5 @@
   .workbench-notice { align-items: flex-start; flex-direction: column; }
   .page-workbench-head { align-items: flex-start; flex-direction: column; gap: 10px; }
   .page-workbench-head h1 { font-size: calc(21px * var(--fs, 1)); }
+  .integration-empty-grid { grid-template-columns: 1fr; }
 }
