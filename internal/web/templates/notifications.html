@@ -1,5 +1,10 @@
 {{define "content"}}{{with .Data}}
 <header class="page-workbench-head"><div><span class="workbench-kicker">{{T "System"}}</span><h1>{{T "Notifications"}}</h1><p>{{T "Deliver operational events through channels you control."}}</p></div><a class="button secondary small" href="/system">{{T "System workbench"}}</a></header>
+<section class="integration-status-strip notification-status" aria-label="{{T "Notification status"}}">
+  <div><span class="status-label">{{T "Channels"}}</span><b>{{len .Channels}}</b><span class="status-hint">{{.EnabledChannels}} {{T "enabled"}}</span></div>
+  <div><span class="status-label">{{T "Waiting"}}</span><b>{{.Waiting}}</b><span class="status-hint">{{T "queued deliveries"}}</span></div>
+  <div><span class="status-label">{{T "Failed"}}</span><b>{{.Failed}}</b><span class="status-hint">{{T "delivery attempts"}}</span></div>
+</section>
 <div class="ngrid">
 <div class="stack">
 <section class="panel" id="channels">

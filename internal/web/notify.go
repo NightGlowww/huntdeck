@@ -42,6 +42,9 @@ type notificationsData struct {
 	Suggested       string // how this browser reached HuntDeck
 	Timezone        string
 	Examples        previewView // this week's messages, every kind
+	EnabledChannels int
+	Failed          int
+	Waiting         int
 }
 
 type channelRow struct {
@@ -81,6 +84,11 @@ func (s *server) renderNotifications(w http.ResponseWriter, r *http.Request, sta
 		d.Channels = append(d.Channels, channelRow{NotifyChannel: c, Where: notify.ParseConfig(c.Config).Masked(c.Kind),
 			Events: eventsTextLang(lang, s.messages, rules), Filters: filtersTextLang(lang, s.messages, rules),
 			Sent: st.Sent, Failed: st.Failed, Waiting: st.Waiting})
+		if c.Enabled {
+			d.EnabledChannels++
+		}
+		d.Failed += st.Failed
+		d.Waiting += st.Waiting
 	}
 	d.DeliveryChannel = r.URL.Query().Get("channel")
 	d.DeliveryStatus = r.URL.Query().Get("status")

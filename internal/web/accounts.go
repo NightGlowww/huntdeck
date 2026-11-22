@@ -34,6 +34,9 @@ type accountsData struct {
 	Groups     []accountGroup
 	Restart    *restartState // a restart waiting to apply saved settings
 	Unreadable bool          // saved values can't be decrypted
+	Configured int
+	Saved      int
+	Total      int
 }
 
 type accountGroup struct {
@@ -97,6 +100,13 @@ func (s *server) accountsTab(ctx context.Context, rows []platformRow) (*accounts
 			g.Polled, g.SignIn = true, rows[i].SignIn
 		}
 		d.Groups = append(d.Groups, g)
+		d.Total++
+		if g.Polled {
+			d.Configured++
+		}
+		if g.Saved {
+			d.Saved++
+		}
 	}
 	if s.Restart != nil {
 		if pending, runs := s.Restart.Pending(ctx); pending {

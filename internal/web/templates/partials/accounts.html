@@ -35,6 +35,11 @@
 <script src="{{static "restart.js"}}" defer></script>
 {{end}}
 {{if .Unreadable}}<p class="flash err">{{T "Some saved settings can't be decrypted: the key file"}} <code>secret.key</code> {{T "in the data directory was lost or replaced. Until they're entered again (or reset), the values in your environment are used."}}</p>{{end}}
+<section class="integration-status-strip account-status" aria-label="{{T "Account status"}}">
+  <div><span class="status-label">{{T "Account groups"}}</span><b>{{.Total}}</b><span class="status-hint">{{T "available to configure"}}</span></div>
+  <div><span class="status-label">{{T "Configured"}}</span><b>{{.Configured}}</b><span class="status-hint">{{T "ready for runtime use"}}</span></div>
+  <div><span class="status-label">{{T "Saved overrides"}}</span><b>{{.Saved}}</b><span class="status-hint">{{T "encrypted in data"}}</span></div>
+</section>
 <div class="acct-grid">
 {{range .Groups}}
 <section class="panel acct" id="acct-{{.Key}}">

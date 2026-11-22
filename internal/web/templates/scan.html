@@ -1,5 +1,10 @@
 {{define "content"}}{{with .Data}}
 <header class="page-workbench-head"><div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "Scan handoff"}}</h1><p>{{T "Send new targets to ScopeSentry with task history."}}</p></div><a class="button secondary small" href="/integrations">{{T "Integrations workbench"}}</a></header>
+{{if not .Off}}<section class="integration-status-strip scan-status" aria-label="{{T "Scanner status"}}">
+  <div><span class="status-label">{{T "Waiting"}}</span><b>{{len .Waiting}}</b><span class="status-hint">{{T "targets ready"}}</span></div>
+  <div><span class="status-label">{{T "Nodes"}}</span><b>{{len .Nodes}}</b><span class="status-hint">{{T "available templates and nodes"}}</span></div>
+  <div><span class="status-label">{{T "Handed off"}}</span><b>{{.HandedOff}}</b><span class="status-hint">{{T "tasks created"}}</span></div>
+</section>{{end}}
 {{if .WaitingError}}<p class="flash err">{{.WaitingError}}</p>{{end}}
 {{if .Off}}
 <section class="panel integration-empty">

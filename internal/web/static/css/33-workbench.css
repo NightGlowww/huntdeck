@@ -14,6 +14,7 @@
 .workbench-notice strong { color: var(--text); }
 .workbench-notice p { margin: 3px 0 0; color: var(--muted); }
 .workbench-notice .button { flex: none; }
+.account-status, .notification-status, .scan-status { margin-bottom: 16px; }
 .workbench-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .workbench-card { display: flex; min-height: 190px; flex-direction: column; padding: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: 0 8px 24px rgb(20 16 50 / .04); }
 .workbench-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
