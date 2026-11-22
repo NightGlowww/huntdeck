@@ -83,6 +83,16 @@
 
 /* ---------- MCP and model workspaces ---------- */
 .mcp-page-head { display: grid; gap: 16px; }
+.mcp-page-head + .integration-status-strip { margin-top: 16px; }
+.integration-page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin: 0 0 20px; }
+.integration-page-head h1 { color: var(--text); font-size: calc(28px * var(--fs, 1)); line-height: 1.15; }
+.integration-page-head p { margin: 7px 0 0; color: var(--muted); line-height: 1.5; }
+.integration-page-head .button { flex: none; }
+.integration-status-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 16px 0; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--border); }
+.integration-status-strip > div { display: grid; gap: 3px; min-height: 74px; padding: 12px 14px; background: var(--surface); }
+.integration-status-strip .status-label { color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.integration-status-strip b { color: var(--text); font-size: calc(15px * var(--fs, 1)); }
+.integration-status-strip .status-hint { color: var(--muted); font-size: calc(11.5px * var(--fs, 1)); }
 .mcp-page-head .connection-setup { border-color: color-mix(in srgb, var(--accent) 22%, var(--border)); }
 .connection-setup .panel-head { min-height: 58px; padding: 14px 20px; background: color-mix(in srgb, var(--accent-weak) 38%, var(--surface)); }
 .connection-setup .panel-head h2 { font-size: calc(17px * var(--fs, 1)); }
@@ -110,6 +120,7 @@
 .mcp-tool-body > p { margin-bottom: 10px; }
 
 .llm-page { display: grid; gap: 16px; }
+.llm-page > .integration-back { justify-self: start; order: 3; }
 .llm-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 4px 2px 2px; }
 .llm-eyebrow { display: block; margin-bottom: 5px; color: var(--accent); font-size: calc(11px * var(--fs, 1)); font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
 .llm-hero h1 { font-size: calc(26px * var(--fs, 1)); line-height: 1.2; }
@@ -122,6 +133,9 @@
 .llm-config .llm-actions { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
 
 @media (max-width: 700px) {
+  .integration-page-head { align-items: flex-start; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .integration-page-head h1 { font-size: calc(23px * var(--fs, 1)); }
+  .integration-status-strip { grid-template-columns: 1fr; gap: 1px; }
   .connection-setup .panel-head, .connection-setup .panel-body { padding-inline: 14px; }
   .llm-hero { display: grid; gap: 8px; }
   .llm-hero-state { padding-top: 0; }

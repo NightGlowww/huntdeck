@@ -30,10 +30,11 @@ type apiDocsData struct {
 	Password bool
 	// Tokens are the API tokens, live and retired; NewToken is the one just
 	// minted, shown once; Flash says what just happened.
-	Tokens    []apiTokenRow
-	NewToken  string
-	Flash     string
-	BulkCount int
+	Tokens        []apiTokenRow
+	NewToken      string
+	Flash         string
+	BulkCount     int
+	EndpointCount int
 }
 
 type apiDocGroup struct {
@@ -137,6 +138,9 @@ func (s *server) renderAPIDocsResult(w http.ResponseWriter, r *http.Request, new
 		groups[op.Tags[0]].Ops = append(groups[op.Tags[0]].Ops, o.docOp(method, path, op, d.Base, platform, handle, zh))
 	}
 	d.NewToken, d.Flash, d.BulkCount = newToken, flash, bulkCount
+	for _, group := range d.Groups {
+		d.EndpointCount += len(group.Ops)
+	}
 	if tokens, err := s.Store.APITokens(r.Context()); err == nil {
 		d.Tokens = tokenRows(tokens)
 	}

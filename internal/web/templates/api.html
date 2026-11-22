@@ -1,4 +1,8 @@
 {{define "content"}}{{with .Data}}
+<header class="integration-page-head">
+  <div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "API"}}</h1><p>{{T "Read data, export scope and test authenticated requests."}}</p></div>
+  <a class="button secondary small" href="/integrations">{{T "Integrations workbench"}}</a>
+</header>
 <div class="apid">
 <nav class="panel apinav" aria-label="{{T "Endpoints"}}">
   <details class="api-directory" open>
@@ -40,6 +44,11 @@
     <div><dt>{{T "Format"}}</dt><dd>{{T "JSON; target lists as plain text, one per line. Errors:"}} <code>{"error": "…"}</code></dd></div>
     <div><dt>{{T "Pages"}}</dt><dd><code>limit</code> {{T "and"}} <code>offset</code>{{T ";"}} {{T "each list gives its"}} <code>total</code>.</dd></div>
   </dl>
+  <div class="integration-status-strip" aria-label="{{T "API status"}}">
+    <div><span class="status-label">{{T "Authentication"}}</span><b>{{if .Password}}{{T "Password protected"}}{{else}}{{T "Open on this private network"}}{{end}}</b></div>
+    <div><span class="status-label">{{T "API tokens"}}</span><b>{{len .Tokens}}</b><span class="status-hint">{{T "stored credentials"}}</span></div>
+    <div><span class="status-label">{{T "Documented endpoints"}}</span><b>{{.EndpointCount}}</b><span class="status-hint">{{T "available here"}}</span></div>
+  </div>
 </section>
 {{if .Password}}<section class="panel credentials" id="tokens">
   <details{{if .Flash}} open{{end}}>

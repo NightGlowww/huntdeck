@@ -1,4 +1,8 @@
 {{define "content"}}{{with .Data}}
+<header class="integration-page-head">
+  <div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "MCP server"}}</h1><p>{{T "Connect desktop agents over HTTP or stdio."}}</p></div>
+  <a class="button secondary small" href="/integrations">{{T "Integrations workbench"}}</a>
+</header>
 <div class="mcp-page-head">
 <section class="panel connection-setup">
   <div class="panel-head">
@@ -26,6 +30,12 @@
     </div>
   </div>
 </section>
+</div>
+
+<div class="integration-status-strip" aria-label="{{T "MCP status"}}">
+  <div><span class="status-label">{{T "HTTP connection"}}</span><b>{{T "Ready"}}</b><span class="status-hint">{{T "configuration available above"}}</span></div>
+  <div><span class="status-label">{{T "Connection keys"}}</span><b>{{add (len .Keys) .Hidden}}</b><span class="status-hint">{{T "live and retired"}}</span></div>
+  <div><span class="status-label">{{T "Tools"}}</span><b>{{len .Tools}}</b><span class="status-hint">{{T "available to clients"}}</span></div>
 </div>
 
 <section class="panel credentials" id="mcp-keys">

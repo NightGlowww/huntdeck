@@ -1993,5 +1993,16 @@
   ,"Bark": "Bark"
   ,"ServerChan": "ServerChan"
   ,"Webhook": "Webhook"
+  ,"API status": "API 状态"
+  ,"Password protected": "口令保护"
+  ,"Open on this private network": "私有网络内开放"
+  ,"stored credentials": "已存凭据"
+  ,"Documented endpoints": "已记录端点"
+  ,"available here": "可在此使用"
+  ,"MCP status": "MCP 状态"
+  ,"HTTP connection": "HTTP 连接"
+  ,"configuration available above": "上方已有配置"
+  ,"live and retired": "有效与已退役"
+  ,"available to clients": "可供客户端使用"
  }
 }
