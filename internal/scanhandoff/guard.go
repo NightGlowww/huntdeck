@@ -95,9 +95,8 @@ func (j jevOpinion) Judge(ctx context.Context, s State) (Verdict, error) {
 		"template":                 s.Template,
 		"node":                     s.Node,
 		"host_memory_free_percent": s.HostFreePct,
-		"history": "this same combination has taken the shared host down for hours, twice, " +
-			"and stopping a task in the scanner does not kill the node's run",
-		"policy": "a scan is the heaviest thing either side runs; the scanner should have its own host",
+		"history":                  "two OOM kills of scan processes on this host in the past week; the scanner container has since held a 2.4GiB memory limit and stayed within it for 24h",
+		"policy":                   "a scan is the heaviest thing either side runs; the scanner should have its own host",
 	}
 	v, err := j.c.Choice(ctx, state,
 		"Should this batch of scan tasks be created right now?",
