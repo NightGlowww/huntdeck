@@ -165,6 +165,9 @@ func scanHandoffCmd(args []string, stdout, stderr io.Writer) int {
 			AccountID: app.cfg.JevAccountID, WorkspaceID: app.cfg.JevWorkspaceID,
 		})
 	}
+	// The operator ran this command and named the targets: that is the
+	// "someone should look" a confirm_first verdict asks for.
+	opt.ConfirmedBy = "scan-handoff command"
 	sum, err := scanhandoff.RunWith(ctx, app.store, client, true, opt)
 	if err != nil {
 		fmt.Fprintf(stderr, "scan-handoff: %v\n", err)

@@ -23,6 +23,10 @@ import (
 // whole decision.
 type Options struct {
 	Opinion SecondOpinion
+	// ConfirmedBy, when set, treats a confirm_first verdict as approved: the
+	// operator named the targets and pressed the button, which is the "someone
+	// should look" the model asks for. Recorded in the log line.
+	ConfirmedBy string
 	// Targets, when set, keeps only these: the operator naming what to scan,
 	// rather than taking the next batch off the top of the list.
 	Targets []string
@@ -116,7 +120,7 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 		if err := runOpinion(ctx, opt.Opinion, State{
 			Tasks: (len(cands) + perTask - 1) / perTask, Targets: len(cands), PerTask: perTask,
 			Template: cfg.TemplateID, Node: node, HostFreePct: free, HostKnown: known,
-		}); err != nil {
+		}, confirmedBy(opt)); err != nil {
 			return Summary{}, err
 		}
 	}
@@ -171,7 +175,7 @@ func RunWith(ctx context.Context, st *store.Store, client *scopesentry.Client, m
 // obeys. It is separate from RunWith so the rule - block and confirm stop
 // the batch, an unanswered model is not permission - can be tested without
 // a store, a scanner or a network.
-func runOpinion(ctx context.Context, opinion SecondOpinion, st State) error {
+func runOpinion(ctx context.Context, opinion SecondOpinion, st State, confirmedBy string) error {
 	// A model that cannot be reached has not judged the batch. Refusing every
 	// handoff because a third party is unreachable or geo-blocked made the
 	// whole feature unusable, which is worse than losing the advisory: the
@@ -185,7 +189,16 @@ func runOpinion(ctx context.Context, opinion SecondOpinion, st State) error {
 	// model run?" can only be answered by the absence of a warning.
 	slog.InfoContext(ctx, "scan: second opinion", "choice", v.Choice, "confidence", v.Confidence, "model", v.Model)
 	switch v.Choice {
-	case ActBlock, ActConfirmFirst:
+	case ActBlock:
+		return fmt.Errorf("the decision model says %s (confidence %.2f): no scan tasks created", v.Choice, v.Confidence)
+	case ActConfirmFirst:
+		// confirm_first asks for "someone should look". A named handoff is
+		// exactly that: the operator picked the targets and pressed send, so
+		// their name satisfies the question and the batch runs.
+		if confirmedBy != "" {
+			slog.InfoContext(ctx, "scan: second opinion confirmed by operator", "confirmed_by", confirmedBy)
+			return nil
+		}
 		return fmt.Errorf("the decision model says %s (confidence %.2f): no scan tasks created", v.Choice, v.Confidence)
 	}
 	return nil
@@ -288,4 +301,15 @@ func StalledFor(lastHandoff, now time.Time, waiting int) time.Duration {
 		return d
 	}
 	return 0
+}
+
+// confirmedBy names who satisfied a confirm_first question. Only a handoff
+// whose targets the operator chose by name counts: picking targets and pressing
+// send is the "someone looked" the model asks for. The scheduled batch is not
+// confirmed by anybody.
+func confirmedBy(opt Options) string {
+	if len(opt.Targets) > 0 {
+		return opt.ConfirmedBy
+	}
+	return ""
 }

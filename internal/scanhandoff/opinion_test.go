@@ -25,12 +25,27 @@ func TestASecondOpinionStopsTheBatch(t *testing.T) {
 		{ActBlock, false},
 	}
 	for _, c := range cases {
-		err := runOpinion(context.Background(), fixedOpinion{choice: c.choice}, State{Targets: 2})
+		err := runOpinion(context.Background(), fixedOpinion{choice: c.choice}, State{Targets: 2}, "")
 		if c.run && err != nil {
 			t.Errorf("%s stopped the batch: %v", c.choice, err)
 		}
 		if !c.run && err == nil {
 			t.Errorf("%s let the batch through", c.choice)
 		}
+	}
+}
+
+// confirm_first asks for "someone should look". A named handoff is exactly
+// that: the operator picked the targets, so the confirmation stands and the
+// batch runs. Without it the verdict still stops the batch.
+func TestConfirmFirstPassesWhenConfirmed(t *testing.T) {
+	if err := runOpinion(context.Background(), fixedOpinion{choice: ActConfirmFirst}, State{Targets: 2}, "scan-handoff command"); err != nil {
+		t.Fatalf("a confirmed batch was stopped: %v", err)
+	}
+	if err := runOpinion(context.Background(), fixedOpinion{choice: ActConfirmFirst}, State{Targets: 2}, ""); err == nil {
+		t.Fatal("an unconfirmed confirm_first let the batch through")
+	}
+	if err := runOpinion(context.Background(), fixedOpinion{choice: ActBlock}, State{Targets: 2}, "scan-handoff command"); err == nil {
+		t.Fatal("a block must stand even with a confirmation")
 	}
 }
