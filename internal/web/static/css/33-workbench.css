@@ -3,6 +3,17 @@
 .workbench-kicker { display: block; margin-bottom: 6px; color: var(--accent); font-size: calc(11px * var(--fs, 1)); font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
 .workbench-hero h1 { color: var(--text); font-size: calc(30px * var(--fs, 1)); line-height: 1.15; letter-spacing: -.025em; }
 .workbench-hero p { max-width: 72ch; margin: 9px 0 0; color: var(--muted); font-size: calc(14px * var(--fs, 1)); line-height: 1.55; }
+.workbench-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-bottom: 14px; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--border); }
+.workbench-metrics > div { display: grid; gap: 3px; min-height: 82px; padding: 14px 16px; background: var(--surface); }
+.workbench-metrics span { color: var(--muted); font-size: calc(10.5px * var(--fs, 1)); font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.workbench-metrics b { color: var(--text); font: 650 calc(22px * var(--fs, 1))/1.1 var(--mono); }
+.workbench-metrics small { color: var(--muted); font-size: calc(11.5px * var(--fs, 1)); }
+.workbench-notices { display: grid; gap: 10px; margin-bottom: 16px; }
+.workbench-notice { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; border: 1px solid var(--border); border-left: 3px solid var(--info); border-radius: 10px; background: var(--surface); }
+.workbench-notice.warn { border-left-color: var(--warn); }
+.workbench-notice strong { color: var(--text); }
+.workbench-notice p { margin: 3px 0 0; color: var(--muted); }
+.workbench-notice .button { flex: none; }
 .workbench-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .workbench-card { display: flex; min-height: 190px; flex-direction: column; padding: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: 0 8px 24px rgb(20 16 50 / .04); }
 .workbench-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -28,6 +39,8 @@
   .workbench-hero h1 { font-size: calc(23px * var(--fs, 1)); }
   .workbench-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .workbench-card { min-height: 160px; padding: 16px; }
+  .workbench-metrics { grid-template-columns: 1fr; }
+  .workbench-notice { align-items: flex-start; flex-direction: column; }
   .page-workbench-head { align-items: flex-start; flex-direction: column; gap: 10px; }
   .page-workbench-head h1 { font-size: calc(21px * var(--fs, 1)); }
 }

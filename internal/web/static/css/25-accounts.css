@@ -86,6 +86,11 @@
 @media (min-width: 1500px) {
   .acct-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
+@media (min-width: 1180px) and (max-width: 1499px) {
+  .acct-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 14px; }
+  .acct-form { padding-inline: 14px; }
+  .acct-field { grid-template-columns: minmax(110px, 140px) minmax(0, 1fr) auto; gap: 8px 10px; }
+}
 @media (max-width: 760px) {
   .acct-field { grid-template-columns: minmax(0, 1fr) auto; }
   .acct-label { grid-column: 1 / -1; }
