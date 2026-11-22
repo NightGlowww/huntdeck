@@ -45,7 +45,7 @@
     <div><dt>{{T "Pages"}}</dt><dd><code>limit</code> {{T "and"}} <code>offset</code>{{T ";"}} {{T "each list gives its"}} <code>total</code>.</dd></div>
   </dl>
   <div class="integration-status-strip" aria-label="{{T "API status"}}">
-    <div><span class="status-label">{{T "Authentication"}}</span><b>{{if .Password}}{{T "Password protected"}}{{else}}{{T "Open on this private network"}}{{end}}</b></div>
+    <div><span class="status-label">{{T "Authentication"}}</span><b>{{if .ReadOnly}}{{T "Public read-only"}}{{else if .Password}}{{T "Password protected"}}{{else}}{{T "Open on this private network"}}{{end}}</b></div>
     <div><span class="status-label">{{T "API tokens"}}</span><b>{{len .Tokens}}</b><span class="status-hint">{{T "stored credentials"}}</span></div>
     <div><span class="status-label">{{T "Documented endpoints"}}</span><b>{{.EndpointCount}}</b><span class="status-hint">{{T "available here"}}</span></div>
   </div>
