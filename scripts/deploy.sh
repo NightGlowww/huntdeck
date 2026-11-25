@@ -342,8 +342,8 @@ else
       # PERF_FEWER_ROUTES_OK=1.
       # Digits only: a stray CR or a banner line over SSH turns [ -lt ] into a
       # status-2 error that aborts the deploy after a successful release.
-      prev_n=$(remote "grep -cE '^/[^ ]+ +200/' '$prev' 2>/dev/null" | tr -dc '0-9')
-      new_n=$(remote "grep -cE '^/[^ ]+ +200/' '$record' 2>/dev/null" | tr -dc '0-9')
+      prev_n=$(remote "grep -cE '^/[^ ]+ +200/' '$prev' 2>/dev/null" | tr -dc '0-9' || true)
+      new_n=$(remote "grep -cE '^/[^ ]+ +200/' '$record' 2>/dev/null" | tr -dc '0-9' || true)
       if [ -n "$prev_n" ] && [ -n "$new_n" ] && [ "$new_n" -lt "$prev_n" ]; then
         echo "  this record measures $new_n routes, the previous one $prev_n" >&2
         if [ "${PERF_FEWER_ROUTES_OK:-0}" != "1" ]; then
