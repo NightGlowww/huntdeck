@@ -268,6 +268,7 @@ var reqTitleShapes = []struct {
 	{regexp.MustCompile(`^Researchers apply and must be accepted before testing$`), "研究者需申请并通过后才能测试"},
 	{regexp.MustCompile(`^You must accept the program's own terms and conditions on (.+) first$`), "需先在 %s 接受该项目自己的条款"},
 	{regexp.MustCompile(`^Your (.+) account must have two-factor authentication on$`), "你的 %s 账户必须开启两步验证"},
+	{regexp.MustCompile(`^Test credentials available from the platform$`), "平台提供测试账号与凭据"},
 }
 
 // reqTitle rewrites a requirement tooltip for the page's language.

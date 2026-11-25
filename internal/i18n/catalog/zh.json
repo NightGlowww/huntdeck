@@ -2454,6 +2454,11 @@
   "over the range": "按所选区间",
   "3 months": "3 个月",
   "12 months": "12 个月",
-  "Range": "区间"
+  "Range": "区间",
+  "Pace": "提交节奏",
+  "%s open · %s this month": "%s 在架 · 本月 %s",
+  "%s valid of %s decided": "%s 有效 / 已定 %s",
+  "%s duplicates": "%s 份重复",
+  "%s a week · %s a month": "每周 %s · 每月 %s"
  }
 }
