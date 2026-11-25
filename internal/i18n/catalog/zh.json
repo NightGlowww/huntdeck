@@ -2502,6 +2502,10 @@
   "The Stats pages' numbers: every platform and all of them together, a platform's programs, and programs' public numbers.": "统计页的数字：各平台与全部平台合计、单个平台的项目、以及项目的公开数字。",
   "HuntDeck itself: what it holds, polling, and health.": "HuntDeck 自身：存了什么、轮询、健康状态。",
   "Keys for scripts, minted here and revoked here. A token is another key to the same access gate as the password: it carries no identity and no scopes.": "给脚本用的密钥，在这里签发、在这里吊销。令牌和密码是同一道门的另一把钥匙：不带身份，也没有权限范围。",
-  "Your own reports on the platforms, as the Reports and Analytics pages show them: titles, states, severities, times and earnings, never write-ups.": "你在平台上的报告，与报告页/分析页一致：标题、状态、严重度、时间与收入，不含正文。"
+  "Your own reports on the platforms, as the Reports and Analytics pages show them: titles, states, severities, times and earnings, never write-ups.": "你在平台上的报告，与报告页/分析页一致：标题、状态、严重度、时间与收入，不含正文。",
+  "Hand the chosen ones over again": "重新派发所选任务",
+  "hand this target over again": "把这些目标重新派发",
+  "A failed task, or one the scanner no longer has: its targets go back in the queue.": "失败的任务、或扫描器已不存在的任务：它的目标会重新回到队列。",
+  "%d target(s) are back in the queue.": "%d 个目标已回到队列。"
  }
 }

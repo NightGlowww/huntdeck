@@ -63,6 +63,7 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	d.Created = q.Get("created")
 	d.Failure = q.Get("error")
 	d.Busy = q.Get("busy")
+	d.Retried, _ = strconv.Atoi(q.Get("retried"))
 	// A failed read is not an empty queue: the page used to show "nothing
 	// waiting" over a database error, which reads as a quiet day.
 	if d.Waiting, err = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 400); err != nil {
@@ -138,6 +139,54 @@ func (s *server) scanNow(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/scan?created="+strconv.Itoa(sum.Tasks), http.StatusSeeOther)
 }
 
+// scanRetry puts targets back in the queue: a task that failed, or that the
+// scanner no longer has, is cleared from the handoffs so the next run picks its
+// targets up again. Without it the only way back was a CLI on the host.
+//
+// Only tasks whose last read says failed or gone are accepted: clearing a
+// running task would hand the same targets out twice.
+func (s *server) scanRetry(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 8<<10)
+	if err := r.ParseForm(); err != nil {
+		http.Redirect(w, r, "/scan?error="+urlQuery(err.Error()), http.StatusSeeOther)
+		return
+	}
+	ids := r.PostForm["task"]
+	if len(ids) == 0 {
+		http.Redirect(w, r, "/scan?error="+urlQuery("no task was chosen"), http.StatusSeeOther)
+		return
+	}
+	states, err := s.Store.HandoffTasks(r.Context(), 200)
+	if err != nil {
+		s.Log.WarnContext(r.Context(), "scan: cannot read the tasks", "error", err)
+		http.Redirect(w, r, "/scan?error="+urlQuery(err.Error()), http.StatusSeeOther)
+		return
+	}
+	retryable := map[string]bool{}
+	for _, t := range states {
+		if t.State == "failed" || t.State == "gone" {
+			retryable[t.TaskID] = true
+		}
+	}
+	var clear []string
+	for _, id := range ids {
+		if retryable[id] {
+			clear = append(clear, id)
+		}
+	}
+	if len(clear) == 0 {
+		http.Redirect(w, r, "/scan?error="+urlQuery("only a failed or missing task can be handed over again"), http.StatusSeeOther)
+		return
+	}
+	n, err := s.Store.ClearHandoffs(r.Context(), clear)
+	if err != nil {
+		s.Log.WarnContext(r.Context(), "scan: cannot clear the handoffs", "error", err)
+		http.Redirect(w, r, "/scan?error="+urlQuery(err.Error()), http.StatusSeeOther)
+		return
+	}
+	http.Redirect(w, r, "/scan?retried="+strconv.Itoa(n), http.StatusSeeOther)
+}
+
 // handOff runs the shared handoff: the page and the poll loop use one
 // implementation, so they cannot drift.
 func (s *server) handOff(ctx context.Context, manual bool) (scanhandoff.Summary, error) {
@@ -154,7 +203,8 @@ func (s *server) handOff(ctx context.Context, manual bool) (scanhandoff.Summary,
 }
 
 func urlQuery(s string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(s, "&", "%26"), "#", "%23")
+	s = strings.ReplaceAll(strings.ReplaceAll(s, "&", "%26"), "#", "%23")
+	return strings.ReplaceAll(s, " ", "%20")
 }
 
 type scanPageData struct {
@@ -188,6 +238,9 @@ type scanPageData struct {
 	// WaitingError is this side failing to read its own tables: shown whether or
 	// not a scanner is configured, because it says nothing about the scanner.
 	WaitingError string
+	// Retried is how many handoff rows a retry cleared: those targets are back in
+	// the queue for the next run.
+	Retried int
 	// Busy is the scanner refusing for capacity: nothing failed, it is full.
 	Busy string
 }
