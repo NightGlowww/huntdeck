@@ -2,7 +2,7 @@
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">Analytics</h1>
 <div class="ahead">
-  <nav class="segs" aria-label="Range">{{range .Ranges}}<a href="{{$.Data.RangeURL .Key}}"{{if eq .Key $.Data.RangeKey}} class="on" aria-current="true"{{end}}>{{.Label}}</a>{{end}}</nav>
+  <nav class="segs" aria-label="{{T "Range"}}">{{range .Ranges}}<a href="{{$.Data.RangeURL .Key}}"{{if eq .Key $.Data.RangeKey}} class="on" aria-current="true"{{end}}>{{T .Label}}</a>{{end}}</nav>
   <form class="arange" method="get" action="/reports/analytics">
     <label><span class="sr-only">From</span><input type="month" name="from" value="{{.From}}" aria-label="{{T "From month"}}"></label>
     <span class="muted">to</span>
@@ -32,11 +32,11 @@
   <div class="panel-body">{{template "bar-chart" .Outcomes}}</div>
 </section>
 <section class="panel bx" data-box="money" data-place="6 6" data-place-wide="4 4" data-title="{{T "Earned per month"}}">
-  <div class="panel-head"><h2>Earned per month{{with .Main}} · {{.}}{{end}}</h2><span class="aside">{{T "by the month it was awarded"}}</span></div>
+  <div class="panel-head"><h2>{{T "Earned per month"}}{{with .Main}} · {{.}}{{end}}</h2><span class="aside">{{T "by the month it was awarded"}}</span></div>
   <div class="panel-body">{{if .HasMoney}}{{template "bar-chart" .Money}}{{else}}<div class="empty-state small">{{T "Nothing awarded in this range."}}</div>{{end}}</div>
 </section>
 <section class="panel bx" data-box="cumulative" data-place="0 12" data-place-wide="8 4" data-title="{{T "Earned in all"}}">
-  <div class="panel-head"><h2>Earned in all{{with .Main}} · {{.}}{{end}}</h2><span class="aside">over the range{{if gt (len .Earned) 1}}; other currencies in the tiles{{end}}</span></div>
+  <div class="panel-head"><h2>{{T "Earned in all"}}{{with .Main}} · {{.}}{{end}}</h2><span class="aside">{{T "over the range"}}{{if gt (len .Earned) 1}}; other currencies in the tiles{{end}}</span></div>
   <div class="panel-body">{{if .HasMoney}}{{template "line-chart" .Cumulative}}{{else}}<div class="empty-state small">{{T "Nothing awarded in this range."}}</div>{{end}}</div>
 </section>
 <section class="panel bx" data-box="severity" data-place="0 6" data-place-wide="0 6" data-title="{{T "By severity"}}">
