@@ -2,6 +2,6 @@
    and blocks, mailstats.html) or "setup" (its address and key, and setting
    it up on Cloudflare, mailsetup.html). */}}
 {{define "huntmail-tabs"}}<nav class="ptabs" aria-label="{{T "HuntMail sections"}}">
-  <a href="/email/stats"{{if eq . "overview"}} class="on" aria-current="page"{{end}}>Overview</a>
-  <a href="/email/setup"{{if eq . "setup"}} class="on" aria-current="page"{{end}}>Setup</a>
+  <a href="/email/stats"{{if eq . "overview"}} class="on" aria-current="page"{{end}}>{{T "Overview"}}</a>
+  <a href="/email/setup"{{if eq . "setup"}} class="on" aria-current="page"{{end}}>{{T "Setup"}}</a>
 </nav>{{end}}

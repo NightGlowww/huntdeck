@@ -13,9 +13,9 @@
   {{if .Addresses}}<table class="kv maddrs">
     {{range .Addresses}}<tr{{if eq .ID $.Data.Mail.Made}} class="made"{{end}}>
       <th class="mono"><code>{{.Address}}</code><button type="button" class="icon-btn" data-copy-text="{{.Address}}" title="Copy {{.Address}}" aria-label="{{T "Copy the address"}}"><svg class="i"><use href="#i-copy"/></svg></button>{{if eq .ID $.Data.Mail.Made}} <span class="chip ok">new</span>{{end}}</th>
-      <td><form method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/email/{{.ID}}/note" class="mnote"><input type="text" name="note" value="{{.Note}}" maxlength="120" placeholder="{{T "what it's for"}}" aria-label="{{T "What {{.Address}} is for"}}"><button type="submit" class="secondary small">Save</button></form></td>
+      <td><form method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/email/{{.ID}}/note" class="mnote"><input type="text" name="note" value="{{.Note}}" maxlength="120" placeholder="{{T "what it's for"}}" aria-label="{{T "What {{.Address}} is for"}}"><button type="submit" class="secondary small">{{T "Save"}}</button></form></td>
       <td class="muted small nowrap" title="{{datetime .CreatedAt}}">made {{ago .CreatedAt}}</td>
-      <td class="acts"><form method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/email/{{.ID}}/forget" data-confirm="Forget {{.Address}}? Its mail stays in HuntMail and still shows here."><button type="submit" class="secondary small" title="{{T "Take it off this list"}}">Forget</button></form></td>
+      <td class="acts"><form method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/email/{{.ID}}/forget" data-confirm="Forget {{.Address}}? Its mail stays in HuntMail and still shows here."><button type="submit" class="secondary small" title="{{T "Take it off this list"}}">{{T "Forget"}}</button></form></td>
     </tr>{{end}}
   </table>{{end}}
 </section>

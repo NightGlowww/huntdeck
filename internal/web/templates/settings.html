@@ -181,8 +181,8 @@
       <span class="muted small">{{if .QuietSet}}Default: 14.{{else}}The default.{{end}}</span>
     </div>
     <div class="zone-actions">
-      <button type="submit" class="small">Save</button>
-      {{if .QuietSet}}<button type="submit" name="reset" value="1" class="small secondary" formnovalidate>Reset to 14</button>{{end}}
+      <button type="submit" class="small">{{T "Save"}}</button>
+      {{if .QuietSet}}<button type="submit" name="reset" value="1" class="small secondary" formnovalidate>{{T "Reset to 14"}}</button>{{end}}
     </div>
   </form>
   <p class="panel-foot">{{T "A report that's still new or triaged is"}}<b>{{T "gone quiet"}}</b>{{T "once the program has said nothing for this many days (counting from submission if it never has): the Reports tile, the Gone quiet view and filter, its quiet mark, and the API's"}}<code>{{T "gone_quiet"}}</code>{{T "follow it. Accepted reports waiting for a fix, and ones you snoozed, muted or added by hand, are never flagged."}}</p>
@@ -234,7 +234,7 @@
 {{end}}
 {{end}}{{end}}
 
-{{define "signin"}}<div class="signin" title="{{T .NameKey}}: {{T .LabelKey}}{{range .Parts}} · {{T .TextKey}}{{with .When}} {{datetime .}}{{end}}{{with .In}} {{datetime .}}{{end}}{{with .At}} {{datetime .}}{{end}}{{end}}"><span class="chip {{.State}}">{{T .LabelKey}}</span><span class="sn">{{T .NameKey}}</span>{{with .Parts}}<span class="muted small sp">{{range $i, $p := .}}{{if $i}} · {{end}}{{T $p.TextKey}}{{with $p.When}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{with $p.In}} <span title="{{datetime .}}">{{until .}}</span>{{end}}{{with $p.At}} {{datetime .}}{{end}}{{end}}</span>{{end}}{{with .Watch}} <a class="link small" href="{{.}}" title="{{T "See the login browser: watch a login, or finish one by hand"}}">watch</a>{{end}}</div>{{with .Problem}}<div class="signin-why small">{{.}}</div>{{end}}{{end}}
+{{define "signin"}}<div class="signin" title="{{T .NameKey}}: {{T .LabelKey}}{{range .Parts}} · {{T .TextKey}}{{with .When}} {{datetime .}}{{end}}{{with .In}} {{datetime .}}{{end}}{{with .At}} {{datetime .}}{{end}}{{end}}"><span class="chip {{.State}}">{{T .LabelKey}}</span><span class="sn">{{T .NameKey}}</span>{{with .Parts}}<span class="muted small sp">{{range $i, $p := .}}{{if $i}} · {{end}}{{T $p.TextKey}}{{with $p.When}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{with $p.In}} <span title="{{datetime .}}">{{until .}}</span>{{end}}{{with $p.At}} {{datetime .}}{{end}}{{end}}</span>{{end}}{{with .Watch}} <a class="link small" href="{{.}}" title="{{T "See the login browser: watch a login, or finish one by hand"}}">{{T "watch"}}</a>{{end}}</div>{{with .Problem}}<div class="signin-why small">{{.}}</div>{{end}}{{end}}
 {{define "lastrun"}}<span class="chip {{.DisplayStatus}}"{{with .Error}} title="{{.}}"{{end}}>{{T .DisplayStatus}}</span> <span class="muted" title="{{datetime .StartedAt}} · {{TF "took %s" (runTook .)}}">{{ago .StartedAt}}<span class="took"> · {{runTook .}}</span></span>{{end}}
 
 {{define "settings-textsize"}}

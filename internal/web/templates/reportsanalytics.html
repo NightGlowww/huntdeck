@@ -6,8 +6,8 @@
   <form class="arange" method="get" action="/reports/analytics">
     <label><span class="sr-only">From</span><input type="month" name="from" value="{{.From}}" aria-label="{{T "From month"}}"></label>
     <span class="muted">to</span>
-    <label><span class="sr-only">To</span><input type="month" name="to" value="{{.To}}" aria-label="To month"></label>
-    <button class="button secondary small" type="submit">Show</button>
+    <label><span class="sr-only">To</span><input type="month" name="to" value="{{.To}}" aria-label="{{T "To month"}}"></label>
+    <button class="button secondary small" type="submit">{{T "Show"}}</button>
   </form>
   <span class="muted small">Reports by when you submitted them, money by when it was awarded · {{.RangeLabel}}</span>
 </div>
@@ -39,10 +39,10 @@
   <div class="panel-head"><h2>Earned in all{{with .Main}} · {{.}}{{end}}</h2><span class="aside">over the range{{if gt (len .Earned) 1}}; other currencies in the tiles{{end}}</span></div>
   <div class="panel-body">{{if .HasMoney}}{{template "line-chart" .Cumulative}}{{else}}<div class="empty-state small">{{T "Nothing awarded in this range."}}</div>{{end}}</div>
 </section>
-<section class="panel bx" data-box="severity" data-place="0 6" data-place-wide="0 6" data-title="By severity">
-  <div class="panel-head"><h2>By severity</h2><span class="aside">bounties in {{or .Main "—"}}</span></div>
+<section class="panel bx" data-box="severity" data-place="0 6" data-place-wide="0 6" data-title="{{T "By severity"}}">
+  <div class="panel-head"><h2>{{T "By severity"}}</h2><span class="aside">bounties in {{or .Main "—"}}</span></div>
   <div class="table-wrap"><table class="atable">
-    <thead><tr><th>Severity</th><th class="num" title="{{T "Reports you submitted as this severity"}}">Submitted</th><th class="num" title="{{T "Reports rated this severity now"}}">Rated</th><th class="num">Valid</th><th class="num" title="{{T "Earned by reports rated this severity now"}}">Earned</th><th class="num" title="{{T "Per paid report"}}">Average</th></tr></thead>
+    <thead><tr><th>{{T "Severity"}}</th><th class="num" title="{{T "Reports you submitted as this severity"}}">{{T "Submitted"}}</th><th class="num" title="{{T "Reports rated this severity now"}}">{{T "Rated"}}</th><th class="num">{{T "Valid"}}</th><th class="num" title="{{T "Earned by reports rated this severity now"}}">{{T "Earned"}}</th><th class="num" title="{{T "Per paid report"}}">{{T "Average"}}</th></tr></thead>
     <tbody>{{$m := .Main}}{{range .Severities}}<tr><td><span class="sev {{.Key}}">{{.Label}}</span></td><td class="num">{{num .Submitted}}</td><td class="num">{{num .Final}}</td><td class="num">{{num .Valid}}</td>
       <td class="num">{{if .Earned}}<span title="{{moneyFull .Earned $m}}">{{money .Earned $m}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
       <td class="num">{{if .Paid}}{{money .Average $m}}{{else}}<span class="zero">—</span>{{end}}</td></tr>{{end}}</tbody>
@@ -65,7 +65,7 @@
 <section class="panel bx" data-box="platforms" data-place="0 12" data-place-wide="0 6" data-title="Platforms">
   <div class="panel-head"><h2>Platforms</h2></div>
   <div class="table-wrap"><table class="atable">
-    <thead><tr><th>Platform</th><th class="num">Reports</th><th class="num">Valid</th><th class="num">Acceptance</th><th class="num">Duplicates</th><th class="num">Earned</th><th class="num" title="{{T "Your average time from submission to triage"}}">To triage</th><th class="num" title="{{T "Your average time from submission to the first bounty"}}">To bounty</th></tr></thead>
+    <thead><tr><th>{{T "Platform"}}</th><th class="num">{{T "Reports"}}</th><th class="num">{{T "Valid"}}</th><th class="num">{{T "Acceptance"}}</th><th class="num">{{T "Duplicates"}}</th><th class="num">{{T "Earned"}}</th><th class="num" title="{{T "Your average time from submission to triage"}}">{{T "To triage"}}</th><th class="num" title="{{T "Your average time from submission to the first bounty"}}">{{T "To bounty"}}</th></tr></thead>
     <tbody>{{range .Platforms}}<tr><td>{{template "ptag" .Platform}} {{platformLabel .Platform}}</td><td class="num">{{num .Reports}}</td><td class="num">{{num .Valid}}</td>
       <td class="num">{{$.Data.Pct .Acceptance}}</td><td class="num">{{$.Data.Pct .DuplicateRate}}</td>
       <td class="num">{{range $i, $a := .Earned}}{{if $i}} + {{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
@@ -75,7 +75,7 @@
 <section class="panel bx" data-box="times" data-place="0 12" data-place-wide="6 6" data-title="{{T "Your times against the programs'"}}">
   <div class="panel-head"><h2>{{T "Your times against the programs'"}}</h2><span class="aside">{{T "your average from submission · theirs as the platform publishes it"}}</span></div>
   <div class="table-wrap"><table class="atable times">
-    <thead><tr><th class="c-prog">{{T "All programs"}}</th><th class="num">{{T "First response"}}</th><th class="num">Triage</th><th class="num">Bounty</th><th class="num">Resolution</th></tr></thead>
+    <thead><tr><th class="c-prog">{{T "All programs"}}</th><th class="num">{{T "First response"}}</th><th class="num">{{T "Triage"}}</th><th class="num">{{T "Bounty"}}</th><th class="num">{{T "Resolution"}}</th></tr></thead>
     <tbody>
       <tr class="overall"><td>{{T "Your average"}}</td>{{with .Times}}<td class="num" title="median {{$.Data.Median .FirstResponse}}">{{or ($.Data.Hours .FirstResponse) "—"}}</td><td class="num" title="median {{$.Data.Median .Triage}}">{{or ($.Data.Hours .Triage) "—"}}</td><td class="num" title="median {{$.Data.Median .Bounty}}">{{or ($.Data.Hours .Bounty) "—"}}</td><td class="num" title="median {{$.Data.Median .Resolution}}">{{or ($.Data.Hours .Resolution) "—"}}</td>{{end}}</tr>
       {{range .Compared}}<tr><td class="c-prog">{{template "aprog" .}}</td>
@@ -90,7 +90,7 @@
 <section class="panel bx" data-box="programs" data-place="0 12" data-place-wide="0 6" data-title="{{T "Top programs"}}">
   <div class="panel-head"><h2>{{T "Top programs"}}</h2><span class="aside">by earnings in {{or .Main "—"}}, then valid reports</span></div>
   <div class="table-wrap"><table class="atable">
-    <thead><tr><th class="c-prog">Program</th><th class="num">Reports</th><th class="num">Valid</th><th class="num">Duplicates</th><th class="num">Earned</th></tr></thead>
+    <thead><tr><th class="c-prog">{{T "Program"}}</th><th class="num">{{T "Reports"}}</th><th class="num">{{T "Valid"}}</th><th class="num">{{T "Duplicates"}}</th><th class="num">{{T "Earned"}}</th></tr></thead>
     <tbody>{{range .Programs}}<tr><td class="c-prog">{{template "aprog" .}}</td><td class="num">{{num .Reports}}</td><td class="num">{{num .Valid}}</td><td class="num">{{num .Duplicates}}</td>
       <td class="num">{{range $i, $a := .Earned}}{{if $i}} + {{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</td></tr>{{else}}<tr><td colspan="5" class="empty-state small">{{T "No valid or paid reports in this range."}}</td></tr>{{end}}</tbody>
   </table></div>

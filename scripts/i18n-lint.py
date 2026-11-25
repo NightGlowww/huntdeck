@@ -26,13 +26,18 @@ NAMES = {
     "post", "cve", "bbp", "vdp", "id", "ids", "caido", "burp", "zap", "discord",
     "telegram", "webhook", "burpsuite", "scope", "insomnia", "bruno", "postman",
     "chrome", "github", "signal", "cvss", "tls", "ssl", "vnc", "env", "sqlite",
+    "huntmail",  # the product's own name, like HuntDeck's
 }
 # Two ASCII words in a row that aren't only names: prose the page still
 # writes in English.
 # An HTML entity is punctuation, not a word: &middot; between two links is
 # not English copy. Entities are dropped before counting.
 ENTITY = re.compile(r"&[a-zA-Z]+;|&#\d+;")
-WORDS = re.compile(r"[A-Za-z][A-Za-z'’-]{2,}")
+# A word is letters, hyphens or apostrophes of any length: a three-letter
+# floor let "Set it up" and "Overview" through. A token carrying . / _ or a
+# digit is an identifier (a host, a path, a file name), not prose.
+WORDS = re.compile(r"[A-Za-z][A-Za-z'’-]*")
+IDENT = re.compile(r"[\w.-]*[./_\d][\w.-]*")
 # Anything handed to T/TF is translated already.
 TRANSLATED = re.compile(r'\{\{-?\s*T(?:F)?\s+"(?:[^"\\]|\\.)*"(?:[^}]*)\}\}')
 # An attribute's value may hold template actions, whose own quotes do not
@@ -40,6 +45,9 @@ TRANSLATED = re.compile(r'\{\{-?\s*T(?:F)?\s+"(?:[^"\\]|\\.)*"(?:[^}]*)\}\}')
 ATTRS = re.compile(r'(?:placeholder|aria-label|title)="((?:[^"{}]|\{\{.*?\}\})*)"', re.S)
 TEXT = re.compile(r">([^<>{}]+)<")
 ACTION = re.compile(r"\{\{.*?\}\}", re.S)
+# A label: the whole text of an anchor, button, tab or table head. One word is
+# copy too - "Overview" and "Save" rendered in English under Chinese headings.
+LABEL = re.compile(r"<(a|button|th|summary|label)\b[^>]*>([A-Za-z][A-Za-z\'’ -]{1,24})</\1>")
 
 
 def main() -> int:
@@ -60,9 +68,14 @@ def main() -> int:
                     continue
                 if "secret.key" in text or text.endswith((".com", ".net", ".key", ".json")):
                     continue
-                words = [w for w in WORDS.findall(ENTITY.sub(" ", text)) if w.lower() not in NAMES]
+                words = [w for w in WORDS.findall(IDENT.sub(" ", ENTITY.sub(" ", text))) if w.lower() not in NAMES]
                 if len(words) >= 2:
                     found.append((kind, text))
+        for m in LABEL.finditer(body):
+            text = m.group(2).strip()
+            if [w for w in WORDS.findall(text) if w.lower() not in NAMES]:
+                found.append(("label", text))
+
         for kind, text in found:
             total += 1
             if not count_only:

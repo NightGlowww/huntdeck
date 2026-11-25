@@ -170,7 +170,7 @@
     <div class="page">
     {{- with .Flash}}<p class="flash ok" role="status">{{T .}}</p>{{end}}
     {{- with .FlashErr}}<p class="flash err" role="alert">{{T .}}</p>{{end}}
-    {{- with .Tour}}<p class="demo-tour" role="note"><b>Self-hosted</b><span>{{.}}{{with repoURL}} <a class="link" href="{{.}}" target="_blank" rel="noopener noreferrer">Self-host HuntDeck</a>{{end}}</span></p>{{end}}
+    {{- with .Tour}}<p class="demo-tour" role="note"><b>Self-hosted</b><span>{{.}}{{with repoURL}} <a class="link" href="{{.}}" target="_blank" rel="noopener noreferrer">{{T "Self-host HuntDeck"}}</a>{{end}}</span></p>{{end}}
     {{template "content" .}}
     </div>
   </main>

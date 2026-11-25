@@ -14,7 +14,7 @@
   </dl>
   {{with .Times}}
   <table class="atable mine-times">
-    <thead><tr><th>Time to</th><th class="num" title="{{T "Your average from submission"}}">Yours</th><th class="num" title="{{T "As the platform publishes it"}}">{{T "The program's"}}</th></tr></thead>
+    <thead><tr><th>{{T "Time to"}}</th><th class="num" title="{{T "Your average from submission"}}">{{T "Yours"}}</th><th class="num" title="{{T "As the platform publishes it"}}">{{T "The program's"}}</th></tr></thead>
     <tbody>{{range .}}<tr><td title="{{.Title}}">{{.Label}}</td><td class="num atime{{with .Versus}} {{.}}{{end}}">{{with .Mine}}<b>{{.}}</b>{{else}}<span class="zero">—</span>{{end}}</td><td class="num">{{or .Program "—"}}</td></tr>{{end}}</tbody>
   </table>
   {{end}}

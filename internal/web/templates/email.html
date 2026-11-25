@@ -35,7 +35,7 @@
     {{with .To}}<input type="hidden" name="to" value="{{.}}">{{end}}
     {{if ne .Size 30}}<input type="hidden" name="n" value="{{.Size}}">{{end}}
     {{with .NL}}<input type="hidden" name="nl" value="{{.}}">{{end}}
-    <button type="submit" class="small">Show</button>
+    <button type="submit" class="small">{{T "Show"}}</button>
     {{with .To}}<a class="pill" href="{{$.Data.FilterOn "to" ""}}" title="{{T "Show every address"}}">to {{.}} <span aria-hidden="true">×</span></a>{{end}}
     <span class="what">newest first{{with .Total}} · {{num .}} {{if eq $.Data.NL "only"}}newsletters{{else}}messages{{end}}{{end}}</span>
     <a class="button secondary small mrefresh" href="{{.Here}}" title="{{T "Ask HuntMail for new mail: the page doesn't check by itself, so it costs nothing until you do"}}"><svg class="i"><use href="#i-refresh"/></svg> Refresh</a>

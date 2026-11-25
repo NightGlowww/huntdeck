@@ -18,20 +18,20 @@
   <div class="table-wrap">
   <table class="fixed flist rlist cards" data-cols="reports">
     <thead><tr>
-      <th class="c-prog" data-col-fixed><a class="{{.SortClass "program"}}" href="{{.SortURL "program"}}">Program</a></th>
-      <th class="c-report" data-col-min="260">Report</th>
-      <th class="c-sev"><a class="{{.SortClass "severity"}}" href="{{.SortURL "severity"}}">Severity</a></th>
-      <th class="c-state"><a class="{{.SortClass "state"}}" href="{{.SortURL "state"}}">State</a></th>
-      <th class="c-bounty num"><a class="{{.SortClass "bounty"}}" href="{{.SortURL "bounty"}}">Earned</a></th>
-      <th class="c-submitted"><a class="{{.SortClass "submitted"}}" href="{{.SortURL "submitted"}}">Submitted</a></th>
-      <th class="c-activity"><a class="{{.SortClass "activity"}}" href="{{.SortURL "activity"}}">Activity</a></th>
-      <th class="c-triaged">Triaged</th>
-      <th class="c-closed">Closed</th>
+      <th class="c-prog" data-col-fixed><a class="{{.SortClass "program"}}" href="{{.SortURL "program"}}">{{T "Program"}}</a></th>
+      <th class="c-report" data-col-min="260">{{T "Report"}}</th>
+      <th class="c-sev"><a class="{{.SortClass "severity"}}" href="{{.SortURL "severity"}}">{{T "Severity"}}</a></th>
+      <th class="c-state"><a class="{{.SortClass "state"}}" href="{{.SortURL "state"}}">{{T "State"}}</a></th>
+      <th class="c-bounty num"><a class="{{.SortClass "bounty"}}" href="{{.SortURL "bounty"}}">{{T "Earned"}}</a></th>
+      <th class="c-submitted"><a class="{{.SortClass "submitted"}}" href="{{.SortURL "submitted"}}">{{T "Submitted"}}</a></th>
+      <th class="c-activity"><a class="{{.SortClass "activity"}}" href="{{.SortURL "activity"}}">{{T "Activity"}}</a></th>
+      <th class="c-triaged">{{T "Triaged"}}</th>
+      <th class="c-closed">{{T "Closed"}}</th>
     </tr></thead>
     <tbody>
     {{range .Rows}}
       <tr data-href="/reports/{{.ID}}"{{if .Quiet}} class="quiet"{{end}}>
-        <td class="c-prog">{{if .Program.ID}}{{template "pname" (plink .Program)}}{{else}}<div class="pn">{{template "ptag" .Platform}}<span class="name" title="{{.ProgramName}} (not in HuntDeck)">{{or .ProgramName "—"}}</span></div>{{end}}</td>
+        <td class="c-prog">{{if .Program.ID}}{{template "pname" (plink .Program)}}{{else}}<div class="pn">{{template "ptag" .Platform}}<span class="name" title="{{T "{{.ProgramName}} (not in HuntDeck)"}}">{{or .ProgramName "—"}}</span></div>{{end}}</td>
         <td class="c-report" title="{{.Title}}"><a class="link" href="/reports/{{.ID}}">{{.Title}}</a>
           {{- if .NeedsYou}} <span class="chip waiting" title="{{T "The program is waiting on you"}}">{{T "needs you"}}</span>{{end}}
           {{- if .Stale}} <span class="chip paused" title="{{T "No word from the program for {{$.Data.QuietDays}} days or more"}}">quiet</span>{{end}}

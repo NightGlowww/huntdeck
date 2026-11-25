@@ -1,4 +1,4 @@
-{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="Back to"><a href="/settings/notifications">{{T "Notifications"}}</a><span class="sep">/</span><span class="here" title="{{T .Title}}">{{T .Title}}</span></nav>{{end}}{{end}}
+{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/settings/notifications">{{T "Notifications"}}</a><span class="sep">/</span><span class="here" title="{{T .Title}}">{{T .Title}}</span></nav>{{end}}{{end}}
 
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T .Title}}</h1>

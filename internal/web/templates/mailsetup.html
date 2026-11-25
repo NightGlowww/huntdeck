@@ -17,7 +17,7 @@
   <p class="msetup-note">HuntMail {{.Version}} runs at <code>{{.Origin}}</code>{{with .Domains}}, receiving mail for {{range $i, $d := .}}{{if $i}}, {{end}}<b>{{$d}}</b>{{end}}{{end}}.
     {{if $.Data.Saved}}Its private address and API key are saved here, encrypted: HuntDeck restarts to use them.{{end}}
     {{if not .Healthy}}It isn't answering yet: a new workers.dev address can take a few minutes.{{end}}</p>
-  <p class="msetup-note"><a class="button small" href="/email">Email</a> <a class="button secondary small" href="/email/stats">Overview</a></p>
+  <p class="msetup-note"><a class="button small" href="/email">{{T "Email"}}</a> <a class="button secondary small" href="/email/stats">{{T "Overview"}}</a></p>
   {{end}}{{end}}
 </section>
 {{end}}

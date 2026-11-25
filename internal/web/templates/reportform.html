@@ -17,7 +17,7 @@
       <label><span>State</span><select name="state">{{range .States}}<option value="{{.Key}}"{{if eq .Key $.Data.State}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
       <label><span>Submitted</span><input type="date" name="submitted" value="{{.Submitted}}" required></label>
       {{if .Manual}}<label><span>Closed</span><input type="date" name="closed" value="{{.Closed}}"></label>{{end}}
-      <label title="{{T "The severity you submitted it as"}}"><span>Submitted as</span><select name="submitted_severity"><option value="">{{T "Not known"}}</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.SubmittedSeverity}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+      <label title="{{T "The severity you submitted it as"}}"><span>{{T "Submitted as"}}</span><select name="submitted_severity"><option value="">{{T "Not known"}}</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.SubmittedSeverity}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
       <label><span>{{T "Severity now"}}</span><select name="severity"><option value="">Unrated</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.Severity}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
     </div>
   </section>
@@ -34,7 +34,7 @@
   </section>{{end}}
   <div class="actbar">
     <button type="submit" class="act-save">{{if .ID}}Save{{else}}Add report{{end}}</button>
-    <a class="button ghost act-cancel" href="{{if .ID}}/reports/{{.ID}}{{else}}/reports{{end}}">Cancel</a>
+    <a class="button ghost act-cancel" href="{{if .ID}}/reports/{{.ID}}{{else}}/reports{{end}}">{{T "Cancel"}}</a>
   </div>
 </form>
 {{end}}{{end}}

@@ -1,4 +1,4 @@
-{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="Back to"><a href="/stats{{.Vis.Query}}">{{T "Stats"}}</a><span class="sep">/</span><a href="/stats/{{.Platform.Platform}}{{.Vis.Query}}">{{platformLabel .Platform.Platform}}</a></nav>{{template "vis-toggle" .Vis}}{{end}}{{end}}
+{{define "topbar-title"}}{{with .Data}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/stats{{.Vis.Query}}">{{T "Stats"}}</a><span class="sep">/</span><a href="/stats/{{.Platform.Platform}}{{.Vis.Query}}">{{platformLabel .Platform.Platform}}</a></nav>{{template "vis-toggle" .Vis}}{{end}}{{end}}
 
 {{/* A platform's stats page (statsplatform.go): the Stats page's tiles for
    it, then its open programs with the same numbers and sparklines; only

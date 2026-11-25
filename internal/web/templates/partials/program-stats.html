@@ -120,7 +120,7 @@
         </tbody>
       </table>
       </div>
-      {{if gt .Total (len $.Disclosed)}}<div class="note-bar">{{TF "Showing the newest %d; all %d are kept." (len $.Disclosed) .Total}}{{if eq $p.Platform "hackerone"}} <a class="link" href="https://hackerone.com/{{$p.Handle}}/hacktivity" target="_blank" rel="noopener noreferrer nofollow">Hacktivity on HackerOne</a>{{end}}</div>{{end}}
+      {{if gt .Total (len $.Disclosed)}}<div class="note-bar">{{TF "Showing the newest %d; all %d are kept." (len $.Disclosed) .Total}}{{if eq $p.Platform "hackerone"}} <a class="link" href="https://hackerone.com/{{$p.Handle}}/hacktivity" target="_blank" rel="noopener noreferrer nofollow">{{T "Hacktivity on HackerOne"}}</a>{{end}}</div>{{end}}
     </section>
     {{end}}{{end}}
 {{end}}

@@ -8,7 +8,7 @@
 {{define "mail-message"}}
 <div class="page-head rhead mhead">
   <div>
-    {{if not .Pane}}<div class="crumbs"><a href="/email">Email</a>{{with .Program}} › <a href="/programs/{{.Platform}}/{{.Handle}}?tab=email">{{.Name}}</a>{{end}}</div>
+    {{if not .Pane}}<div class="crumbs"><a href="/email">{{T "Email"}}</a>{{with .Program}} › <a href="/programs/{{.Platform}}/{{.Handle}}?tab=email">{{.Name}}</a>{{end}}</div>
     <h1>{{or .Subject "(no subject)"}}</h1>{{else}}<h2 class="mpane-title">{{or .Subject "(no subject)"}}</h2>{{end}}
     <div class="sub title-row">
       <span>{{.Sender}}</span>
@@ -37,17 +37,17 @@
 <div class="stack mmsg">
 <section class="panel mmeta" aria-label="{{T "Who it's from and to"}}">
   <table class="kv mside">
-    <tr><th>From</th><td>{{.HeaderFrom}}</td></tr>
-    {{if ne .From .HeaderFrom}}<tr><th title="{{T "The envelope sender: where bounces go"}}">Sent by</th><td class="mono small">{{or .From "—"}}</td></tr>{{end}}
-    <tr><th>To</th><td class="mono small">{{.To}}</td></tr>
+    <tr><th>{{T "From"}}</th><td>{{.HeaderFrom}}</td></tr>
+    {{if ne .From .HeaderFrom}}<tr><th title="{{T "The envelope sender: where bounces go"}}">{{T "Sent by"}}</th><td class="mono small">{{or .From "—"}}</td></tr>{{end}}
+    <tr><th>{{T "To"}}</th><td class="mono small">{{.To}}</td></tr>
     {{- if not .Pane}}{{/* beside the list, the list shows it */}}
-    {{with .Program}}<tr><th>Program</th><td><div class="pn">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}?tab=email">{{.Name}}</a></div></td></tr>
-    {{- else}}{{with .Guess}}<tr><th title="A guess: {{$.GuessWhy}}">Program?</th><td>{{range .}}<div class="pn mguess">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}">{{.Name}}</a></div>{{end}}<span class="muted small">a guess: {{$.GuessWhy}}</span></td></tr>{{end}}{{end}}{{end}}
+    {{with .Program}}<tr><th>{{T "Program"}}</th><td><div class="pn">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}?tab=email">{{.Name}}</a></div></td></tr>
+    {{- else}}{{with .Guess}}<tr><th title="{{T "A guess: {{$.GuessWhy}}"}}">Program?</th><td>{{range .}}<div class="pn mguess">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}">{{.Name}}</a></div>{{end}}<span class="muted small">a guess: {{$.GuessWhy}}</span></td></tr>{{end}}{{end}}{{end}}
   </table>
   <table class="kv mside">
-    <tr><th>Received</th><td><span title="{{datetime .ReceivedAt}}">{{datetime .ReceivedAt}}</span></td></tr>
-    <tr><th>Size</th><td>{{filesize .RawSize}}{{if .RawTruncated}} <span class="chip req" title="{{T "Larger than HuntMail keeps: only its start was stored"}}">{{T "cut short"}}</span>{{end}}</td></tr>
-    <tr><th title="{{T "The sender checks, as Cloudflare recorded them"}}">Checks</th><td class="mchecks"><span>SPF {{template "mail-verdict" .Auth.SPF}}</span><span>DKIM {{template "mail-verdict" .Auth.DKIM}}</span><span>DMARC {{template "mail-verdict" .Auth.DMARC}}</span></td></tr>
+    <tr><th>{{T "Received"}}</th><td><span title="{{datetime .ReceivedAt}}">{{datetime .ReceivedAt}}</span></td></tr>
+    <tr><th>{{T "Size"}}</th><td>{{filesize .RawSize}}{{if .RawTruncated}} <span class="chip req" title="{{T "Larger than HuntMail keeps: only its start was stored"}}">{{T "cut short"}}</span>{{end}}</td></tr>
+    <tr><th title="{{T "The sender checks, as Cloudflare recorded them"}}">{{T "Checks"}}</th><td class="mchecks"><span>SPF {{template "mail-verdict" .Auth.SPF}}</span><span>DKIM {{template "mail-verdict" .Auth.DKIM}}</span><span>DMARC {{template "mail-verdict" .Auth.DMARC}}</span></td></tr>
     {{with .Auth.VerifiedDomains}}<tr><th>{{T "Verified for"}}</th><td>{{range $i, $d := .}}{{if $i}}, {{end}}{{$d}}{{end}}</td></tr>{{end}}
   </table>
 </section>
