@@ -2380,6 +2380,8 @@
   "Not applicable": "不适用",
   "Spam": "垃圾提交",
   "day": "天",
-  "days": "天"
+  "days": "天",
+  "quiet": "沉寂",
+  "open reports": "份在架报告"
  }
 }

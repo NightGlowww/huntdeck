@@ -11,7 +11,7 @@
 {{template "rail" .RailView}}
 <section class="panel ptable">
   <div class="activef">
-    <span class="total">{{num .Pager.Total}} {{if and .OpenOnly (not .Pills)}}{{T "open"}} {{end}}{{T (plural .Pager.Total "report" "reports")}}</span>
+    <span class="total">{{num .Pager.Total}} {{if and .OpenOnly (not .Pills)}}{{T "open reports"}}{{else}}{{T (plural .Pager.Total "report" "reports")}}{{end}}</span>
     {{template "pills" .}}
   </div>
 {{if .Rows}}
@@ -34,7 +34,7 @@
         <td class="c-prog">{{if .Program.ID}}{{template "pname" (plink .Program)}}{{else}}<div class="pn">{{template "ptag" .Platform}}<span class="name" title="{{T "{{.ProgramName}} (not in HuntDeck)"}}">{{or .ProgramName "—"}}</span></div>{{end}}</td>
         <td class="c-report" title="{{.Title}}"><a class="link" href="/reports/{{.ID}}">{{.Title}}</a>
           {{- if .NeedsYou}} <span class="chip waiting" title="{{T "The program is waiting on you"}}">{{T "needs you"}}</span>{{end}}
-          {{- if .Stale}} <span class="chip paused" title="{{T "No word from the program for {{$.Data.QuietDays}} days or more"}}">quiet</span>{{end}}
+          {{- if .Stale}} <span class="chip paused" title="{{T "No word from the program for {{$.Data.QuietDays}} days or more"}}">{{T "quiet"}}</span>{{end}}
           {{- if .Unread}} <span class="chip creds" title="{{T "Unread messages on the platform"}}">unread</span>{{end}}
           {{- if .Muted}} <span class="chip req">muted</span>{{else if .Quiet}} <span class="chip req" title="{{T "Snoozed until {{with .SnoozedUntil}}{{date .}}{{end}}"}}">snoozed</span>{{end}}
           {{- if .GoneAt}} <span class="chip removed" title="{{T "No longer listed by the platform since {{with .GoneAt}}{{date .}}{{end}}"}}">gone</span>{{end}}
