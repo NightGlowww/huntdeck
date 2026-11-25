@@ -42,7 +42,8 @@ func TestGoBuiltLabelsAreTranslated(t *testing.T) {
 		}
 	}
 
-	// Every page title a handler passes to the layout.
+	// The sign-in lines' words are keys too: a missing one shows English.
+	keyLit := regexp.MustCompile(`(?:TextKey|LabelKey|NameKey):\s*"([^"\\]{1,80})"`)
 	title := regexp.MustCompile(`Title:\s*"([^"\\]{1,60})"`)
 	seen := 0
 	files, err := filepath.Glob("*.go")
@@ -56,6 +57,12 @@ func TestGoBuiltLabelsAreTranslated(t *testing.T) {
 		body, err := os.ReadFile(name)
 		if err != nil {
 			t.Fatal(err)
+		}
+		for _, m := range keyLit.FindAllStringSubmatch(string(body), -1) {
+			seen++
+			if !b.HasMsg("zh", m[1]) {
+				missing = append(missing, name+" key: "+m[1])
+			}
 		}
 		for _, m := range title.FindAllStringSubmatch(string(body), -1) {
 			seen++

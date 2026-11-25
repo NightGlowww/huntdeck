@@ -3,7 +3,7 @@
   <div><span class="workbench-kicker">{{if eq $.Nav "system"}}{{T "System"}}{{else}}{{T "Integrations"}}{{end}}</span><h1>{{T .Title}}</h1><p>{{T .Description}}</p></div>
 </header>
 <section class="workbench-metrics" aria-label="{{T "Status summary"}}">
-{{range .Metrics}}<div><span>{{T .Label}}</span><b>{{.Value}}</b><small>{{T .Hint}}</small></div>{{end}}
+{{range .Metrics}}<div><span>{{T .Label}}</span><b>{{T .Value}}</b><small>{{T .Hint}}</small></div>{{end}}
 </section>
 {{with .Notices}}<section class="workbench-notices" aria-label="{{T "Needs attention"}}">{{range .}}<article class="workbench-notice {{.Tone}}"><div><strong>{{T .Title}}</strong><p>{{T .Description}}</p></div><a class="button small secondary" href="{{.URL}}">{{T .Action}}</a></article>{{end}}</section>{{end}}
 <section class="workbench-grid" aria-label="{{T .Title}}">

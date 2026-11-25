@@ -2437,6 +2437,9 @@
   "manual": "手动",
   "startup": "启动时",
   "needs the website login, which HuntDeck doesn't have yet": "需要网站登录，HuntDeck 还没有",
-  "read with the polls, once an hour at most": "随轮询读取，最多每小时一次"
+  "read with the polls, once an hour at most": "随轮询读取，最多每小时一次",
+  "browser login": "浏览器登录",
+  "The default.": "默认值。",
+  "Default: 14.": "默认：14。"
  }
 }
