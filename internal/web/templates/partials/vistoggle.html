@@ -2,5 +2,5 @@
      Private programs, each with its open programs. vis-toggle sits beside
      the page title; vis-toggle-m is the same at the top of the page, for
      screens under 1800px, where the title bar has no room for both. */}}
-{{define "vis-toggle"}}<nav class="seg vis-toggle" aria-label="{{T "Which programs"}}">{{range .Segments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}" title="{{if eq .Label "All"}}{{T "Every program you can see"}}{{else if eq .Label "Public"}}{{T "Public programs only"}}{{else}}{{T "Private programs only: the ones you were invited to"}}{{end}}">{{.Label}} <em>{{num .Count}}</em></a>{{end}}</nav>{{end}}
+{{define "vis-toggle"}}<nav class="seg vis-toggle" aria-label="{{T "Which programs"}}">{{range .Segments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}" title="{{if eq .Label "All"}}{{T "Every program you can see"}}{{else if eq .Label "Public"}}{{T "Public programs only"}}{{else}}{{T "Private programs only: the ones you were invited to"}}{{end}}">{{T .Label}} <em>{{num .Count}}</em></a>{{end}}</nav>{{end}}
 {{define "vis-toggle-m"}}<div class="vis-toggle-m">{{template "vis-toggle" .}}</div>{{end}}
