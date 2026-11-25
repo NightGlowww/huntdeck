@@ -53,10 +53,11 @@ type Inputs struct {
 	InScope      int     // assets in scope in this program
 	AddedAt      time.Time
 	Now          time.Time
-	Flips        int  // pause/reopen flips in the window
-	NeedsCreds   bool // credentials must be requested
-	NoAutomation bool // automation banned: hand testing only
-	HandedOff    bool // the scanner already has this target
+	Flips        int    // pause/reopen flips in the window
+	NeedsCreds   bool   // credentials must be requested
+	NoAutomation bool   // automation banned: hand testing only
+	HandedOff    bool   // the scanner already has this target
+	ScanState    string // what it said last: running, done, failed, gone, or "" unread
 
 	// Platform ranks, 0..1, when the caller has them (1 = cleanest / fastest).
 	// Zero means "no rank": the absolute value is used instead.
@@ -191,7 +192,18 @@ func reasons(in Inputs) []Reason {
 	// First, so the two-reason row still shows it: a target the scanner already
 	// holds is the thing a reader needs to know before anything else.
 	if in.HandedOff {
-		out = append(out, Reason{Key: "already handed to the scanner"})
+		switch in.ScanState {
+		case "done":
+			out = append(out, Reason{Key: "already scanned: the scanner finished it"})
+		case "failed":
+			out = append(out, Reason{Key: "the scanner failed on it: hand it over again"})
+		case "gone":
+			out = append(out, Reason{Key: "the scanner no longer has it: hand it over again"})
+		case "running", "queued", "paused":
+			out = append(out, Reason{Key: "the scanner is on it now"})
+		default:
+			out = append(out, Reason{Key: "already handed to the scanner"})
+		}
 	}
 	if in.PayoutUSD > 0 {
 		out = append(out, Reason{Key: "pays up to $%s", Args: []string{moneyText(in.PayoutUSD)}})

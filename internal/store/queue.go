@@ -30,9 +30,10 @@ type QueueInput struct {
 	InScope      int
 	Flips        int
 	AddedAt      time.Time
-	HandedOff    bool // already handed to the scanner; the queue says so
-	NeedsCreds   bool // the program hands out test credentials on request
-	NoAutomation bool // the program bans automated tools: hand testing only
+	HandedOff    bool   // already handed to the scanner; the queue says so
+	ScanState    string // what the scanner said last: running, done, failed, gone, or "" unread
+	NeedsCreds   bool   // the program hands out test credentials on request
+	NoAutomation bool   // the program bans automated tools: hand testing only
 }
 
 // QueueCandidates returns the targets worth ranking: open programs, in scope,
@@ -85,6 +86,8 @@ SELECT t.program_id, p.platform, p.handle, p.name, t.kind, t.value, t.apex, t.sc
        -- should say "scanned" rather than rank it as if it were untouched.
        EXISTS(SELECT 1 FROM scan_handoffs h
                WHERE h.target = t.value OR h.target = t.apex) AS handed_off,
+       COALESCE((SELECT h.state FROM scan_handoffs h
+                  WHERE h.target = t.value OR h.target = t.apex LIMIT 1), '') AS scan_state,
        t.added_at
   FROM target_scores t
   JOIN programs p ON p.id = t.program_id
@@ -108,9 +111,10 @@ SELECT t.program_id, p.platform, p.handle, p.name, t.kind, t.value, t.apex, t.sc
 		var added, currency string
 		var payout float64
 		var noAuto, needsCreds, handedOff int
+		var scanState string
 		if err := rows.Scan(&in.ProgramID, &in.Platform, &in.Handle, &in.Name, &in.Kind, &in.Value, &in.Apex,
 			&in.TargetScore, &in.ProgramValue, &payout, &currency, &in.SpeedDays, &in.Disclosed365, &in.InScope, &noAuto, &needsCreds,
-			&in.Flips, &handedOff, &added); err != nil {
+			&in.Flips, &handedOff, &scanState, &added); err != nil {
 			return nil, fmt.Errorf("queue candidates: %w", err)
 		}
 		in.AddedAt, _ = time.Parse(time.RFC3339, added)
@@ -119,6 +123,7 @@ SELECT t.program_id, p.platform, p.handle, p.name, t.kind, t.value, t.apex, t.sc
 		in.NoAutomation = noAuto == 1
 		in.NeedsCreds = needsCreds == 1
 		in.HandedOff = handedOff == 1
+		in.ScanState = scanState
 		// Every comparison in the queue is in dollars: the same number in yen and
 		// in dollars is not the same bounty.
 		in.PayoutUSD = ToUSD(payout, currency)
