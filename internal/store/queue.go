@@ -252,6 +252,9 @@ func (s *Store) RefreshHuntQueue(ctx context.Context, now time.Time) error {
 			NeedsCreds:   in.NeedsCreds,
 			NoAutomation: in.NoAutomation,
 			HandedOff:    in.HandedOff,
+			// Without this the materialised queue loses what the scanner said and
+			// every row falls back to "handed over, unread" - which is what it did.
+			ScanState: in.ScanState,
 		})
 		reasons, _ := json.Marshal(res.Reasons)
 		// A target scoring below the floor is not a candidate for today; keeping
