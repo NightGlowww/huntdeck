@@ -10,7 +10,7 @@
 {{if .CanNL}}<div class="vis-toggle-m">{{template "nl-toggle" .}}</div>{{end}}
 {{if not .Configured}}
 <section class="panel">
-  <div class="panel-head"><h2>{{T "Set up HuntMail"}}</h2><span class="aside">{{T "not set up"}}</span></div>
+  <div class="panel-head"><h2 class="nocaps">{{T "Set up HuntMail"}}</h2><span class="aside">{{T "not set up"}}</span></div>
   <div class="panel-body mail-intro">
     <p>{{T "Email shows your"}}<a class="link" href="https://github.com/mdpsec/huntmail" target="_blank" rel="noopener noreferrer">HuntMail</a>{{T "inbox: a catch-all on a spare domain of yours that runs on your own Cloudflare account (the free plan is enough). Every address on the domain works, so each signup can have its own."}}</p>
     <p>{{T "Once it's set up, each program gets an"}}<b>Email</b>{{T "tab: make an address for it in one click, and its mail lists there and here, with the codes and links ready to copy."}}</p>
