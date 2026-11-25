@@ -310,7 +310,16 @@ func loadTemplates(zone func() *time.Location, version string, readOnly bool, li
 			"change":    func(c store.ChangeView) string { return describeChangeLang(lang, messages, c) },
 			"changeTag": func(k string) string { return changeTagLang(lang, messages, k) },
 			// Times read in the page's language: "3d ago" / "3 天前".
-			"ago":    func(t time.Time) string { return agoLang(lang, messages, t) },
+			"ago": func(t time.Time) string { return agoLang(lang, messages, t) },
+			// agoOf takes a stored RFC 3339 string, for rows whose time comes
+			// straight from the database.
+			"agoOf": func(s string) string {
+				t, err := time.Parse(time.RFC3339, s)
+				if err != nil {
+					return s
+				}
+				return agoLang(lang, messages, t)
+			},
 			"agoPtr": func(t *time.Time) string { return agoPtrLang(lang, messages, t) },
 			"until":  func(t time.Time) string { return untilLang(lang, messages, t) },
 		}

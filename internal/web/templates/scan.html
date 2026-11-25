@@ -74,7 +74,7 @@
 {{if .RecentOrder}}{{$d := .}}
 <section class="panel"><div class="panel-head"><h2>{{T "Handed over lately"}}</h2><span class="aside">{{TF "the last %d" (len .RecentOrder)}}</span></div>
 <table class="table"><thead><tr><th>{{T "Task"}}</th><th>{{T "Platform"}}</th><th>{{T "Targets"}}</th><th>{{T "State"}}</th><th>{{T "When"}}</th></tr></thead><tbody>
-{{range .RecentOrder}}{{$b := index $d.Recent .}}<tr><td class="mono small">{{$b.TaskID}}</td><td>{{$b.Platform}}</td><td class="small">{{range $i, $t := $b.Targets}}{{if lt $i 3}}{{$t}} {{end}}{{end}}{{with len $b.Targets}}{{if gt . 3}}<span class="muted">+{{sub . 3}}</span>{{end}}{{end}}</td><td>{{template "taskstate" (index $d.RecentState $b.TaskID)}}</td><td class="small muted">{{$b.At}}</td></tr>{{end}}
+{{range .RecentOrder}}{{$b := index $d.Recent .}}<tr><td class="mono small">{{$b.TaskID}}</td><td>{{$b.Platform}}</td><td class="small">{{range $i, $t := $b.Targets}}{{if lt $i 3}}{{$t}} {{end}}{{end}}{{with len $b.Targets}}{{if gt . 3}}<span class="muted">+{{sub . 3}}</span>{{end}}{{end}}</td><td>{{template "taskstate" (index $d.RecentState $b.TaskID)}}</td><td class="small muted" title="{{$b.At}}">{{agoOf $b.At}}</td></tr>{{end}}
 </tbody></table></section>
 {{end}}
 

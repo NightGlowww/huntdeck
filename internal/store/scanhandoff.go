@@ -241,5 +241,5 @@ type HandoffBatch struct {
 	TaskID   string
 	Platform string
 	Targets  []string
-	At       string
+	At       string // RFC 3339, as stored
 }
