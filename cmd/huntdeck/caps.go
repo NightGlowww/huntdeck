@@ -119,6 +119,10 @@ func scanReconcileCmd(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stdout, "read %d of %d task(s): %d done, %d failed, %d gone\n",
 		sum.Read, sum.Tasks, sum.Done, sum.Failed, sum.Gone)
+	if sum.RateLimited {
+		// A pass cut short is not a pass with nothing to do: say which it was.
+		fmt.Fprintln(stdout, "the scanner asked us to slow down: the pass stopped early, the next one carries on")
+	}
 	// What the handoff table actually holds, per state: the queue reads this
 	// column, and "the page says unread" needs a number to argue with.
 	if states, err := app.store.HandoffStates(ctx); err == nil {
