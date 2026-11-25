@@ -185,6 +185,7 @@ func programSitemaps(base string, progs []store.SitemapProgram) []sitemapPart {
 // writeSitemapXML writes v as an indented XML document.
 func (s *server) writeSitemapXML(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
+	w.Header().Set("Content-Security-Policy", xmlPolicy) // the browser's tree view needs its own styles
 	_, _ = w.Write([]byte(xml.Header))
 	enc := xml.NewEncoder(w)
 	enc.Indent("", "  ")

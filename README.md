@@ -226,7 +226,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 Requires Go (the version in `go.mod`).
 
 ```sh
-make test   # go test -race ./...
+make test   # go test -race -timeout 30m ./...
 make lint   # go vet + golangci-lint
 make vuln   # govulncheck
 make check  # all three: what a change must pass

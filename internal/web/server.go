@@ -378,6 +378,13 @@ func cspNonce() string {
 // handlers serving images set it over securityHeaders' policy.
 const imagePolicy = "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'none'; sandbox"
 
+// xmlPolicy is the Content-Security-Policy of the sitemaps: opened on its
+// own, an XML file is shown in the browser's tree view, which styles
+// itself inline and draws its expand arrows as data: images, so the pages'
+// policy leaves it unstyled (its text run together, then bare tags). A
+// sitemap runs nothing: sandboxed, it may have those and nothing else.
+const xmlPolicy = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; frame-ancestors 'none'; sandbox"
+
 // rasterImage says whether path names a PNG or ICO file.
 func rasterImage(path string) bool {
 	return strings.HasSuffix(path, ".png") || strings.HasSuffix(path, ".ico") || strings.HasSuffix(path, ".webp")

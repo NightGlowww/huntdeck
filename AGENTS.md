@@ -136,7 +136,7 @@ internal/web/          UI pages, REST/text API, host guard, templates/ and stati
 
 ```sh
 make build        # bin/huntdeck
-make test         # go test -race ./...
+make test         # go test -race -timeout 30m ./...
 make lint         # go vet + golangci-lint
 make vuln         # govulncheck
 make check        # all three: every change must pass it
