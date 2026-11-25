@@ -67,7 +67,7 @@ func (n *Notifier) Run(ctx context.Context) {
 // what's due.
 func (n *Notifier) Tick(ctx context.Context) error {
 	now := n.Store.Now()
-	err := errors.Join(n.queueRuns(ctx), n.queueLongPauses(ctx, now), n.queueReportNotices(ctx, now), n.queueDigests(ctx, now),
+	err := errors.Join(n.queueRuns(ctx), n.queueLongPauses(ctx, now), n.queueReportNotices(ctx, now), n.queueQuiet(ctx, now), n.queueDigests(ctx, now),
 		n.sendDue(ctx, now))
 	if now.Sub(n.pruned) > time.Hour {
 		n.pruned = now

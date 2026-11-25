@@ -67,7 +67,7 @@ var emoji = map[string]string{
 	EventInvite: "🔒", EventLaunch: "🚀", EventScopeAdded: "🎯", EventScopeRemoved: "➖", EventScopeOut: "🚫",
 	EventScopeChanged: "✏️", EventReopened: "▶️", EventPaused: "⏸️", EventRemoved: "🗑️", EventBountyRaised: "💰",
 	EventRewardsChanged: "💱", EventPolicyChanged: "📝", EventAnnouncement: "📣", EventScanHandoff: "🛰️", EventScanBlocked: "🛑", EventPlatformProblem: "⚠️", EventPlatformRecovered: "✅", EventTest: "🔔",
-	EventReportBounty: "💵", EventReportState: "📄", EventReportWaiting: "💬", EventReportSeverity: "🎚️", EventReportNew: "📨",
+	EventReportBounty: "💵", EventReportState: "📄", EventReportWaiting: "💬", EventReportSeverity: "🎚️", EventReportNew: "📨", EventReportQuiet: "📭",
 }
 
 // parts renders a message's events as one or more messages under limit.
@@ -341,6 +341,8 @@ func title(e Event, tr Text) string {
 		return text(tr, "Severity changed")
 	case EventReportNew:
 		return text(tr, "New report found")
+	case EventReportQuiet:
+		return text(tr, "Report gone quiet")
 	}
 	return e.Kind
 }

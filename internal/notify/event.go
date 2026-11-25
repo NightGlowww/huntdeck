@@ -49,6 +49,9 @@ const (
 	EventReportWaiting  = "report_waiting"
 	EventReportSeverity = "report_severity"
 	EventReportNew      = "report_new"
+	// EventReportQuiet is derived, not a change: a report still undecided after
+	// the days Settings › Reports sets without a word from the program.
+	EventReportQuiet = "report_quiet"
 )
 
 // EventKind describes an event kind for Settings.
@@ -92,6 +95,7 @@ var EventKinds = []EventKind{
 	{EventReportWaiting, "Waiting on you", "waiting on you", "A program asked you something on one of your reports", GroupReports, true},
 	{EventReportSeverity, "Report severity changed", "report severities", "Triage rated one of your reports higher or lower", GroupReports, false},
 	{EventReportNew, "New report found", "new reports", "A report you submitted, once HuntDeck has read it", GroupReports, false},
+	{EventReportQuiet, "Report gone quiet", "reports gone quiet", "A report still undecided after the days Settings › Reports sets with no word from the program", GroupReports, true},
 	{EventPlatformProblem, "Platform problems", "platform problems", "Polls of a platform failed three times in a row (login broken, say), and when they work again", GroupHuntDeck, true},
 }
 
