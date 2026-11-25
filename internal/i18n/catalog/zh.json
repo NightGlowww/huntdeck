@@ -2459,6 +2459,8 @@
   "%s open · %s this month": "%s 在架 · 本月 %s",
   "%s valid of %s decided": "%s 有效 / 已定 %s",
   "%s duplicates": "%s 份重复",
-  "%s a week · %s a month": "每周 %s · 每月 %s"
+  "%s a week · %s a month": "每周 %s · 每月 %s",
+  "this month": "本月",
+  "Rejected": "被拒"
  }
 }
