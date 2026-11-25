@@ -363,7 +363,7 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 			seeds.Run(ctx)
 		}()
 	}
-	wg.Add(4)
+	wg.Add(5)
 	go func() {
 		defer wg.Done()
 		scheduler.Run(ctx, log, a.store, a.syncer, sched, scheduleJobs(platforms))
@@ -376,21 +376,39 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 	}()
 	go func() {
 		defer wg.Done()
+		// Reading the scanner's answer back gets its own minute, not the queue's
+		// thirty: on the thirty-minute loop the backlog moved once every half hour,
+		// and a pass spent the scanner's rate budget re-reading the same few tasks.
+		// Eight a minute suits an MCP that allows about ten.
+		if a.cfg.ReadOnly || a.cfg.ScanKey.Reveal() == "" {
+			return
+		}
+		tick := time.NewTicker(time.Minute)
+		defer tick.Stop()
+		client := &scopesentry.Client{BaseURL: a.cfg.ScanURL, Key: a.cfg.ScanKey.Reveal()}
+		for {
+			if sum, err := scanhandoff.Reconcile(ctx, a.store, client, 8, a.store.Now()); err != nil {
+				if ctx.Err() == nil {
+					log.Warn("scan reconcile failed", "err", err)
+				}
+			} else if sum.Done > 0 || sum.Failed > 0 || sum.RateLimited {
+				log.Info("scan tasks read", "done", sum.Done, "failed", sum.Failed, "gone", sum.Gone, "rateLimited", sum.RateLimited)
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case <-tick.C:
+			}
+		}
+	}()
+	go func() {
+		defer wg.Done()
 		// HuntQueue is derived data: rebuild it now and then, so the table follows
 		// the polls without anyone running a command.
 		if a.cfg.ReadOnly {
 			return
 		}
 		tick := time.NewTicker(30 * time.Minute)
-		// Declared here, outside the loop: inside it, the zero value made
-		// time.Since(...) always past a minute and every tick fired a read - which
-		// spent the scanner's whole rate budget on itself.
-		//
-		// Reading the tasks back shares that budget with the handoff and with
-		// anyone running the CLI: the scanner answers about ten calls a minute, so
-		// eight a minute leaves room and still clears a 170-task backlog in half an
-		// hour.
-		var lastReconcile time.Time
 		defer tick.Stop()
 		for {
 			// One HuntScore row per day: the backtest in docs/design/ai-layer.md
@@ -426,21 +444,6 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 				} else if sum.Tasks > 0 {
 					log.Info("scan tasks created", "tasks", sum.Tasks, "targets", sum.Targets, "node", sum.Node)
 					notify.ReportHandoff(ctx, a.store, log, sum, nil)
-				}
-				// And reads back what the scanner says about the tasks it made:
-				// the pipeline's last link, so a finished or failed task is not
-				// known to the scanner alone.
-				// Every ten minutes, not every tick: the scanner rates its MCP, and a
-				// pass that runs constantly spends the whole budget refusing itself.
-				if time.Since(lastReconcile) >= time.Minute {
-					lastReconcile = time.Now()
-					if sum, err := scanhandoff.Reconcile(ctx, a.store, client, 8, a.store.Now()); err != nil {
-						if ctx.Err() == nil {
-							log.Warn("scan reconcile failed", "err", err)
-						}
-					} else if sum.Done > 0 || sum.Failed > 0 || sum.RateLimited {
-						log.Info("scan tasks read", "done", sum.Done, "failed", sum.Failed, "gone", sum.Gone, "rateLimited", sum.RateLimited)
-					}
 				}
 			}
 			select {
