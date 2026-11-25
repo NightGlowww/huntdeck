@@ -81,6 +81,11 @@ and the ones that can take `--data` say so.
   targets to the scanner instead of the next batch off the top of the list: one
   task per program, named after it, recorded so a re-handoff does not queue it
   again.
+- **`huntdeck scan-reconcile [-limit 50]`** — read what the scanner says about the
+  tasks HuntDeck created (its `get_task`: status, progress, end time) and keep
+  the outcome, so a finished or failed handoff is no longer known to the scanner
+  alone. A task deleted on the scanner side is recorded as gone; a network or
+  auth failure stops the pass rather than marking everything gone.
 - **`huntdeck scan-clear [--task ID,...]`** - forget the scan handoffs HuntDeck
   recorded, so those targets are candidates again. The scanner's own tasks are
   deleted on its page: the key HuntDeck holds has five tools and none deletes.

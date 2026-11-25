@@ -34,6 +34,7 @@ Commands:
                                                   [--data DIR] [--no-sessions] [--keep N]
   doctor       Look the data directory over: writability, schema, key, space  [--data DIR]
   scan-handoff  [--targets a,b,c] Send named targets to the scanner, one task per program
+  scan-reconcile [--limit N] Read what the scanner says about the tasks HuntDeck created
   scan-clear  [--task ID,...] Forget the handoff records, so those targets are candidates
                 again; the scanner own tasks are deleted from its own page
   account     Your standing per platform: HackerOne reputation and signal,
@@ -58,33 +59,34 @@ Run "huntdeck <command> -h" for a command's flags.
 type command func(args []string, stdout, stderr io.Writer) int
 
 var commands = map[string]command{
-	"serve":         noArgs(serve),
-	"migrate":       noArgs(migrate),
-	"healthcheck":   noArgs(healthcheck),
-	"poll":          pollCmd,
-	"export":        exportCmd,
-	"match":         matchCmd,
-	"stats":         statsFetchCmd,
-	"score":         scoreCmd,
-	"status":        statusCmd,
-	"queue":         queueCmd,
-	"intigriti":     intigritiCmd,
-	"audit-texts":   auditTextsCmd,
-	"triage":        triageCmd,
-	"backtest":      backtestCmd,
-	"compact":       compactCmd,
-	"ai-check":      aiCheckCmd,
-	"ai-extract":    aiExtractCmd,
-	"changes":       changesCmd,
-	"seed":          seedCmd,
-	"backup":        backupCmd,
-	"restore":       restoreCmd,
-	"doctor":        doctorCmd,
-	"account":       accountCmd,
-	"scan-clear":    scanClearCmd,
-	"scan-handoff":  scanHandoffCmd,
-	"bugcrowd-caps": bugcrowdCapsCmd,
-	"reports":       reportsCmd,
+	"serve":          noArgs(serve),
+	"migrate":        noArgs(migrate),
+	"healthcheck":    noArgs(healthcheck),
+	"poll":           pollCmd,
+	"export":         exportCmd,
+	"match":          matchCmd,
+	"stats":          statsFetchCmd,
+	"score":          scoreCmd,
+	"status":         statusCmd,
+	"queue":          queueCmd,
+	"intigriti":      intigritiCmd,
+	"audit-texts":    auditTextsCmd,
+	"triage":         triageCmd,
+	"backtest":       backtestCmd,
+	"compact":        compactCmd,
+	"ai-check":       aiCheckCmd,
+	"ai-extract":     aiExtractCmd,
+	"changes":        changesCmd,
+	"seed":           seedCmd,
+	"backup":         backupCmd,
+	"restore":        restoreCmd,
+	"doctor":         doctorCmd,
+	"account":        accountCmd,
+	"scan-clear":     scanClearCmd,
+	"scan-handoff":   scanHandoffCmd,
+	"scan-reconcile": scanReconcileCmd,
+	"bugcrowd-caps":  bugcrowdCapsCmd,
+	"reports":        reportsCmd,
 }
 
 func main() {

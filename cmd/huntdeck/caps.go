@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/mdpsec/huntdeck/internal/config"
 	"github.com/mdpsec/huntdeck/internal/jev"
@@ -83,6 +84,41 @@ func bugcrowdCaps(ctx context.Context, cfg config.Config, log *slog.Logger, hand
 // candidates again. It is what makes a re-handoff possible after the scanner's
 // own tasks are deleted: the scanner cannot be driven from here (its key has no
 // delete tool), so the two halves are one command each.
+// scanReconcileCmd reads what the scanner says about the tasks HuntDeck
+// created and keeps the outcome: the one link the pipeline was missing.
+func scanReconcileCmd(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("scan-reconcile", flag.ContinueOnError)
+	limit := fs.Int("limit", 50, "how many of the newest tasks to read")
+	pos, code, ok := parseFlags(fs, args, stderr)
+	if !ok {
+		return code
+	}
+	if len(pos) > 0 {
+		fmt.Fprintf(stderr, "scan-reconcile: unexpected arguments: %v\n", pos)
+		return 2
+	}
+	ctx, stop := readOnlyContext(stderr)
+	defer stop()
+	app, ok := openApp(ctx, stderr, false)
+	if !ok {
+		return 1
+	}
+	defer app.close()
+	if app.cfg.ScanURL == "" || app.cfg.ScanKey.Reveal() == "" {
+		fmt.Fprintln(stderr, "scan-reconcile: no scanner configured; set it in Settings > Accounts > Scan handoff")
+		return 1
+	}
+	client := &scopesentry.Client{BaseURL: app.cfg.ScanURL, Key: app.cfg.ScanKey.Reveal()}
+	sum, err := scanhandoff.Reconcile(ctx, app.store, client, *limit, time.Now())
+	if err != nil {
+		fmt.Fprintf(stderr, "scan-reconcile: %v\n", err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "read %d of %d task(s): %d done, %d failed, %d gone\n",
+		sum.Read, sum.Tasks, sum.Done, sum.Failed, sum.Gone)
+	return 0
+}
+
 func scanClearCmd(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("scan-clear", flag.ContinueOnError)
 	tasks := fs.String("task", "", "only this task id (comma separated); default every handoff")

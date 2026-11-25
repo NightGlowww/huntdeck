@@ -67,13 +67,25 @@ the page call it; the CLI prints to stdout instead.
   stuck for N hours.
 - Notifications — two event kinds, routed by each channel's rules.
 
-## Known open link
+## The last link, now closed
 
-**Scan result → store.** `get_task_progress` (the only per-task tool the
-handoff key has) returns module timings and no status — checked with a real
-task id. Until ScopeSentry exposes a status or a column lands in
-`scan_handoffs`, a finished or failed task is known to the scanner alone, and
-releasing its targets is a manual `huntdeck scan-clear --task <id>`.
+**Scan result → store.** The open link was here: `get_task_progress` (the tool
+the handoff first used) returns module timings and no status, so a finished or
+failed task was known to the scanner alone. `get_task` does carry it - status,
+progress and the end time - which was checked against a real task before the
+column landed:
+
+- migration 0078 adds `state`, `status` and `checked_at` to `scan_handoffs`;
+- `scanhandoff.Reconcile` reads the newest tasks and keeps the outcome, once
+  per task (a finished task is not asked about again),
+- it runs with the handoff on the same clock in `serve`, and on demand as
+  `huntdeck scan-reconcile [-limit N]`,
+- a task the scanner no longer knows is recorded as `gone`; a network or auth
+  failure stops the pass rather than marking everything gone.
+
+Guarded by `TestReconcileRecordsWhatTheScannerSays`: the finished task is kept
+as done, the forgotten one as gone, and a second pass does not ask about the
+finished task again (removing that skip turns it red).
 
 ## The failure catalogue (what each link taught)
 

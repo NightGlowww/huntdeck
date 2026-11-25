@@ -418,6 +418,16 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 					log.Info("scan tasks created", "tasks", sum.Tasks, "targets", sum.Targets, "node", sum.Node)
 					notify.ReportHandoff(ctx, a.store, log, sum, nil)
 				}
+				// And reads back what the scanner says about the tasks it made:
+				// the pipeline's last link, so a finished or failed task is not
+				// known to the scanner alone.
+				if sum, err := scanhandoff.Reconcile(ctx, a.store, client, 25, a.store.Now()); err != nil {
+					if ctx.Err() == nil {
+						log.Warn("scan reconcile failed", "err", err)
+					}
+				} else if sum.Done > 0 || sum.Failed > 0 {
+					log.Info("scan tasks read", "done", sum.Done, "failed", sum.Failed, "gone", sum.Gone)
+				}
 			}
 			select {
 			case <-ctx.Done():
