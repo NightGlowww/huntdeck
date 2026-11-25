@@ -92,6 +92,12 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	}
 	// What went out, and under which task id: the scanner names a task however it
 	// likes, so this is how a task in its list is traced back to a program.
+	if counts, cerr := s.Store.HandoffStates(r.Context()); cerr == nil {
+		d.ScanCounts = counts
+	}
+	if at, ok, cerr := s.Store.LastHandoffRead(r.Context()); cerr == nil {
+		d.LastRead, d.ReadKnown = at, ok
+	}
 	if tasks, terr := s.Store.HandoffTasks(r.Context(), 40); terr == nil {
 		d.RecentState = make(map[string]store.HandoffTask, len(tasks))
 		for _, t := range tasks {
@@ -266,6 +272,11 @@ type scanPageData struct {
 	// Recent are the tasks handed over lately, by the id the scanner gave back.
 	Recent      map[string]store.HandoffBatch
 	RecentOrder []string
+	// ScanCounts is how many targets sit in each state, and LastRead when the
+	// column was last refreshed: the histogram on the page rather than in a CLI.
+	ScanCounts map[string]int
+	LastRead   time.Time
+	ReadKnown  bool
 	// RecentState is what the scanner said about each of them last, by task id:
 	// the pipeline's last link, shown where the handoffs are.
 	RecentState map[string]store.HandoffTask

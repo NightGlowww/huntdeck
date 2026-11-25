@@ -98,3 +98,20 @@ func (s *Store) HandoffsWithoutTask(ctx context.Context) (int, error) {
 	}
 	return n, nil
 }
+
+// LastHandoffRead is the most recent time any task's state was read, so the page
+// can say how fresh the column is instead of leaving it to guesswork.
+func (s *Store) LastHandoffRead(ctx context.Context) (time.Time, bool, error) {
+	var at *string
+	if err := s.db.R.QueryRowContext(ctx, `SELECT MAX(checked_at) FROM scan_handoffs`).Scan(&at); err != nil {
+		return time.Time{}, false, fmt.Errorf("last handoff read: %w", err)
+	}
+	if at == nil || *at == "" {
+		return time.Time{}, false, nil
+	}
+	t, err := time.Parse(time.RFC3339, *at)
+	if err != nil {
+		return time.Time{}, false, nil
+	}
+	return t, true, nil
+}

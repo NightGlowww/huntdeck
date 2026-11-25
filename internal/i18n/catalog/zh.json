@@ -2538,6 +2538,8 @@
   "the scanner asked us to slow down: the pass stopped early": "扫描器要求放慢：这一趟提前结束",
   "read %d task(s): %d finished, %d failed": "读了 %d 个任务：%d 个完成、%d 个失败",
   "Read their state now": "立即读取状态",
-  "Asking the scanner…": "正在询问扫描器…"
+  "Asking the scanner…": "正在询问扫描器…",
+  "finished": "已完成",
+  "last read": "上次读取"
  }
 }
