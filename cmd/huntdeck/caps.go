@@ -91,6 +91,7 @@ func bugcrowdCaps(ctx context.Context, cfg config.Config, log *slog.Logger, hand
 func scanReconcileCmd(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("scan-reconcile", flag.ContinueOnError)
 	limit := fs.Int("limit", 50, "how many of the newest tasks to read")
+	showTasks := fs.Bool("tasks", false, "print the tasks the pass walks, in its order")
 	pos, code, ok := parseFlags(fs, args, stderr)
 	if !ok {
 		return code
@@ -135,6 +136,21 @@ func scanReconcileCmd(args []string, stdout, stderr io.Writer) int {
 			parts = append(parts, name+"="+strconv.Itoa(states[k]))
 		}
 		fmt.Fprintf(stdout, "targets by state: %s\n", strings.Join(parts, " "))
+		if *showTasks {
+			if tasks, terr := app.store.HandoffTasks(ctx, 15); terr == nil {
+				for _, t := range tasks {
+					state := t.State
+					if state == "" {
+						state = "(unread)"
+					}
+					checked := "never"
+					if t.CheckedAt != nil {
+						checked = t.CheckedAt.Format("15:04")
+					}
+					fmt.Fprintf(stdout, "  %s  rows=%-4d state=%-10s status=%-3d checked=%s\n", t.TaskID, t.Targets, state, t.Status, checked)
+				}
+			}
+		}
 		if n, err := app.store.HandoffsWithoutTask(ctx); err == nil && n > 0 {
 			fmt.Fprintf(stdout, "without a task: %d (recorded with no receipt: no pass can read them)\n", n)
 		}
