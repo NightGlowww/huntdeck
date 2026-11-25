@@ -305,6 +305,16 @@ disagree in either direction.
   that code stopped working; and the row that says a column is required was never
   populated, which nothing noticed. Every guard added since is proved by
   reverting its fix.
+
+- **Say what you will watch before you change anything.** Three times this project
+  mistook a broken measurement for a fix: a page's row count taken from a header
+  cell (so filtering could not possibly show), a cache key that omitted the filter
+  (so the filtered view was served the plain list - every unit test green, the page
+  unchanged), and a summary that printed "read 0" whether there was nothing to read
+  or the scanner had refused. In each case the code was fine to read and the
+  number was wrong. Name the observable first - the row count in the body, the
+  total in the filter's own words, the line that separates "nothing to do" from
+  "could not do it" - and check it goes red when the fix is reverted.
 - Tests are table-driven. Platform clients are tested against `httptest`
   servers replaying fixtures (pagination, 429, 5xx, auth failure, partial
   failure); the sync engine with `internal/platform/fake`, including "a
