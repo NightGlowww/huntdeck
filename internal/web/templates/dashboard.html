@@ -109,7 +109,7 @@
         <div class="dh">{{template "pname" (plink .Program)}}
           <span class="st">{{if .NewProgram}}<b class="add">{{T "new"}}</b>{{end}}{{if .Added}}<b class="add">+{{num .Added}}</b>{{end}}{{if .Removed}}<b class="del">−{{num .Removed}}</b>{{end}}{{if .Edited}}<b class="mod">~{{num .Edited}}</b>{{end}}{{if .Bounty}}<b class="mod">$</b>{{end}}</span>
           <span class="when" data-ago data-at="{{iso .Latest}}" title="{{datetime .Latest}}">{{ago .Latest}}</span></div>
-        {{range .Lines}}<div class="dl {{.Class}}"><span class="sign">{{if eq .Class "add"}}+{{else if eq .Class "del"}}−{{else}}~{{end}}</span>{{if .ChangeID}}<a href="/changes/{{.ChangeID}}">{{.Text}}</a>{{else}}<code title="{{.Text}}">{{.Text}}</code>{{end}}</div>{{end}}
+        {{range .Lines}}<div class="dl {{.Class}}"><span class="sign">{{if eq .Class "add"}}+{{else if eq .Class "del"}}−{{else}}~{{end}}</span>{{if .ChangeID}}<a href="/changes/{{.ChangeID}}">{{if .Change}}{{change .Change}}{{else}}{{.Text}}{{end}}</a>{{else}}<code title="{{.Text}}">{{.Text}}</code>{{end}}</div>{{end}}
         {{if .More}}<a class="dl more" href="/programs/{{.Program.Platform}}/{{.Program.Handle}}?tab=scope&amp;order=added"><span class="sign"></span>… {{num .More}} more</a>{{end}}
       </div>
       {{end}}{{end}}
@@ -163,8 +163,8 @@
         <div class="pick-body">
           {{template "pname" (plink .ProgramRef "#huntscore")}}
           {{with .Detail.TopReason}}<div class="why muted small">{{huntReason .}}</div>{{end}}
-          <div class="meta small">{{num .Wildcards}} {{plural .Wildcards "wildcard" "wildcards"}} · {{num .InScope}} {{T "in scope"}} ·
-            {{with amount .TopBounty .Currency}}<span class="amt">{{.}}</span> {{T "max"}}{{else}}{{with amount .AvgBounty .Currency}}<span class="amt">{{.}}</span> {{T "avg"}}{{else}}{{if .OffersBounty}}{{T "amounts not shared"}}{{else}}{{T "no bounties"}}{{end}}{{end}}{{end}}</div>
+          <div class="meta small">{{num .Wildcards}} {{T (plural .Wildcards "wildcard" "wildcards")}} · {{num .InScope}} {{T "in scope"}} ·
+            {{with amount .TopBounty .Currency}}<span class="amt-pair"><span class="amt">{{.}}</span> {{T "max"}}</span>{{else}}{{with amount .AvgBounty .Currency}}<span class="amt-pair"><span class="amt">{{.}}</span> {{T "avg"}}</span>{{else}}{{if .OffersBounty}}{{T "amounts not shared"}}{{else}}{{T "no bounties"}}{{end}}{{end}}{{end}}</div>
         </div></li>
       {{end}}{{end}}
     </ul>

@@ -245,6 +245,9 @@ type boardDiff struct {
 
 // boardLine is one line of a diff card: "add", "del" or "mod".
 type boardLine struct {
+	// Change is the change this line shows, so the template renders its words
+	// in the page's language; Text carries data only (an identifier, a value).
+	Change      *store.ChangeView
 	Class, Text string
 	ChangeID    int64 // for changes with a detail page
 }
@@ -424,7 +427,7 @@ func boardDiffs(changes []store.BoardChange, limit int) ([]boardDiff, int) {
 		case store.ChangeScopeAdded:
 			if c.Field == "out_of_scope" { // more exclusions: a scope edit, not new surface
 				d.Edited++
-				line = boardLine{Class: "mod", Text: c.NewValue + "  (out of scope)"}
+				line = boardLine{Class: "mod", Text: c.NewValue, Change: &c.ChangeView, ChangeID: detailID(c.ChangeView)}
 				break
 			}
 			d.Added++
@@ -434,19 +437,19 @@ func boardDiffs(changes []store.BoardChange, limit int) ([]boardDiff, int) {
 			line = boardLine{Class: "del", Text: c.OldValue}
 		case store.ChangeScopeUpdated:
 			d.Edited++
-			line = boardLine{Class: "mod", Text: strings.TrimSpace(c.Identifier + "  " + strings.ReplaceAll(c.Field, "_", " ") + " " + c.OldValue + " → " + c.NewValue)}
+			line = boardLine{Class: "mod", Change: &c.ChangeView, ChangeID: detailID(c.ChangeView)}
 		case store.ChangeProgramAdded:
 			d.NewProgram = true
-			line = boardLine{Class: "add", Text: "program listed"}
+			line = boardLine{Class: "add", Change: &c.ChangeView, ChangeID: detailID(c.ChangeView)}
 		case store.ChangeProgramRemoved:
 			d.Other = true
-			line = boardLine{Class: "del", Text: "program no longer listed"}
+			line = boardLine{Class: "del", Change: &c.ChangeView, ChangeID: detailID(c.ChangeView)}
 		case store.ChangeBountyChanged, store.ChangeRewardsChanged:
 			d.Bounty = true
-			line = boardLine{Class: "mod", Text: describeChange(c.ChangeView), ChangeID: detailID(c.ChangeView)}
+			line = boardLine{Class: "mod", Change: &c.ChangeView, ChangeID: detailID(c.ChangeView)}
 		default:
 			d.Other = true
-			line = boardLine{Class: "mod", Text: describeChange(c.ChangeView), ChangeID: detailID(c.ChangeView)}
+			line = boardLine{Class: "mod", Change: &c.ChangeView, ChangeID: detailID(c.ChangeView)}
 		}
 		if len(d.Lines) < boardDiffRows {
 			d.Lines = append(d.Lines, line)

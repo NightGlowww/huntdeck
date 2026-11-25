@@ -116,3 +116,6 @@
      the rule that used to sit here never applied. Its replacement lives there. */
   .picks .why, .picks .why b { white-space: normal; }
 }
+
+/* An amount and its word are one token: €5K 最高 must not split across lines. */
+.picks .meta .amt-pair { white-space: nowrap; }

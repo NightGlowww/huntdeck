@@ -44,10 +44,12 @@ func TestBoardDiffs(t *testing.T) {
 	if p1.Program.ID != 1 || p1.Added != 3 || p1.Edited != 1 || len(p1.Lines) != boardDiffRows || p1.More != 1 {
 		t.Errorf("program 1 card = %+v", p1)
 	}
-	if p1.Lines[2] != (boardLine{Class: "mod", Text: "c.example.com  (out of scope)"}) {
-		t.Errorf("out-of-scope addition = %+v", p1.Lines[2])
+	// The line carries the change itself: the template renders its words in the
+	// page's language, and Text keeps only the data (the identifier).
+	if l := p1.Lines[2]; l.Class != "mod" || l.Text != "c.example.com" || l.Change == nil || l.Change.Field != "out_of_scope" {
+		t.Errorf("out-of-scope addition = %+v", l)
 	}
-	if p2.Removed != 1 || p2.Edited != 1 || p2.Lines[0].Class != "del" || p2.Lines[1].Text != "/self-service-*  asset type url → other" {
+	if p2.Removed != 1 || p2.Edited != 1 || p2.Lines[0].Class != "del" || p2.Lines[1].Change == nil || p2.Lines[1].Change.Field != "asset_type" {
 		t.Errorf("program 2 card = %+v", p2)
 	}
 }

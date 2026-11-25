@@ -2382,6 +2382,25 @@
   "day": "天",
   "days": "天",
   "quiet": "沉寂",
-  "open reports": "份在架报告"
+  "open reports": "份在架报告",
+  "No automated tools": "不使用自动化工具",
+  "Policy forbids: ": "政策禁止：",
+  "Sign up with your ": "注册请用你的 ",
+  "Sign up with your @": "注册请用你的 @",
+  "User-Agent: ": "User-Agent：",
+  "Announcement · ": "公告 · ",
+  "HuntDeck: changes": "HuntDeck：变更",
+  "Every message, newsletters too": "全部邮件，含订阅",
+  "Only what HuntMail took for a newsletter": "只看 HuntMail 判为订阅邮件的",
+  "POJIA report": "POJIA 报告",
+  "HuntDeck: ": "HuntDeck：",
+  "First response: ": "首次响应：",
+  "To validate: ": "到确认有效：",
+  "Identity-verified hackers only (ID verification on ": "仅限通过身份验证的猎人（需在 ",
+  "Test credentials available from the platform": "平台提供测试凭据",
+  "You must accept the program's own terms and conditions on ": "你需要先在以下平台接受本项目自己的条款：",
+  "Your ": "你的 ",
+  "Programs you have notes on, saved in this browser": "你写过备注的项目（保存在本浏览器）",
+  "Programs you watch, saved in this browser": "你关注的项目（保存在本浏览器）"
  }
 }
