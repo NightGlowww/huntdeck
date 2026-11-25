@@ -36,6 +36,7 @@ var funcs = template.FuncMap{
 	"softBreak": softBreak,
 	// pojiaLinks turns a POJIA answer into navigable HTML.
 	"pojiaLinks":   pojiaLinks,
+	"beforeParen":  beforeParen,
 	"pojiaClasses": pojiaClasses,
 	"ago":          ago,
 	"until":        until,
@@ -358,4 +359,13 @@ func loadTemplates(zone func() *time.Location, version string, readOnly bool, li
 		out[lang] = set
 	}
 	return out, nil
+}
+
+// beforeParen cuts a bilingual label at its opening bracket: a chip shows the
+// Chinese and keeps the gloss for its tooltip.
+func beforeParen(s string) string {
+	if i := strings.IndexAny(s, "（("); i > 0 {
+		return strings.TrimSpace(s[:i])
+	}
+	return s
 }
