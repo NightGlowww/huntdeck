@@ -38,6 +38,7 @@ func (s *Store) QuietReports(ctx context.Context, days int, now time.Time) ([]Qu
 		 WHERE r.state IN ('new', 'triaged')
 		   AND r.gone_at IS NULL
 		   AND COALESCE(r.muted, 0) = 0
+		   AND r.source = 'platform' -- one added by hand has no program to be silent
 		   AND (r.snoozed_until IS NULL OR r.snoozed_until < ?)
 		   AND COALESCE(r.last_activity_at, r.submitted_at) < ?
 		   AND (r.quiet_notified_at IS NULL OR r.quiet_notified_at < COALESCE(r.last_activity_at, r.submitted_at))

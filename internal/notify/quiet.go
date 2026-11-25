@@ -49,6 +49,12 @@ func (n *Notifier) queueQuiet(ctx context.Context, now time.Time) error {
 	if err != nil {
 		return err
 	}
+	// Nothing to deliver (no channel chooses this kind, or none is set up): the
+	// silence is not consumed. Stamping it here would swallow the notice for a
+	// channel the user configures tomorrow.
+	if len(outbox) == 0 && len(pending) == 0 {
+		return nil
+	}
 	if err := n.Store.QueueOutboxAndPending(ctx, outbox, pending); err != nil {
 		return fmt.Errorf("quiet reports: queue: %w", err)
 	}
