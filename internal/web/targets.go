@@ -221,6 +221,11 @@ func (s *server) targets(w http.ResponseWriter, r *http.Request) {
 	}
 	query := strings.TrimSpace(q.Get("q"))
 	best, az := q.Get("sort") == "best" && len(f.AssetTypes) == 0, q.Get("sort") == "az" // assets aren't scored
+	// One row per program needs the asset path: it is the one that can dedupe
+	// across kinds after sorting, and its total is counted from the deduped list.
+	if f.OnePerProgram && len(f.AssetTypes) == 0 {
+		f.AssetTypes = []string{scope.KindWildcard, scope.KindDomain, scope.KindURL, scope.KindIP, scope.KindCIDR}
+	}
 	list := s.Store.TargetRows
 	switch {
 	case best:
@@ -311,7 +316,11 @@ func (d targetsData) SortAria(key string) string {
 // targetFacetParams are what the Targets page's facet counts depend on: the
 // filters it reads, less the sort and page. The rest (ignored programs, tags)
 // lives in the database, whose every change starts the memo again.
-var targetFacetParams = []string{"kind", "q", "scope", "platform", "bounty", "private", "include_paused", "include_ignored", "tag", "added"}
+var targetFacetParams = []string{"kind", "q", "scope", "platform", "bounty", "private", "include_paused", "include_ignored", "tag", "added",
+	// one changes which rows come back, so it belongs in the memo key: without it
+	// the filtered view was served the plain list from the cache, and the switch
+	// looked broken because it was.
+	"one"}
 
 // pageRows is one page of a list, in the memo: the rows and how many match.
 type pageRows struct {
