@@ -323,7 +323,7 @@
   "bounty eligible": "赏金资格",
   "max severity": "最高危害",
   "identifier": "标识",
-  "severity": "危害",
+  "severity": "严重度",
   "critical": "严重",
   "high": "高",
   "medium": "中",
@@ -539,7 +539,7 @@
   "Filter assets and notes": "筛选资产与备注",
   "platform order": "平台顺序",
   "Asset": "资产",
-  "Severity": "危害",
+  "Severity": "严重度",
   "covers": "覆盖",
   "Showing %s of %s": "显示 %s / 共 %s",
   "Show all": "显示全部",
@@ -688,8 +688,8 @@
   "Weakness": "弱点",
   "Votes": "赞同",
   "No disclosed reports match these filters.": "没有符合这些筛选的已披露报告。",
-  "report": "报告",
-  "reports": "报告",
+  "report": "份报告",
+  "reports": "份报告",
   "Endpoints": "接口",
   "Getting started": "快速开始",
   "Address": "地址",
@@ -2378,6 +2378,8 @@
   "Duplicate": "重复",
   "Informative": "无实际影响",
   "Not applicable": "不适用",
-  "Spam": "垃圾提交"
+  "Spam": "垃圾提交",
+  "day": "天",
+  "days": "天"
  }
 }
