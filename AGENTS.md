@@ -198,6 +198,15 @@ a test that every message they ask for exists), and `TestPaletteContrast`
 reads `static/css/00-theme.css` and fails when a palette's text drops below
 WCAG AA (4.5:1) on the surfaces it sits on, in light or dark.
 
+A third check reads what the browser renders: `scripts/i18n-audit.mjs` loads each
+page in Chinese and lists the runs of Latin words that are not a brand, a host
+or a file name, which is where a handler's sentence or a plural key printed raw
+shows up. It takes `--baseline scripts/i18n-audit-baseline.json` and exits 1
+when a page grows past its recorded count, so new English copy fails a check
+instead of being found by eye a month later. Re-record the baseline with the
+same run only when the drop is deliberate.
+
+
 Three more guard the reference: `TestEnvVarsAreDocumented` fails when a variable
 the config reads is missing from `docs/configuration.md` or `.env.example`,
 `TestEveryToolIsDocumented` fails when an MCP tool and `docs/mcp.md` disagree,

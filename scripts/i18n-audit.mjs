@@ -11,7 +11,7 @@
 import { spawn } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 const args = process.argv.slice(2);
 const flag = (n, d) => { const i = args.indexOf('--' + n); return i >= 0 && args[i + 1] ? args[i + 1] : d; };
@@ -33,7 +33,7 @@ const ALLOW = new Set((
   'api url urls ip cidr json csv http https get post put delete cve cvss cwe bbp vdp id ids ' +
   'caido burp zap discord telegram webhook burpsuite scope insomnia bruno postman chrome github ' +
   'signal tls ssl vnc env sqlite cloudflare workers d1 openai typesafe bailian jev ssk ssv ' +
-  'dkim dmarc ok on off user agent token key cookie cookies'
+  'dkim dmarc ok on off user agent token key cookie cookies a–z z–a'
 ).split(/\s+/));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -94,6 +94,13 @@ const COLLECT = `(() => {
   return out;
 })()`;
 
+const baselinePath = flag('baseline', '');
+let baseline = {};
+if (baselinePath && existsSync(baselinePath)) {
+  baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
+}
+const regressions = [];
+
 let total = 0;
 for (const [name, path] of pages) {
   await send('Page.navigate', { url: base + path }, S);
@@ -112,9 +119,20 @@ for (const [name, path] of pages) {
     console.log('== ' + name + ' (' + hits.length + ')');
     for (const h of hits.slice(0, 12)) console.log('   ' + h);
     total += hits.length;
+    const cap = baseline[name];
+    if (cap !== undefined && hits.length > cap) {
+      regressions.push(name + ': ' + hits.length + ' (baseline ' + cap + ')');
+    }
   }
 }
 console.log('english fragments: ' + total);
+if (baselinePath) {
+  if (regressions.length) {
+    console.log('over baseline:\n  ' + regressions.join('\n  '));
+  } else {
+    console.log('within the baseline');
+  }
+}
 ws.close();
 chrome.kill();
-process.exit(0);
+process.exit(regressions.length ? 1 : 0);
