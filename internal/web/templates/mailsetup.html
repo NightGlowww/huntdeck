@@ -1,7 +1,7 @@
 {{/* Email › HuntMail › Setup (mailsetup.go): HuntMail's address and key,
    and setting it up on Cloudflare or updating it. */}}
 {{define "content"}}{{with .Data}}
-<h1 class="m-heading">HuntMail</h1>
+<h1 class="m-heading">{{T "HuntMail"}}</h1>
 {{template "huntmail-tabs" "setup"}}
 {{if .Run}}
 <section class="panel msetup-run"{{if .Busy}} data-setup-running{{end}} aria-live="polite">
@@ -25,17 +25,17 @@
 <div class="pair2 msetup-top">
 <div class="msetup-conn">{{template "accounts" .Accounts}}</div>
 {{if .CanSetUp}}<section class="panel" id="msetup-form">
-  <div class="panel-head"><h2>{{if .Configured}}Update or add a domain{{else}}Set up{{end}}</h2></div>
+  <div class="panel-head"><h2 class="nocaps">{{if .Configured}}{{T "Update or add a domain"}}{{else}}{{T "Set up"}}{{end}}</h2></div>
   <form method="post" action="/email/setup" class="panel-body profile-form column" autocomplete="off">
     {{with .Problem}}<p class="flash err" role="alert">{{.}}</p>{{end}}
     <label class="wide"><span>{{T "Cloudflare API token"}}</span><input type="password" name="token" required autocomplete="new-password" spellcheck="false" maxlength="400"></label>
-    <label class="wide"><span>Domain{{if .Configured}}s to add{{end}}</span><input type="text" name="domains" value="{{.Domains}}" spellcheck="false" maxlength="400" {{if not .Configured}}required {{end}}placeholder="{{T "e.g. example.com"}}">
-      <span class="muted small">{{if .Configured}}Optional: leave empty to update HuntMail only. {{end}}Several: separate them with commas. Each must be on the token's account.</span></label>
+    <label class="wide"><span>{{if .Configured}}{{T "Domains to add"}}{{else}}{{T "Domain"}}{{end}}</span><input type="text" name="domains" value="{{.Domains}}" spellcheck="false" maxlength="400" {{if not .Configured}}required {{end}}placeholder="{{T "e.g. example.com"}}">
+      <span class="muted small">{{if .Configured}}{{T "Optional: leave empty to update HuntMail only."}} {{end}}{{T "Several: separate them with commas. Each must be on the token's account."}}</span></label>
     <label class="wide"><span>{{T "Worker name"}}</span><input type="text" name="name" value="{{.Name}}" spellcheck="false" maxlength="63" pattern="[a-z0-9][a-z0-9\-]*">
       <span class="muted small">{{T "Its database has the same name. Keep"}}<code>huntmail</code>{{T "unless you run more than one."}}</span></label>
     <label class="check msetup-check"><input type="checkbox" name="replace" value="1"{{if .Replace}} checked{{end}}><span>{{T "Replace an existing catch-all"}}<span class="hint muted small">{{T "Only if the domain's catch-all already forwards somewhere: that mail goes to HuntMail instead."}}</span></span></label>
     <label class="check msetup-check"><input type="checkbox" name="newkey" value="1"{{if .NewKey}} checked{{end}}><span>{{T "Make a new key"}}<span class="hint muted small">{{T "For a HuntMail HuntDeck doesn't have the key of: whatever uses the old key stops working."}}</span></span></label>
-    <button type="submit">{{if .Configured}}Update HuntMail{{else}}Set up HuntMail{{end}}</button>
+    <button type="submit">{{if .Configured}}{{T "Update HuntMail"}}{{else}}{{T "Set up HuntMail"}}{{end}}</button>
   </form>
 </section>
 {{else}}

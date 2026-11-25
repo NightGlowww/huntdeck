@@ -3,7 +3,7 @@
 
 {{/* Mail, Newsletters or All, when HuntMail tells newsletters apart: in
      the title bar, or at the top of the page where that has no room. */}}
-{{define "nl-toggle"}}<nav class="seg vis-toggle" aria-label="Newsletters">{{range .NLSegments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}" title="{{.Title}}">{{.Label}}{{if .Counted}} <em>{{num .Count}}</em>{{end}}</a>{{end}}</nav>{{end}}
+{{define "nl-toggle"}}<nav class="seg vis-toggle" aria-label="{{T "Newsletters"}}">{{range .NLSegments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}" title="{{.Title}}">{{.Label}}{{if .Counted}} <em>{{num .Count}}</em>{{end}}</a>{{end}}</nav>{{end}}
 
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T "Email"}}</h1>

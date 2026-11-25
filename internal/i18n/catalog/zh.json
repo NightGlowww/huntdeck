@@ -2401,6 +2401,12 @@
   "You must accept the program's own terms and conditions on ": "你需要先在以下平台接受本项目自己的条款：",
   "Your ": "你的 ",
   "Programs you have notes on, saved in this browser": "你写过备注的项目（保存在本浏览器）",
-  "Programs you watch, saved in this browser": "你关注的项目（保存在本浏览器）"
+  "Programs you watch, saved in this browser": "你关注的项目（保存在本浏览器）",
+  "Update or add a domain": "更新或新增域",
+  "Set up": "安装设置",
+  "Domains to add": "要新增的域",
+  "Update HuntMail": "更新 HuntMail",
+  "Optional: leave empty to update HuntMail only.": "可选：留空则只更新 HuntMail。",
+  "Several: separate them with commas. Each must be on the token's account.": "多个域用逗号分隔；每个域都必须在这个 token 所属的账号下。"
  }
 }
