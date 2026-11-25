@@ -99,5 +99,6 @@
  "days": "天",
  "not an interval: try 30m, 6h, 1d or off": "不是有效间隔：试试 30m、6h、1d 或 off",
  "%s is faster than the %s floor": "%s 快于 %s 的下限",
- "Yes, do it": "确定执行"
+ "Yes, do it": "确定执行",
+ "g then a letter": "g 再按一个字母"
 }

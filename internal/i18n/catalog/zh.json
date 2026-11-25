@@ -2440,6 +2440,16 @@
   "read with the polls, once an hour at most": "随轮询读取，最多每小时一次",
   "browser login": "浏览器登录",
   "The default.": "默认值。",
-  "Default: 14.": "默认：14。"
+  "Default: 14.": "默认：14。",
+  "Copy and open": "复制并打开",
+  "Average bounty": "平均赏金",
+  "New · 30 days": "新增 · 30 天",
+  "Awaiting bounty": "等待赏金",
+  "Newest submitted": "最近提交",
+  "This month": "本月",
+  "This year": "今年",
+  "g then a letter": "按 g 再按一个字母",
+  "MCP client": "MCP 客户端",
+  "Move": "移动"
  }
 }
