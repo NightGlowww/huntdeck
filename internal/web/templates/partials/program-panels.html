@@ -48,7 +48,7 @@
   <ul>
   {{range .Before}}
     <li{{if .Alert}} class="alert"{{end}}><svg class="i" aria-hidden="true"><use href="#{{if or (eq .Kind "req") (eq .Kind "warn")}}i-info{{else if or (eq .Kind "auto") (eq .Kind "rate")}}i-activity{{else if eq .Kind "email"}}i-file{{else if eq .Kind "creds"}}i-target{{else}}i-sliders{{end}}"/></svg>
-      <div><b>{{.Title}}</b>{{with .Detail}}<span>{{.}}</span>{{end}}</div>
+      <div><b>{{T .Title}}</b>{{with .Detail}}<span>{{T .}}</span>{{end}}</div>
       {{with .Copy}}<button type="button" class="icon-btn" data-copy-text="{{.}}" title="{{T "Copy"}}" aria-label="{{T "Copy"}} {{.}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button>{{end}}</li>
   {{end}}
   </ul>

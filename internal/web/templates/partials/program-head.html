@@ -82,7 +82,7 @@
    programs that don't pay leave out the money ones. */}}
 {{define "program-kpis"}}{{with .Data}}{{$p := .P}}{{$r := .Row}}
 <section class="panel kpis{{if not $p.OffersBounty}} six{{end}}" aria-label="{{T "Headline numbers"}}">
-  <div class="kpi"><span class="l">{{T "HuntScore"}}</span><span class="v">{{template "m-hunt" $r}}</span>
+  <div class="kpi"><span class="l nocaps">{{T "HuntScore"}}</span><span class="v">{{template "m-hunt" $r}}</span>
     <span class="h">{{with $p.Hunt}}{{TF "%s confidence" (T .Confidence)}}{{end}}{{with $.Data.HuntChange}} · <span title="{{$.Data.HuntSince}}">{{.}}</span>{{end}}</span></div>
   {{if $p.OffersBounty}}
   <div class="kpi"><span class="l">{{T "Bounty"}}</span><span class="v">{{template "m-bounty" $r}}</span>

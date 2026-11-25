@@ -2512,6 +2512,9 @@
   "already scanned: the scanner finished it": "已扫完：扫描器完成了这个目标",
   "the scanner failed on it: hand it over again": "扫描器在这个目标上失败了：可重新派发",
   "the scanner no longer has it: hand it over again": "扫描器已没有这个任务：可重新派发",
-  "the scanner is on it now": "扫描器正在处理"
+  "the scanner is on it now": "扫描器正在处理",
+  "Send this header with every request.": "每个请求都要带上这个头。",
+  "For test accounts.": "用于测试账号。",
+  "Policy forbids: automated scanners": "政策禁止：自动化扫描器"
  }
 }
