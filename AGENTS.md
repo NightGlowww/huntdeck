@@ -207,6 +207,15 @@ instead of being found by eye a month later. Re-record the baseline with the
 same run only when the drop is deliberate.
 
 
+Two failure shapes are worth naming, because both are silent:
+
+a page's markup can sit outside its `{{define}}` and Go executes the named
+template without complaint - the scan page's handoff panel never rendered for
+its whole life that way, and `TestNoTemplateTextOutsideDefine` now fails on it;
+and a translated string may hold template code as its own text (the DKIM
+tooltip's does), so anything that reads templates by cutting at the first `}}`
+must be quote-aware, or it unbalances the file it is reading.
+
 Three more guard the reference: `TestEnvVarsAreDocumented` fails when a variable
 the config reads is missing from `docs/configuration.md` or `.env.example`,
 `TestEveryToolIsDocumented` fails when an MCP tool and `docs/mcp.md` disagree,

@@ -13,7 +13,7 @@
       <a class="an-top" href="#start">{{T "Getting started"}}</a>
       <a class="an-top" href="#tokens">{{T "API tokens"}}</a>
       {{range .Groups}}{{if .Ops}}<div class="an-g">{{.Name}}</div>
-      {{range .Ops}}<a href="#{{.ID}}"><span class="mth {{lower .Method}}">{{.Method}}</span><span class="an-t">{{.Summary}}</span></a>{{end}}{{end}}{{end}}
+      {{range .Ops}}<a href="#{{.ID}}"><span class="mth {{lower .Method}}">{{.Method}}</span><span class="an-t">{{T .Summary}}</span></a>{{end}}{{end}}{{end}}
     </div>
   </details>
 </nav>
@@ -105,12 +105,12 @@
   </details>
 </section>{{else}}<section class="panel credentials" id="tokens"><details><summary class="credential-summary"><span class="credential-title">{{T "API tokens"}}</span><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary><p class="credential-empty">{{T "No access password is set, so there is nothing for a token to unlock: every script reaches this API directly."}}</p></details></section>{{end}}
 {{range .Groups}}{{if .Ops}}
-<h2 class="apigroup" id="{{.ID}}">{{.Name}}<span>{{.Description}}</span></h2>
+<h2 class="apigroup" id="{{.ID}}">{{T .Name}}<span>{{T .Description}}</span></h2>
 {{range .Ops}}
 <section class="panel ep" id="{{.ID}}">
 <details class="ep-disclosure"{{if eq .ID "board"}} open{{end}}>
   <summary class="ep-summary">
-    <span class="ep-summary-main"><span class="ep-path"><span class="mth {{lower .Method}}">{{.Method}}</span><code>{{.Path}}</code></span><b>{{.Summary}}</b></span>
+    <span class="ep-summary-main"><span class="ep-path"><span class="mth {{lower .Method}}">{{.Method}}</span><code>{{.Path}}</code></span><b>{{T .Summary}}</b></span>
     <svg class="i" aria-hidden="true"><use href="#i-chev"/></svg>
   </summary>
   <div class="ep-layout">
