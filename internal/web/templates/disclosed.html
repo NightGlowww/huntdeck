@@ -37,7 +37,7 @@
         <td class="c-check"><input type="checkbox" class="pick" value="{{.URL}}" aria-label="{{TF "Select %s" .Title}}"></td>
         <td class="c-prog">{{template "pname" (plink .Program "?tab=stats#disclosed")}}</td>
         <td class="c-report" title="{{.Title}}{{with .Reporter}}&#10;by {{.}}{{end}}{{with .Substate}}{{if ne . "resolved"}} · {{.}}{{end}}{{end}}{{range .CVEIDs}} · {{.}}{{end}}{{with .Summary}}&#10;&#10;{{.}}{{end}}"><a class="link" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{.Title}}</a>{{with .Reporter}} <span class="muted small">by {{.}}</span>{{end}}</td>
-        <td class="c-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{.Severity}}</span>{{else}}<span class="zero">{{if .Severity}}none{{else}}—{{end}}</span>{{end}}</td>
+        <td class="c-sev">{{if and .Severity (ne .Severity "none")}}<span class="sev {{.Severity}}">{{T .Severity}}</span>{{else}}<span class="zero">{{if .Severity}}{{T "none"}}{{else}}—{{end}}</span>{{end}}</td>
         <td class="c-weak small" title="{{.Weakness}}">{{with .Weakness}}<a class="link" href="{{$.Data.WeaknessURL .}}">{{.}}</a>{{else}}<span class="zero" title="{{T "No weakness given"}}">—</span>{{end}}</td>
         <td class="c-bounty num nowrap" data-label="Bounty">{{$d := .}}{{with amount .Bounty .Currency}}<span title="{{amountFull $d.Bounty $d.Currency}}">{{.}}</span>{{else}}<span class="zero" title="{{T "Bounty not shown"}}">—</span>{{end}}</td>
         <td class="c-votes num" data-label="Votes">{{if .Votes}}{{num .Votes}}{{else}}<span class="zero">0</span>{{end}}</td>
