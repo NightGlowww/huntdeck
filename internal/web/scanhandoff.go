@@ -92,6 +92,7 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	}
 	// What went out, and under which task id: the scanner names a task however it
 	// likes, so this is how a task in its list is traced back to a program.
+	d.ReadBatch = s.ScanReadBatch
 	if counts, cerr := s.Store.HandoffStates(r.Context()); cerr == nil {
 		d.ScanCounts = counts
 	}
@@ -274,6 +275,9 @@ type scanPageData struct {
 	RecentOrder []string
 	// ScanCounts is how many targets sit in each state, and LastRead when the
 	// column was last refreshed: the histogram on the page rather than in a CLI.
+	// ReadBatch is how many tasks one read-back pass asks about: the button says
+	// it, so a configured batch cannot leave the tooltip lying.
+	ReadBatch  int
 	ScanCounts map[string]int
 	LastRead   time.Time
 	ReadKnown  bool

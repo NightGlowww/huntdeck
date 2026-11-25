@@ -2543,6 +2543,6 @@
   "last read": "上次读取",
   "One row per program: the order picks which of its targets is shown": "每个项目只显示一行：由当前排序决定显示它的哪个目标",
   "one row per program: open a row for the rest of its targets": "每个项目一条：点开一行可看该项目的全部目标",
-  "Asks the scanner about the next eight tasks: about ten calls a minute is all it allows, so one press reads eight": "向扫描器询问接下来八个任务：它每分钟只允许约十次调用，所以一次点击读八个"
+  "Asks the scanner about the next %d tasks: about ten calls a minute is all it allows": "向扫描器询问接下来 %d 个任务：它每分钟只允许约十次调用"
  }
 }
