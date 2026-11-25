@@ -61,7 +61,10 @@ func queueCmd(args []string, stdout, stderr io.Writer) int {
 	// "huntdeck queue --explain" printed the plain table.
 	if !*fresh && !*explain {
 		if top, computed, err := s.HuntQueueTop(ctx, store.QueueFilter{Platform: *platform, Kind: *kind, Paying: *paying}, *limit, 0); err == nil && len(top) > 0 && time.Since(computed) < 48*time.Hour {
-			fmt.Fprintf(stdout, "materialised %s ago\n", time.Since(computed).Round(time.Minute))
+			// Say how to refresh it: `queue` reads the table and does not rebuild it,
+			// which cost an evening of "the reason never changes" when the build was
+			// half an hour old and nobody knew.
+			fmt.Fprintf(stdout, "materialised %s ago (rebuild: huntdeck score)\n", time.Since(computed).Round(time.Minute))
 			printMaterialised(stdout, top)
 			return 0
 		}
