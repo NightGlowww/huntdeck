@@ -27,10 +27,12 @@ func (s *Store) HandoffTasks(ctx context.Context, limit int) ([]HandoffTask, err
 		  FROM scan_handoffs
 		 WHERE task_id <> ''
 		 GROUP BY task_id
-		 -- Tasks still worth reading first. Newest-first alone kept the reconciler
-		 -- on the same already-read twenty and never reached the backlog: 301 rows
-		 -- stayed unread that way while every pass reported success.
-		 ORDER BY CASE WHEN MIN(state) IN ('done', 'failed', 'gone') THEN 1 ELSE 0 END,
+		 -- Never-read tasks first, then the rest by recency. Ordering by "not
+		 -- finished" was not enough: a task read a minute ago as queued is still
+		 -- not finished, so every pass re-read the same eight and the 301 unread
+		 -- rows were never reached.
+		 ORDER BY CASE WHEN MIN(state) = '' THEN 0 ELSE 1 END,
+		          CASE WHEN MIN(state) IN ('done', 'failed', 'gone') THEN 1 ELSE 0 END,
 		          MAX(created_at) DESC
 		 LIMIT ?`, limit)
 	if err != nil {
