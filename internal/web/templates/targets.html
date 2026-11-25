@@ -22,7 +22,6 @@
       <a class="qv{{if .Best}} on{{end}}" href="{{.SortURL "best"}}" title="{{T "Recently added targets ranked by target score"}}">{{T "Best new targets"}}</a>
       <a class="qv{{if eq .Filter.Order "bounty"}} on{{end}}" href="{{.SortURL "bounty"}}" title="{{T "Highest bounty first; ones without a bounty last"}}">{{T "Highest bounty"}}</a>
       <a class="qv{{if .AZ}} on{{end}}" href="{{.SortURL "az"}}">{{T "A–Z"}}</a>
-      <a class="qv{{if .Filter.OnePerProgram}} on{{end}}" href="{{.OneURL}}" title="{{T "One row per program: the order picks which of its targets is shown"}}">{{T "One per program"}}</a>
     </span>
   </div>
 {{if .Rows}}
