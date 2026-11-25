@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -116,6 +118,24 @@ func scanReconcileCmd(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stdout, "read %d of %d task(s): %d done, %d failed, %d gone\n",
 		sum.Read, sum.Tasks, sum.Done, sum.Failed, sum.Gone)
+	// What the handoff table actually holds, per state: the queue reads this
+	// column, and "the page says unread" needs a number to argue with.
+	if states, err := app.store.HandoffStates(ctx); err == nil {
+		keys := make([]string, 0, len(states))
+		for k := range states {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		parts := make([]string, 0, len(keys))
+		for _, k := range keys {
+			name := k
+			if name == "" {
+				name = "unread"
+			}
+			parts = append(parts, name+"="+strconv.Itoa(states[k]))
+		}
+		fmt.Fprintf(stdout, "targets by state: %s\n", strings.Join(parts, " "))
+	}
 	return 0
 }
 
