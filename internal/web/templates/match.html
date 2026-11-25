@@ -24,7 +24,7 @@
   {{else}}
   <div class="empty-state">
     <p>{{T "No stored program lists"}} <code>{{.Query}}</code>{{if .Past}} {{T "any more"}}{{end}}.</p>
-    <p class="small"><code>*.example.com</code> {{T "covers subdomains, not"}} <code>example.com</code> {{T "itself"}}.
+    <p class="small"><code>{{T "*.example.com"}}</code> {{T "covers subdomains, not"}} <code>{{T "example.com"}}</code> {{T "itself"}}.
       {{T "Looking for a program by name?"}} <a class="link" href="/programs?state=all&amp;q={{.Query}}">{{T "Search programs for"}} “{{.Query}}”</a>.</p>
   </div>
   {{end}}

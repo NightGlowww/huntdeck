@@ -12,7 +12,7 @@
       <b>{{.Title}}</b>{{with .Detail}}<span class="{{if eq $.Data.Err .}}msetup-err{{else}}muted{{end}}">{{.}}</span>{{end}}</li>{{end}}
   </ol>
   {{if .Err}}{{if not .Steps}}<p class="msetup-err msetup-note">{{.Err}}</p>{{end}}
-  <p class="msetup-note muted small">Each step looks before it changes anything: fix what it says and run it again, and it carries on from where it stopped.</p>
+  <p class="msetup-note muted small">{{T "Each step looks before it changes anything: fix what it says and run it again, and it carries on from where it stopped."}}</p>
   {{else if not .Busy}}{{with .Result}}
   <p class="msetup-note">HuntMail {{.Version}} runs at <code>{{.Origin}}</code>{{with .Domains}}, receiving mail for {{range $i, $d := .}}{{if $i}}, {{end}}<b>{{$d}}</b>{{end}}{{end}}.
     {{if $.Data.Saved}}Its private address and API key are saved here, encrypted: HuntDeck restarts to use them.{{end}}
@@ -28,32 +28,30 @@
   <div class="panel-head"><h2>{{if .Configured}}Update or add a domain{{else}}Set up{{end}}</h2></div>
   <form method="post" action="/email/setup" class="panel-body profile-form column" autocomplete="off">
     {{with .Problem}}<p class="flash err" role="alert">{{.}}</p>{{end}}
-    <label class="wide"><span>Cloudflare API token</span><input type="password" name="token" required autocomplete="new-password" spellcheck="false" maxlength="400"></label>
-    <label class="wide"><span>Domain{{if .Configured}}s to add{{end}}</span><input type="text" name="domains" value="{{.Domains}}" spellcheck="false" maxlength="400" {{if not .Configured}}required {{end}}placeholder="e.g. example.com">
+    <label class="wide"><span>{{T "Cloudflare API token"}}</span><input type="password" name="token" required autocomplete="new-password" spellcheck="false" maxlength="400"></label>
+    <label class="wide"><span>Domain{{if .Configured}}s to add{{end}}</span><input type="text" name="domains" value="{{.Domains}}" spellcheck="false" maxlength="400" {{if not .Configured}}required {{end}}placeholder="{{T "e.g. example.com"}}">
       <span class="muted small">{{if .Configured}}Optional: leave empty to update HuntMail only. {{end}}Several: separate them with commas. Each must be on the token's account.</span></label>
-    <label class="wide"><span>Worker name</span><input type="text" name="name" value="{{.Name}}" spellcheck="false" maxlength="63" pattern="[a-z0-9][a-z0-9\-]*">
-      <span class="muted small">Its database has the same name. Keep <code>huntmail</code> unless you run more than one.</span></label>
-    <label class="check msetup-check"><input type="checkbox" name="replace" value="1"{{if .Replace}} checked{{end}}><span>Replace an existing catch-all
-      <span class="hint muted small">Only if the domain's catch-all already forwards somewhere: that mail goes to HuntMail instead.</span></span></label>
-    <label class="check msetup-check"><input type="checkbox" name="newkey" value="1"{{if .NewKey}} checked{{end}}><span>Make a new key
-      <span class="hint muted small">For a HuntMail HuntDeck doesn't have the key of: whatever uses the old key stops working.</span></span></label>
+    <label class="wide"><span>{{T "Worker name"}}</span><input type="text" name="name" value="{{.Name}}" spellcheck="false" maxlength="63" pattern="[a-z0-9][a-z0-9\-]*">
+      <span class="muted small">{{T "Its database has the same name. Keep"}}<code>huntmail</code>{{T "unless you run more than one."}}</span></label>
+    <label class="check msetup-check"><input type="checkbox" name="replace" value="1"{{if .Replace}} checked{{end}}><span>{{T "Replace an existing catch-all"}}<span class="hint muted small">{{T "Only if the domain's catch-all already forwards somewhere: that mail goes to HuntMail instead."}}</span></span></label>
+    <label class="check msetup-check"><input type="checkbox" name="newkey" value="1"{{if .NewKey}} checked{{end}}><span>{{T "Make a new key"}}<span class="hint muted small">{{T "For a HuntMail HuntDeck doesn't have the key of: whatever uses the old key stops working."}}</span></span></label>
     <button type="submit">{{if .Configured}}Update HuntMail{{else}}Set up HuntMail{{end}}</button>
   </form>
 </section>
 {{else}}
-<section class="panel"><div class="panel-body msetup-intro"><p>HuntMail runs on your own Cloudflare account. This HuntDeck can't set it up itself: use <a class="link" href="https://github.com/mdpsec/huntmail" target="_blank" rel="noopener noreferrer">HuntMail's own setup</a>, then enter the address and API key it printed above.</p></div></section>
+<section class="panel"><div class="panel-body msetup-intro"><p>{{T "HuntMail runs on your own Cloudflare account. This HuntDeck can't set it up itself: use"}}<a class="link" href="https://github.com/mdpsec/huntmail" target="_blank" rel="noopener noreferrer">{{T "HuntMail's own setup"}}</a>{{T ", then enter the address and API key it printed above."}}</p></div></section>
 {{end}}
 </div>
 {{if .CanSetUp}}<section class="panel msetup-about">
-  <div class="panel-head"><h2>What it does</h2><span class="aside">HuntMail {{.Version}}{{with .Running}} · yours runs {{.}}{{end}}</span></div>
+  <div class="panel-head"><h2>{{T "What it does"}}</h2><span class="aside">HuntMail {{.Version}}{{with .Running}} · yours runs {{.}}{{end}}</span></div>
   <div class="panel-body msetup-intro">
-    <p>HuntMail is a catch-all inbox that runs on your own Cloudflare account: every address on your domain works, so each signup can have its own, and HuntDeck shows the mail on the Email page and each program's Email tab. The free plan is enough. Use a domain you don't get other mail on.</p>
-    <p>HuntDeck sets it up with Cloudflare's API: a D1 database, the HuntMail Worker on your workers.dev address, its private address and API key (saved here, encrypted), and the domain's Email Routing, with its catch-all pointed at HuntMail. Run it again to add a domain or to update HuntMail; it keeps your settings and key.</p>
-    <p>It needs an API token: in Cloudflare, <a class="link" href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">My Profile › API Tokens</a> › Create Token › Create Custom Token, with:</p>
+    <p>{{T "HuntMail is a catch-all inbox that runs on your own Cloudflare account: every address on your domain works, so each signup can have its own, and HuntDeck shows the mail on the Email page and each program's Email tab. The free plan is enough. Use a domain you don't get other mail on."}}</p>
+    <p>{{T "HuntDeck sets it up with Cloudflare's API: a D1 database, the HuntMail Worker on your workers.dev address, its private address and API key (saved here, encrypted), and the domain's Email Routing, with its catch-all pointed at HuntMail. Run it again to add a domain or to update HuntMail; it keeps your settings and key."}}</p>
+    <p>{{T "It needs an API token: in Cloudflare,"}}<a class="link" href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">{{T "My Profile › API Tokens"}}</a>{{T "› Create Token › Create Custom Token, with:"}}</p>
     <table class="kv msetup-perms">
       {{range .Permissions}}<tr><th>{{index . 0}}</th><td>{{index . 1}}</td></tr>{{end}}
     </table>
-    <p class="muted small">Zone Resources: your domain. Account Resources: your account. HuntDeck uses the token for this run only and doesn't keep it; you can delete it in Cloudflare afterwards.</p>
+    <p class="muted small">{{T "Zone Resources: your domain. Account Resources: your account. HuntDeck uses the token for this run only and doesn't keep it; you can delete it in Cloudflare afterwards."}}</p>
   </div>
 </section>
 {{end}}

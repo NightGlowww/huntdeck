@@ -41,7 +41,7 @@
         <td class="c-weak small" title="{{.Weakness}}">{{with .Weakness}}<a class="link" href="{{$.Data.WeaknessURL .}}">{{.}}</a>{{else}}<span class="zero" title="{{T "No weakness given"}}">—</span>{{end}}</td>
         <td class="c-bounty num nowrap" data-label="Bounty">{{$d := .}}{{with amount .Bounty .Currency}}<span title="{{amountFull $d.Bounty $d.Currency}}">{{.}}</span>{{else}}<span class="zero" title="{{T "Bounty not shown"}}">—</span>{{end}}</td>
         <td class="c-votes num" data-label="Votes">{{if .Votes}}{{num .Votes}}{{else}}<span class="zero">0</span>{{end}}</td>
-        <td class="c-date nowrap"><span class="when{{if fresh .DisclosedAt}} fresh{{end}}" title="disclosed {{datetime .DisclosedAt}}{{with .SubmittedAt}}&#10;submitted {{datetime .}}{{end}}">{{date .DisclosedAt}}</span></td>
+        <td class="c-date nowrap"><span class="when{{if fresh .DisclosedAt}} fresh{{end}}" title="{{T "disclosed {{datetime .DisclosedAt}}{{with .SubmittedAt}}&#10;submitted {{datetime .}}{{end}}"}}">{{date .DisclosedAt}}</span></td>
       </tr>
     {{end}}
     </tbody>

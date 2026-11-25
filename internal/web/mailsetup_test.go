@@ -164,7 +164,7 @@ func TestMailSetupNoBundle(t *testing.T) {
 	src := config.Source{LookupEnv: func(string) (string, bool) { return "", false }, ReadFile: func(string) ([]byte, error) { return nil, os.ErrNotExist }}
 	e := newTestEnv(t, func(d *Deps) { d.Accounts = overrides.New(d.Store, t.TempDir(), src) })
 	res, body := e.do(e.client(), "GET", "/email/setup", nil, nil)
-	if res.StatusCode != http.StatusOK || !strings.Contains(body, `id="acct-huntmail"`) || strings.Contains(body, `name="token"`) || !strings.Contains(body, "HuntMail's own setup") {
+	if res.StatusCode != http.StatusOK || !strings.Contains(body, `id="acct-huntmail"`) || strings.Contains(body, `name="token"`) || !strings.Contains(body, "own setup") { // through T, so the apostrophe is escaped
 		t.Errorf("%d:\n%s", res.StatusCode, body)
 	}
 }

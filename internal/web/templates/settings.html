@@ -56,10 +56,10 @@
       {{end}}
       {{with $y := $p.Reports}}
       <tr class="sub{{if not (and $y.Enabled $y.Configured $p.Enabled)}} off{{end}}">
-        <td class="c-name nowrap"><span class="subl">Your reports</span></td>
-        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="reports_enabled_{{$y.Name}}" value="1" form="sched" aria-label="Read your {{$y.Name}} reports"{{if $y.Enabled}} checked{{end}}> <span class="muted small">{{if $y.Enabled}}on{{else}}off{{end}}</span></label></td>
+        <td class="c-name nowrap"><span class="subl">{{T "Your reports"}}</span></td>
+        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="reports_enabled_{{$y.Name}}" value="1" form="sched" aria-label="{{T "Read your"}} {{$y.Name}} {{T "reports"}}"{{if $y.Enabled}} checked{{end}}> <span class="muted small">{{if $y.Enabled}}on{{else}}off{{end}}</span></label></td>
         <td colspan="3" class="c-wide"><div class="pollc subc"><span class="muted small">{{if not $y.Configured}}needs the website login, which HuntDeck doesn't have yet{{else}}read with the polls, once an hour at most{{end}}</span>
-          <span class="muted small">· last read</span>{{with $y.SyncedAt}}<span class="when" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">never</span>{{end}}
+          <span class="muted small">{{T "· last read"}}</span>{{with $y.SyncedAt}}<span class="when" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">never</span>{{end}}
           {{if $y.Count}}<a class="link small" href="/reports?platform={{$y.Name}}">{{num $y.Count}} {{plural $y.Count "report" "reports"}}</a>{{end}}</div></td>
         <td class="c-side num"></td>
       </tr>
@@ -173,10 +173,10 @@
 
 {{else if eq .Tab "reports"}}
 <section class="panel" id="quiet">
-  <div class="panel-head"><h2>Gone quiet</h2><span class="aside">when an undecided report is flagged</span></div>
+  <div class="panel-head"><h2>{{T "Gone quiet"}}</h2><span class="aside">{{T "when an undecided report is flagged"}}</span></div>
   <form method="post" action="/settings/reports" class="panel-body zone-form">
     <div class="zone-field">
-      <label for="quiet-days"><span>Days without a word from the program</span></label>
+      <label for="quiet-days"><span>{{T "Days without a word from the program"}}</span></label>
       <input type="number" class="quiet-days" id="quiet-days" name="quiet_days" value="{{.QuietDays}}" min="1" max="365" step="1" required inputmode="numeric">
       <span class="muted small">{{if .QuietSet}}Default: 14.{{else}}The default.{{end}}</span>
     </div>
@@ -185,7 +185,7 @@
       {{if .QuietSet}}<button type="submit" name="reset" value="1" class="small secondary" formnovalidate>Reset to 14</button>{{end}}
     </div>
   </form>
-  <p class="panel-foot">A report that's still new or triaged is <b>gone quiet</b> once the program has said nothing for this many days (counting from submission if it never has): the Reports tile, the Gone quiet view and filter, its "quiet" mark, and the API's <code>gone_quiet</code> follow it. Accepted reports waiting for a fix, and ones you snoozed, muted or added by hand, are never flagged.</p>
+  <p class="panel-foot">{{T "A report that's still new or triaged is"}}<b>{{T "gone quiet"}}</b>{{T "once the program has said nothing for this many days (counting from submission if it never has): the Reports tile, the Gone quiet view and filter, its quiet mark, and the API's"}}<code>{{T "gone_quiet"}}</code>{{T "follow it. Accepted reports waiting for a fix, and ones you snoozed, muted or added by hand, are never flagged."}}</p>
 </section>
 
 {{else}}

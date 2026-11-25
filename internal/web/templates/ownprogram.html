@@ -9,7 +9,7 @@
     <div class="panel-head"><h2>{{T "Program"}}</h2><span class="aside">{{T "not on HackerOne, Bugcrowd, Intigriti or YesWeHack"}}</span></div>
     <div class="panel-body profile-form">
       <label class="wide"><span>{{T "Name"}}</span><input type="text" name="name" value="{{.Name}}" maxlength="120" required placeholder="{{T "e.g. Example Corp Bug Bounty"}}"></label>
-      <label class="wide"><span>{{T "Program page"}}</span><input type="url" name="url" value="{{.URL}}" maxlength="500" required placeholder="https://example.com/security/bug-bounty" spellcheck="false">
+      <label class="wide"><span>{{T "Program page"}}</span><input type="url" name="url" value="{{.URL}}" maxlength="500" required placeholder="{{T "https://example.com/security/bug-bounty"}}" spellcheck="false">
         <span class="muted small">{{T "Where its rules are published: HuntDeck links to it, and never fetches it."}}</span></label>
       <label><span>{{T "Status"}}</span><select name="state">
         <option value="open"{{if eq .State "open"}} selected{{end}}>{{T "Open"}}</option>
@@ -33,8 +33,8 @@
   <section class="panel">
     <div class="panel-head"><h2>{{T "Scope"}}</h2><span class="aside">{{T "one asset per line: domains, wildcards, URLs, IPs or CIDR ranges"}}</span></div>
     <div class="panel-body own-scope">
-      <label><span>{{T "In scope"}}</span><textarea name="in_scope" rows="10" spellcheck="false" placeholder="*.example.com&#10;api.example.net&#10;https://app.example.com/">{{.InScope}}</textarea></label>
-      <label><span>{{T "Out of scope"}}</span><textarea name="out_scope" rows="10" spellcheck="false" placeholder="status.example.com">{{.OutScope}}</textarea></label>
+      <label><span>{{T "In scope"}}</span><textarea name="in_scope" rows="10" spellcheck="false" placeholder="{{T "*.example.com&#10;api.example.net&#10;https://app.example.com/"}}">{{.InScope}}</textarea></label>
+      <label><span>{{T "Out of scope"}}</span><textarea name="out_scope" rows="10" spellcheck="false" placeholder="{{T "status.example.com"}}">{{.OutScope}}</textarea></label>
     </div>
     <p class="panel-foot">{{T "Saving records what you added, removed or edited on the program's Changes tab, as a platform's news would be (but sends no notifications)."}}</p>
   </section>

@@ -11,7 +11,7 @@
     <div class="panel-body profile-form">
       <label class="wide"><span>{{T "Name"}}</span><input type="text" name="name" value="{{.Name}}" maxlength="60" required placeholder="{{T "e.g. Phone"}}"></label>
       {{if eq .Kind "discord"}}
-      <label class="wide"><span>{{T "Webhook URL"}}</span><input type="password" name="url" autocomplete="off" spellcheck="false" maxlength="300" {{if .ID}}placeholder="{{T "saved; paste a new one to replace it"}}"{{else}}required placeholder="https://discord.com/api/webhooks/…"{{end}}>
+      <label class="wide"><span>{{T "Webhook URL"}}</span><input type="password" name="url" autocomplete="off" spellcheck="false" maxlength="300" {{if .ID}}placeholder="{{T "saved; paste a new one to replace it"}}"{{else}}required placeholder="{{T "https://discord.com/api/webhooks/…"}}"{{end}}>
         <span class="muted small">{{T "In Discord: channel settings › Integrations › Webhooks › New Webhook › Copy Webhook URL."}}</span></label>
       {{else if eq .Kind "telegram"}}
       <label class="wide"><span>{{T "Bot token"}}</span><input type="password" name="token" autocomplete="off" spellcheck="false" maxlength="200" {{if .ID}}placeholder="{{T "saved; paste a new one to replace it"}}"{{else}}required placeholder="123456:ABC…"{{end}}>
@@ -39,10 +39,10 @@
       <label class="wide"><span>{{T "Server"}}</span><input type="text" name="server" autocomplete="off" spellcheck="false" maxlength="200" placeholder="{{T "optional; https://sctapi.ftqq.com"}}">
         <span class="muted small">{{T "Leave blank for ServerChan, or give a different address."}}</span></label>
       {{else}}
-      <label class="wide"><span>{{T "URL"}}</span><input type="password" name="url" autocomplete="off" spellcheck="false" maxlength="500" {{if .ID}}placeholder="{{T "saved; enter a new one to replace it"}}"{{else}}required placeholder="https://example.com/hooks/huntdeck"{{end}}>
+      <label class="wide"><span>{{T "URL"}}</span><input type="password" name="url" autocomplete="off" spellcheck="false" maxlength="500" {{if .ID}}placeholder="{{T "saved; enter a new one to replace it"}}"{{else}}required placeholder="{{T "https://example.com/hooks/huntdeck"}}"{{end}}>
         <span class="muted small">{{T "Gets a JSON POST per message (see the README for the format)."}}</span></label>
       <label class="wide"><span>{{T "Signing secret"}}</span><input type="password" name="secret" autocomplete="off" maxlength="200" placeholder="{{if .HasSecret}}{{T "saved; enter a new one to replace it"}}{{else}}{{T "optional"}}{{end}}">
-        <span class="muted small">{{T "Signs each request:"}} <code>X-HuntDeck-Signature: sha256=…</code> {{T "(HMAC of the body)."}}</span></label>
+        <span class="muted small">{{T "Signs each request:"}} <code>{{T "X-HuntDeck-Signature: sha256=…"}}</code> {{T "(HMAC of the body)."}}</span></label>
       {{if .HasSecret}}<label class="check"><input type="checkbox" name="clear_secret" value="1"> {{T "Remove the secret"}}</label>{{end}}
       {{end}}
     </div>
