@@ -310,3 +310,23 @@ func biggestLoss(factors []huntqueue.Factor) queueLoss {
 	}
 	return best
 }
+
+// queueChipLabels are the chips whose label is interface copy rather than a
+// platform's name. The template used to list them one by one in an if-chain, and
+// a chip added later fell through to the platform label and printed in English -
+// which is what happened to the two scanned chips.
+var queueChipLabels = map[string]bool{
+	"All platforms":       true,
+	"Paying only":         true,
+	"Added in 7 days":     true,
+	"One per program":     true,
+	"Already handed over": true,
+	"Not handed over yet": true,
+	// Clear filters renders through its own branch in the template, but it is copy
+	// the catalog carries all the same: listing it keeps the guard honest about
+	// what a fixed chip label is.
+	"Clear filters": true,
+}
+
+// isQueueChipLabel says whether a chip's label is copy the catalog carries.
+func isQueueChipLabel(label string) bool { return queueChipLabels[label] }

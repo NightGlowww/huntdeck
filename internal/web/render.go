@@ -134,6 +134,7 @@ var funcs = template.FuncMap{
 	},
 	"acctSection":        acctSection,
 	"platformLabel":      platformLabel,
+	"isQueueChipLabel":   isQueueChipLabel,
 	"platformShort":      platformShort,
 	"changeTag":          changeTag,
 	"changeSubject":      changeSubject,
