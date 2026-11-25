@@ -10,16 +10,18 @@ import (
 	"github.com/mdpsec/huntdeck/internal/i18n"
 )
 
-// TestQueueReasonsAreTranslated pins the queue's why-column: the reasons a row
-// carries are English sentences built in huntqueue, rewritten for Chinese by a
-// shape in reason.go. A reason with no shape reads English in a Chinese page,
-// and nothing noticed - the four handoff reasons did exactly that.
+// TestQueueReasonsAreTranslated pins the queue's why-column, where the reader
+// decides what to hunt. A reason is built in huntqueue as an English sentence
+// and reaches the page through the catalog (queueViews passes s.T); one built
+// with %s has its values spliced in first, so only the static ones can be
+// checked from their source literal.
 //
-// Only the reasons with no arguments are checked here: one built with %s has
-// its values spliced in before the shape sees it, so its source literal is not
-// the text the shape matches.
+// This is the path that matters: an earlier version of this test checked the
+// shape table in reason.go instead, which static reasons never pass through -
+// it reported four reasons as untranslated that the catalog had carried all
+// along, and would have passed four that only looked fixed.
 func TestQueueReasonsAreTranslated(t *testing.T) {
-	messages, err := i18n.Load()
+	bundle, err := i18n.Load()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,15 +34,15 @@ func TestQueueReasonsAreTranslated(t *testing.T) {
 	var missing []string
 	for _, m := range lit.FindAllStringSubmatch(string(body), -1) {
 		seen++
-		if reasonText("zh", messages, m[1]) == m[1] {
+		if !bundle.HasMsg("zh", m[1]) {
 			missing = append(missing, m[1])
 		}
 	}
-	if seen < 4 {
+	if seen < 8 {
 		t.Fatalf("only %d static reasons found: the pattern stopped matching", seen)
 	}
 	if len(missing) > 0 {
 		sort.Strings(missing)
-		t.Errorf("%d reason(s) have no Chinese shape:\n%s", len(missing), strings.Join(missing, "\n"))
+		t.Errorf("%d reason(s) have no zh entry:\n%s", len(missing), strings.Join(missing, "\n"))
 	}
 }
