@@ -2515,6 +2515,25 @@
   "the scanner is on it now": "扫描器正在处理",
   "Send this header with every request.": "每个请求都要带上这个头。",
   "For test accounts.": "用于测试账号。",
-  "Policy forbids: automated scanners": "政策禁止：自动化扫描器"
+  "Policy forbids: automated scanners": "政策禁止：自动化扫描器",
+  "What the instance holds: programs and scope entries per platform, and when it last polled.": "实例里存了什么：各平台的项目与范围条目，以及最近一次轮询的时间。",
+  "Search programs: HuntScore, bounty range, 90-day numbers. Filter by a word, platform, state or bounties.": "搜索项目：HuntScore、赏金区间、90 天数字。可按关键词、平台、状态或是否有赏金过滤。",
+  "The programs matching a search, as the page's spreadsheet: CSV text to save, every column, no paging.": "匹配搜索的项目，按页面表格的形态输出：可直接保存的 CSV 文本，全列，不分页。",
+  "One program in full: what it pays, its numbers, its policy, and its assets in scope.": "单个项目的完整信息：给多少钱、它的数字、它的政策，以及范围内的资产。",
+  "Private programs you were invited to: what the platform offered, when, and whether you joined. The page and the API have this list; the tools did not.": "你收到的私有项目邀请：平台给了什么、什么时候给的、你是否已接受。页面和 API 一直有这个列表，工具之前没有。",
+  "In-scope targets (wildcards, domains, URLs, apps, APIs…) with the program that lists them and its bounty.": "范围内的目标（通配符、域名、URL、应用、API…），附带收录它的项目及其赏金。",
+  "Check a list of hosts, IPs or URLs (one per line, as a recon tool prints them) against every program's scope in one call: which are in scope, under which program, and whether that program pays. The workflow it exists for: subfinder output straight in, the in-scope subset out.": "拿一批主机、IP 或 URL（每行一个，侦察工具的输出原样）一次性对照所有项目的范围：哪些在范围内、属于哪个项目、该项目是否付赏金。它存在的意义：subfinder 的输出直接喂进来，出去的是范围内子集。",
+  "Which programs list a host, IP or URL in scope, and whether they pay a bounty.": "某主机、IP 或 URL 在哪些项目的范围内，以及那些项目是否付赏金。",
+  "What changed lately: new scope, removed scope, bounty changes, launches, pauses. Newest first.": "最近发生了什么变更：新增范围、移除范围、赏金变化、上线、暂停。最新在前。",
+  "Changes as plain text, one a line: date, program, what happened, asset. The page's own filters apply.": "变更的纯文本形式，一行一条：日期、项目、发生了什么、资产。套用页面自己的筛选。",
+  "Disclosed reports across the programs: title, severity, weakness, bounty, votes, and a link.": "跨项目的已披露报告：标题、严重度、弱点、赏金、投票数，以及链接。",
+  "A program's scope entries as plain text, one identifier per line: every row the filters match (not just the first screenful), with the Scope tab's filters.": "某个项目的范围条目的纯文本形式，一行一个标识符：所有符合筛选的行（不只是第一屏），用范围标签页的筛选。",
+  "A program's scope as a file for Burp Suite, ZAP or Caido: the body to save, ready to import.": "把某个项目的范围导出成 Burp Suite、ZAP 或 Caido 的文件：给出可直接保存并导入的内容。",
+  "HuntQueue: targets ranked by whether you can start today and what the work is worth per hour, with the reasons behind each score, plus `gated`: the targets a hard gate keeps out and why (an invitation to accept, requirements, paused). Built every half hour; the fastest way to decide what to do next.": "HuntQueue：按「今天能不能开打」和「每小时值多少」排序的目标，附每条得分背后的理由，以及 `gated`——被硬门槛挡住的目标及原因（待接受的邀请、前置要求、已暂停）。每半小时重建一次；决定下一步做什么最快的方式。",
+  "The Hunt board as one answer: totals, this week's scope churn and new programs, the programs that reopened or paused, and the top hunts ranked by HuntScore. What to open a session with.": "把猎捕面板作为一个答案返回：总量、本周范围变动与新增项目、重新开放或暂停的项目，以及按 HuntScore 排出的最值得挖的项目。开一场会话时先看这个。",
+  "Platform totals: programs, bounties paid, reports, and how the numbers moved. Filter and sort them the way /stats does, so the answer can be “who pays best” instead of everything.": "平台总量：项目数、已付赏金、报告数，以及这些数字怎么变。可以像 /stats 那样筛选排序，于是答案可以只是「谁给得最多」而不是全部。",
+  "Ask the instance to poll a platform now: a quick poll lists programs, a full one fetches every scope. At most once a minute — polls cost the platform.": "让实例现在轮询某个平台：快速轮询列出项目，完整轮询抓取全部范围。每分钟最多一次——轮询要花平台的钱。",
+  "Ask the decision model whether a finding would survive triage, before it is submitted. Two probabilities come back: would a triager accept it, and do the supplied artefacts prove the impact. Needs HUNTDECK_JEV_KEY.": "在提交之前，问决策模型某个发现能否活过三审。返回两个概率：三审会不会接受它，以及提供的材料是否证明了影响。需要 HUNTDECK_JEV_KEY。",
+  "Ask the decision model whether a testing plan complies with a program's own policy text. The policy comes from the instance; the plan comes from you. Answers forbidden, check_first or allowed with P(comply). Needs HUNTDECK_JEV_KEY.": "问决策模型某个测试计划是否符合项目自己的政策原文。政策来自实例，计划来自你。回答 forbidden、check_first 或 allowed，并给出 P(comply)。需要 HUNTDECK_JEV_KEY。"
  }
 }

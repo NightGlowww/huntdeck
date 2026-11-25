@@ -96,7 +96,7 @@
     <details class="mcp-tool" id="{{$tool.Name}}"{{if eq $i 0}} open{{end}}>
       <summary><span class="mcp-tool-name"><code>{{$tool.Name}}</code>{{if $tool.Write}} <span class="chip">{{T "changes data"}}</span>{{end}}</span><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
       <div class="mcp-tool-body">
-        <p>{{$tool.Description}}</p>
+        <p>{{T $tool.Description}}</p>
         {{if $tool.Arguments}}
         <table class="mcp-args"><thead><tr><th>{{T "Argument"}}</th><th>{{T "Type"}}</th><th>{{T "What it is for"}}</th></tr></thead><tbody>
           {{range $tool.Arguments}}<tr><td><code>{{.Name}}</code>{{if .Required}} <span class="chip small">{{T "required"}}</span>{{end}}</td><td>{{.Type}}</td><td>{{.What}}</td></tr>{{end}}
