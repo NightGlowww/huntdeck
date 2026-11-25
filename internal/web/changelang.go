@@ -65,7 +65,19 @@ func describeChangeLang(lang string, m *i18n.Bundle, c store.ChangeView) string 
 		if c.Field == "instruction" {
 			return m.TF(lang, "Scope instructions changed%s", m.TF(lang, " of %s", assetText(c.Asset)))
 		}
-		old, cur := c.OldValue, c.NewValue
+		// A severity or a type is an enumerable word, not free text: "critical →
+		// high" reads as English in a Chinese page unless it is translated like
+		// the field's name is.
+		val := func(v string) string {
+			switch c.Field {
+			case "max_severity", "asset_type":
+				if t := m.T(lang, v); t != v {
+					return t
+				}
+			}
+			return v
+		}
+		old, cur := val(c.OldValue), val(c.NewValue)
 		if old == "" {
 			old = "—"
 		}
