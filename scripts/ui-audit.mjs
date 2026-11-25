@@ -37,6 +37,9 @@ const sizes = (flag('sizes', '') || String(flag('width', '390,1400')))
   .split(',').map((s) => Number(s.trim())).filter((n) => n > 0);
 if (sizes.length === 0) { console.error('no viewport size'); process.exit(2); }
 const passwordEnv = flag('password-env', 'HD_PASSWORD');
+// --lang sets hd_lang before the first page: the interface has two, and a
+// review of the wrong one says nothing about what the reader sees.
+const lang = flag('lang', '');
 const password = process.env[passwordEnv] || '';
 const chromePath = flag('chrome',
   existsSync('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
@@ -106,6 +109,11 @@ const evaluate = (expression) => send('Runtime.evaluate', { expression, awaitPro
   .then((r) => r.result?.result?.value);
 
 await send('Page.navigate', { url: base + '/login' }, S);
+await sleep(800);
+if (lang) {
+  await evaluate('document.cookie = "hd_lang=' + lang + ';path=/;max-age=31536000"');
+  console.log('language: ' + lang);
+}
 await sleep(1500);
 if (password) {
   const body = 'password=' + encodeURIComponent(password) + '&next=%2F';

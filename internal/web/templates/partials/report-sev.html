@@ -1,6 +1,7 @@
 {{/* A report's severity: what it was submitted as, and what it is now when
-triage changed it. */}}
+   triage changed it. The words go through T: the keys are the platform's own
+   (critical, high, ...) and the catalog carries their names. */}}
 {{define "rsev"}}{{$cur := .Severity}}{{$sub := .SubmittedSeverity}}
-{{- if and $sub (ne $sub $cur)}}<span class="sev {{$sub}} was" title="{{T "Submitted as {{$sub}}"}}">{{$sub}}</span> <span class="arrow" aria-label="{{T "changed to"}}">→</span> {{end}}
-{{- if $cur}}<span class="sev {{$cur}}" title="{{if eq .Agreement "match"}}{{T "As submitted"}}{{else if eq .Agreement "upgraded"}}{{T "Raised by triage"}}{{else if eq .Agreement "downgraded"}}{{T "Lowered by triage"}}{{else if eq .Agreement "changed"}}{{T "Changed by triage (the platform doesn't say from what)"}}{{else}}{{T "Severity"}}{{end}}{{with .SeverityLabel}} · {{.}}{{end}}">{{with .SeverityLabel}}{{.}}{{else}}{{$cur}}{{end}}</span>{{else}}<span class="zero" title="{{with .SeverityLabel}}{{.}}{{else}}{{T "Not rated"}}{{end}}">—</span>{{end}}
-{{- if and (not $sub) .SeverityChanged}} <span class="muted small" title="{{T "Triage changed it; the platform doesn't say from what"}}">changed</span>{{end}}{{end}}
+{{- if and $sub (ne $sub $cur)}}<span class="sev {{$sub}} was" title="{{T "Submitted as"}} {{T $sub}}">{{T $sub}}</span> <span class="arrow" aria-label="{{T "changed to"}}">→</span> {{end}}
+{{- if $cur}}<span class="sev {{$cur}}" title="{{if eq .Agreement "match"}}{{T "As submitted"}}{{else if eq .Agreement "upgraded"}}{{T "Raised by triage"}}{{else if eq .Agreement "downgraded"}}{{T "Lowered by triage"}}{{else if eq .Agreement "changed"}}{{T "Changed by triage (the platform doesn't say from what)"}}{{else}}{{T "Severity"}}{{end}}{{with .SeverityLabel}} · {{T .}}{{end}}">{{T $cur}}</span>{{else}}<span class="zero" title="{{with .SeverityLabel}}{{T .}}{{else}}{{T "Not rated"}}{{end}}">—</span>{{end}}
+{{- if and (not $sub) .SeverityChanged}} <span class="muted small" title="{{T "Triage changed it; the platform doesn't say from what"}}">{{T "changed"}}</span>{{end}}{{end}}

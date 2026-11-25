@@ -6,7 +6,7 @@
     <h1>{{.Title}}{{with .URL}} <a class="ext" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "Open on the platform"}}" aria-label="{{T "Open on the platform"}}"><svg class="i"><use href="#i-external"/></svg></a>{{end}}</h1>
     <div class="sub title-row">
       {{if .Program.ID}}{{template "pname" (plink .Program)}}{{else}}<span class="pn">{{template "ptag" .Platform}}<span class="name">{{or .ProgramName "—"}}</span>{{if .ProgramName}} <span class="muted small">{{T "(not in HuntDeck)"}}</span>{{end}}</span>{{end}}
-      <span class="rstate {{.StateClass}}" title="{{with .RawState}}{{T "On the platform:"}} {{.}}{{end}}">{{.StateLabel}}</span>
+      <span class="rstate {{.StateClass}}" title="{{with .RawState}}{{T "On the platform:"}} {{.}}{{end}}">{{T .StateLabel}}</span>
       <span class="rsev">{{template "rsev" .}}</span>
       {{- if .NeedsYou}} <span class="chip waiting">{{T "needs you"}}</span>{{end}}
       {{- if .Stale}} <span class="chip paused">{{T "gone quiet"}}</span>{{end}}

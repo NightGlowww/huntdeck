@@ -2370,6 +2370,14 @@
   "Unblock": "解除拦截",
   "Wake": "唤醒",
   "Yours": "你的",
-  "setup": "设置"
+  "setup": "设置",
+  "no word in": "已",
+  "bounties, bonuses, retests": "赏金、奖金与复测奖励",
+  "New": "新提交",
+  "Won't fix": "不修复",
+  "Duplicate": "重复",
+  "Informative": "无实际影响",
+  "Not applicable": "不适用",
+  "Spam": "垃圾提交"
  }
 }
