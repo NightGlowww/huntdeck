@@ -1,12 +1,12 @@
 {{/* The Email page: the user's HuntMail inbox (mail.go). */}}
-{{define "topbar-title"}}<h1>Email</h1>{{if .Data.CanNL}}{{template "nl-toggle" .Data}}{{end}}{{end}}
+{{define "topbar-title"}}<h1>{{T "Email"}}</h1>{{if .Data.CanNL}}{{template "nl-toggle" .Data}}{{end}}{{end}}
 
 {{/* Mail, Newsletters or All, when HuntMail tells newsletters apart: in
      the title bar, or at the top of the page where that has no room. */}}
 {{define "nl-toggle"}}<nav class="seg vis-toggle" aria-label="Newsletters">{{range .NLSegments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}" title="{{.Title}}">{{.Label}}{{if .Counted}} <em>{{num .Count}}</em>{{end}}</a>{{end}}</nav>{{end}}
 
 {{define "content"}}{{with .Data}}
-<h1 class="m-heading">Email</h1>
+<h1 class="m-heading">{{T "Email"}}</h1>
 {{if .CanNL}}<div class="vis-toggle-m">{{template "nl-toggle" .}}</div>{{end}}
 {{if not .Configured}}
 <section class="panel">
