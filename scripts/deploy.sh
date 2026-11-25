@@ -330,8 +330,15 @@ else
   # Keep the record too: one file per deploy, the last ten kept, so two
   # releases can be compared instead of remembered.
   record="perf/$(date +%Y%m%dT%H%M%S).md"
+  # The previous record, before this one is written: comparing is the only way a
+  # number becomes a signal, and nobody opens perf/ by hand a week later.
+  prev=$(remote "cd $dir && ls -t perf/*.md 2>/dev/null | head -1" | tr -d '\r')
   if remote "cd $dir && mkdir -p perf && bash scripts/perf-snapshot.sh -o $record >/dev/null 2>&1 && ls -t perf/*.md | tail -n +11 | xargs -r rm -f"; then
     echo "  record: $dir/$record"
+    if [ -n "$prev" ]; then
+      echo "  against the previous record ($(basename "$prev")):"
+      remote "cd $dir && python3 scripts/perf-diff.py '$prev' '$record' 2>/dev/null | head -6" | sed 's/^/    /' || true
+    fi
   else
     echo "  (could not write the performance record)" >&2
   fi

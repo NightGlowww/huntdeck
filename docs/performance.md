@@ -40,7 +40,11 @@ scripts/perf-snapshot.sh --cold --db copy.db -o /tmp/p.md  # and first hits, and
 ```
 
 Two records are only useful if comparing them is quick: `scripts/perf-diff.py`
-reads two snapshots and prints the difference per route, largest first.
+reads two snapshots and prints the difference per route, largest first. The deploy
+runs it itself now - after writing the new record it prints the largest changes
+against the previous one, because a number nobody compares is a number nobody
+reads. The budget line still does not fail a deploy (a shared host with a noisy
+neighbour should not block a release); the comparison is the signal to look at.
 
 ```sh
 scripts/perf-diff.py perf/20261118T233839.md perf/20261118T233907.md
