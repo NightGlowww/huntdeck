@@ -221,6 +221,11 @@ func (s *server) targets(w http.ResponseWriter, r *http.Request) {
 	}
 	query := strings.TrimSpace(q.Get("q"))
 	best, az := q.Get("sort") == "best" && len(f.AssetTypes) == 0, q.Get("sort") == "az" // assets aren't scored
+	// One row per program needs the asset path: it is the one that can dedupe
+	// across kinds after sorting, and its total is counted from the deduped list.
+	if f.OnePerProgram && len(f.AssetTypes) == 0 {
+		f.AssetTypes = []string{scope.KindWildcard, scope.KindDomain, scope.KindURL, scope.KindIP, scope.KindCIDR}
+	}
 	list := s.Store.TargetRows
 	switch {
 	case best:
