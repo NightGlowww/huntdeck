@@ -2461,6 +2461,11 @@
   "%s duplicates": "%s 份重复",
   "%s a week · %s a month": "每周 %s · 每月 %s",
   "this month": "本月",
-  "Rejected": "被拒"
+  "Rejected": "被拒",
+  "not read yet": "尚未读取",
+  "the scanner's status %d": "扫描器状态码 %d",
+  "queued": "排队中",
+  "done": "已完成",
+  "unknown": "未知"
  }
 }
