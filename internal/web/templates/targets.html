@@ -15,7 +15,7 @@
 <section class="panel ptable">
   <div class="activef">
     <span class="total">{{num .Pager.Total}} {{T (lower (kindLabel .KindParam))}}</span>
-    <span class="what">{{if .Best}}{{TF "best new: in scope, added %s, on programs you can hunt" .AddedText}}{{else if eq .KindParam "root"}}{{T "of in-scope wildcards, domains and URLs: a root domain itself is often not in scope"}}{{else if .Filter.OutOfScope}}{{T "out of scope"}}{{else}}{{T "in scope"}}{{end}}</span>
+    <span class="what">{{if .Best}}{{TF "best new: in scope, added %s, on programs you can hunt" .AddedText}}{{else if eq .KindParam "root"}}{{T "of in-scope wildcards, domains and URLs: a root domain itself is often not in scope"}}{{else if .Filter.OutOfScope}}{{T "out of scope"}}{{else}}{{T "in scope"}}{{end}}{{if .Filter.OnePerProgram}} · {{T "one row per program: open a row for the rest of its targets"}}{{end}}</span>
     {{template "pills" .}}
     <span class="quick">
       <a class="qv{{if eq .Filter.Order "new"}} on{{end}}" href="{{.SortURL ""}}" title="{{T "Most recently added first; ones without a date last"}}">{{T "Newest"}}</a>

@@ -2541,6 +2541,7 @@
   "Asking the scanner…": "正在询问扫描器…",
   "finished": "已完成",
   "last read": "上次读取",
-  "One row per program: the order picks which of its targets is shown": "每个项目只显示一行：由当前排序决定显示它的哪个目标"
+  "One row per program: the order picks which of its targets is shown": "每个项目只显示一行：由当前排序决定显示它的哪个目标",
+  "one row per program: open a row for the rest of its targets": "每个项目一条：点开一行可看该项目的全部目标"
  }
 }
