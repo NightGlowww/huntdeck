@@ -2534,6 +2534,10 @@
   "Platform totals: programs, bounties paid, reports, and how the numbers moved. Filter and sort them the way /stats does, so the answer can be “who pays best” instead of everything.": "平台总量：项目数、已付赏金、报告数，以及这些数字怎么变。可以像 /stats 那样筛选排序，于是答案可以只是「谁给得最多」而不是全部。",
   "Ask the instance to poll a platform now: a quick poll lists programs, a full one fetches every scope. At most once a minute — polls cost the platform.": "让实例现在轮询某个平台：快速轮询列出项目，完整轮询抓取全部范围。每分钟最多一次——轮询要花平台的钱。",
   "Ask the decision model whether a finding would survive triage, before it is submitted. Two probabilities come back: would a triager accept it, and do the supplied artefacts prove the impact. Needs HUNTDECK_JEV_KEY.": "在提交之前，问决策模型某个发现能否活过三审。返回两个概率：三审会不会接受它，以及提供的材料是否证明了影响。需要 HUNTDECK_JEV_KEY。",
-  "Ask the decision model whether a testing plan complies with a program's own policy text. The policy comes from the instance; the plan comes from you. Answers forbidden, check_first or allowed with P(comply). Needs HUNTDECK_JEV_KEY.": "问决策模型某个测试计划是否符合项目自己的政策原文。政策来自实例，计划来自你。回答 forbidden、check_first 或 allowed，并给出 P(comply)。需要 HUNTDECK_JEV_KEY。"
+  "Ask the decision model whether a testing plan complies with a program's own policy text. The policy comes from the instance; the plan comes from you. Answers forbidden, check_first or allowed with P(comply). Needs HUNTDECK_JEV_KEY.": "问决策模型某个测试计划是否符合项目自己的政策原文。政策来自实例，计划来自你。回答 forbidden、check_first 或 allowed，并给出 P(comply)。需要 HUNTDECK_JEV_KEY。",
+  "the scanner asked us to slow down: the pass stopped early": "扫描器要求放慢：这一趟提前结束",
+  "read %d task(s): %d finished, %d failed": "读了 %d 个任务：%d 个完成、%d 个失败",
+  "Read their state now": "立即读取状态",
+  "Asking the scanner…": "正在询问扫描器…"
  }
 }

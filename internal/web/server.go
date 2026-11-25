@@ -278,6 +278,7 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /scan/save", s.scanSave)
 	mux.HandleFunc("POST /scan/now", s.scanNow)
 	mux.HandleFunc("POST /scan/retry", s.scanRetry)
+	mux.HandleFunc("POST /scan/read", s.scanReadNow)
 	mux.HandleFunc("POST /programs/{platform}/{handle}/policy-check", s.programPolicyCheck)
 	mux.HandleFunc("POST /methodology/check", s.methodologyCheck)
 	mux.HandleFunc("GET /pojia", s.pojiaPage)

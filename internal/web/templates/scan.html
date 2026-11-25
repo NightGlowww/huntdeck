@@ -26,6 +26,7 @@
 {{if .Waiting}}<p class="muted small">{{T "The scanner runs one task per node at a time and queues at most five: a handoff every minute or so is as fast as it can go."}}</p>{{end}}
 {{if .Created}}<p class="flash ok">{{TF "Created %s scan task(s)." .Created}}</p>{{end}}
 {{if .Failure}}<p class="flash err">{{TF "The handoff did not run: %s" .Failure}}</p>{{end}}
+{{if .ReadTried}}<p class="flash {{if .ReadLimited}}warn{{else}}ok{{end}}">{{if .ReadLimited}}{{T "the scanner asked us to slow down: the pass stopped early"}}{{else}}{{TF "read %d task(s): %d finished, %d failed" .Read .ReadDone .ReadFailed}}{{end}}</p>{{end}}
 {{if .Retried}}<p class="flash ok">{{TF "%d target(s) are back in the queue." .Retried}}</p>{{end}}
 {{if .Busy}}<p class="flash warn">{{TF "The scanner is queued, so nothing was created: %s" .Busy}}</p>{{end}}
 {{if .BelowFloor}}<p class="flash warn">{{TF "The scanner host has %.0f%% memory free; a handoff is refused below %.0f%%. A scan task is heavy: a full-template run has taken a host down before." .ScannerFree 25.0}}</p>{{end}}
@@ -73,7 +74,8 @@
   </div>
 </section>{{end}}
 {{if .RecentOrder}}{{$d := .}}
-<section class="panel"><div class="panel-head"><h2>{{T "Handed over lately"}}</h2><span class="aside">{{TF "the last %d" (len .RecentOrder)}}</span></div>
+<section class="panel"><div class="panel-head"><h2>{{T "Handed over lately"}}</h2>
+      <span class="aside">{{TF "the last %d" (len .RecentOrder)}}<form method="post" action="/scan/read" data-busy="{{T "Asking the scanner…"}}"><button type="submit" class="small secondary">{{T "Read their state now"}}</button></form></span></div>
 <form method="post" action="/scan/retry"><table class="table"><thead><tr><th class="c-check"></th><th>{{T "Task"}}</th><th>{{T "Platform"}}</th><th>{{T "Targets"}}</th><th>{{T "State"}}</th><th>{{T "When"}}</th></tr></thead><tbody>
 {{range .RecentOrder}}{{$b := index $d.Recent .}}<tr><td class="c-check">{{with index $d.RecentState $b.TaskID}}{{if or (eq .State "failed") (eq .State "gone")}}<input type="checkbox" name="task" value="{{$b.TaskID}}" aria-label="{{T "hand this target over again"}}">{{end}}{{end}}</td><td class="mono small">{{$b.TaskID}}</td><td>{{$b.Platform}}</td><td class="small">{{range $i, $t := $b.Targets}}{{if lt $i 3}}{{$t}} {{end}}{{end}}{{with len $b.Targets}}{{if gt . 3}}<span class="muted">+{{sub . 3}}</span>{{end}}{{end}}</td><td>{{template "taskstate" (index $d.RecentState $b.TaskID)}}</td><td class="small muted" title="{{$b.At}}">{{agoOf $b.At}}</td></tr>{{end}}
 </tbody></table>

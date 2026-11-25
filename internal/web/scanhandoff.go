@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -64,6 +65,13 @@ func (s *server) scanPage(w http.ResponseWriter, r *http.Request) {
 	d.Failure = q.Get("error")
 	d.Busy = q.Get("busy")
 	d.Retried, _ = strconv.Atoi(q.Get("retried"))
+	if q.Get("read") != "" {
+		d.Read, _ = strconv.Atoi(q.Get("read"))
+		d.ReadDone, _ = strconv.Atoi(q.Get("done"))
+		d.ReadFailed, _ = strconv.Atoi(q.Get("failed"))
+		d.ReadLimited = q.Get("limited") == "1"
+		d.ReadTried = true
+	}
 	// A failed read is not an empty queue: the page used to show "nothing
 	// waiting" over a database error, which reads as a quiet day.
 	if d.Waiting, err = s.Store.ScanCandidates(r.Context(), d.Config.Kinds, 400); err != nil {
@@ -137,6 +145,32 @@ func (s *server) scanNow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/scan?created="+strconv.Itoa(sum.Tasks), http.StatusSeeOther)
+}
+
+// scanReadNow reads the scanner's answer right now, instead of waiting for the
+// minute tick: a reader who just started a task wants to see it running, and the
+// pass is the same one serve runs.
+func (s *server) scanReadNow(w http.ResponseWriter, r *http.Request) {
+	if s.ScanKey.Reveal() == "" {
+		http.Redirect(w, r, "/scan?error="+urlQuery("no scanner is configured"), http.StatusSeeOther)
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
+	defer cancel()
+	sum, err := scanhandoff.Reconcile(ctx, s.Store, s.scanClient(), 8, s.Store.Now())
+	if err != nil {
+		s.Log.WarnContext(ctx, "scan: read back failed", "error", err)
+		http.Redirect(w, r, "/scan?error="+urlQuery(err.Error()), http.StatusSeeOther)
+		return
+	}
+	q := url.Values{}
+	q.Set("read", strconv.Itoa(sum.Read))
+	q.Set("done", strconv.Itoa(sum.Done))
+	q.Set("failed", strconv.Itoa(sum.Failed))
+	if sum.RateLimited {
+		q.Set("limited", "1")
+	}
+	http.Redirect(w, r, "/scan?"+q.Encode(), http.StatusSeeOther)
 }
 
 // scanRetry puts targets back in the queue: a task that failed, or that the
@@ -238,6 +272,13 @@ type scanPageData struct {
 	// WaitingError is this side failing to read its own tables: shown whether or
 	// not a scanner is configured, because it says nothing about the scanner.
 	WaitingError string
+	// Read is what a "read now" pass did: how many tasks it asked about, what came
+	// back finished or failed, and whether the scanner asked it to slow down.
+	Read        int
+	ReadDone    int
+	ReadFailed  int
+	ReadLimited bool
+	ReadTried   bool
 	// Retried is how many handoff rows a retry cleared: those targets are back in
 	// the queue for the next run.
 	Retried int
