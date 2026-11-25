@@ -178,6 +178,9 @@ poll shows as partial with the reason. If it's real, run
 - **HUNTDECK_SCAN_URL** - a ScopeSentry instance (its web address).
 - **HUNTDECK_SCAN_KEY** - an ssk_ key from that instance, scoped to
   task:write, task:read, node:read and template:read.
+- **HUNTDECK_SCAN_READ_BATCH** - how many tasks one read-back pass asks the
+  scanner about (default 8, 1–100). Its MCP allows about ten calls a minute, so
+  eight fits; a self-hosted instance with a higher limit can raise it.
 
 With both set, the Scan page lists the instance's templates and nodes;
 turning the handoff on creates one scan task per batch of new in-scope

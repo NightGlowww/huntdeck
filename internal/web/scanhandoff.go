@@ -163,7 +163,7 @@ func (s *server) scanReadNow(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 	defer cancel()
-	sum, err := scanhandoff.Reconcile(ctx, s.Store, s.scanClient(), 8, s.Store.Now())
+	sum, err := scanhandoff.Reconcile(ctx, s.Store, s.scanClient(), s.ScanReadBatch, s.Store.Now())
 	if err != nil {
 		s.Log.WarnContext(ctx, "scan: read back failed", "error", err)
 		http.Redirect(w, r, "/scan?error="+urlQuery(err.Error()), http.StatusSeeOther)

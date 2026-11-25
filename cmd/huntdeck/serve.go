@@ -297,7 +297,7 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 		Metrics: web.NewMetrics(), DB: a.db, Store: a.store, Poller: poller, Progress: progress, Platforms: infos, BugcrowdCaps: bcCaps, WebSyncs: webSyncs, Schedule: sched,
 		Version: version.String(), AllowedHosts: a.cfg.AllowedHosts, Timezone: a.cfg.Timezone, Notify: notifier, VNC: vnc,
 		Language: a.cfg.Language, Password: a.cfg.Password.Reveal(),
-		Browser: host, Accounts: a.saved, Restart: restart, ReadOnly: a.cfg.ReadOnly, AIBaseURL: a.cfg.AIBaseURL, AIModel: a.cfg.AIModel, AI: aiClient(a.cfg), PojiaURL: a.cfg.PojiaURL, PojiaKey: a.cfg.PojiaKey, ScanURL: a.cfg.ScanURL, ScanKey: a.cfg.ScanKey, JevURL: a.cfg.JevURL, JevKey: a.cfg.JevKey, JevModel: a.cfg.JevModel, JevProxy: a.cfg.JevProxy, JevProvider: a.cfg.JevProvider, JevAccountID: a.cfg.JevAccountID, JevWorkspaceID: a.cfg.JevWorkspaceID, FeedbackEmail: a.cfg.FeedbackEmail, ClientIPHeader: a.cfg.ClientIPHeader, PublicURL: a.cfg.PublicURL, XAccount: a.cfg.XAccount, RepoURL: a.cfg.RepoURL,
+		Browser: host, Accounts: a.saved, Restart: restart, ReadOnly: a.cfg.ReadOnly, AIBaseURL: a.cfg.AIBaseURL, AIModel: a.cfg.AIModel, AI: aiClient(a.cfg), PojiaURL: a.cfg.PojiaURL, PojiaKey: a.cfg.PojiaKey, ScanURL: a.cfg.ScanURL, ScanKey: a.cfg.ScanKey, ScanReadBatch: a.cfg.ScanReadBatch, JevURL: a.cfg.JevURL, JevKey: a.cfg.JevKey, JevModel: a.cfg.JevModel, JevProxy: a.cfg.JevProxy, JevProvider: a.cfg.JevProvider, JevAccountID: a.cfg.JevAccountID, JevWorkspaceID: a.cfg.JevWorkspaceID, FeedbackEmail: a.cfg.FeedbackEmail, ClientIPHeader: a.cfg.ClientIPHeader, PublicURL: a.cfg.PublicURL, XAccount: a.cfg.XAccount, RepoURL: a.cfg.RepoURL,
 	}
 	if h := a.cfg.HuntMail; h.Enabled() && !a.cfg.ReadOnly {
 		// Straight to Cloudflare, not through HUNTDECK_PROXY: that's for the
@@ -387,7 +387,7 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 		defer tick.Stop()
 		client := &scopesentry.Client{BaseURL: a.cfg.ScanURL, Key: a.cfg.ScanKey.Reveal()}
 		for {
-			if sum, err := scanhandoff.Reconcile(ctx, a.store, client, 8, a.store.Now()); err != nil {
+			if sum, err := scanhandoff.Reconcile(ctx, a.store, client, a.cfg.ScanReadBatch, a.store.Now()); err != nil {
 				if ctx.Err() == nil {
 					log.Warn("scan reconcile failed", "err", err)
 				}

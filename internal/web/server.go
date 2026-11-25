@@ -121,6 +121,9 @@ type Deps struct {
 	// ScanURL and ScanKey are a ScopeSentry instance the handoff sends targets to.
 	ScanURL string
 	ScanKey config.Secret
+	// ScanReadBatch is how many tasks one read-back pass asks the scanner about:
+	// its MCP allows about ten calls a minute.
+	ScanReadBatch int
 	// JevURL, JevKey and JevModel are the decision model asked before a handoff.
 	JevURL   string
 	JevKey   config.Secret

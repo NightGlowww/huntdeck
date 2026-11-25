@@ -84,6 +84,10 @@ type Config struct {
 	// the targets HuntDeck finds and scans them.
 	ScanURL string
 	ScanKey Secret
+	// ScanReadBatch is how many tasks one reconcile pass asks the scanner about.
+	// Its MCP allows about ten calls a minute, so eight fits; a self-hosted
+	// instance with a higher limit can raise it, and a shared one lower it.
+	ScanReadBatch int
 	// JevURL, JevKey and JevModel are TypeSafe's System One model: a typed,
 	// calibrated judgement in a few hundred milliseconds, asked before a
 	// consequential action.
@@ -292,6 +296,7 @@ func Load(src Source) (Config, error) {
 	cfg.PojiaKey = Secret(strings.TrimSpace(r.get("HUNTDECK_POJIA_KEY", "")))
 	cfg.ScanURL = strings.TrimSpace(r.get("HUNTDECK_SCAN_URL", ""))
 	cfg.ScanKey = Secret(strings.TrimSpace(r.get("HUNTDECK_SCAN_KEY", "")))
+	cfg.ScanReadBatch = scanReadBatch(r.get("HUNTDECK_SCAN_READ_BATCH", ""))
 	cfg.JevURL = strings.TrimSpace(r.get("HUNTDECK_JEV_URL", ""))
 	if cfg.JevURL == "" {
 		cfg.JevURL = "https://api.typesafe.ai"
@@ -686,4 +691,18 @@ func Check(cfg Config) error {
 		errs = append(errs, errors.New("YWH_TOTP_SECRET needs YWH_EMAIL and YWH_PASSWORD"))
 	}
 	return errors.Join(errs...)
+}
+
+// scanReadBatch parses the read-back batch size: eight unless a sane number is
+// given, because a pass that asks for a thousand is refused on the first call and
+// reports nothing read.
+func scanReadBatch(v string) int {
+	n, err := strconv.Atoi(strings.TrimSpace(v))
+	if err != nil || n < 1 {
+		return 8
+	}
+	if n > 100 {
+		return 100
+	}
+	return n
 }
