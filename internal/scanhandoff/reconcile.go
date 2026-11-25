@@ -32,7 +32,7 @@ type ReconcileSummary struct {
 }
 
 // pace is how long to wait between task reads: the scanner rates its MCP.
-const pace = 400 * time.Millisecond
+const pace = 1200 * time.Millisecond
 
 func Reconcile(ctx context.Context, st *store.Store, client *scopesentry.Client, limit int, now time.Time) (ReconcileSummary, error) {
 	var sum ReconcileSummary

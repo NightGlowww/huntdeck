@@ -408,6 +408,10 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 			// The same clock hands new targets to the scanner, when the operator
 			// turned that on: off is the default and the honest one.
 			if a.cfg.ScanKey.Reveal() != "" {
+				// Reading the tasks back shares one rate limit with the handoff and
+				// with anyone running the CLI by hand: ten minutes apart, ten at a
+				// time, is what the scanner's MCP allows.
+				var lastReconcile time.Time
 				client := &scopesentry.Client{BaseURL: a.cfg.ScanURL, Key: a.cfg.ScanKey.Reveal()}
 				if sum, err := scanhandoff.Run(ctx, a.store, client, false); err != nil {
 					if ctx.Err() == nil {
@@ -421,12 +425,17 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 				// And reads back what the scanner says about the tasks it made:
 				// the pipeline's last link, so a finished or failed task is not
 				// known to the scanner alone.
-				if sum, err := scanhandoff.Reconcile(ctx, a.store, client, 25, a.store.Now()); err != nil {
-					if ctx.Err() == nil {
-						log.Warn("scan reconcile failed", "err", err)
+				// Every ten minutes, not every tick: the scanner rates its MCP, and a
+				// pass that runs constantly spends the whole budget refusing itself.
+				if time.Since(lastReconcile) >= 10*time.Minute {
+					lastReconcile = time.Now()
+					if sum, err := scanhandoff.Reconcile(ctx, a.store, client, 10, a.store.Now()); err != nil {
+						if ctx.Err() == nil {
+							log.Warn("scan reconcile failed", "err", err)
+						}
+					} else if sum.Done > 0 || sum.Failed > 0 || sum.RateLimited {
+						log.Info("scan tasks read", "done", sum.Done, "failed", sum.Failed, "gone", sum.Gone, "rateLimited", sum.RateLimited)
 					}
-				} else if sum.Done > 0 || sum.Failed > 0 {
-					log.Info("scan tasks read", "done", sum.Done, "failed", sum.Failed, "gone", sum.Gone)
 				}
 			}
 			select {
