@@ -340,8 +340,10 @@ else
       # not a faster release, it is a page nobody measures any more - and that is
       # silent unless someone counts. Deliberately dropping a page sets
       # PERF_FEWER_ROUTES_OK=1.
-      prev_n=$(remote "grep -cE '^/[^ ]+ +200/' '$prev' 2>/dev/null" | tr -d '\r')
-      new_n=$(remote "grep -cE '^/[^ ]+ +200/' '$record' 2>/dev/null" | tr -d '\r')
+      # Digits only: a stray CR or a banner line over SSH turns [ -lt ] into a
+      # status-2 error that aborts the deploy after a successful release.
+      prev_n=$(remote "grep -cE '^/[^ ]+ +200/' '$prev' 2>/dev/null" | tr -dc '0-9')
+      new_n=$(remote "grep -cE '^/[^ ]+ +200/' '$record' 2>/dev/null" | tr -dc '0-9')
       if [ -n "$prev_n" ] && [ -n "$new_n" ] && [ "$new_n" -lt "$prev_n" ]; then
         echo "  this record measures $new_n routes, the previous one $prev_n" >&2
         if [ "${PERF_FEWER_ROUTES_OK:-0}" != "1" ]; then
