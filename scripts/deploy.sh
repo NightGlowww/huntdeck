@@ -336,6 +336,20 @@ else
   if remote "cd $dir && mkdir -p perf && bash scripts/perf-snapshot.sh -o $record >/dev/null 2>&1 && ls -t perf/*.md | tail -n +11 | xargs -r rm -f"; then
     echo "  record: $dir/$record"
     if [ -n "$prev" ]; then
+      # Coverage first: a record that measures fewer routes than the last one is
+      # not a faster release, it is a page nobody measures any more - and that is
+      # silent unless someone counts. Deliberately dropping a page sets
+      # PERF_FEWER_ROUTES_OK=1.
+      prev_n=$(remote "grep -cE '^/[^ ]+ +200/' '$prev' 2>/dev/null" | tr -d '\r')
+      new_n=$(remote "grep -cE '^/[^ ]+ +200/' '$record' 2>/dev/null" | tr -d '\r')
+      if [ -n "$prev_n" ] && [ -n "$new_n" ] && [ "$new_n" -lt "$prev_n" ]; then
+        echo "  this record measures $new_n routes, the previous one $prev_n" >&2
+        if [ "${PERF_FEWER_ROUTES_OK:-0}" != "1" ]; then
+          echo "  !! a route dropped out of the measurement; set PERF_FEWER_ROUTES_OK=1" >&2
+          echo "     if that page was removed on purpose" >&2
+          exit 1
+        fi
+      fi
       echo "  against the previous record ($(basename "$prev")):"
       remote "cd $dir && python3 scripts/perf-diff.py '$prev' '$record' 2>/dev/null | head -6" | sed 's/^/    /' || true
     fi

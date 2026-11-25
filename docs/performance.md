@@ -46,6 +46,11 @@ against the previous one, because a number nobody compares is a number nobody
 reads. The budget line still does not fail a deploy (a shared host with a noisy
 neighbour should not block a release); the comparison is the signal to look at.
 
+Coverage is the one thing that does fail a deploy: a record that measures fewer
+routes than the one before it means a page dropped out of the measurement, which
+is a correctness problem and not the host's mood. Dropping a page on purpose
+sets `PERF_FEWER_ROUTES_OK=1`.
+
 ```sh
 scripts/perf-diff.py perf/20261118T233839.md perf/20261118T233907.md
 ```
