@@ -27,7 +27,11 @@ func (s *Store) HandoffTasks(ctx context.Context, limit int) ([]HandoffTask, err
 		  FROM scan_handoffs
 		 WHERE task_id <> ''
 		 GROUP BY task_id
-		 ORDER BY MAX(created_at) DESC
+		 -- Tasks still worth reading first. Newest-first alone kept the reconciler
+		 -- on the same already-read twenty and never reached the backlog: 301 rows
+		 -- stayed unread that way while every pass reported success.
+		 ORDER BY CASE WHEN MIN(state) IN ('done', 'failed', 'gone') THEN 1 ELSE 0 END,
+		          MAX(created_at) DESC
 		 LIMIT ?`, limit)
 	if err != nil {
 		return nil, fmt.Errorf("handoff tasks: %w", err)
