@@ -57,8 +57,8 @@
       {{with $y := $p.Reports}}
       <tr class="sub{{if not (and $y.Enabled $y.Configured $p.Enabled)}} off{{end}}">
         <td class="c-name nowrap"><span class="subl">{{T "Your reports"}}</span></td>
-        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="reports_enabled_{{$y.Name}}" value="1" form="sched" aria-label="{{T "Read your"}} {{$y.Name}} {{T "reports"}}"{{if $y.Enabled}} checked{{end}}> <span class="muted small">{{if $y.Enabled}}on{{else}}off{{end}}</span></label></td>
-        <td colspan="3" class="c-wide"><div class="pollc subc"><span class="muted small">{{if not $y.Configured}}needs the website login, which HuntDeck doesn't have yet{{else}}read with the polls, once an hour at most{{end}}</span>
+        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="reports_enabled_{{$y.Name}}" value="1" form="sched" aria-label="{{T "Read your"}} {{$y.Name}} {{T "reports"}}"{{if $y.Enabled}} checked{{end}}> <span class="muted small">{{if $y.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
+        <td colspan="3" class="c-wide"><div class="pollc subc"><span class="muted small">{{if not $y.Configured}}{{T "needs the website login, which HuntDeck doesn't have yet"}}{{else}}{{T "read with the polls, once an hour at most"}}{{end}}</span>
           <span class="muted small">{{T "· last read"}}</span>{{with $y.SyncedAt}}<span class="when" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">never</span>{{end}}
           {{if $y.Count}}<a class="link small" href="/reports?platform={{$y.Name}}">{{num $y.Count}} {{plural $y.Count "report" "reports"}}</a>{{end}}</div></td>
         <td class="c-side num"></td>
@@ -107,7 +107,7 @@
       <tr{{if eq .Status "running"}} data-live{{end}}>
         <td><span class="when" title="{{datetime .StartedAt}}">{{ago .StartedAt}}</span></td>
         <td class="shrink">{{template "ptag" .Platform}}</td>
-        <td class="muted">{{if eq .Mode "web"}}{{T "browser"}}{{else}}{{T .Mode}}{{end}}</td><td class="muted">{{.Trigger}}</td>
+        <td class="muted">{{if eq .Mode "web"}}{{T "browser"}}{{else}}{{T .Mode}}{{end}}</td><td class="muted">{{T .Trigger}}</td>
         <td class="run-status"><span class="chips"><span class="chip {{.DisplayStatus}}"{{if eq .DisplayStatus "interrupted"}} title="{{T "Stopped by a restart or shutdown"}}"{{end}}>{{T .DisplayStatus}}</span>{{if .ListingRecent}}<span class="chip" title="{{T "Quick poll that read only the newest programs; the complete listing, which finds invites and removals, runs every two hours"}}">{{T "newest only"}}</span>{{else if and (not .ListingComplete) (ne .Status "running") (ne .Trigger "program")}}<span class="chip" title="{{T "Programs aren't marked removed when the listing is incomplete"}}">{{T "partial list"}}</span>{{end}}{{if and (eq .Status "running") $live.Stalled}}<span class="chip stalled" title="{{TF "No request answered and no program done for %s: it may be stuck. Restart now (Accounts) stops it; it keeps what it saved" $live.Idle}}">{{TF "no activity %s" $live.Idle}}</span>{{end}}</span>
           {{if eq .Status "running"}}<span class="run-prog small">{{if $live.Known}}<b>{{$live.Step}}</b>{{with $live.Left}} · {{.}}{{end}}{{if not $live.Stalled}} · <span class="muted" title="{{T "When it last had a request answered or a program done"}}">{{TF "last activity %s ago" $live.Idle}}</span>{{end}}{{else}}<span class="muted">{{T "Running in another process: no progress to show"}}</span>{{end}}</span>{{end}}
           {{if ne .DisplayStatus "interrupted"}}{{with .Error}}<span class="muted small run-err" title="{{.}}">{{.}}</span>{{end}}{{end}}</td>

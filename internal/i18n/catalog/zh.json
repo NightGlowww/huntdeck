@@ -612,7 +612,7 @@
   "last run": "上次运行",
   "disabled": "已停用",
   "on": "开",
-  "off": "未启用",
+  "off": "关",
   "browser": "浏览器",
   "quick": "快速",
   "full": "全量",
@@ -2432,6 +2432,11 @@
   "disclosed history": "公开披露历史",
   "Decision model": "决策模型",
   "Proxy and login browser": "代理与登录浏览器",
-  "for the Email page": "供邮箱页使用"
+  "for the Email page": "供邮箱页使用",
+  "schedule": "定时",
+  "manual": "手动",
+  "startup": "启动时",
+  "needs the website login, which HuntDeck doesn't have yet": "需要网站登录，HuntDeck 还没有",
+  "read with the polls, once an hour at most": "随轮询读取，最多每小时一次"
  }
 }
