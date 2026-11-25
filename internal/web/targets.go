@@ -33,6 +33,14 @@ type targetsData struct {
 
 func (d targetsData) list() listQuery { return listQuery{"/targets", d.query} }
 
+// OneURL toggles the one-row-per-program filter, keeping every other choice.
+func (d targetsData) OneURL() string {
+	if d.Filter.OnePerProgram {
+		return d.list().with("one", "")
+	}
+	return d.list().with("one", "1")
+}
+
 // Rail is the filter rail's groups.
 func (d targetsData) Rail() []railGroup {
 	l, fc := d.list(), d.Facets
@@ -156,6 +164,7 @@ func targetFilterFrom(q url.Values, now time.Time) store.TargetFilter {
 		kind, assets = "", a.Types
 	}
 	return store.TargetFilter{
+		OnePerProgram:  q.Get("one") == "1",
 		AssetTypes:     assets,
 		Kind:           kind,
 		OutOfScope:     q.Get("scope") == "out" && kind != scope.KindRoot, // roots come from in-scope targets only

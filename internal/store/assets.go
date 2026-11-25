@@ -136,6 +136,21 @@ func (s *Store) assetList(ctx context.Context, f TargetFilter, query string) ([]
 	default:
 		slices.SortStableFunc(out, byValue)
 	}
+	if f.OnePerProgram {
+		// After the sort, so the row kept is the one the chosen order puts first:
+		// the newest, or the best paying. The page's total is counted from this
+		// list, so the number and the rows agree.
+		seen := make(map[int64]bool, len(out))
+		kept := out[:0]
+		for _, r := range out {
+			if seen[r.Program.ID] {
+				continue
+			}
+			seen[r.Program.ID] = true
+			kept = append(kept, r)
+		}
+		out = kept
+	}
 	return out, nil
 }
 

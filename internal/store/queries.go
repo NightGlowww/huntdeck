@@ -42,6 +42,10 @@ type TargetFilter struct {
 	// program's targets new to the user (TargetRow.Joined), its best ones,
 	// so a large program just joined doesn't fill a short list.
 	JoinedPerProgram int
+	// OnePerProgram keeps the first target of each program in the sorted list, so
+	// a program with eight hundred wildcards does not fill the page: the reader
+	// sees which programs have something, then filters to one.
+	OnePerProgram bool
 	// Limit and Offset page EachTarget and EachBestTarget (Limit 0: every
 	// one from Offset on).
 	Limit, Offset int

@@ -2540,6 +2540,7 @@
   "Read their state now": "立即读取状态",
   "Asking the scanner…": "正在询问扫描器…",
   "finished": "已完成",
-  "last read": "上次读取"
+  "last read": "上次读取",
+  "One row per program: the order picks which of its targets is shown": "每个项目只显示一行：由当前排序决定显示它的哪个目标"
  }
 }
