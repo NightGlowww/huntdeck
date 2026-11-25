@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"regexp"
 	"slices"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/reports"
 	"github.com/mdpsec/huntdeck/internal/store"
 )
 
@@ -81,6 +83,7 @@ func TestOpenAPIDocumentsEveryRoute(t *testing.T) {
 // that comes back null where the schema says array fails).
 func TestAPIResponsesFitSchemas(t *testing.T) {
 	e := newTestEnv(t)
+	e.addReports(t)
 	c := e.client()
 	res, body := e.do(c, "GET", "/api/v1/openapi.json", nil, nil)
 	if res.StatusCode != http.StatusOK {
@@ -108,6 +111,11 @@ func TestAPIResponsesFitSchemas(t *testing.T) {
 		schema             string
 	}{
 		{"GET", "/api/v1/board", "", 200, "Board"},
+		{"GET", "/api/v1/reports", "", 200, "MyReportList"},
+		{"GET", "/api/v1/reports?status=paid&sort=bounty&limit=1", "", 200, "MyReportList"},
+		{"GET", "/api/v1/reports?status=nonsense", "", 400, "Error"},
+		{"GET", "/api/v1/reports/analytics", "", 200, "ReportsAnalytics"},
+		{"GET", "/api/v1/reports/analytics?from=2020-01&to=2020-02", "", 200, "ReportsAnalytics"},
 		{"GET", "/api/v1/programs?state=all", "", 200, "ProgramList"},
 		{"GET", "/api/v1/programs?sort=huntscore&limit=1", "", 200, "ProgramList"},
 		{"GET", "/api/v1/programs?state=all&trends=1", "", 200, "ProgramList"},
@@ -310,6 +318,11 @@ func TestOpenAPIValuesMatchCode(t *testing.T) {
 		{"/api/v1/stats", "sort", store.StatsSorts},
 		{"/api/v1/stats/platforms/{platform}", "sort", statsPlatformSorts},
 		{"/api/v1/changes", "kind", store.ChangeKinds()},
+		{"/api/v1/reports", "status", append(keysOf(reportGroups), "all")},
+		{"/api/v1/reports", "state", keysOf(reports.States)},
+		{"/api/v1/reports", "severity", append(keysOf(reports.Severities), "unrated")},
+		{"/api/v1/reports", "platform", reportFormPlatforms},
+		{"/api/v1/reports/analytics", "range", keysOf(analyticsRanges)},
 	} {
 		got, want := slices.Sorted(slices.Values(values(tt.path, tt.param))), slices.Sorted(slices.Values(tt.code))
 		if !slices.Equal(got, want) {
@@ -352,4 +365,14 @@ func TestAPIPage(t *testing.T) {
 	if res.StatusCode != http.StatusMovedPermanently || res.Header.Get("Location") != "/api" {
 		t.Errorf("/settings?tab=api = %d → %q, want 301 → /api", res.StatusCode, res.Header.Get("Location"))
 	}
+}
+
+// keysOf lists the Key fields of a slice of choices.
+func keysOf(s any) []string {
+	v := reflect.ValueOf(s)
+	out := make([]string, v.Len())
+	for i := range out {
+		out[i] = v.Index(i).FieldByName("Key").String()
+	}
+	return out
 }

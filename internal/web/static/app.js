@@ -1134,3 +1134,31 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
 	addEventListener("scroll", hide, { passive: true });
 })();
 
+// The sidebar's fold button: icons only, or icons and names; remembered
+// (theme.js applies it before the page shows). Folded, each icon's name
+// shows on hover.
+(() => {
+  const btn = document.querySelector("[data-side-toggle]");
+  if (!btn) return;
+  const root = document.documentElement;
+  for (const a of document.querySelectorAll(".nav a")) {
+    const label = a.querySelector(".label");
+    if (label && !a.title) a.title = label.textContent.trim();
+  }
+  const show = () => {
+    const min = root.dataset.side === "min";
+    btn.setAttribute("aria-pressed", String(min));
+    btn.title = min ? "Show the sidebar's names" : "Fold the sidebar to its icons";
+    btn.setAttribute("aria-label", min ? "Unfold the sidebar" : "Fold the sidebar");
+  };
+  show();
+  btn.addEventListener("click", () => {
+    if (root.dataset.side === "min") delete root.dataset.side;
+    else root.dataset.side = "min";
+    try {
+      if (root.dataset.side === "min") localStorage.setItem("huntdeck-side", "min");
+      else localStorage.removeItem("huntdeck-side");
+    } catch { /* storage blocked: folded for this page only */ }
+    show();
+  });
+})();

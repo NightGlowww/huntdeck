@@ -9,13 +9,18 @@ programs count, and when it's sent.
   in a row, and when they work again) are on by default. Scope removed,
   out-of-scope changes, scope edits, programs paused or no longer listed,
   other bounty table changes, rules edits and program announcements
-  (Bugcrowd) can be turned on. Programs that
+  (Bugcrowd) can be turned on. On your own reports, a bounty awarded, a
+  new state and a program waiting on your reply are on for new channels;
+  a severity change and a new report found can be turned on (a report you
+  muted never notifies, and the first time HuntDeck reads a platform's
+  reports is their past, not news). Programs that
   pause and reopen again and again (3+ times a week: Intigriti pauses at its
   report limit) aren't notified for each flip: a pause is sent once it has
   lasted a day, and the reopening after it.
 - **Which programs:** platforms, paying or private only, a minimum top
   bounty, tags to include or exclude, and "only wildcards and new root
-  domains" for new scope. Ignored programs never notify.
+  domains" for new scope. Ignored programs never notify. News on your own
+  reports follows only the platforms: the rest is about programs to hunt.
 - **When:** after each poll (all of a poll's changes in one message, grouped
   by program), a daily digest at a time in your time zone, or both.
 - **Delivery:** messages wait in the database and are retried with backoff
@@ -53,8 +58,12 @@ Setting up a channel:
   `type` is `poll`, `digest` or `test`; event kinds are `invite`, `launch`,
   `scope_added`, `scope_removed`, `scope_out`, `scope_changed`, `reopened`,
   `paused`, `removed`, `bounty_raised`, `rewards_changed`, `policy_changed`,
-  `announcement`, `platform_problem`, `platform_recovered` and `test`, with `old`, `new`,
-  `detail` and `change_id` where they apply. New fields may be added;
+  `announcement`, `platform_problem`, `platform_recovered`, `report_state`,
+  `report_bounty`, `report_waiting`, `report_severity`, `report_new` and `test`, with `old`, `new`,
+  `detail` and `change_id` where they apply. The `report_*` kinds carry
+  `report` instead of `program`: `id`, `title`, `url` (on the platform),
+  `state`, `severity`, `program_name`, `program_handle`, `private`, a
+  bounty's `amount` and `currency`, and `huntdeck_url`. New fields may be added;
   existing ones keep their meaning. With a signing secret, each request
   carries `X-HuntDeck-Signature: sha256=<hex HMAC-SHA256 of the body>`.
 

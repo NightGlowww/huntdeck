@@ -1,0 +1,69 @@
+{
+  "name": "huntmail",
+  "version": "1.6.0",
+  "main_module": "index.js",
+  "modules": [
+    {
+      "name": "index.js",
+      "type": "esm",
+      "sha256": "360bd83bfdf4887e5d2247b5bf60bf3b7eb53ebb3799d8d7b9810ec13cf38b2f"
+    }
+  ],
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "crons": [
+    "* * * * *"
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "workers_dev": true,
+  "d1_binding": "DB",
+  "vars": {
+    "DOMAINS": "",
+    "RETENTION_DAYS": "30",
+    "MAX_STORE_MB": "350",
+    "MAX_MESSAGE_KB": "4096",
+    "FORWARD_TO": "",
+    "VIEW_LINK_TTL": "900",
+    "PARSE_BYTES": "262144",
+    "GZIP_MAX_BYTES": "131072",
+    "TO_READ_PARSE_MAX": "1",
+    "CRON_PARSE_DEFERRED": "0",
+    "CRON_PARSE_MAX": "4",
+    "NEWSLETTER_RETENTION_DAYS": "0"
+  },
+  "secrets": [
+    "API_KEY",
+    "BASE_PATH"
+  ],
+  "secret_rules": {
+    "API_KEY": "at least 32 characters (setup uses 64 hex)",
+    "BASE_PATH": "16-128 characters of A-Z a-z 0-9 _ - (setup uses 32 hex)"
+  },
+  "migrations": [
+    "0001_init.sql",
+    "0002_auth_flood.sql",
+    "0003_meta_reserve.sql",
+    "0004_recount_sizes.sql",
+    "0005_daily_stats.sql",
+    "0006_deferred_parse.sql",
+    "0007_domain_stats.sql",
+    "0008_domain_and_deferred_index.sql",
+    "0009_newsletters_and_blocks.sql"
+  ],
+  "migrations_sha256": {
+    "0001_init.sql": "35a59403e94de8cdf619a94ab1ec8b28920440ea1c16e82e36276deb81563e6c",
+    "0002_auth_flood.sql": "cf2242c4f8f883499913ebc93ca671354fb7aab820a086fa4fca568286da2793",
+    "0003_meta_reserve.sql": "9a014bd99517a9c461f098a17e02f4e765e68227d97e791529d0f973988c2f78",
+    "0004_recount_sizes.sql": "cc304bcff78c5060eb4df26104c62a0f61d8b04b69a22b17dadd3415e283f8ec",
+    "0005_daily_stats.sql": "04ba757dde412e0a9cea119ebbeafe33ff82fe6c2f672930fd6ca295e59ed30f",
+    "0006_deferred_parse.sql": "2af6858766b804a7b3212df5e91f687d3c70aac6c3c7ebeb4ab7180408944bbb",
+    "0007_domain_stats.sql": "938475080e353f9af84d24010eccd1a3ef8f8276de840b89f62089af6f4fcb24",
+    "0008_domain_and_deferred_index.sql": "92944657b50eff8f1c1daa02d90523547fc1176c3c9a59175635598d2088cdc1",
+    "0009_newsletters_and_blocks.sql": "516fff05fbad12058e4d2fab199ab7170afc6f26f001d76f10dea6bda0ce1f80"
+  },
+  "migrations_table": "d1_migrations"
+}

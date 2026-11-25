@@ -1,0 +1,9 @@
+{{/* A read-only copy's tour of one of the user's own pages (readonly.go):
+   its picture, with made-up data. Nothing of anyone's is read. */}}
+{{define "content"}}{{with .Data}}
+<h1 class="m-heading">{{.Title}}</h1>
+<figure class="owntour">
+  <img src="{{static .Shot}}" alt="{{.Alt}}" width="1440" height="863" loading="eager">
+  <figcaption class="muted small">{{.Title}} in a HuntDeck of your own, with made-up data.</figcaption>
+</figure>
+{{end}}{{end}}

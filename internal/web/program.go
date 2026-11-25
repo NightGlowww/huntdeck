@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -104,6 +105,12 @@ type programData struct {
 	// says that rather than hiding.
 	PojiaFailed bool
 	PojiaStale  bool
+	// Mine is the user's own reports to the program (the Overview); nil
+	// without any, and always in a read-only copy.
+	Mine *programMine
+	// MailOn: HuntMail is set up, so the Email tab shows; Mail is the tab.
+	MailOn bool
+	Mail   *programMailView
 }
 
 // programTab is one of a program page's tabs.
@@ -116,7 +123,7 @@ type programTab struct {
 }
 
 // programTabs are a program page's tabs, in order.
-var programTabs = []string{"overview", "scope", "policy", "stats", "changes", "notes"}
+var programTabs = []string{"overview", "scope", "policy", "stats", "changes", "email", "notes"}
 
 const (
 	// disclosuresShown is how many disclosed reports a program page lists.
@@ -163,9 +170,10 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, (&url.URL{Path: r.URL.Path, RawQuery: q.Encode()}).String(), http.StatusMovedPermanently)
 		return
 	}
-	d := programData{P: p, Tab: oneOf(tab, programTabs...)}
-	// POJIA's disclosed-report history: cached for a week, fetched on the first
-	// visit after that. A missing key leaves the panel off entirely.
+	d := programData{P: p, Tab: oneOf(tab, programTabs...), MailOn: s.Mail != nil}
+	if d.Tab == "email" && !d.MailOn {
+		d.Tab = "overview"
+	}
 	// The policy check needs a decision model; its answer comes back on the query.
 	d.PolicyCheckOn = s.JevKey.Reveal() != ""
 	q := r.URL.Query()
@@ -176,6 +184,8 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 	d.PolicyWhy = q.Get("policy_why")
 	d.PolicyError = q.Get("policy_error")
 
+	// POJIA's disclosed-report history: cached for a week, fetched on the first
+	// visit after that. A missing key leaves the panel off entirely.
 	if s.PojiaKey.Reveal() != "" {
 		s.pojiaPanel(ctx, r, p, &d)
 	}
@@ -282,6 +292,19 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 	if d.Tab == "scope" {
 		d.Scope = d.scopeView(r)
 	}
+	if d.Tab == "email" {
+		made, _ := strconv.ParseInt(r.URL.Query().Get("made"), 10, 64)
+		if d.Mail, err = s.programMail(ctx, p, made, nlParam(r.URL.Query())); err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+	}
+	if d.Tab == "overview" {
+		if d.Mine, err = s.programMine(ctx, p); err != nil {
+			s.serverError(w, r, err)
+			return
+		}
+	}
 	d.Tabs = d.tabs()
 	s.render(w, r, http.StatusOK, "program", pageData{Title: p.Name, Nav: "programs", Description: programDescription(d),
 		Feed: programPath(p) + "/changes.atom", FeedTitle: "HuntDeck: " + p.Name + " changes",
@@ -360,8 +383,11 @@ func (d *programData) tabs() []programTab {
 	if d.hasReports() || len(d.History) > 0 {
 		out = append(out, programTab{Key: "stats", Label: "Stats"})
 	}
-	out = append(out, programTab{Key: "changes", Label: "Changes", Count: d.Feed.AllTotal, Counted: true},
-		programTab{Key: "notes", Label: "Notes", Notes: true}) // always has a box: HuntDeck keeps the notes
+	out = append(out, programTab{Key: "changes", Label: "Changes", Count: d.Feed.AllTotal, Counted: true})
+	if d.MailOn {
+		out = append(out, programTab{Key: "email", Label: "Email"})
+	}
+	out = append(out, programTab{Key: "notes", Label: "Notes", Notes: true}) // always has a box: HuntDeck keeps the notes
 	for i := range out {
 		out[i].On = out[i].Key == d.Tab
 	}

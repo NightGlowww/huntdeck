@@ -62,6 +62,7 @@ Each adds a feature; the syncer and server find them by type assertion.
 | `DisclosureFetcher`, `ResolutionFetcher` | Disclosed and resolved reports. |
 | `CredentialReporter` | Whether each credential works, under Settings › Accounts. |
 | `KeepAliver` | Keeps an idle login session alive between polls. |
+| `ReportFetcher` | The user's own reports (Reports, Analytics, report notifications). |
 | `WebSyncer` | A separate logged-in browser sync for data the API lacks. |
 
 ## 3. Wiring it in

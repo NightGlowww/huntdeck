@@ -18,11 +18,7 @@
 </section>
 {{else}}
 
-<div class="board-editbar" data-board-editbar hidden><span class="sr-only" role="status" aria-live="polite" data-board-live></span>
-  <span>{{T "Drag a box by its handle to move it, and drag its edges or bottom corner to resize it: widths snap to twelfths of the page and heights to 20px steps. A box shorter than its content scrolls;"}} <b>{{T "Fit"}}</b> {{T "sets it back to its content's height. The layout is saved in this browser, separately for ultrawide screens."}}</span>
-  <button type="button" class="button secondary small" data-board-reset>{{T "Reset layout"}}</button>
-  <button type="button" class="button small" data-board-done>{{T "Done"}}</button>
-</div>
+{{template "board-editbar"}}
 
 {{if .QueueErr}}<section class="panel queue-strip"><div class="panel-head"><h2>{{T "Hunt queue"}}</h2></div><p class="empty-state">{{T "The queue could not be read just now; it is rebuilt every half hour."}}</p></section>{{end}}
 {{if .Queue}}

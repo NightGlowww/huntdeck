@@ -1,0 +1,232 @@
+/* Email (email.html, emailmsg.html, partials/mail-table.html,
+   partials/program-email.html): the user's HuntMail inbox, as text. */
+.mlist th.c-prog { width: 230px; }
+.mlist th.c-to { width: 300px; }
+.mlist th.c-from { width: 210px; }
+.mlist th.c-code { width: 130px; }
+.mlist th.c-when { width: 100px; }
+.mlist td.c-to { color: var(--text-2); }
+.mlist .mverified { margin-left: 2px; padding: 0 5px; }
+.mlist td.c-code .icon-btn { margin-left: 4px; vertical-align: middle; }
+code.mcode { padding: 1px 6px; border-radius: 5px; background: var(--accent-weak); color: var(--accent); font: 600 12.5px var(--mono); }
+@media (max-width: 1600px) { .mlist th.c-to { width: 240px; } .mlist th.c-from { width: 170px; } }
+
+.mfilter .search-field { display: inline-flex; flex: 1 1 280px; align-items: center; gap: 6px; max-width: 420px; height: 30px; padding: 0 9px;
+  border: 1px solid var(--border-2); border-radius: 6px; background: var(--surface); }
+.mfilter .search-field .i { width: 14px; height: 14px; color: var(--muted); }
+.mfilter .search-field input { flex: 1; min-width: 0; height: 28px; padding: 0; border: 0; background: none; box-shadow: none; }
+.mfilter select { height: 30px; max-width: 260px; }
+.mfilter .what { margin-left: auto; color: var(--muted); font-size: 12.5px; }
+.mpager { border-top: 1px solid var(--border); }
+.mpager .mp-size b { color: var(--text); }
+.mlist .mnl { margin-right: 6px; padding: 0 5px; color: var(--muted); font-size: 10.5px; font-weight: 500; vertical-align: 1px; } /* before the subject: its ellipsis would hide it after */
+#mail-list .panel-head, #mail-list .panel-head .aside { flex-wrap: wrap; }
+.mguess .name { color: var(--text-2); font-weight: 500; }
+.mail-foot { margin: 10px 2px 0; }
+.mail-intro p { max-width: 760px; margin: 0 0 10px; line-height: 1.55; }
+.mail-intro p:last-child { margin-bottom: 0; }
+
+/* A message. */
+.mcodes { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+.mcode-big { display: inline-flex; align-items: center; gap: 10px; }
+.mcode-big code { padding: 4px 12px; border-radius: 7px; background: var(--accent-weak); color: var(--accent); font: 650 20px var(--mono); letter-spacing: .06em; }
+/* Links: one line each, cut short (the start shows where it goes; the
+   whole of it is on hover, copy and open), in a box of its own height. */
+.mlinks-box { max-height: 420px; overflow: auto; }
+.mlinks { table-layout: fixed; }
+.mlinks th { width: 34%; color: var(--text-2); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mlinks td.mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mlinks td.acts { width: 76px; text-align: right; }
+.mside td { overflow-wrap: anywhere; }
+.mside th { width: 32%; }
+pre.mail-text { margin: 0; padding: 14px 16px; max-height: 70vh; overflow: auto; color: var(--text); font: 13px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* A program's Email tab. */
+.mnew { align-items: flex-start; }
+.mnew > button { display: inline-flex; align-items: center; gap: 6px; }
+.mnew > button .i { width: 14px; height: 14px; }
+.maddrs th { width: auto; color: var(--text); font-weight: 500; }
+.maddrs th code { font-size: 12.5px; overflow-wrap: anywhere; }
+.maddrs th .icon-btn { margin-left: 6px; vertical-align: middle; }
+.maddrs tr.made th, .maddrs tr.made td { background: var(--good-weak); }
+.maddrs td { padding: 7px 16px; border-top: 1px solid var(--border); vertical-align: middle; }
+.maddrs td.acts { width: 80px; text-align: right; }
+.mnote { display: flex; gap: 6px; }
+.mnote input { flex: 1; min-width: 120px; height: 28px; }
+@media (max-width: 700px) {
+  .maddrs, .maddrs tbody, .maddrs tr { display: block; }
+  .maddrs tr { padding: 8px 0; border-top: 1px solid var(--border); }
+  .maddrs th, .maddrs td { display: block; width: auto; padding: 4px 16px; border-top: 0; }
+  .maddrs td.acts { width: auto; text-align: left; }
+}
+
+/* Settings › HuntMail: setting it up on Cloudflare, and following a run. */
+.msetup-run { margin-bottom: 16px; }
+.msetup-steps { margin: 0; padding: 4px 0; list-style: none; }
+.msetup-steps li { display: grid; grid-template-columns: 72px minmax(0, auto) 1fr; gap: 4px 12px; align-items: baseline; padding: 8px 16px; border-top: 1px solid var(--border); }
+.msetup-steps li:first-child { border-top: 0; }
+.msetup-steps .chip { justify-self: start; }
+.msetup-steps b { font-weight: 550; }
+.msetup-steps li > span:last-child:not(.chip) { overflow-wrap: anywhere; }
+.msetup-err { color: var(--bad); }
+.profile-form > label.msetup-check { display: flex; align-items: flex-start; height: auto; padding: 8px 10px; white-space: normal; }
+.msetup-check input { margin-top: 3px; }
+.msetup-check .hint { display: block; margin-top: 2px; }
+.msetup-note { margin: 0; padding: 10px 16px; border-top: 1px solid var(--border); }
+.msetup-intro p { margin: 0 0 10px; }
+.msetup-perms { margin: 0 0 10px; }
+.msetup-perms th { width: 90px; color: var(--muted); font-weight: 500; }
+.msetup-perms th, .msetup-perms td { padding: 5px 0; border-top: 1px solid var(--border); text-align: left; }
+@media (max-width: 700px) {
+  .msetup-steps li { grid-template-columns: 72px 1fr; }
+  .msetup-steps li > span:last-child:not(.chip) { grid-column: 2; }
+}
+
+/* Email › Stats. */
+svg.mbar { display: block; width: 100%; height: 4px; margin-top: 6px; overflow: visible; }
+.mbar-bg { fill: var(--surface-3); }
+.mbar-fill { fill: var(--accent); }
+.mbar-fill.hot { fill: var(--bad); }
+.mdomains th, .mdomains td { padding: 8px 16px; border-top: 1px solid var(--border); text-align: left; }
+.mdomains thead th { border-top: 0; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.mdomains .num { width: 84px; text-align: right; font-variant-numeric: tabular-nums; }
+.mdomains .c-bar { width: 34%; }
+.mdomains .c-bar svg.mbar { margin-top: 0; }
+.bc-mail { fill: var(--accent); }
+.stat .v.bad { color: var(--bad); }
+.acct-mail p { margin: 0 0 12px; }
+.acct-mail .acct-mail-acts { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.mrefresh { display: inline-flex; align-items: center; gap: 5px; }
+.mrefresh .i { width: 13px; height: 13px; }
+
+/* The Email page: the list, and on wide screens the open message beside
+   it (mailpane.js), staying in view while the list scrolls. */
+.mpane { display: none; }
+@media (min-width: 1280px) {
+  .mpanes { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 16px; align-items: start; }
+  .mpanes > .panel { margin: 0; }
+  .mpane { display: block; position: sticky; top: 72px; max-height: calc(100dvh - 88px); overflow-y: auto; }
+  .mpane > .panel + .panel, .mpane .stack > .panel + .panel { margin-top: 12px; }
+  .mpane[aria-busy] { opacity: .55; transition: opacity .15s .1s; }
+  .mpanes .mlist th.c-prog { width: 17%; }
+  .mpanes .mlist th.c-to { width: 22%; }
+  .mpanes .mlist th.c-from { width: 16%; }
+  .mpanes .mlist th.c-code { width: 128px; }
+  .mpanes .mlist th.c-when { width: 86px; }
+  .mpanes .mlist :is(th, td) { padding-left: 10px; padding-right: 10px; }
+  .mpanes .mlist :is(th, td):first-child { padding-left: 16px; }
+  .mpanes .mlist td.c-code .mlinkbtn + .icon-btn { display: none; } /* the pane has it */
+  .mpanes .mfilter { flex-wrap: nowrap; }
+  .mpanes .mfilter .search-field { flex: 1 1 160px; min-width: 120px; }
+  .mpanes .mfilter select { min-width: 0; flex: 0 1 150px; }
+  .mpanes .mfilter .what { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+}
+/* 1280–1599px with the pane: the list takes more of the width, programs
+   lose their platform tag (it's in the name's tooltip), and the filters
+   wrap rather than squeeze. */
+@media (min-width: 1280px) and (max-width: 1599px) {
+  .mpanes { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+  .mpanes .mlist th.c-prog { width: 130px; }
+  .mpanes .mlist td.c-prog .ptag { display: none; }
+  .mpanes .mlist th.c-code { width: 112px; }
+  .mpanes .mlist th.c-when { width: 78px; }
+  .mpanes .mfilter { flex-wrap: wrap; }
+  .mpanes .mfilter .search-field { flex: 1 1 100%; max-width: none; }
+  .mpanes .mfilter select { flex: 1 1 140px; }
+}
+/* Beside the pane under 1920px, the address goes under the sender rather
+   than taking a column of its own. */
+.mto-sub { display: none; }
+@media (min-width: 1280px) and (max-width: 1919px) {
+  .mpanes .mlist .c-to { display: none; }
+  .mpanes .mlist th.c-from { width: 24%; }
+  .mpanes .mlist .mto-sub { display: inline; }
+  .mpanes .mlist td .mto-sub { display: block; margin-top: 1px; overflow: hidden; color: var(--muted); font-size: 11.5px; text-overflow: ellipsis; white-space: nowrap; }
+}
+.mlist td.c-from .msender { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A program on one line: its tag, its name cut short, "+2". */
+.mlist td.c-prog .pn { flex-wrap: nowrap; }
+.mlist td.c-prog .pn .name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mlist td.c-code code.mcode { max-width: calc(100% - 28px); overflow: hidden; text-overflow: ellipsis; vertical-align: middle; display: inline-block; }
+/* No scroll bars: the pane, a message's links and its text scroll with
+   the wheel or trackpad, as HuntDeck's other scrolling boxes do. */
+.mpane, .mlinks-box, pre.mail-text { scrollbar-width: none; }
+:is(.mpane, .mlinks-box, pre.mail-text)::-webkit-scrollbar { display: none; }
+.mlist tr.on > td { background: var(--accent-weak); }
+.mlist tr.on > td:first-child { box-shadow: inset 3px 0 var(--accent); }
+.mpane .mhead { margin: 0 0 12px; }
+.mpane .mhead .actions { flex-wrap: wrap; }
+h2.mpane-title { margin: 0 0 6px; font-size: 18px; line-height: 1.3; overflow-wrap: anywhere; }
+.mpane .split { grid-template-columns: minmax(0, 1fr); }
+.mpane-empty { padding: 48px 16px; text-align: center; }
+.mlinkbtn { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 5px; background: var(--accent-weak); color: var(--accent); font-size: 12px; font-weight: 600; text-decoration: none; }
+.mlinkbtn .i { width: 11px; height: 11px; }
+.mlinkbtn:hover { background: var(--accent); color: var(--on-accent, #fff); }
+.maction-body { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+.maction-what { display: grid; gap: 2px; min-width: 0; flex: 1 1 260px; }
+.maction-what .mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.maction-acts { display: flex; gap: 8px; }
+.maction-acts .button .i { width: 12px; height: 12px; }
+/* Email › Blocks. */
+.mblockf > button { display: inline-flex; align-items: center; gap: 6px; }
+.mblockf > button .i { width: 14px; height: 14px; }
+.mblocks th.c-hits { width: 90px; }
+.mblocks th.c-when { width: 110px; }
+.mblocks th.c-acts { width: 280px; } /* "Only newsletters" and "Unblock" side by side */
+.mblocks td.c-what { overflow-wrap: anywhere; }
+.mblock-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.mblocks tr.on > td { background: var(--accent-weak); } /* the one just added */
+/* A message: who it's from first (two tables side by side where there's
+   room), the links folded, Block as a menu beside the view buttons. */
+.mmsg { gap: 12px; }
+.mmeta { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.mmeta .kv th { width: 96px; }
+.mchecks { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: 12px; }
+.mblock-menu > summary { display: inline-flex; align-items: center; gap: 5px; }
+.mblock-menu > summary .i { width: 13px; height: 13px; }
+.mblock-menu > summary .chev-d { transform: rotate(90deg); }
+.mblock-menu[open] > summary .chev-d { transform: rotate(-90deg); }
+.mblock-menu .menu { top: 34px; min-width: 300px; }
+.mblock-menu .menu b { font-weight: 600; }
+.mlinks-fold > summary { list-style: none; cursor: pointer; }
+.mlinks-fold > summary::-webkit-details-marker { display: none; }
+.mlinks-fold:not([open]) > summary { border-bottom: 0; }
+.mlinks-fold > summary .aside { gap: 6px; }
+.mlinks-fold > summary .chev-d { width: 13px; height: 13px; transform: rotate(90deg); }
+.mlinks-fold[open] > summary .chev-d { transform: rotate(-90deg); }
+.mlinks-fold[open] .mfold-show, .mlinks-fold:not([open]) .mfold-hide { display: none; }
+.mblock-menu .menu-note a { display: inline; padding: 0; font-size: inherit; color: var(--accent); }
+.maction-what b { overflow-wrap: anywhere; }
+.mlinks-other { border-top: 1px solid var(--border); }
+.mlinks-other > summary { padding: 10px 16px; color: var(--text-2); font-size: 12.5px; cursor: pointer; }
+.mlinks-other > summary .muted { font-size: 12px; }
+.mlinks-other[open] > summary { border-bottom: 1px solid var(--border); }
+#mail-blocks { margin-top: 16px; } /* below the charts on the HuntMail page */
+/* A read-only copy's tour of the user's own pages (owntour.html). */
+.owntour { margin: 0; }
+.owntour img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, .08); }
+.owntour figcaption { margin-top: 8px; }
+
+/* HuntMail › Setup: its address and key beside setting it up, what that
+   does below. */
+.msetup-top { align-items: start; }
+.msetup-conn .acct-grid { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1700px) { .msetup-conn .acct-field { grid-template-columns: 170px minmax(0, 1fr) 90px; } }
+/* Narrower, the box is half the page or less: each label above its input. */
+@media (max-width: 1699px) {
+  .msetup-conn .acct-field { grid-template-columns: minmax(0, 1fr) auto; }
+  .msetup-conn .acct-field > .acct-label { grid-column: 1 / -1; }
+  .msetup-conn .acct-help { grid-column: 1 / -1; }
+}
+.msetup-about { margin-top: 16px; }
+.msetup-about .msetup-intro p, .msetup-about .msetup-perms { max-width: 120ch; }
+
+/* HuntMail › Overview: top senders, each with its block. */
+#mail-senders { margin-top: 16px; }
+.mlists { align-items: start; margin-top: 16px; }
+.mlists > #mail-senders, .mlists > #mail-blocks { margin-top: 0; }
+@media (max-width: 1500px) { .mlists { grid-template-columns: minmax(0, 1fr); } .mlists > #mail-blocks { margin-top: 0; } }
+.msenders th.c-n { width: 110px; }
+.msenders th.c-acts { width: 270px; } /* "newsletters blocked" and Unblock side by side */
+.msenders td.c-what { overflow-wrap: anywhere; }
+.msenders td.c-acts { text-align: right; }

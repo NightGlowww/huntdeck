@@ -43,8 +43,18 @@ you:
 - Credentials come from the environment, `*_FILE` secrets or Settings, where
   saved values are encrypted at rest; they're never logged or shown again.
 - Nothing is sent anywhere but the platforms you configure, the notification
-  channels you add, and a new install's one download of the public starter
-  seed (`HUNTDECK_SEED_URL=off` turns it off).
+  channels you add, your HuntMail inbox if you set one up, Cloudflare's API
+  (`api.cloudflare.com`) while HuntDeck sets HuntMail up or updates it when
+  you ask, and a new install's one download of the public starter seed
+  (`HUNTDECK_SEED_URL=off` turns it off).
+- Setting HuntMail up takes a Cloudflare API token, used for that run only:
+  it's never saved or logged, and you can delete it afterwards. The key and
+  private address the setup makes are saved encrypted, like any other
+  credential saved in Settings.
+- With HuntMail set up, anyone who can reach HuntDeck can read your mail
+  through it, as they can read everything else in it. Its key stays on the
+  server; mail is shown as text, never as HTML, and attachments only
+  download.
 
 So "anyone who can reach the port can use it" is expected behaviour, not a
 vulnerability. What is in scope: anything that lets a website, a platform's

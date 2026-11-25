@@ -1,0 +1,7 @@
+{{/* Email › HuntMail's tabs, given which is open: "overview" (its numbers
+   and blocks, mailstats.html) or "setup" (its address and key, and setting
+   it up on Cloudflare, mailsetup.html). */}}
+{{define "huntmail-tabs"}}<nav class="ptabs" aria-label="HuntMail sections">
+  <a href="/email/stats"{{if eq . "overview"}} class="on" aria-current="page"{{end}}>Overview</a>
+  <a href="/email/setup"{{if eq . "setup"}} class="on" aria-current="page"{{end}}>Setup</a>
+</nav>{{end}}

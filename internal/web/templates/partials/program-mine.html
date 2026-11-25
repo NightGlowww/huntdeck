@@ -1,0 +1,29 @@
+{{/* A program page's "Your reports": the user's own reports to the
+   program, what they earned, and the user's times beside the program's
+   published ones (programmine.go). Only when there are some; never in a
+   read-only copy. */}}
+{{define "program-mine"}}{{with .Mine}}
+<section class="panel pmine">
+  <div class="panel-head"><h2>Your reports <span class="count">{{num .Reports}}</span></h2>
+    <span class="aside"><a class="link" href="{{.AllURL}}">{{if gt .Reports (len .Recent)}}All {{num .Reports}}{{else}}In Reports{{end}} →</a></span></div>
+  <dl class="kv">
+    <div><dt>Open</dt><dd>{{num .Open}}</dd></div>
+    <div><dt title="Valid (accepted, resolved, or valid but not to be fixed) of the reports decided">Valid</dt><dd>{{num .Valid}}{{if .Decided}} <span class="muted">· {{.Pct .Acceptance}}</span>{{end}}</dd></div>
+    <div><dt>Duplicates</dt><dd>{{num .Duplicates}}</dd></div>
+    <div><dt title="Bounties, bonuses and retests, per currency">Earned</dt><dd>{{range $i, $a := .Earned}}{{if $i}} + {{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</dd></div>
+  </dl>
+  {{with .Times}}
+  <table class="atable mine-times">
+    <thead><tr><th>Time to</th><th class="num" title="Your average from submission">Yours</th><th class="num" title="As the platform publishes it">The program's</th></tr></thead>
+    <tbody>{{range .}}<tr><td title="{{.Title}}">{{.Label}}</td><td class="num atime{{with .Versus}} {{.}}{{end}}">{{with .Mine}}<b>{{.}}</b>{{else}}<span class="zero">—</span>{{end}}</td><td class="num">{{or .Program "—"}}</td></tr>{{end}}</tbody>
+  </table>
+  {{end}}
+  <table class="fixed mine-list">
+    <tbody>{{range .Recent}}
+      <tr><td class="ml-when nowrap"><span class="when" title="Submitted {{datetime .SubmittedAt}}">{{age .SubmittedAt}}</span></td>
+        <td class="ml-title"><a class="link" href="/reports/{{.ID}}" title="{{.Title}}">{{.Title}}</a>{{if .NeedsYou}} <span class="chip waiting" title="The program is waiting on you">needs you</span>{{end}}</td>
+        <td class="ml-state"><span class="rstate {{.StateClass}}">{{.StateLabel}}</span></td></tr>
+    {{end}}</tbody>
+  </table>
+</section>
+{{end}}{{end}}

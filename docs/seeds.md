@@ -6,8 +6,8 @@ disclosed and resolved reports. A seed skips that wait. It holds every **public*
 program's platform data from another install, and nothing of that user's: no
 programs that are or ever were private (or their scope), no programs added
 by hand unless shared (see Independent programs), no logins, settings of yours, tags,
-ignores, notifications, poll history, own stats or scores, and no hunters'
-handles.
+ignores, notifications, poll history, own stats or scores, reports, HuntMail
+addresses or mail, and no hunters' handles.
 
 **By default a new install loads the public starter seed by itself**: on its
 first start, with an empty database, it downloads

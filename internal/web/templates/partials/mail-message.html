@@ -1,0 +1,97 @@
+{{/* One HuntMail message (mailMessageView), as text: mail is written by
+   whoever sent it, so nothing here renders its HTML. HuntMail's own
+   locked-down view opens in a new tab through a link that expires. On its
+   own page (emailmsg.html) or in the Email page's right-hand pane
+   (.Pane). Who it's from comes first, then what it's about (its action
+   link, codes, text); its links are folded away, most being the sender's
+   own (logos, social, legal). Block is beside the view buttons. */}}
+{{define "mail-message"}}
+<div class="page-head rhead mhead">
+  <div>
+    {{if not .Pane}}<div class="crumbs"><a href="/email">Email</a>{{with .Program}} › <a href="/programs/{{.Platform}}/{{.Handle}}?tab=email">{{.Name}}</a>{{end}}</div>
+    <h1>{{or .Subject "(no subject)"}}</h1>{{else}}<h2 class="mpane-title">{{or .Subject "(no subject)"}}</h2>{{end}}
+    <div class="sub title-row">
+      <span>{{.Sender}}</span>
+      {{if .Verified}}<span class="chip ok" title="DKIM or DMARC passed for {{range $i, $d := .Auth.VerifiedDomains}}{{if $i}}, {{end}}{{$d}}{{end}}">verified</span>{{else}}<span class="chip req" title="No passing DKIM or DMARC: the sender may not be who the mail says">not verified</span>{{end}}
+      <span class="muted">to <a class="link mono small" href="/email?to={{.To}}">{{.To}}</a></span>
+      <span class="muted" title="{{datetime .ReceivedAt}}">{{ago .ReceivedAt}}</span>
+      {{if .Newsletter}}<span class="chip" title="HuntMail took it for a newsletter: list headers, no code or link to act on. The Email page leaves these out unless you ask for them">newsletter</span>{{end}}
+    </div>
+  </div>
+  <div class="actions">
+    {{if .HasHTML}}<a class="button small" href="/email/{{.ID}}/view" target="_blank" rel="noopener noreferrer" title="HuntMail's own view, locked down: no scripts, no remote images">Open full view</a>
+    <a class="button secondary small" href="/email/{{.ID}}/view?images=1" target="_blank" rel="noopener noreferrer" title="With remote images, styles and fonts: the sender sees that it was opened">With images</a>{{end}}
+    {{if .CanBlock}}<details class="tb-menu mblock-menu" data-menu>
+      <summary class="button secondary small" title="Have HuntMail turn away mail like this from now on"><svg class="i"><use href="#i-ban"/></svg>Block<svg class="i chev-d"><use href="#i-chev"/></svg></summary>
+      <div class="menu">
+        {{range .BlockDomains}}<form method="post" action="/email/blocks" data-confirm="Turn away newsletters from {{.}} from now on? Its account mail (codes, links) still gets through."><input type="hidden" name="kind" value="sender"><input type="hidden" name="value" value="{{.}}"><input type="hidden" name="scope" value="newsletters"><button type="submit"{{if ne . $.SenderDomain}} title="Its root domain: it takes {{$.SenderDomain}} and every other subdomain"{{end}}><span class="label">Newsletters from <b class="mono">{{.}}</b></span></button></form>
+        <form method="post" action="/email/blocks" data-confirm="Turn away all mail from {{.}} from now on, codes and links too?"><input type="hidden" name="kind" value="sender"><input type="hidden" name="value" value="{{.}}"><input type="hidden" name="scope" value="all"><button type="submit"><span class="label">All mail from <b class="mono">{{.}}</b></span></button></form>{{end}}
+        <form method="post" action="/email/blocks" data-confirm="Turn away all mail to {{.To}} from now on, from anyone?"><input type="hidden" name="kind" value="recipient"><input type="hidden" name="value" value="{{.To}}"><button type="submit"><span class="label">All mail to this address</span></button></form>
+        {{with .Program}}<form method="post" action="/email/blocks" data-confirm="Turn away all mail to {{.Name}}'s addresses ({{.Prefix}}-…) from now on?"><input type="hidden" name="kind" value="prefix"><input type="hidden" name="value" value="{{.Prefix}}-"><button type="submit"><span class="label">All mail to <b class="mono">{{.Prefix}}-…</b> ({{.Name}})</span></button></form>{{end}}
+        <p class="menu-note">HuntMail turns it away as it arrives; mail already here stays. <a class="link" href="/email/stats#mail-blocks">HuntMail › Blocks</a> lists them, to unblock one.</p>
+      </div>
+    </details>{{end}}
+  </div>
+</div>
+
+<div class="stack mmsg">
+<section class="panel mmeta" aria-label="Who it's from and to">
+  <table class="kv mside">
+    <tr><th>From</th><td>{{.HeaderFrom}}</td></tr>
+    {{if ne .From .HeaderFrom}}<tr><th title="The envelope sender: where bounces go">Sent by</th><td class="mono small">{{or .From "—"}}</td></tr>{{end}}
+    <tr><th>To</th><td class="mono small">{{.To}}</td></tr>
+    {{- if not .Pane}}{{/* beside the list, the list shows it */}}
+    {{with .Program}}<tr><th>Program</th><td><div class="pn">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}?tab=email">{{.Name}}</a></div></td></tr>
+    {{- else}}{{with .Guess}}<tr><th title="A guess: {{$.GuessWhy}}">Program?</th><td>{{range .}}<div class="pn mguess">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}">{{.Name}}</a></div>{{end}}<span class="muted small">a guess: {{$.GuessWhy}}</span></td></tr>{{end}}{{end}}{{end}}
+  </table>
+  <table class="kv mside">
+    <tr><th>Received</th><td><span title="{{datetime .ReceivedAt}}">{{datetime .ReceivedAt}}</span></td></tr>
+    <tr><th>Size</th><td>{{filesize .RawSize}}{{if .RawTruncated}} <span class="chip req" title="Larger than HuntMail keeps: only its start was stored">cut short</span>{{end}}</td></tr>
+    <tr><th title="The sender checks, as Cloudflare recorded them">Checks</th><td class="mchecks"><span>SPF {{template "mail-verdict" .Auth.SPF}}</span><span>DKIM {{template "mail-verdict" .Auth.DKIM}}</span><span>DMARC {{template "mail-verdict" .Auth.DMARC}}</span></td></tr>
+    {{with .Auth.VerifiedDomains}}<tr><th>Verified for</th><td>{{range $i, $d := .}}{{if $i}}, {{end}}{{$d}}{{end}}</td></tr>{{end}}
+  </table>
+</section>
+{{with .Action}}<section class="panel maction">
+  <div class="panel-head"><h2>{{.Kind}} link</h2><span class="aside">opening it is a click: it can use it up</span></div>
+  <div class="panel-body maction-body">
+    <div class="maction-what"><b>{{or .Text "(no text)"}}</b><span class="mono small muted" title="{{.URL}}">{{.URL}}</span></div>
+    <div class="maction-acts"><a class="button small" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow">Open <svg class="i"><use href="#i-external"/></svg></a>
+      <button type="button" class="button secondary small" data-copy-text="{{.URL}}"><svg class="i"><use href="#i-copy"/></svg><span class="label">Copy</span></button></div>
+  </div>
+</section>{{end}}
+{{with .Codes}}<section class="panel">
+  <div class="panel-head"><h2>{{plural (len .) "Code" "Codes"}}</h2><span class="aside">likeliest first</span></div>
+  <div class="panel-body mcodes">{{range .}}<span class="mcode-big"><code>{{.}}</code><button type="button" class="button secondary small" data-copy-text="{{.}}"><svg class="i"><use href="#i-copy"/></svg><span class="label">Copy</span></button></span>{{end}}</div>
+</section>{{end}}
+<section class="panel">
+  <div class="panel-head"><h2>Text</h2><span class="aside">{{if .HasHTML}}the mail's plain text; Open full view for its layout{{else}}plain text{{end}}</span></div>
+  {{if .Text}}<pre class="mail-text">{{.Text}}</pre>
+  {{else if eq .ParseStatus "pending" "deferred"}}<div class="empty-state">HuntMail hasn't read this message yet. Reload in a moment.</div>
+  {{else if eq .ParseStatus "failed"}}<div class="empty-state">HuntMail couldn't read this message. Its full view may still show it.</div>
+  {{else}}<div class="empty-state">No text.</div>{{end}}
+  {{if eq .ParseStatus "partial"}}<p class="panel-foot">A long message: only its start was read, so codes and links further down may be missing.</p>{{end}}
+</section>
+{{with .LinkDetails}}{{$l := $.Links}}<details class="panel mlinks-fold"{{if $.LinksOpen}} open{{end}}>
+  <summary class="panel-head"><h2>Links <span class="count">{{len $l.Main}}</span></h2><span class="aside"><span class="mfold-show">show them{{with $l.Other}} · {{len .}} more of the sender's own{{end}}</span><span class="mfold-hide">opening one is a click: it can use up a one-time link</span><svg class="i chev-d"><use href="#i-chev"/></svg></span></summary>
+  <div class="mlinks-box">{{with $l.Main}}<table class="kv mlinks">{{range .}}{{template "mail-link" .}}{{end}}</table>{{end}}
+  {{with $l.Other}}<details class="mlinks-other"><summary>{{len .}} more {{plural (len .) "link" "links"}} <span class="muted">({{$l.OtherKinds}})</span></summary>
+    <table class="kv mlinks">{{range .}}{{template "mail-link" .}}{{end}}</table></details>{{end}}</div>
+</details>{{end}}
+{{with .Attachments}}<section class="panel">
+  <div class="panel-head"><h2>Attachments</h2><span class="aside">downloads, never opened here</span></div>
+  <table class="kv">
+    {{range $i, $a := .}}<tr><th><a class="link" href="/email/{{$.ID}}/attachments/{{$i}}" download>{{or $a.Filename "attachment"}}</a></th><td class="muted small">{{$a.MimeType}}</td><td class="num muted small">{{filesize $a.Size}}</td></tr>{{end}}
+  </table>
+</section>{{end}}
+</div>
+{{end}}
+
+{{/* One of a message's links: the text the sender wrote, the real
+   address, copy and open. */}}
+{{define "mail-link"}}<tr{{with .Kind}} data-kind="{{.}}"{{end}}><th title="The text a reader sees, written by the sender">{{or .Text "(no text)"}}</th><td class="mono small" title="{{.URL}}">{{.URL}}</td>
+  <td class="acts nowrap"><button type="button" class="icon-btn" data-copy-text="{{.URL}}" title="Copy the link" aria-label="Copy the link"><svg class="i"><use href="#i-copy"/></svg></button>{{with httpURL .URL}}<a class="icon-btn" href="{{.}}" target="_blank" rel="noopener noreferrer nofollow" title="Open the link" aria-label="Open the link"><svg class="i"><use href="#i-external"/></svg></a>{{end}}</td></tr>{{end}}
+
+{{/* The Email page's pane: a message, or what to do. */}}
+{{define "mail-pane"}}{{if .}}{{if .Problem}}<section class="panel"><div class="empty-state err">{{.Problem}}</div></section>{{else}}{{template "mail-message" .}}{{end}}{{else}}<section class="panel"><div class="empty-state mpane-empty">Choose a message to read it here.<br><span class="muted small">j and k move down and up the list, o opens one.</span></div></section>{{end}}{{end}}
+
+{{define "mail-verdict"}}{{if eq . "pass"}}<span class="chip ok">pass</span>{{else if or (eq . "fail") (eq . "softfail") (eq . "permerror")}}<span class="chip failed">{{.}}</span>{{else}}<span class="zero">{{or . "none"}}</span>{{end}}{{end}}

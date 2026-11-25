@@ -38,6 +38,9 @@ func (s *Store) CheckSignedOut(ctx context.Context) error {
 			AND program_id IN (SELECT id FROM programs WHERE platform = 'intigriti')`},
 		{"the user's numbers, tags or thanks", `SELECT (SELECT count(*) FROM program_user_stats) + (SELECT count(*) FROM program_tags)
 			+ (SELECT count(*) FROM program_thanks)`},
+		{"the user's own reports", `SELECT (SELECT count(*) FROM my_reports) + (SELECT count(*) FROM my_report_payments)
+			+ (SELECT count(*) FROM my_report_events) + (SELECT count(*) FROM my_report_changes)`},
+		{"the user's HuntMail addresses", `SELECT (SELECT count(*) FROM mail_prefixes) + (SELECT count(*) FROM mail_addresses)`},
 		{"polls or notifications", `SELECT (SELECT count(*) FROM poll_runs) + (SELECT count(*) FROM notify_channels)
 			+ (SELECT count(*) FROM notify_outbox) + (SELECT count(*) FROM notify_pending)`},
 		{"reporters' handles", `SELECT (SELECT count(*) FROM accepted_reports WHERE COALESCE(reporter, '') <> '')

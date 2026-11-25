@@ -120,10 +120,11 @@ var funcs = template.FuncMap{
 		}
 		return hunters90(*n)
 	},
-	"add":   func(a, b int) int { return a + b },
-	"sub":   func(a, b int) int { return a - b },
-	"list":  func(v ...string) []string { return v },
-	"lower": strings.ToLower,
+	"add":      func(a, b int) int { return a + b },
+	"sub":      func(a, b int) int { return a - b },
+	"list":     func(v ...string) []string { return v },
+	"filesize": fileSize,
+	"lower":    strings.ToLower,
 	"truncate": func(s string, n int) string {
 		if r := []rune(s); len(r) > n {
 			return string(r[:n-1]) + "…"

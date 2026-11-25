@@ -111,6 +111,10 @@ func TestLoadErrors(t *testing.T) {
 		{"bad browser time zone", map[string]string{"HUNTDECK_CHROME_TIMEZONE": "New York"}, []string{"HUNTDECK_CHROME_TIMEZONE"}},
 		{"short password", map[string]string{"HUNTDECK_PASSWORD": "short"}, []string{"at least 8 characters"}},
 		{"language too long", map[string]string{"HUNTDECK_LANGUAGE": "chinese-simplified"}, []string{"HUNTDECK_LANGUAGE"}},
+		{"huntmail url without key", map[string]string{"HUNTMAIL_URL": "https://mail.example.workers.dev/0123456789abcdef"}, []string{"HUNTMAIL_URL and HUNTMAIL_API_KEY"}},
+		{"huntmail url without base path", map[string]string{"HUNTMAIL_URL": "https://mail.example.workers.dev/", "HUNTMAIL_API_KEY": "k"}, []string{"HUNTMAIL_URL: needs its base path"}},
+		{"huntmail url not https", map[string]string{"HUNTMAIL_URL": "http://mail.example.com/0123456789abcdef", "HUNTMAIL_API_KEY": "k"}, []string{"HUNTMAIL_URL: must start with https"}},
+		{"huntmail domain", map[string]string{"HUNTMAIL_DOMAINS": "example.com, not a domain"}, []string{"HUNTMAIL_DOMAINS"}},
 		{"reports all problems", map[string]string{"HUNTDECK_LOG_FORMAT": "xml", "HUNTDECK_LOG_LEVEL": "loud"}, []string{"HUNTDECK_LOG_FORMAT", "HUNTDECK_LOG_LEVEL"}},
 	}
 	for _, tt := range tests {
@@ -244,6 +248,7 @@ func TestReadOnly(t *testing.T) {
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "H1_USERNAME": "u", "H1_TOKEN": "t"}, []string{"H1_*"}},
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "BC_PUBLIC_ONLY": "1", "HUNTDECK_VNC": "1"}, []string{"BC_*", "HUNTDECK_VNC"}},
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "YWH_PUBLIC_ONLY": "1", "HUNTDECK_PROXY": "http://127.0.0.1:3128"}, []string{"YWH_*", "HUNTDECK_PROXY"}},
+		{map[string]string{"HUNTDECK_READ_ONLY": "1", "HUNTMAIL_URL": "https://mail.example.workers.dev/0123456789abcdef", "HUNTMAIL_API_KEY": "k"}, []string{"HUNTMAIL_URL"}},
 		{map[string]string{"H1_USERNAME": "u", "H1_TOKEN": "t"}, nil},
 	}
 	for _, tt := range tests {
@@ -286,5 +291,24 @@ func TestSeedURL(t *testing.T) {
 	}
 	if !strings.HasPrefix(DefaultSeedURL, "https://github.com/mdpsec/huntdeck/releases/download/seed/") {
 		t.Errorf("DefaultSeedURL = %s", DefaultSeedURL)
+	}
+}
+
+// HuntMail: off by default; its address and key go together, its domains
+// are cleaned up, and the address (which holds a secret path) never prints
+// in an error.
+func TestHuntMailConfig(t *testing.T) {
+	cfg, err := Load(source(nil, nil))
+	if err != nil || cfg.HuntMail.Enabled() {
+		t.Fatalf("off by default: %+v %v", cfg.HuntMail, err)
+	}
+	cfg, err = Load(source(map[string]string{"HUNTMAIL_URL": " https://mail.example.workers.dev/0123456789abcdef/ ", "HUNTMAIL_API_KEY": "k",
+		"HUNTMAIL_DOMAINS": "Example.com, @example.net"}, nil))
+	if err != nil || !cfg.HuntMail.Enabled() || strings.Join(cfg.HuntMail.Domains, ",") != "example.com,example.net" {
+		t.Fatalf("set up: %+v %v", cfg.HuntMail, err)
+	}
+	_, err = Load(source(map[string]string{"HUNTMAIL_URL": "https://mail.example.workers.dev/s3cretpath?x=1", "HUNTMAIL_API_KEY": "k"}, nil))
+	if err == nil || strings.Contains(err.Error(), "s3cretpath") {
+		t.Errorf("bad address: %v", err)
 	}
 }

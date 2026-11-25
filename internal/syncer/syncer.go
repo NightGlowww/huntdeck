@@ -297,6 +297,10 @@ func (s *Syncer) poll(ctx context.Context, log *slog.Logger, p platform.Platform
 		run.AcceptedNew, err = s.syncAccepted(ctx, log, af, p.Name(), ids, o.Mode == ModeFull)
 		statsErr = errors.Join(statsErr, err)
 	}
+	if rf, due := s.reportsDue(ctx, p, o.Mode); due && o.Limit == 0 && ctx.Err() == nil {
+		s.step(run.ID, "Your reports", 0)
+		statsErr = errors.Join(statsErr, s.syncReports(ctx, log, rf, p.Name()))
+	}
 	return listErr, statsErr
 }
 

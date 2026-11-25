@@ -581,7 +581,7 @@
   "CIDR": "网段",
   "APP": "应用",
   "Settings sections": "设置分区",
-  "Polling": "轮询中",
+  "Polling": "轮询",
   "Browser": "浏览器",
   "Display": "显示",
   "Platforms": "平台",
@@ -1089,7 +1089,7 @@
   "Remove": "移除",
   "Remove %s? Its history stays, under Status › Removed.": "移除 %s？其历史会保留在「状态 › 已移除」下。",
   "Back to the hunt board": "返回狩猎面板",
-  "Not configured": "尚未配置",
+  "Not configured": "未配置",
   "The platform is off": "平台已停用",
   "Quick poll that read only the newest programs; the complete listing, which finds invites and removals, runs every two hours": "仅读取最新项目的快速轮询；完整列表（可发现邀请与下架）每两小时运行一次",
   "Programs aren't marked removed when the listing is incomplete": "列表不完整时不会把项目标记为下架",
@@ -1610,7 +1610,7 @@
   "(%s, %s)": "（%s，%s）",
   "Optional capabilities": "可选能力",
   "off unless you set them up": "未配置即关闭",
-  "AI policy extraction": "AI 政策抽取",
+  "AI policy extraction": "AI 政策提取",
   "the program page shows only the rules quoted from the policy": "程序页只显示取自政策原文的规则",
   "%s, %d cached reading(s)": "%s，已缓存 %d 份读数",
   "Read three policies now": "现在读取三份政策",
@@ -1951,7 +1951,6 @@
   "Configure the runtime, credentials and operating preferences from one place.": "在一个工作台中配置运行环境、凭据和系统偏好。",
   "Integrations workbench": "集成工作台",
   "Connect HuntDeck to scripts, agents, scanners and research services.": "连接脚本、智能体、扫描器和研究服务。",
-  "Polling": "轮询",
   "Platforms, schedules, sign-in state and recent runs.": "平台、调度、登录状态和最近运行记录。",
   "Open polling": "打开轮询",
   "Encrypted credentials and environment overrides.": "加密凭据和环境变量覆盖。",
@@ -1968,7 +1967,7 @@
   "HuntScore weighting and the ranking strategy.": "HuntScore 权重和排名策略。",
   "Tune scoring": "调整评分",
   "Ready": "就绪",
-  "Review": "需要检查",
+  "Review": "复盘",
   "Available": "可用",
   "Read data, export scope and test authenticated requests.": "读取数据、导出范围并测试鉴权请求。",
   "Open API": "打开 API",
@@ -1976,84 +1975,89 @@
   "Open MCP": "打开 MCP",
   "Search disclosed reports and discovery paths.": "搜索已披露报告和漏洞发现路径。",
   "Open POJIA": "打开 POJIA",
-  "Scan handoff": "扫描派发",
   "Send new targets to ScopeSentry with task history.": "把新目标派发给 ScopeSentry，并保留任务历史。",
   "Open scanner": "打开扫描器",
-  "AI policy extraction": "AI 政策提取",
   "Read policy text once and cache the rules it states.": "读取政策文本一次，并缓存其中的规则。",
   "Open model": "打开模型",
   "Connected": "已连接",
-  "Not configured": "未配置",
-  "Optional": "可选"
-  ,"Runtime, credentials and operator preferences.": "运行环境、凭据和操作员偏好。"
-  ,"Deliver operational events through channels you control.": "通过你控制的渠道投递运行事件。"
-  ,"Add channel": "添加渠道"
-  ,"Discord": "Discord"
-  ,"Telegram": "Telegram"
-  ,"Bark": "Bark"
-  ,"ServerChan": "ServerChan"
-  ,"Webhook": "Webhook"
-  ,"API status": "API 状态"
-  ,"Password protected": "口令保护"
-  ,"Open on this private network": "私有网络内开放"
-  ,"stored credentials": "已存凭据"
-  ,"Documented endpoints": "已记录端点"
-  ,"available here": "可在此使用"
-  ,"MCP status": "MCP 状态"
-  ,"HTTP connection": "HTTP 连接"
-  ,"configuration available above": "上方已有配置"
-  ,"live and retired": "有效与已退役"
-  ,"available to clients": "可供客户端使用"
-  ,"Scanner handoff is not configured": "尚未配置扫描派发"
-  ,"New in-scope targets can be handed to ScopeSentry once its connection is ready.": "连接准备好后，新的范围内目标会自动派发给 ScopeSentry。"
-  ,"Data flow": "数据流"
-  ,"polls → waiting targets → scan tasks": "轮询 → 等待目标 → 扫描任务"
-  ,"Required": "所需配置"
-  ,"endpoint + ssk_ key": "端点 + ssk_ 密钥"
-  ,"Safety": "安全边界"
-  ,"one handoff per target": "每个目标只派发一次"
-  ,"Research index": "研究索引"
-  ,"Connect POJIA to search disclosed reports": "连接 POJIA，搜索已披露报告"
-  ,"Use discovery paths, payloads, CVEs and similar reports as a research workspace.": "使用发现路径、载荷、CVE 和相似报告开展研究。"
-  ,"keywords, CVEs and programs": "关键词、CVE 和项目"
-  ,"Explore": "探索"
-  ,"classes and payloads": "漏洞类型和载荷"
-  ,"Review": "复盘"
-  ,"report detail and fixes": "报告详情和修复"
-  ,"Configure POJIA": "配置 POJIA"
-  ,"not configured": "未配置"
-  ,"Account status": "账户状态"
-  ,"Account groups": "账户分组"
-  ,"available to configure": "可配置项"
-  ,"Configured": "已配置"
-  ,"ready for runtime use": "可供运行时使用"
-  ,"Saved overrides": "已保存覆盖值"
-  ,"encrypted in data": "已加密存储"
-  ,"Notification status": "通知状态"
-  ,"enabled": "已启用"
-  ,"queued deliveries": "待投递消息"
-  ,"delivery attempts": "投递尝试"
-  ,"Scanner status": "扫描器状态"
-  ,"targets ready": "待处理目标"
-  ,"Nodes": "节点"
-  ,"available templates and nodes": "可用模板与节点"
-  ,"Handed off": "已派发"
-  ,"tasks created": "已创建任务"
-  ,"The key needs task:write, task:read, node:read and template:read, and nothing wider.": "该密钥只需 task:write、task:read、node:read 和 template:read 权限，不要更宽。"
-  ,"Public read-only": "公开只读"
-  ,"Status summary": "状态摘要"
-  ,"Needs attention": "需要处理"
-  ,"configured sources": "已配置来源"
-  ,"stored programs": "已存项目"
-  ,"accepting reports": "正在接收报告"
-  ,"MCP tools": "MCP 工具"
-  ,"research index": "研究索引"
-  ,"handoff connection": "派发连接"
-  ,"No platform is configured": "尚未配置平台"
-  ,"Add an account before scheduling polls.": "请先添加账户，再设置轮询。"
-  ,"Open accounts": "打开账户"
-  ,"Scanner handoff is optional": "扫描派发是可选功能"
-  ,"Configure ScopeSentry when you want new targets sent automatically.": "需要自动派发新目标时，再配置 ScopeSentry。"
-  ,"Review scanner": "检查扫描器"
+  "Optional": "可选",
+  "Runtime, credentials and operator preferences.": "运行环境、凭据和操作员偏好。",
+  "Deliver operational events through channels you control.": "通过你控制的渠道投递运行事件。",
+  "Discord": "Discord",
+  "Telegram": "Telegram",
+  "Bark": "Bark",
+  "ServerChan": "ServerChan",
+  "Webhook": "Webhook",
+  "API status": "API 状态",
+  "Password protected": "口令保护",
+  "Open on this private network": "私有网络内开放",
+  "stored credentials": "已存凭据",
+  "Documented endpoints": "已记录端点",
+  "available here": "可在此使用",
+  "MCP status": "MCP 状态",
+  "HTTP connection": "HTTP 连接",
+  "configuration available above": "上方已有配置",
+  "live and retired": "有效与已退役",
+  "available to clients": "可供客户端使用",
+  "Scanner handoff is not configured": "尚未配置扫描派发",
+  "New in-scope targets can be handed to ScopeSentry once its connection is ready.": "连接准备好后，新的范围内目标会自动派发给 ScopeSentry。",
+  "Data flow": "数据流",
+  "polls → waiting targets → scan tasks": "轮询 → 等待目标 → 扫描任务",
+  "Required": "所需配置",
+  "endpoint + ssk_ key": "端点 + ssk_ 密钥",
+  "Safety": "安全边界",
+  "one handoff per target": "每个目标只派发一次",
+  "Research index": "研究索引",
+  "Connect POJIA to search disclosed reports": "连接 POJIA，搜索已披露报告",
+  "Use discovery paths, payloads, CVEs and similar reports as a research workspace.": "使用发现路径、载荷、CVE 和相似报告开展研究。",
+  "keywords, CVEs and programs": "关键词、CVE 和项目",
+  "Explore": "探索",
+  "classes and payloads": "漏洞类型和载荷",
+  "report detail and fixes": "报告详情和修复",
+  "Configure POJIA": "配置 POJIA",
+  "not configured": "未配置",
+  "Account status": "账户状态",
+  "Account groups": "账户分组",
+  "available to configure": "可配置项",
+  "Configured": "已配置",
+  "ready for runtime use": "可供运行时使用",
+  "Saved overrides": "已保存覆盖值",
+  "encrypted in data": "已加密存储",
+  "Notification status": "通知状态",
+  "enabled": "已启用",
+  "queued deliveries": "待投递消息",
+  "delivery attempts": "投递尝试",
+  "Scanner status": "扫描器状态",
+  "targets ready": "待处理目标",
+  "Nodes": "节点",
+  "available templates and nodes": "可用模板与节点",
+  "Handed off": "已派发",
+  "tasks created": "已创建任务",
+  "The key needs task:write, task:read, node:read and template:read, and nothing wider.": "该密钥只需 task:write、task:read、node:read 和 template:read 权限，不要更宽。",
+  "Public read-only": "公开只读",
+  "Status summary": "状态摘要",
+  "Needs attention": "需要处理",
+  "configured sources": "已配置来源",
+  "stored programs": "已存项目",
+  "accepting reports": "正在接收报告",
+  "MCP tools": "MCP 工具",
+  "research index": "研究索引",
+  "handoff connection": "派发连接",
+  "No platform is configured": "尚未配置平台",
+  "Add an account before scheduling polls.": "请先添加账户，再设置轮询。",
+  "Open accounts": "打开账户",
+  "Scanner handoff is optional": "扫描派发是可选功能",
+  "Configure ScopeSentry when you want new targets sent automatically.": "需要自动派发新目标时，再配置 ScopeSentry。",
+  "Review scanner": "检查扫描器",
+  "Reports": "我的报告",
+  "Analytics": "统计",
+  "HuntMail": "HuntMail",
+  "HuntMail numbers and your blocks": "HuntMail 的数据与被拦发件人",
+  "Drag a box by its handle to move it, and drag its edges or bottom corner to resize it: widths snap to twelfths of the page and heights to 20px steps. A box shorter than its content scrolls; Fit sets it back to its content height. The layout is saved in this browser, separately for ultrawide screens.": "拖动卡片左上角的手柄可以移动，拖动边缘或右下角可以改大小：宽度按页面十二等分吸附，高度按 20px 步进。卡片比内容矮时会滚动；「适应内容」把它恢复成内容高度。布局保存在这个浏览器里，超宽屏单独一套。",
+  "Bounty awarded": "赏金已发",
+  "Waiting on you": "等你回复",
+  "Severity changed": "严重度变了",
+  "New report found": "发现新报告",
+  "Report %s": "报告%s"
  }
 }

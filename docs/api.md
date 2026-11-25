@@ -39,9 +39,23 @@ curl -s "http://127.0.0.1:8080/api/v1/changes?since=30d&limit=100&order=oldest" 
 curl -s "http://127.0.0.1:8080/api/v1/match?host=app.example.com"
 curl -s "http://127.0.0.1:8080/api/v1/targets?kind=wildcards&sort=best"   # newest, most promising first
 subfinder -d example.com -silent | curl -s --data-binary @- "http://127.0.0.1:8080/api/v1/match?format=txt"   # keep the in-scope hosts
+curl -s "http://127.0.0.1:8080/api/v1/reports?status=you"     # your reports waiting on your reply
+curl -s "http://127.0.0.1:8080/api/v1/reports/analytics?range=year"   # your numbers this year
 curl -s "http://127.0.0.1:8080/api/v1/status"
 curl -s -X POST "http://127.0.0.1:8080/api/v1/poll/hackerone?mode=quick"
 ```
+
+**Your reports.** `/api/v1/reports` lists the reports on the Reports page,
+latest activity first by default (`sort=submitted|activity|bounty|severity|program|state`),
+with its filters (`status=open|you|stale|unpaid|valid|closed|paid`,
+`platform`, `state`, `severity` and `year`, several comma-separated, `since`,
+`q` to search titles and programs; every report unless `status` says
+otherwise), paged with `limit` (default 100, max 1000) and `offset`, each with its program,
+state (normalised, and the platform's own as `platform_state`), severities,
+dates, who it waits on, its payments and earnings per currency.
+`/api/v1/reports/analytics` is the Analytics page as numbers (`range`, or
+`from` and `to` months). They hold titles and states only, never write-ups
+or comments.
 
 Target filters: `kind` (wildcards, domains, urls, ips, cidrs, `roots` for
 root domains, `all`, or an asset type such as apps, android, ios or hardware), `scope=out`,
@@ -154,6 +168,7 @@ huntdeck score -n 25                  # rescore now and list the top HuntScores
 huntdeck poll --limit 20              # poll now (only the first 20 programs)
 huntdeck poll --platform bc --refetch-scope   # download every scope now, even unchanged ones
 huntdeck stats security               # fetch a HackerOne program's stats now (--platform for others)
+huntdeck reports --platform h1        # read your own reports now (prints counts, never titles)
 huntdeck seed export /data/seed-out.db.gz   # public programs' data, for a new install to start from
 huntdeck seed import /data/seed.db.gz       # load one into a new, empty install
 ```

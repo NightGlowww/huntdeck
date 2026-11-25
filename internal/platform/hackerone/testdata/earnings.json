@@ -1,0 +1,17 @@
+{
+  "data": [
+    {"id": "300", "type": "earning-bounty-earned", "attributes": {"amount": 1100.0, "created_at": "2026-02-18T08:00:01.000Z"},
+      "relationships": {
+        "program": {"data": {"id": "11", "type": "program", "attributes": {"handle": "acme", "currency": "usd"}}},
+        "bounty": {"data": {"id": "400", "type": "bounty", "attributes": {"amount": "1000.0", "bonus_amount": "100.0", "awarded_amount": "920.0", "awarded_bonus_amount": "92.0", "awarded_currency": "EUR", "created_at": "2026-02-18T08:00:00.000Z"},
+          "relationships": {"report": {"data": {"id": "5001", "type": "report", "attributes": {"vulnerability_information": "NEVER"}}}}}}
+      }},
+    {"id": "301", "type": "earning-retest-completed", "attributes": {"amount": 50.0, "created_at": "2026-02-25T08:00:00.000Z"},
+      "relationships": {
+        "program": {"data": {"id": "11", "type": "program", "attributes": {"handle": "acme", "currency": "usd"}}},
+        "report_retest_user": {"data": {"id": "500", "type": "report-retest-user", "attributes": {"completed_at": "2026-02-25T08:00:00.000Z"},
+          "relationships": {"report_retest": {"data": {"id": "600", "type": "report-retest", "relationships": {"report": {"data": {"id": "5001", "type": "report"}}}}}}}}
+      }}
+  ],
+  "links": {}
+}

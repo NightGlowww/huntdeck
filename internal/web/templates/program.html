@@ -12,6 +12,7 @@
 {{else if eq .Tab "stats"}}{{template "program-stats" $}}
 {{else if eq .Tab "changes"}}{{template "program-changes" $}}
 {{else if eq .Tab "notes"}}{{template "program-notes" $}}
+{{else if eq .Tab "email"}}{{template "program-email" $}}
 {{else}}{{template "program-overview" $}}{{end}}
 {{end}}
 {{template "spark-defs"}}

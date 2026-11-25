@@ -92,7 +92,12 @@ func TestSearchEngines(t *testing.T) {
 				!strings.Contains(smBody, "<loc>https://demo.example.com/sitemaps/fake-1.xml</loc>") || strings.Contains(smBody, "/programs/") {
 				t.Errorf("sitemap index %d:\n%s", sm.StatusCode, smBody)
 			}
-			if res, pages := e.do(e.client(), http.MethodGet, "/sitemaps/pages.xml", nil, nil); res.StatusCode != http.StatusOK ||
+			// The browser's XML tree view styles itself inline: sitemaps allow
+			// that, sandboxed, while pages keep their policy.
+			if csp := sm.Header.Get("Content-Security-Policy"); csp != xmlPolicy {
+				t.Errorf("sitemap policy %q", csp)
+			}
+			if res, pages := e.do(e.client(), http.MethodGet, "/sitemaps/pages.xml", nil, nil); res.StatusCode != http.StatusOK || res.Header.Get("Content-Security-Policy") != xmlPolicy ||
 				!strings.Contains(pages, "  <url>\n    <loc>https://demo.example.com/programs</loc>") || strings.Contains(pages, "/programs/fake/") {
 				t.Errorf("pages sitemap %d:\n%s", res.StatusCode, pages)
 			}

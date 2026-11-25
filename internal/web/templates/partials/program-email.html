@@ -1,0 +1,26 @@
+{{/* A program's Email tab (programmail.go): the HuntMail addresses made for
+   it and the mail they got. */}}
+{{define "program-email"}}{{with .Data}}{{$p := .P}}{{with .Mail}}
+{{with .Problem}}<p class="flash err">{{.}}</p>{{end}}
+<section class="panel" id="mail-addresses">
+  <div class="panel-head"><h2>Addresses</h2><span class="aside">{{if .Prefix}}everything to {{.Prefix}}-… is this program's{{else}}one per signup: the random part keeps other senders out{{end}}</span></div>
+  {{if .Domains}}<form method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/email/new" class="panel-body profile-form mnew">
+    {{if gt (len .Domains) 1}}<label><span>Domain</span><select name="domain">{{range .Domains}}<option value="{{.}}">{{.}}</option>{{end}}</select></label>{{else}}<input type="hidden" name="domain" value="{{index .Domains 0}}">{{end}}
+    <label class="wide"><span>What it's for</span><input type="text" name="note" maxlength="120" placeholder="optional, such as: admin account, second user"></label>
+    <button type="submit"><svg class="i"><use href="#i-plus"/></svg> New address</button>
+  </form>
+  {{else if not .Problem}}<div class="empty-state">HuntMail lists no domains yet. Add yours in <a class="link" href="/email/setup">Email › HuntMail › Setup</a> (Domains for new addresses).</div>{{end}}
+  {{if .Addresses}}<table class="kv maddrs">
+    {{range .Addresses}}<tr{{if eq .ID $.Data.Mail.Made}} class="made"{{end}}>
+      <th class="mono"><code>{{.Address}}</code><button type="button" class="icon-btn" data-copy-text="{{.Address}}" title="Copy {{.Address}}" aria-label="Copy the address"><svg class="i"><use href="#i-copy"/></svg></button>{{if eq .ID $.Data.Mail.Made}} <span class="chip ok">new</span>{{end}}</th>
+      <td><form method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/email/{{.ID}}/note" class="mnote"><input type="text" name="note" value="{{.Note}}" maxlength="120" placeholder="what it's for" aria-label="What {{.Address}} is for"><button type="submit" class="secondary small">Save</button></form></td>
+      <td class="muted small nowrap" title="{{datetime .CreatedAt}}">made {{ago .CreatedAt}}</td>
+      <td class="acts"><form method="post" action="/programs/{{$p.Platform}}/{{$p.Handle}}/email/{{.ID}}/forget" data-confirm="Forget {{.Address}}? Its mail stays in HuntMail and still shows here."><button type="submit" class="secondary small" title="Take it off this list">Forget</button></form></td>
+    </tr>{{end}}
+  </table>{{end}}
+</section>
+{{if .Prefix}}<section class="panel ptable" id="mail-list">
+  <div class="panel-head"><h2>Mail</h2><span class="aside">{{if .CanNL}}<nav class="seg" aria-label="Newsletters">{{range .NLSegments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}" title="{{.Title}}">{{.Label}}</a>{{end}}</nav>{{end}}<span>{{if .MoreURL}}the latest {{len .Rows}} · <a class="link" href="{{.MoreURL}}">all of it on the Email page</a>{{else}}newest first{{end}}</span></span></div>
+  {{if .Rows}}{{template "mail-table" .Table}}{{else if not .Problem}}<div class="empty-state">{{if eq .NL "only"}}No newsletters to {{.Prefix}}-… addresses.{{else if .CanNL}}No mail to {{.Prefix}}-… addresses{{if not .NL}} but newsletters, if any{{end}}.{{else}}No mail yet to {{.Prefix}}-… addresses.{{end}}</div>{{end}}
+</section>{{end}}
+{{end}}{{end}}{{end}}

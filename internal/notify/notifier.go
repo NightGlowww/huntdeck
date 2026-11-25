@@ -67,7 +67,8 @@ func (n *Notifier) Run(ctx context.Context) {
 // what's due.
 func (n *Notifier) Tick(ctx context.Context) error {
 	now := n.Store.Now()
-	err := errors.Join(n.queueRuns(ctx), n.queueLongPauses(ctx, now), n.queueDigests(ctx, now), n.sendDue(ctx, now))
+	err := errors.Join(n.queueRuns(ctx), n.queueLongPauses(ctx, now), n.queueReportNotices(ctx, now), n.queueDigests(ctx, now),
+		n.sendDue(ctx, now))
 	if now.Sub(n.pruned) > time.Hour {
 		n.pruned = now
 		err = errors.Join(err, n.Store.PruneOutbox(ctx, now.Add(-keepOutbox)))
@@ -173,6 +174,36 @@ func (n *Notifier) queueLongPauses(ctx context.Context, now time.Time) error {
 		ids[i] = c.ID
 	}
 	return n.Store.QueueLongPauses(ctx, ids, outbox, pending)
+}
+
+// queueReportNotices queues news on the user's reports for the channels
+// that choose it, as one message a channel. A poll saves reports a page at
+// a time, so news waits for running polls to end (up to an hour), to come
+// as one message rather than a few.
+func (n *Notifier) queueReportNotices(ctx context.Context, now time.Time) error {
+	notices, err := n.Store.ReportNotices(ctx)
+	if err != nil || len(notices) == 0 {
+		return err
+	}
+	if notices[0].OccurredAt.After(now.Add(-time.Hour)) {
+		running, err := n.Store.RunningSince(ctx, now.Add(-time.Hour))
+		if err != nil || len(running) > 0 {
+			return err
+		}
+	}
+	chans, err := n.channels(ctx)
+	if err != nil {
+		return err
+	}
+	outbox, pending, err := route(chans, FromReportNotices(notices))
+	if err != nil {
+		return err
+	}
+	ids := make([]int64, len(notices))
+	for i, rn := range notices {
+		ids[i] = rn.ID
+	}
+	return n.Store.QueueReportNotices(ctx, ids, outbox, pending)
 }
 
 // runEvents are a poll's events: its changes, and a platform alert when

@@ -43,6 +43,12 @@ const (
 	EventPlatformProblem   = "platform_problem"
 	EventPlatformRecovered = "platform_recovered"
 	EventTest              = "test"
+	// The user's own reports (reports.go).
+	EventReportState    = "report_state"
+	EventReportBounty   = "report_bounty"
+	EventReportWaiting  = "report_waiting"
+	EventReportSeverity = "report_severity"
+	EventReportNew      = "report_new"
 )
 
 // EventKind describes an event kind for Settings.
@@ -59,6 +65,7 @@ type EventKind struct {
 const (
 	GroupOpportunities = "Opportunities" // somewhere new to hunt
 	GroupWatching      = "Watching"      // programs changing in other ways
+	GroupReports       = "Your reports"  // the user's own reports
 	GroupHuntDeck      = "HuntDeck"      // HuntDeck itself
 )
 
@@ -80,6 +87,11 @@ var EventKinds = []EventKind{
 	{EventRemoved, "Program no longer listed", "unlisted", "Gone from the platform's listing", GroupWatching, false},
 	{EventRewardsChanged, "Other bounty table changes", "other bounty changes", "Lower or reshuffled amounts", GroupWatching, false},
 	{EventPolicyChanged, "Rules edited", "rules edits", "Policy, reward notes or exclusions changed", GroupWatching, false},
+	{EventReportBounty, "Bounty awarded", "bounties awarded", "A bounty, bonus or retest payment on one of your reports", GroupReports, true},
+	{EventReportState, "Report state changed", "report states", "One of your reports was triaged, resolved, closed as a duplicate…", GroupReports, true},
+	{EventReportWaiting, "Waiting on you", "waiting on you", "A program asked you something on one of your reports", GroupReports, true},
+	{EventReportSeverity, "Report severity changed", "report severities", "Triage rated one of your reports higher or lower", GroupReports, false},
+	{EventReportNew, "New report found", "new reports", "A report you submitted, once HuntDeck has read it", GroupReports, false},
 	{EventPlatformProblem, "Platform problems", "platform problems", "Polls of a platform failed three times in a row (login broken, say), and when they work again", GroupHuntDeck, true},
 }
 
@@ -101,6 +113,7 @@ type Event struct {
 	New         string    `json:"new,omitempty"`          // and after
 	Detail      string    `json:"detail,omitempty"`       // a sentence about it
 	ChangeID    int64     `json:"change_id,omitempty"`    // the change with a diff page
+	Report      *Report   `json:"report,omitempty"`       // the user's own report it's about
 }
 
 // Program is the program an event is about.

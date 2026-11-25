@@ -42,6 +42,7 @@ Commands:
                 the acceptance rate against the threshold, the next reassessment
   restore --from FILE  Unpack such a file into a data directory (stop HuntDeck first)
                                                   [--data DIR] [--force] [--no-sessions] [--dry-run]
+  reports      Read your own reports from the platforms now [--platform h1]
   seed export FILE  Write the public programs' data to FILE, for others to start from (.gz to compress)
   seed import FILE  Load such a file into a new, empty install (or put it in the data
                     directory as seed.db or seed.db.gz, and the first start loads it)
@@ -83,6 +84,7 @@ var commands = map[string]command{
 	"scan-clear":    scanClearCmd,
 	"scan-handoff":  scanHandoffCmd,
 	"bugcrowd-caps": bugcrowdCapsCmd,
+	"reports":       reportsCmd,
 }
 
 func main() {

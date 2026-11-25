@@ -37,6 +37,10 @@
     {
       "name": "Tokens",
       "description": "Keys for scripts, minted here and revoked here. A token is another key to the same access gate as the password: it carries no identity, and there are no scopes or roles."
+    },
+    {
+      "name": "Your reports",
+      "description": "Your own reports on the platforms, as the Reports and Analytics pages show them: titles, states, severities, times and earnings, never write-ups or comments."
     }
   ],
   "paths": {
@@ -3243,7 +3247,9 @@
     },
     "/api/tokens/rotate": {
       "post": {
-        "tags": ["Tokens"],
+        "tags": [
+          "Tokens"
+        ],
         "operationId": "rotateToken",
         "summary": "Rotate an API token",
         "description": "Replaces the token's secret in place, keeping the name and the created time. The old value stops working at once; the new one is shown once, in the page body, like a creation.",
@@ -3254,19 +3260,30 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "id": { "type": "string", "description": "The token's id, as the page lists it." }
+                  "id": {
+                    "type": "string",
+                    "description": "The token's id, as the page lists it."
+                  }
                 },
-                "required": ["id"]
+                "required": [
+                  "id"
+                ]
               }
             }
           }
         },
-        "responses": { "200": { "description": "The API page, with the new value shown once." } }
+        "responses": {
+          "200": {
+            "description": "The API page, with the new value shown once."
+          }
+        }
       }
     },
     "/api/tokens/delete": {
       "post": {
-        "tags": ["Tokens"],
+        "tags": [
+          "Tokens"
+        ],
         "operationId": "deleteToken",
         "summary": "Delete a revoked API token",
         "description": "Drops a revoked token's row from the list. A live token is refused: revoke it first, so one click cannot remove something a script is still using.",
@@ -3277,14 +3294,23 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "id": { "type": "string", "description": "The token's id, as the page lists it." }
+                  "id": {
+                    "type": "string",
+                    "description": "The token's id, as the page lists it."
+                  }
                 },
-                "required": ["id"]
+                "required": [
+                  "id"
+                ]
               }
             }
           }
         },
-        "responses": { "200": { "description": "The API page, with a confirmation." } }
+        "responses": {
+          "200": {
+            "description": "The API page, with a confirmation."
+          }
+        }
       }
     },
     "/api/tokens/revoke": {
@@ -3323,7 +3349,9 @@
     },
     "/api/tokens/revoke-bulk": {
       "post": {
-        "tags": ["Tokens"],
+        "tags": [
+          "Tokens"
+        ],
         "operationId": "revokeTokensBulk",
         "summary": "Revoke selected API tokens",
         "description": "Retires every selected API token. The rows remain so the page can show their state.",
@@ -3334,19 +3362,33 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "id": {"type": "array", "items": {"type": "string"}, "description": "One or more token ids from the page."}
+                  "id": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "One or more token ids from the page."
+                  }
                 },
-                "required": ["id"]
+                "required": [
+                  "id"
+                ]
               }
             }
           }
         },
-        "responses": {"200": {"description": "The API page, with a confirmation."}}
+        "responses": {
+          "200": {
+            "description": "The API page, with a confirmation."
+          }
+        }
       }
     },
     "/api/tokens/delete-bulk": {
       "post": {
-        "tags": ["Tokens"],
+        "tags": [
+          "Tokens"
+        ],
         "operationId": "deleteTokensBulk",
         "summary": "Delete selected revoked API tokens",
         "description": "Removes selected revoked API token rows. Live tokens remain until they are revoked first.",
@@ -3357,14 +3399,283 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "id": {"type": "array", "items": {"type": "string"}, "description": "One or more token ids from the page."}
+                  "id": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "One or more token ids from the page."
+                  }
                 },
-                "required": ["id"]
+                "required": [
+                  "id"
+                ]
               }
             }
           }
         },
-        "responses": {"200": {"description": "The API page, with a confirmation."}}
+        "responses": {
+          "200": {
+            "description": "The API page, with a confirmation."
+          }
+        }
+      }
+    },
+    "/api/v1/reports": {
+      "get": {
+        "tags": [
+          "Your reports"
+        ],
+        "operationId": "listMyReports",
+        "summary": "List your reports",
+        "description": "Your reports, as HuntDeck read them from the platforms or you added them by hand, with the Reports page's filters, latest activity first. States are normalised (new, triaged, accepted, resolved, accepted_risk, duplicate, informative, not_applicable, out_of_scope, spam); platform_state is the platform's own. Earnings are per currency, never converted.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Which reports: open, waiting on you, gone quiet (undecided, no word from the program for the days set in Settings › Reports, 14 by default), valid with nothing paid yet (unpaid), valid, closed, paid, or all (the default).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "you",
+                "stale",
+                "unpaid",
+                "valid",
+                "closed",
+                "paid",
+                "all"
+              ]
+            },
+            "example": "open"
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "description": "Only these platforms' (comma-separated).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "hackerone",
+                  "bugcrowd",
+                  "intigriti",
+                  "yeswehack",
+                  "independent",
+                  "other"
+                ]
+              }
+            },
+            "style": "form",
+            "explode": false
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Only these states (comma-separated).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "new",
+                  "triaged",
+                  "accepted",
+                  "resolved",
+                  "accepted_risk",
+                  "duplicate",
+                  "informative",
+                  "not_applicable",
+                  "out_of_scope",
+                  "spam"
+                ]
+              }
+            },
+            "style": "form",
+            "explode": false
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "description": "Only these severities, as rated now (comma-separated).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "critical",
+                  "high",
+                  "medium",
+                  "low",
+                  "none",
+                  "unrated"
+                ]
+              }
+            },
+            "style": "form",
+            "explode": false
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "Submitted since: an RFC 3339 time, or a duration back from now (24h, 30d).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Only reports submitted in these years (comma-separated).",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "style": "form",
+            "explode": false,
+            "example": [
+              2026
+            ]
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search: reports whose title or program contains this.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "xss"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Order.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "submitted",
+                "activity",
+                "bounty",
+                "severity",
+                "program",
+                "state"
+              ],
+              "default": "activity"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "How many to return, at most 1,000.",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1
+            },
+            "example": 5
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "How many to skip, for the next page.",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyReportList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter isn't valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/reports/analytics": {
+      "get": {
+        "tags": [
+          "Your reports"
+        ],
+        "operationId": "reportsAnalytics",
+        "summary": "Your numbers",
+        "description": "The Analytics page: your reports over a range (all time unless asked), by outcome, month, severity, platform and program; how triage treated the severities you submitted; your times from submission, against the ones programs publish. Reports count by when you submitted them, money by when it was awarded. Rates are null when nothing is decided.",
+        "parameters": [
+          {
+            "name": "range",
+            "in": "query",
+            "description": "The range.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "month",
+                "3m",
+                "12m",
+                "year",
+                "lastyear"
+              ],
+              "default": "all"
+            },
+            "example": "12m"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "From this month (YYYY-MM), instead of range.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "To this month (YYYY-MM), included; now when left out.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportsAnalytics"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
       }
     }
   },

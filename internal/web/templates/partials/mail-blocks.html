@@ -1,0 +1,17 @@
+{{/* HuntMail's blocks as a table (mailBlockList), on the HuntMail
+   page. */}}
+{{define "mail-blocks"}}
+<div class="table-wrap"><table class="fixed mblocks cards">
+    <thead><tr><th class="c-what">Turns away</th><th class="num c-hits" title="Messages this block turned away">Blocked</th><th class="c-when">Last</th><th class="c-when">Added</th><th class="c-acts"></th></tr></thead>
+    <tbody>{{range .Rows}}{{$b := .}}<tr id="block-{{.ID}}"{{if eq .ID $.Added}} class="on"{{end}}>
+      <td class="c-what">{{.What}} <b class="mono">{{.Value}}</b>{{with .Program}} <span class="muted small">({{.Name}}'s addresses)</span>{{end}}</td>
+      <td class="num c-hits" data-label="Blocked">{{if .Hits}}{{num .Hits}}{{else}}<span class="zero">0</span>{{end}}</td>
+      <td class="c-when" data-label="Last">{{with .LastHit}}<span title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">never</span>{{end}}</td>
+      <td class="c-when" data-label="Added"><span title="{{datetime .CreatedAt}}">{{ago .CreatedAt}}</span></td>
+      <td class="acts c-acts"><div class="mblock-btns">
+        {{with .OtherScope}}<form method="post" action="/email/blocks"><input type="hidden" name="kind" value="sender"><input type="hidden" name="value" value="{{$b.Value}}"><input type="hidden" name="scope" value="{{.}}"><button type="submit" class="secondary small" title="{{if eq . "all"}}Turn away all its mail, account mail too{{else}}Let its account mail through again: codes, links, anything without list headers{{end}}">{{if eq . "all"}}Block all{{else}}Only newsletters{{end}}</button></form>{{end}}
+        <form method="post" action="/email/blocks/{{.ID}}/delete" data-confirm="Unblock it? What it already turned away is gone; what comes next gets through."><button type="submit" class="secondary small" title="Remove the block: HuntMail takes this mail again">Unblock</button></form>
+      </div></td>
+    </tr>{{end}}</tbody>
+  </table></div>
+{{end}}

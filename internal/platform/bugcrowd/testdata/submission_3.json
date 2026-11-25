@@ -1,0 +1,4 @@
+{"needsCompliance": false,
+ "submissionHeader": {"title": "Account takeover via reset link", "submittedAt": "2026-03-10T10:00:00.000Z", "closedAt": null,
+   "status": {"label": "Unresolved", "variant": "unresolved", "descriptionHtml": "x"}, "reward": {"amount": "$2,500", "points": 20, "pointsClass": "x"}},
+ "submissionData": {"activityFeedUrl": "/acme/submissions/r3/activities", "submissionDetailProps": {"submission": {"description": "NEVER"}}}}

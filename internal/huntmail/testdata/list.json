@@ -1,0 +1,46 @@
+{
+  "emails": [
+    {
+      "id": "019a8e4f3c2b7d1e9f0a4b6c8d2e",
+      "received_at": "2026-11-18T10:00:00.123Z",
+      "to": "acme-1731942000-k7q2x@example.com",
+      "from": "bounce@mailer.target.example",
+      "header_from": "Target <no-reply@target.example>",
+      "header_to": "acme-1731942000-k7q2x@example.com",
+      "subject": "Your verification code",
+      "message_id": "<abc@target.example>",
+      "sent_at": "2026-11-18T10:00:00.000Z",
+      "has_html": true,
+      "codes": ["482913"],
+      "links": ["https://target.example/verify?t=abc"],
+      "link_details": [{"url": "https://target.example/verify?t=abc", "text": "Verify your email"}],
+      "attachments": [],
+      "auth": {"spf": "pass", "dkim": "pass", "dmarc": "pass", "verified_domains": ["target.example"], "spam_score": 0},
+      "raw_size": 34123,
+      "raw_truncated": false,
+      "parse_status": "ok",
+      "newsletter": true
+    },
+    {
+      "id": "019a8e4f3c2b7d1e9f0a4b6c8d2f",
+      "received_at": "2026-11-17T09:00:00.000Z",
+      "to": "acme-1731900000-p3m8z@example.net",
+      "from": "news@other.example",
+      "header_from": "Other <news@other.example>",
+      "header_to": "acme-1731900000-p3m8z@example.net",
+      "subject": "Welcome",
+      "message_id": "<def@other.example>",
+      "sent_at": null,
+      "has_html": false,
+      "codes": [],
+      "links": [],
+      "link_details": [],
+      "attachments": [{"filename": "terms.pdf", "mime_type": "application/pdf", "size": 2048, "content_id": "", "inline": false}],
+      "auth": {"spf": "none", "dkim": "none", "dmarc": "none", "verified_domains": [], "spam_score": null},
+      "raw_size": 70000,
+      "raw_truncated": false,
+      "parse_status": "deferred"
+    }
+  ],
+  "next_cursor": "c2"
+}

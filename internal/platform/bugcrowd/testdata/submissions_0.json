@@ -1,0 +1,10 @@
+{"submissions": [
+  {"submission_url": "/submissions/aaaaaaaa-0000-4000-8000-000000000003", "reference_number": "r3", "title": "Account takeover via reset link",
+   "program_name": "Acme", "engagement_name": "Acme Bug Bounty", "substate": "unresolved", "duplicate": false, "priority": 2, "points": 20,
+   "comment_count": 2, "submitted_at": "2026-03-10T10:00:00.000Z", "last_activity_date": "2026-03-12T10:00:00.000Z",
+   "researcher_updated_at": "2026-03-10T10:00:00.000Z", "draft": false, "rar_on_current_user": false, "blocked_by_current_user": false,
+   "bug_url": "https://shop.example.com/NEVER", "caption": "NEVER", "username": "hunter"},
+  {"submission_url": "/submissions/aaaaaaaa-0000-4000-8000-000000000002", "reference_number": "r2", "title": "Verbose error",
+   "program_name": "Acme", "engagement_name": "Acme Bug Bounty", "substate": "resolved", "duplicate": true, "priority": 4, "points": 1,
+   "comment_count": 0, "submitted_at": "2026-02-10T10:00:00.000Z", "last_activity_date": "2026-02-20T10:00:00.000Z", "draft": false}
+], "meta": {"totalHits": 3, "transactionTotals": {"monetaryRewards": "$NEVER"}}}

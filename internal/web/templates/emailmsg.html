@@ -1,0 +1,9 @@
+{{/* One HuntMail message (mail.go), as text: mail is written by whoever
+   sent it, so nothing here renders its HTML. HuntMail's own locked-down
+   view opens in a new tab through a link that expires. */}}
+{{define "topbar-actions"}}<a class="tb-btn" href="/email" title="Your HuntMail inbox"><svg class="i"><use href="#i-inbox"/></svg><span class="label">Email</span></a>{{end}}
+{{define "content"}}{{with .Data}}
+{{with .Problem}}<section class="panel"><div class="empty-state err">{{.}}</div></section>{{else}}
+{{template "mail-message" .}}
+{{end}}
+{{end}}{{end}}

@@ -5,7 +5,8 @@
 .panel-foot { margin: 0; padding: 10px 16px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); line-height: 1.5; }
 .panel-foot code { font-size: calc(11.5px * var(--fs, 1)); }
 /* Two panels side by side; one above the other when narrow. */
-.pair2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+/* Two boxes side by side, ending level. */
+.pair2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .pair2 > .panel + .panel { margin-top: 0; }
 @media (max-width: 1100px) { .pair2 { grid-template-columns: minmax(0, 1fr); } }
 
@@ -128,6 +129,9 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 .evg { min-width: 0; margin: 0; padding: 0; border: 0; }
 .evg legend { margin-bottom: 8px; padding: 0; color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 .evgroups .events-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+.evg legend { margin-bottom: 8px; padding: 0; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+/* At most four to a row, so each group fills its rows on a wide screen. */
+.evgroups .events-grid { grid-template-columns: repeat(auto-fill, minmax(max(240px, calc((100% - 24px) / 4)), 1fr)); gap: 8px; }
 .actbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 /* Save comes first in the form, so Enter saves; it's shown last. */
 .actbar .act-delete { order: 0; }
@@ -139,6 +143,7 @@ table.glance td:first-child { color: var(--text); font-weight: 600; }
 .act-result[data-state="err"] { color: var(--bad); }
 /* A form's fields one under another (the channel form's When). */
 .profile-form.column { flex-direction: column; align-items: flex-start; }
+.profile-form.column > label.wide { flex: none; align-self: stretch; }
 
 /* Choices wrap rather than widen the page (a fieldset is as wide as its
    content unless told otherwise). */

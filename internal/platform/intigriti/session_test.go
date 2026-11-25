@@ -94,6 +94,17 @@ func (f *fakeWeb) handler(t *testing.T) http.Handler {
 		set(w, csrfCookie, url.QueryEscape("csrf/"+fmt.Sprint(n)))
 		http.Redirect(w, r, "/auth/researcher", http.StatusFound)
 	})
+	mux.HandleFunc("/api/v1/payouts", func(w http.ResponseWriter, r *http.Request) {
+		f.mu.Lock()
+		f.hits[r.Method+" "+r.URL.Path]++
+		f.mu.Unlock()
+		if r.Header.Get("Authorization") != "Bearer "+token {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		b, _ := os.ReadFile(filepath.Join("testdata", "api_payouts.json"))
+		_, _ = w.Write(b)
+	})
 	mux.HandleFunc("/researcher", func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "<html>app</html>") })
 	mux.HandleFunc(webAPI+"/", func(w http.ResponseWriter, r *http.Request) {
 		f.mu.Lock()
@@ -120,6 +131,10 @@ func (f *fakeWeb) handler(t *testing.T) http.Handler {
 			webAPI + "/statistics/programs/" + acmeID + "/ninetydays": "web_ninetydays.json",
 			webAPI + "/programs/" + acmeID + "/update":                "web_updates.json",
 			webAPI + "/invites":                                       "web_invites.json",
+			webAPI + "/submissions":                                   "web_submissions.json",
+			webAPI + "/submissions/ACME-AAAA1111":                     "web_submission_acme1.json",
+			webAPI + "/submissions/ACME-BBBB2222":                     "web_submission_acme2.json",
+			webAPI + "/submissions/GLOB-CCCC3333":                     "web_submission_glob3.json",
 			webAPI + "/program/" + acmeID + "/leaderboard/last90days": "web_leaderboard_90d.json",
 			webAPI + "/program/" + acmeID + "/leaderboard/allTime":    "web_leaderboard_all.json",
 		}[r.URL.Path]

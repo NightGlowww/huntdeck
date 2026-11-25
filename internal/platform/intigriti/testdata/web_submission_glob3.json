@@ -1,0 +1,5 @@
+{"id": "GLOB-CCCC3333", "programId": "33333333-3333-4333-8333-333333333333", "title": "Duplicate IDOR",
+ "state": {"status": 4, "closeReason": 2}, "severity": 3, "createdAt": 1789000000,
+ "events": [{"discriminator": 2, "createdAt": 1789500000, "from": {"status": 1}, "to": {"status": 4, "closeReason": 2}, "user": {"role": "TRIAGE"}}],
+ "stateTimeline": [{"state": {"status": 1}, "timestamp": 1789000000}, {"state": {"status": 4, "closeReason": 2}, "timestamp": 1789500000}],
+ "payouts": []}

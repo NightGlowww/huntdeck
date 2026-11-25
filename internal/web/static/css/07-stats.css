@@ -27,8 +27,16 @@ col.w-weak { width: 22%; }
 .profile-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px 28px; }
 .profile-form > label { display: grid; gap: 4px; }
 .profile-form > label > span:first-child, .profile-form legend { color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.disclosed-sum .weak { font-size: 12.5px; color: var(--text-2); }
+.note-bar { margin: 0; padding: 9px 16px; border-bottom: 1px solid var(--border); color: var(--text-2); font-size: 12.5px; }
+/* Fields line up by their tops: labels on one line, boxes on the next, any
+   help under its box. A button among them sits level with the boxes. */
+.profile-form { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 18px 28px; }
+.profile-form > label { display: grid; gap: 4px; }
+.profile-form > label > span:first-child, .profile-form legend { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .06em; line-height: 16px; text-transform: uppercase; }
+.profile-form:not(.column) > :is(button, .button) { height: 32px; margin-top: 20px; }
 .profile-form fieldset { display: flex; gap: 14px; margin: 0; padding: 0; border: 0; }
-.profile-form legend { padding: 0; margin-bottom: 6px; }
+.profile-form legend { padding: 0; margin-bottom: 4px; }
 .profile-form input.zone { width: 240px; }
 .presets { margin: 0; padding-top: 0; list-style: none; display: grid; gap: 2px; }
 .presets b { color: var(--text); font-weight: 600; }

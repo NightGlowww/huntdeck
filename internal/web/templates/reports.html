@@ -1,0 +1,66 @@
+{{define "topbar-actions"}}<a class="tb-btn" href="/reports/analytics" title="Your numbers over time"><svg class="i"><use href="#i-chart"/></svg><span class="label">Analytics</span></a><a class="tb-btn" href="/reports/new" title="Add a report HuntDeck can't read from a platform"><svg class="i"><use href="#i-plus"/></svg><span class="label">Add a report</span></a><a class="tb-btn" href="{{.Data.CSVURL}}" data-csv-cols="reports" title="These reports as a spreadsheet (CSV): every page, the columns shown"><svg class="i"><use href="#i-download"/></svg><span class="label">CSV</span></a>{{template "colpick" .Data.Columns}}{{end}}
+{{define "content"}}{{with .Data}}
+<h1 class="m-heading">Reports</h1>
+<div class="stats rstats">
+  <a class="stat" href="/reports"><span class="l">Open</span><span class="v{{if not .Open}} zero{{end}}">{{num .Open}}</span><span class="h">of {{num .Total}} {{plural .Total "report" "reports"}}</span></a>
+  <a class="stat{{if .NeedsYou}} hot{{end}}" href="/reports?status=you" title="Open reports where the program is waiting on you"><span class="l">Needs you</span><span class="v{{if not .NeedsYou}} zero{{end}}">{{num .NeedsYou}}</span><span class="h">waiting on your reply</span></a>
+  <a class="stat" href="/reports?status=stale" title="Not decided yet, and no word from the program for {{.QuietDays}} days (Settings › Reports)"><span class="l">Gone quiet</span><span class="v{{if not .Stale}} zero{{end}}">{{num .Stale}}</span><span class="h">no word in {{.QuietDays}} {{plural .QuietDays "day" "days"}}</span></a>
+  <a class="stat" href="/reports/analytics?range=year" title="Bounties, bonuses and retests awarded this year, per currency"><span class="l">Earned {{.Year}}</span><span class="v{{if not .EarnedYTD}} zero{{end}}">{{with .EarnedYTD}}{{with index . 0}}<span title="{{moneyFull .Value .Currency}}">{{money .Value .Currency}}</span>{{end}}{{else}}0{{end}}</span><span class="h">{{if gt (len .EarnedYTD) 1}}{{range $i, $a := .EarnedYTD}}{{if $i}}<span title="{{moneyFull $a.Value $a.Currency}}">+ {{money $a.Value $a.Currency}}</span> {{end}}{{end}}{{else}}bounties, bonuses, retests{{end}}</span></a>
+</div>
+<div class="plist">
+{{template "rail" .RailView}}
+<section class="panel ptable">
+  <div class="activef">
+    <span class="total">{{num .Pager.Total}} {{if and .OpenOnly (not .Pills)}}open {{end}}{{plural .Pager.Total "report" "reports"}}</span>
+    {{template "pills" .}}
+  </div>
+{{if .Rows}}
+  <div class="table-wrap">
+  <table class="fixed flist rlist cards" data-cols="reports">
+    <thead><tr>
+      <th class="c-prog" data-col-fixed><a class="{{.SortClass "program"}}" href="{{.SortURL "program"}}">Program</a></th>
+      <th class="c-report" data-col-min="260">Report</th>
+      <th class="c-sev"><a class="{{.SortClass "severity"}}" href="{{.SortURL "severity"}}">Severity</a></th>
+      <th class="c-state"><a class="{{.SortClass "state"}}" href="{{.SortURL "state"}}">State</a></th>
+      <th class="c-bounty num"><a class="{{.SortClass "bounty"}}" href="{{.SortURL "bounty"}}">Earned</a></th>
+      <th class="c-submitted"><a class="{{.SortClass "submitted"}}" href="{{.SortURL "submitted"}}">Submitted</a></th>
+      <th class="c-activity"><a class="{{.SortClass "activity"}}" href="{{.SortURL "activity"}}">Activity</a></th>
+      <th class="c-triaged">Triaged</th>
+      <th class="c-closed">Closed</th>
+    </tr></thead>
+    <tbody>
+    {{range .Rows}}
+      <tr data-href="/reports/{{.ID}}"{{if .Quiet}} class="quiet"{{end}}>
+        <td class="c-prog">{{if .Program.ID}}{{template "pname" (plink .Program)}}{{else}}<div class="pn">{{template "ptag" .Platform}}<span class="name" title="{{.ProgramName}} (not in HuntDeck)">{{or .ProgramName "—"}}</span></div>{{end}}</td>
+        <td class="c-report" title="{{.Title}}"><a class="link" href="/reports/{{.ID}}">{{.Title}}</a>
+          {{- if .NeedsYou}} <span class="chip waiting" title="The program is waiting on you">needs you</span>{{end}}
+          {{- if .Stale}} <span class="chip paused" title="No word from the program for {{$.Data.QuietDays}} days or more">quiet</span>{{end}}
+          {{- if .Unread}} <span class="chip creds" title="Unread messages on the platform">unread</span>{{end}}
+          {{- if .Muted}} <span class="chip req">muted</span>{{else if .Quiet}} <span class="chip req" title="Snoozed until {{with .SnoozedUntil}}{{date .}}{{end}}">snoozed</span>{{end}}
+          {{- if .GoneAt}} <span class="chip removed" title="No longer listed by the platform since {{with .GoneAt}}{{date .}}{{end}}">gone</span>{{end}}
+          {{- if eq .Source "manual"}} <span class="chip req" title="Added by hand">manual</span>{{end}}
+          {{- with .URL}} <a class="ext" href="{{.}}" target="_blank" rel="noopener noreferrer" title="Open on the platform" aria-label="Open on the platform"><svg class="i"><use href="#i-external"/></svg></a>{{end}}</td>
+        <td class="c-sev nowrap" data-label="Severity">{{template "rsev" .}}</td>
+        <td class="c-state" data-label="State"><span class="rstate {{.StateClass}}" title="{{with .RawState}}On the platform: {{.}}{{end}}">{{.StateLabel}}</span></td>
+        <td class="c-bounty num nowrap" data-label="Earned">{{range $i, $a := .Earned}}{{if $i}}<br>{{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+        <td class="c-submitted nowrap" data-label="Submitted"><span class="when" title="{{datetime .SubmittedAt}}">{{date .SubmittedAt}}</span></td>
+        <td class="c-activity nowrap" data-label="Activity">{{with .LastActivityAt}}<span class="when" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">—</span>{{end}}{{if .Comments}} <span class="muted small" title="{{.Comments}} {{plural .Comments "comment" "comments"}}">· {{.Comments}}<svg class="i ic"><use href="#i-chat"/></svg></span>{{end}}</td>
+        <td class="c-triaged nowrap" data-label="Triaged">{{with .TriagedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+        <td class="c-closed nowrap" data-label="Closed">{{with .ClosedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  <script src="{{static "columns.js"}}"></script>
+  {{template "pager" .Pager}}
+{{else if .Pager.Beyond}}
+  {{template "past-end" .Pager}}
+{{else if .Total}}
+  <div class="empty-state">No reports match these filters. <a class="link" href="{{.ClearURL}}">Clear filters</a></div>
+{{else}}
+  <div class="empty-state">No reports yet. HuntDeck reads your reports from HackerOne (its API token), Bugcrowd (a login or session) and Intigriti (its web login) as it polls; for others, <a class="link" href="/reports/new">add one by hand</a>.</div>
+{{end}}
+</section>
+</div>
+{{end}}{{end}}

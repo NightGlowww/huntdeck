@@ -17,7 +17,7 @@ const (
 // allowed hosts, logging, VNC) stay in the environment only.
 type Field struct {
 	Name  string // the environment variable
-	Group string // the platform's name, or "network"
+	Group string // the platform's name, "huntmail" or "network"
 	Label string
 	Kind  Kind
 	Help  string
@@ -37,6 +37,7 @@ const (
 	GroupBugcrowd  = "bugcrowd"
 	GroupIntigriti = "intigriti"
 	GroupYesWeHack = "yeswehack"
+	GroupHuntMail  = "huntmail"
 	GroupNetwork   = "network"
 	// GroupAI is the optional model: an OpenAI-compatible endpoint that reads
 	// a program's policy and states the rules it sets.
@@ -96,6 +97,12 @@ var Editable = []Field{
 	{Name: "YWH_PUBLIC_ONLY", Group: GroupYesWeHack, Label: "Public programs without an account", Kind: KindBool},
 	{Name: "YWH_RATE", Group: GroupYesWeHack, Label: "Requests per second", Kind: KindNumber, Default: "2", Help: "0.1 to 5."},
 	{Name: "YWH_CONCURRENCY", Group: GroupYesWeHack, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
+
+	{Name: "HUNTMAIL_URL", Group: GroupHuntMail, Label: "Address", Kind: KindSecret,
+		Help: "Your HuntMail's address with its base path, as its setup printed it: https://<worker>.<subdomain>.workers.dev/<base path>. Kept secret like the key."},
+	{Name: "HUNTMAIL_API_KEY", Group: GroupHuntMail, Label: "API key", Kind: KindSecret},
+	{Name: "HUNTMAIL_DOMAINS", Group: GroupHuntMail, Label: "Domains for new addresses", Kind: KindText,
+		Help: "Comma-separated, such as example.com, example.net. Empty: the domains HuntMail was set up for."},
 
 	{Name: "HUNTDECK_PROXY", Group: GroupNetwork, Label: "Proxy", Kind: KindSecret,
 		Help: "For all platform traffic and the login browser, such as http://user:password@host:port (http:// for the login browser) or socks5://host:port."},

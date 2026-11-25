@@ -123,6 +123,8 @@ type Config struct {
 	Bugcrowd  Bugcrowd
 	Intigriti Intigriti
 	YesWeHack YesWeHack
+	// HuntMail is the user's HuntMail inbox, read by the Email page.
+	HuntMail HuntMail
 	// HUNTDECK_SOURCES: platforms HuntDeck has no client for, read from
 	// documents a script of the user's writes (sources.go).
 	Sources Sources
@@ -197,6 +199,20 @@ type YesWeHack struct {
 
 // Enabled reports whether YesWeHack should be polled.
 func (y YesWeHack) Enabled() bool { return y.Email != "" || y.Token != "" || y.PublicOnly }
+
+// HuntMail is the user's HuntMail inbox: a catch-all for hunting on their
+// own Cloudflare account (https://github.com/mdpsec/huntmail). Its address
+// holds a secret base path, so it's kept as a Secret like the key.
+type HuntMail struct {
+	URL Secret // HUNTMAIL_URL
+	Key Secret // HUNTMAIL_API_KEY
+	// HUNTMAIL_DOMAINS: domains to make new addresses on; HuntMail's own
+	// list when empty.
+	Domains []string
+}
+
+// Enabled reports whether a HuntMail inbox is set up.
+func (h HuntMail) Enabled() bool { return h.URL != "" && h.Key != "" }
 
 // Secret is a string that renders as [REDACTED] when printed or logged.
 type Secret string
@@ -401,6 +417,24 @@ func Load(src Source) (Config, error) {
 		Concurrency:   r.int("YWH_CONCURRENCY", 2, 1, 4),
 	}
 
+	cfg.HuntMail = HuntMail{URL: Secret(strings.TrimSpace(r.get("HUNTMAIL_URL", ""))), Key: Secret(strings.TrimSpace(r.get("HUNTMAIL_API_KEY", "")))}
+	if h := cfg.HuntMail; (h.URL == "") != (h.Key == "") {
+		r.errs = append(r.errs, errors.New("HUNTMAIL_URL and HUNTMAIL_API_KEY must be set together"))
+	}
+	if u := cfg.HuntMail.URL; u != "" {
+		if err := huntMailURL(u.Reveal()); err != nil {
+			r.errs = append(r.errs, fmt.Errorf("HUNTMAIL_URL: %w", err))
+		}
+	}
+	for _, d := range strings.FieldsFunc(r.get("HUNTMAIL_DOMAINS", ""), func(c rune) bool { return c == ',' || c == ' ' }) {
+		d = strings.ToLower(strings.TrimPrefix(strings.TrimSpace(d), "@"))
+		if !validDomain(d) {
+			r.errs = append(r.errs, fmt.Errorf("HUNTMAIL_DOMAINS: %q is not a domain like example.com", d))
+			continue
+		}
+		cfg.HuntMail.Domains = append(cfg.HuntMail.Domains, d)
+	}
+
 	list, errs := parseSources(r.get("HUNTDECK_SOURCES", ""))
 	cfg.Sources = Sources{List: list, Interval: r.duration("HUNTDECK_SOURCES_INTERVAL", time.Hour)}
 	r.errs = append(r.errs, errs...)
@@ -523,12 +557,48 @@ func readOnlyConflicts(cfg Config) []error {
 		{cfg.VNC, "HUNTDECK_VNC"},
 		{cfg.Proxy != nil, "HUNTDECK_PROXY"},
 		{len(cfg.Sources.List) > 0, "HUNTDECK_SOURCES"},
+		{cfg.HuntMail.URL != "" || cfg.HuntMail.Key != "", "HUNTMAIL_URL and HUNTMAIL_API_KEY"},
 	} {
 		if c.on {
 			out = append(out, fmt.Errorf("HUNTDECK_READ_ONLY never polls or signs in: unset %s", c.what))
 		}
 	}
 	return out
+}
+
+// huntMailURL checks a HuntMail address without saying what it is: it
+// holds a secret. https (http only for this machine), with a base path.
+func huntMailURL(raw string) error {
+	u, err := url.Parse(strings.TrimRight(raw, "/"))
+	switch {
+	case err != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "":
+		return errors.New("should look like https://<worker>.<subdomain>.workers.dev/<base path>, as HuntMail's setup printed it")
+	case u.Scheme != "https" && (u.Scheme != "http" || (u.Hostname() != "localhost" && u.Hostname() != "127.0.0.1")):
+		return errors.New("must start with https://")
+	case strings.Trim(u.Path, "/") == "":
+		return errors.New("needs its base path, the part after the host that HuntMail's setup printed")
+	}
+	return nil
+}
+
+// validDomain reports whether d looks like a domain name: labels of
+// letters, digits and dashes, at least two of them.
+func validDomain(d string) bool {
+	labels := strings.Split(d, ".")
+	if len(d) > 253 || len(labels) < 2 {
+		return false
+	}
+	for _, l := range labels {
+		if l == "" || len(l) > 63 || l[0] == '-' || l[len(l)-1] == '-' {
+			return false
+		}
+		for _, c := range l {
+			if c != '-' && (c < '0' || c > '9') && (c < 'a' || c > 'z') {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // validHeaderName reports whether name is an HTTP header name: letters,

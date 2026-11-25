@@ -18,6 +18,7 @@ import (
 
 	"github.com/mdpsec/huntdeck/internal/ai"
 	"github.com/mdpsec/huntdeck/internal/config"
+	"github.com/mdpsec/huntdeck/internal/huntmail/setup"
 	"github.com/mdpsec/huntdeck/internal/i18n"
 	"github.com/mdpsec/huntdeck/internal/overrides"
 	"github.com/mdpsec/huntdeck/internal/platform"
@@ -70,6 +71,9 @@ type PlatformInfo struct {
 	// Discloses says it publishes disclosed reports
 	// (platform.DisclosureFetcher): elsewhere none isn't "0".
 	Discloses bool
+	// Reports, if set, says whether HuntDeck can read the user's own
+	// reports there now (platform.ReportFetcher): it needs a login.
+	Reports func() bool
 }
 
 // Schedule reads and edits per-platform polling settings; see
@@ -139,6 +143,18 @@ type Deps struct {
 	VNC *VNC
 	// Browser is the shared login browser; nil where there's none.
 	Browser LoginBrowser
+	// Mail reads the user's HuntMail inbox (the Email page); nil where it
+	// isn't set up, and always in a read-only copy.
+	Mail MailReader
+	// MailDomains are the domains to make new addresses on
+	// (HUNTMAIL_DOMAINS); HuntMail's own when empty.
+	MailDomains []string
+	// MailBundle is the HuntMail HuntDeck can set up on the user's
+	// Cloudflare (Email › HuntMail › Setup); nil when it has none.
+	MailBundle *setup.Bundle
+	// MailSetupTest changes a setup run's options: tests point it at a
+	// fake Cloudflare. Nil everywhere else.
+	MailSetupTest func(*setup.Options)
 	// Accounts edits the settings saved over the environment (Settings >
 	// Accounts); nil where they can't be.
 	Accounts *overrides.Saved
@@ -196,12 +212,16 @@ type server struct {
 	ownMu sync.Mutex
 	// versions dates the API's answers for Last-Modified (conditional.go).
 	versions versionMemo
+	// mailDomainList keeps HuntMail's domains for a while (mail.go).
+	mailDomainList mailDomainCache
+	// mailSetup is the latest HuntMail setup run (mailsetup.go).
+	mailSetup mailSetupState
 }
 
 // NewHandler returns the root HTTP handler.
 func NewHandler(d Deps) (http.Handler, error) {
 	if d.ReadOnly { // never anything of the account's, whatever the caller passed
-		d.Accounts, d.Restart, d.Browser, d.VNC, d.DemoSeed, d.WebSyncs = nil, nil, nil, nil, nil, nil
+		d.Accounts, d.Restart, d.Browser, d.VNC, d.DemoSeed, d.WebSyncs, d.MailBundle = nil, nil, nil, nil, nil, nil, nil
 	}
 	s := &server{Deps: d}
 	messages, err := i18n.Load()
@@ -293,6 +313,30 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("GET /programs/{platform}/{handle}/og.png", s.programOGImage)
 	mux.HandleFunc("GET /changes/{id}", s.change)
 	mux.HandleFunc("GET /disclosed", s.disclosed)
+	mux.HandleFunc("GET /reports", s.myReports)
+	mux.HandleFunc("GET /reports/analytics", s.reportsAnalytics)
+	mux.HandleFunc("GET /reports.csv", s.myReportsCSV)
+	mux.HandleFunc("GET /reports/new", s.newReportForm)
+	mux.HandleFunc("POST /reports/new", s.saveNewReport)
+	mux.HandleFunc("GET /reports/{id}", s.myReport)
+	mux.HandleFunc("GET /reports/{id}/edit", s.editReportForm)
+	mux.HandleFunc("POST /reports/{id}/edit", s.saveReportEdit)
+	mux.HandleFunc("POST /reports/{id}/snooze", s.snoozeReport)
+	mux.HandleFunc("POST /reports/{id}/mute", s.muteReport)
+	mux.HandleFunc("POST /reports/{id}/reset", s.resetReport)
+	mux.HandleFunc("POST /reports/{id}/delete", s.deleteReport)
+	mux.HandleFunc("GET /email", s.mailInbox)
+	mux.HandleFunc("GET /email/stats", s.mailStats)
+	mux.HandleFunc("GET /email/setup", s.mailSetupPage)
+	mux.HandleFunc("GET /email/setup/status", s.mailSetupStatus)
+	mux.HandleFunc("POST /email/setup", s.startMailSetup)
+	mux.HandleFunc("GET /email/blocks", s.mailBlocks)
+	mux.HandleFunc("POST /email/blocks", s.mailBlockAdd)
+	mux.HandleFunc("POST /email/blocks/{id}/delete", s.mailBlockDelete)
+	mux.HandleFunc("GET /email/{id}", s.mailMessage)
+	mux.HandleFunc("GET /email/{id}/view", s.mailOpen)
+	mux.HandleFunc("GET /email/{id}/pane", s.mailPane)
+	mux.HandleFunc("GET /email/{id}/attachments/{n}", s.mailAttachment)
 	mux.HandleFunc("GET /match", s.match)
 	mux.HandleFunc("GET /search", s.search)
 	mux.HandleFunc("GET /settings", s.settings)
@@ -304,9 +348,11 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /settings/websync", s.saveWebSync)
 	mux.HandleFunc("POST /settings/websync/reset", s.resetWebSync)
 	mux.HandleFunc("POST /settings/huntscore", s.saveHuntPreset)
+	mux.HandleFunc("POST /settings/reports", s.saveReportSettings)
 	mux.HandleFunc("POST /settings/timezone", s.saveTimezone)
 	mux.HandleFunc("POST /settings/accounts", s.saveAccounts)
 	mux.HandleFunc("POST /settings/accounts/reset", s.resetAccounts)
+	mux.HandleFunc("GET /settings/huntmail", s.mailSettingsMoved) // HuntMail's settings moved to its page
 	mux.HandleFunc("POST /settings/restart", s.restartNow)
 	mux.HandleFunc("GET /settings/restart", s.restartStatus)
 	mux.HandleFunc("POST /settings/seed", s.exportDemoSeed)
@@ -331,6 +377,9 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("POST /programs/{platform}/{handle}/note", s.setProgramNote)
 	mux.HandleFunc("POST /programs/ignore", s.ignoreMany)
 	mux.HandleFunc("POST /programs/{platform}/{handle}/tags", s.setTags)
+	mux.HandleFunc("POST /programs/{platform}/{handle}/email/new", s.newMailAddress)
+	mux.HandleFunc("POST /programs/{platform}/{handle}/email/{id}/note", s.noteMailAddress)
+	mux.HandleFunc("POST /programs/{platform}/{handle}/email/{id}/forget", s.forgetMailAddress)
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSONError(w, http.StatusNotFound, "no such endpoint")
 	})
@@ -390,6 +439,8 @@ func (s *server) apiRoutes() []apiRoute {
 		{"POST /api/tokens/delete-bulk", s.deleteAPITokens},
 		{"GET /api/v1/changes", s.apiChanges},
 		{"GET /api/v1/disclosed", s.apiDisclosed},
+		{"GET /api/v1/reports", s.apiMyReports},
+		{"GET /api/v1/reports/analytics", s.apiReportsAnalytics},
 		{"GET /api/v1/stats", s.apiStats},
 		{"GET /api/v1/stats/platforms", s.apiStatsPlatforms},
 		{"GET /api/v1/stats/platforms/{platform}", s.apiStatsPlatform},
@@ -434,9 +485,16 @@ func cspNonce() string {
 // handlers serving images set it over securityHeaders' policy.
 const imagePolicy = "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'none'; sandbox"
 
+// xmlPolicy is the Content-Security-Policy of the sitemaps: opened on its
+// own, an XML file is shown in the browser's tree view, which styles
+// itself inline and draws its expand arrows as data: images, so the pages'
+// policy leaves it unstyled (its text run together, then bare tags). A
+// sitemap runs nothing: sandboxed, it may have those and nothing else.
+const xmlPolicy = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; frame-ancestors 'none'; sandbox"
+
 // rasterImage says whether path names a PNG or ICO file.
 func rasterImage(path string) bool {
-	return strings.HasSuffix(path, ".png") || strings.HasSuffix(path, ".ico")
+	return strings.HasSuffix(path, ".png") || strings.HasSuffix(path, ".ico") || strings.HasSuffix(path, ".webp")
 }
 
 // securityHeaders sets the headers every answer gets. Search engines are
@@ -656,6 +714,7 @@ var flashMessages = map[string]string{
 	"ai-none":            "Every policy here has been read already; nothing was sent.",
 	"ai-failed":          "The endpoint refused the request; the server log has the reason.",
 	"huntscore-saved":    "HuntScore weighting saved and every program rescored.",
+	"reports-saved":      "Saved: Reports use it from now on.",
 	"timezone-saved":     "Time zone saved. Dates and times now show in it.",
 	"channel-saved":      "Channel saved.",
 	"channel-deleted":    "Channel deleted.",
@@ -664,7 +723,11 @@ var flashMessages = map[string]string{
 	"invite-accepted":    "Invitation accepted. HuntDeck is refreshing that program now: its scope and stats show in a minute or two.",
 	"accounts-saved":     "Saved, encrypted. HuntDeck restarts to use it, and a platform with new credentials is polled straight after, so its sign-in shows.",
 	"accounts-reset":     "Back to the values in your environment (.env). HuntDeck restarts to use them.",
+	"huntmail-set-up":    "HuntMail is set up, and its address and API key are saved here, encrypted. HuntDeck restarts to use them.",
 	"accounts-unchanged": "Nothing changed, so nothing was saved.",
+	"report-saved":       "Report saved.",
+	"report-reset":       "The platform's values come back with the next sync.",
+	"report-deleted":     "Report deleted.",
 	"invite-accepting":   "Accepting: the platform is slow to answer (it may be signing in). Refresh in a minute; the program refreshes once it's accepted.",
 }
 

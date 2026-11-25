@@ -1,0 +1,16 @@
+[
+  {"id": "ACME-AAAA1111", "programId": "11111111-1111-4111-8111-111111111111", "programName": "Acme", "companyName": "Acme Corp",
+   "title": "SSRF in PDF export", "state": {"status": 5, "closeReason": 1, "duplicateSubmission": null},
+   "severity": 4, "severityVector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N", "bounty": {"value": 1500, "currency": "EUR"},
+   "hasBonus": true, "awaitingFeedback": false, "hasUnreadMessages": false, "createdAt": 1790000000, "lastUpdatedAt": 1791000000,
+   "lastEvent": {"discriminator": 2, "createdAt": 1791000000}, "destroyedAt": null},
+  {"id": "ACME-BBBB2222", "programId": "11111111-1111-4111-8111-111111111111", "programName": "Acme",
+   "title": "Missing rate limit", "state": {"status": 1, "closeReason": null, "duplicateSubmission": null},
+   "severity": 7, "severityVector": null, "bounty": null, "hasBonus": false, "awaitingFeedback": true, "hasUnreadMessages": true,
+   "createdAt": 1792000000, "lastUpdatedAt": 1792100000, "lastEvent": {"discriminator": 1, "createdAt": 1792100000}, "destroyedAt": null},
+  {"id": "GLOB-CCCC3333", "programId": "33333333-3333-4333-8333-333333333333", "programName": "Not in HuntDeck",
+   "title": "Duplicate IDOR", "state": {"status": 4, "closeReason": 2, "duplicateSubmission": {"code": "GLOB-0000"}},
+   "severity": 3, "createdAt": 1789000000, "lastUpdatedAt": 1789500000, "destroyedAt": null},
+  {"id": "GONE-DDDD4444", "programId": "33333333-3333-4333-8333-333333333333", "title": "Deleted draft",
+   "state": {"status": 1}, "severity": 2, "createdAt": 1788000000, "destroyedAt": 1788000100}
+]

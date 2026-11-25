@@ -1,0 +1,4 @@
+{"maxCount": 2, "records": [
+  {"id": "pay-1", "discriminator": 1, "submissionCode": "ACME-AAAA1111", "type": {"id": 1, "value": "Bounty"}, "amount": {"value": 1500, "currency": "EUR"}, "status": {"id": 3, "value": "Paid"}, "createdAt": 1790200000, "paidAt": 1790800000},
+  {"id": "pay-2", "discriminator": 1, "submissionCode": "ACME-AAAA1111", "type": {"id": 3, "value": "CompanyBonus"}, "amount": {"value": 150, "currency": "EUR"}, "status": {"id": 5, "value": "Pending"}, "createdAt": 1790300000, "paidAt": null}
+]}

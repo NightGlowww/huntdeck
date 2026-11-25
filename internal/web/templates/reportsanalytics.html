@@ -1,0 +1,105 @@
+{{define "topbar-actions"}}<a class="tb-btn" href="/reports" title="All your reports"><svg class="i"><use href="#i-flag"/></svg><span class="label">Reports</span></a>{{if .Data.Total}}<button type="button" class="tb-btn" data-board-edit hidden><svg class="i"><use href="#i-grid"/></svg><span class="label">Customize</span></button>{{end}}{{end}}
+{{define "content"}}{{with .Data}}
+<h1 class="m-heading">Analytics</h1>
+<div class="ahead">
+  <nav class="segs" aria-label="Range">{{range .Ranges}}<a href="{{$.Data.RangeURL .Key}}"{{if eq .Key $.Data.RangeKey}} class="on" aria-current="true"{{end}}>{{.Label}}</a>{{end}}</nav>
+  <form class="arange" method="get" action="/reports/analytics">
+    <label><span class="sr-only">From</span><input type="month" name="from" value="{{.From}}" aria-label="From month"></label>
+    <span class="muted">to</span>
+    <label><span class="sr-only">To</span><input type="month" name="to" value="{{.To}}" aria-label="To month"></label>
+    <button class="button secondary small" type="submit">Show</button>
+  </form>
+  <span class="muted small">Reports by when you submitted them, money by when it was awarded · {{.RangeLabel}}</span>
+</div>
+{{if not .Total}}
+<section class="panel"><div class="empty-state">No reports yet. Once HuntDeck has read yours (or you've <a class="link" href="/reports/new">added some</a>), your numbers show here.</div></section>
+{{else}}
+{{template "board-editbar"}}
+<div class="board aboard" data-board="analytics" data-board-even>
+<section class="bx" data-box="totals" data-place="0 12" data-place-wide="0 12" data-title="Totals">
+<div class="stats astats">
+  <div class="stat"><span class="l">Reports</span><span class="v{{if not .Reports}} zero{{end}}">{{num .Reports}}</span><span class="h">{{num .Open}} open · {{num .ThisMonth}} this month</span></div>
+  <div class="stat" title="Valid (accepted, resolved, or valid but not to be fixed) of the reports decided"><span class="l">Acceptance</span><span class="v">{{.Pct .Acceptance}}</span><span class="h">{{num .Valid}} valid of {{num .Decided}} decided</span></div>
+  <div class="stat" title="Duplicates of the reports decided"><span class="l">Duplicates</span><span class="v">{{.Pct .DuplicateRate}}</span><span class="h">{{num .Duplicates}} {{plural .Duplicates "duplicate" "duplicates"}}</span></div>
+  <div class="stat" title="Bounties, bonuses and retests awarded in the range, per currency (never converted)"><span class="l">Earned</span><span class="v{{if not .Earned}} zero{{end}}">{{with .Earned}}{{with index . 0}}<span title="{{moneyFull .Value .Currency}}">{{money .Value .Currency}}</span>{{end}}{{else}}0{{end}}</span><span class="h">{{if gt (len .Earned) 1}}{{range $i, $a := .Earned}}{{if $i}}<span title="{{moneyFull $a.Value $a.Currency}}">+ {{money $a.Value $a.Currency}}</span> {{end}}{{end}}{{else}}this month {{with .ThisMonthEarned}}{{with index . 0}}{{money .Value .Currency}}{{end}}{{else}}0{{end}}{{end}}</span></div>
+  <div class="stat" title="Reports submitted per week and per month, over the range"><span class="l">Pace</span><span class="v">{{printf "%.1f" .PerWeek}}</span><span class="h">a week · {{printf "%.1f" .PerMonth}} a month</span></div>
+  <div class="stat" title="Earned per month on average over the range, in {{.Main}}"><span class="l">Per month</span><span class="v{{if not .EarnedPerMonth}} zero{{end}}">{{if .Main}}{{money .EarnedPerMonth .Main}}{{else}}0{{end}}</span><span class="h">earned, on average</span></div>
+</div>
+</section>
+<section class="panel bx" data-box="outcomes" data-place="0 6" data-place-wide="0 4" data-title="Reports per month">
+  <div class="panel-head"><h2>Reports per month</h2>
+    <span class="aside alegend"><span><span class="sw valid"></span>Valid <b>{{num .Sum.Valid}}</b></span> <span><span class="sw dup"></span>Duplicate <b>{{num .Sum.Duplicates}}</b></span> <span><span class="sw rejected"></span>Rejected <b>{{num .Sum.Rejected}}</b></span> <span><span class="sw open"></span>Open <b>{{num .Sum.Open}}</b></span></span></div>
+  <div class="panel-body">{{template "bar-chart" .Outcomes}}</div>
+</section>
+<section class="panel bx" data-box="money" data-place="6 6" data-place-wide="4 4" data-title="Earned per month">
+  <div class="panel-head"><h2>Earned per month{{with .Main}} · {{.}}{{end}}</h2><span class="aside">by the month it was awarded</span></div>
+  <div class="panel-body">{{if .HasMoney}}{{template "bar-chart" .Money}}{{else}}<div class="empty-state small">Nothing awarded in this range.</div>{{end}}</div>
+</section>
+<section class="panel bx" data-box="cumulative" data-place="0 12" data-place-wide="8 4" data-title="Earned in all">
+  <div class="panel-head"><h2>Earned in all{{with .Main}} · {{.}}{{end}}</h2><span class="aside">over the range{{if gt (len .Earned) 1}}; other currencies in the tiles{{end}}</span></div>
+  <div class="panel-body">{{if .HasMoney}}{{template "line-chart" .Cumulative}}{{else}}<div class="empty-state small">Nothing awarded in this range.</div>{{end}}</div>
+</section>
+<section class="panel bx" data-box="severity" data-place="0 6" data-place-wide="0 6" data-title="By severity">
+  <div class="panel-head"><h2>By severity</h2><span class="aside">bounties in {{or .Main "—"}}</span></div>
+  <div class="table-wrap"><table class="atable">
+    <thead><tr><th>Severity</th><th class="num" title="Reports you submitted as this severity">Submitted</th><th class="num" title="Reports rated this severity now">Rated</th><th class="num">Valid</th><th class="num" title="Earned by reports rated this severity now">Earned</th><th class="num" title="Per paid report">Average</th></tr></thead>
+    <tbody>{{$m := .Main}}{{range .Severities}}<tr><td><span class="sev {{.Key}}">{{.Label}}</span></td><td class="num">{{num .Submitted}}</td><td class="num">{{num .Final}}</td><td class="num">{{num .Valid}}</td>
+      <td class="num">{{if .Earned}}<span title="{{moneyFull .Earned $m}}">{{money .Earned $m}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+      <td class="num">{{if .Paid}}{{money .Average $m}}{{else}}<span class="zero">—</span>{{end}}</td></tr>{{end}}</tbody>
+  </table></div>
+</section>
+<section class="panel bx" data-box="agreement" data-place="6 6" data-place-wide="6 6" data-title="Triage and your severity">
+  <div class="panel-head"><h2>Triage and your severity</h2><span class="aside">decided reports</span></div>
+  {{with .Agreement}}{{$k := .Known}}<div class="panel-body">
+    {{with $.Data.AgreeBar}}<svg class="agree" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="How triage treated your severities">{{range .}}<rect class="{{.Class}}" x="{{.X}}" y="0" width="{{.W}}" height="6"><title>{{.Title}}</title></rect>{{end}}</svg>{{end}}
+    <table class="kv">
+      <tr><th><span class="sw a-match"></span>Kept as submitted</th><td class="num">{{num .Match}}</td><td class="num muted">{{$.Data.Share .Match $k}}</td></tr>
+      <tr><th><span class="sw a-up"></span>Raised by triage</th><td class="num">{{num .Upgraded}}</td><td class="num muted">{{$.Data.Share .Upgraded $k}}</td></tr>
+      <tr><th><span class="sw a-down"></span>Lowered by triage</th><td class="num">{{num .Downgraded}}</td><td class="num muted">{{$.Data.Share .Downgraded $k}}</td></tr>
+      <tr><th><span class="sw a-changed"></span>Changed, from what not known</th><td class="num">{{num .Changed}}</td><td class="num muted">{{$.Data.Share .Changed $k}}</td></tr>
+      <tr><th>Not comparable</th><td class="num">{{num .Unknown}}</td><td class="num muted" title="No severity submitted or rated">—</td></tr>
+    </table>
+    <p class="note">Bugcrowd says triage changed a priority, never from what: those count as changed unless you enter what you submitted.</p>
+  </div>{{end}}
+</section>
+<section class="panel bx" data-box="platforms" data-place="0 12" data-place-wide="0 6" data-title="Platforms">
+  <div class="panel-head"><h2>Platforms</h2></div>
+  <div class="table-wrap"><table class="atable">
+    <thead><tr><th>Platform</th><th class="num">Reports</th><th class="num">Valid</th><th class="num">Acceptance</th><th class="num">Duplicates</th><th class="num">Earned</th><th class="num" title="Your average time from submission to triage">To triage</th><th class="num" title="Your average time from submission to the first bounty">To bounty</th></tr></thead>
+    <tbody>{{range .Platforms}}<tr><td>{{template "ptag" .Platform}} {{platformLabel .Platform}}</td><td class="num">{{num .Reports}}</td><td class="num">{{num .Valid}}</td>
+      <td class="num">{{$.Data.Pct .Acceptance}}</td><td class="num">{{$.Data.Pct .DuplicateRate}}</td>
+      <td class="num">{{range $i, $a := .Earned}}{{if $i}} + {{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+      <td class="num">{{or ($.Data.Hours .Triage) "—"}}</td><td class="num">{{or ($.Data.Hours .Bounty) "—"}}</td></tr>{{end}}</tbody>
+  </table></div>
+</section>
+<section class="panel bx" data-box="times" data-place="0 12" data-place-wide="6 6" data-title="Your times against the programs'">
+  <div class="panel-head"><h2>Your times against the programs'</h2><span class="aside">your average from submission · theirs as the platform publishes it</span></div>
+  <div class="table-wrap"><table class="atable times">
+    <thead><tr><th class="c-prog">All programs</th><th class="num">First response</th><th class="num">Triage</th><th class="num">Bounty</th><th class="num">Resolution</th></tr></thead>
+    <tbody>
+      <tr class="overall"><td>Your average</td>{{with .Times}}<td class="num" title="median {{$.Data.Median .FirstResponse}}">{{or ($.Data.Hours .FirstResponse) "—"}}</td><td class="num" title="median {{$.Data.Median .Triage}}">{{or ($.Data.Hours .Triage) "—"}}</td><td class="num" title="median {{$.Data.Median .Bounty}}">{{or ($.Data.Hours .Bounty) "—"}}</td><td class="num" title="median {{$.Data.Median .Resolution}}">{{or ($.Data.Hours .Resolution) "—"}}</td>{{end}}</tr>
+      {{range .Compared}}<tr><td class="c-prog">{{template "aprog" .}}</td>
+        {{template "atime" (list ($.Data.Hours .Yours.FirstResponse) ($.Data.Published .Theirs.FirstResponse) ($.Data.Versus .Yours.FirstResponse .Theirs.FirstResponse))}}
+        {{template "atime" (list ($.Data.Hours .Yours.Triage) ($.Data.Published (or .Theirs.Triage .Theirs.Validation)) ($.Data.Versus .Yours.Triage (or .Theirs.Triage .Theirs.Validation)))}}
+        {{template "atime" (list ($.Data.Hours .Yours.Bounty) ($.Data.Published .Theirs.Bounty) ($.Data.Versus .Yours.Bounty .Theirs.Bounty))}}
+        {{template "atime" (list ($.Data.Hours .Yours.Resolution) ($.Data.Published .Theirs.Resolution) ($.Data.Versus .Yours.Resolution .Theirs.Resolution))}}</tr>{{end}}
+    </tbody>
+  </table></div>
+  <p class="panel-foot">Green: quicker for you than the program's published average by a fifth or more; red: slower. Programs publish averages over recent months; yours cover the range shown.</p>
+</section>
+<section class="panel bx" data-box="programs" data-place="0 12" data-place-wide="0 6" data-title="Top programs">
+  <div class="panel-head"><h2>Top programs</h2><span class="aside">by earnings in {{or .Main "—"}}, then valid reports</span></div>
+  <div class="table-wrap"><table class="atable">
+    <thead><tr><th class="c-prog">Program</th><th class="num">Reports</th><th class="num">Valid</th><th class="num">Duplicates</th><th class="num">Earned</th></tr></thead>
+    <tbody>{{range .Programs}}<tr><td class="c-prog">{{template "aprog" .}}</td><td class="num">{{num .Reports}}</td><td class="num">{{num .Valid}}</td><td class="num">{{num .Duplicates}}</td>
+      <td class="num">{{range $i, $a := .Earned}}{{if $i}} + {{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</td></tr>{{else}}<tr><td colspan="5" class="empty-state small">No valid or paid reports in this range.</td></tr>{{end}}</tbody>
+  </table></div>
+</section>
+</div>
+<script src="{{static "board.js"}}"></script>
+{{end}}
+{{end}}{{end}}
+
+{{define "aprog"}}<div class="pn">{{template "ptag" .Platform}}{{if .ProgramID}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}" title="{{.Name}}">{{.Name}}</a>{{else}}<span class="name" title="{{.Name}}">{{or .Name "—"}}</span>{{end}}{{if .Private}} <span class="chip private">private</span>{{end}}</div>{{end}}
+
+{{define "atime"}}{{$y := index . 0}}{{$t := index . 1}}{{$v := index . 2}}<td class="num atime{{with $v}} {{.}}{{end}}">{{if or $y $t}}<b>{{or $y "—"}}</b> <span class="muted">/ {{or $t "—"}}</span>{{else}}<span class="zero">—</span>{{end}}</td>{{end}}

@@ -1,5 +1,5 @@
-// Hunt board layout. The board is a 12-column grid: each box has a column, a
-// width and, once resized, a height, and sits just under whatever is above it
+// Board layouts (the Hunt board's, Analytics'). A board is a 12-column
+// grid: each box has a column, a width and, once resized, a height, and sits just under whatever is above it
 // in those columns. In Customize mode a box can be dragged to another place
 // (it snaps to the columns and the other boxes slide aside), resized by
 // dragging its sides, bottom or bottom corner (widths in whole columns,
@@ -11,10 +11,16 @@
 (() => {
   const board = document.querySelector("[data-board]");
   if (!board) return;
-  const key = "huntdeck-board";
+  // Each board keeps its own layout: the Hunt board's under "huntdeck-board",
+  // another's (data-board="analytics") under "huntdeck-board-analytics".
+  const key = board.dataset.board ? "huntdeck-board-" + board.dataset.board : "huntdeck-board";
   const cols = 12;
   const minW = 2;
   const gap = 16; // as between panels (12-board.css)
+  // data-board-even: boxes that start on the same row and fit their content
+  // grow to the tallest of them, so a row ends level (Analytics); not a box
+  // under 60% of that height, which would be left mostly empty.
+  const even = board.hasAttribute("data-board-even");
   const step = 20; // height snap
   const minH = 120;
   const maxH = 4000;
@@ -97,6 +103,27 @@
     });
     return { out, height: Math.max(0, ...sky) - gap };
   };
+  // level stretches the content-fitted boxes of each row to the row's
+  // tallest, updating heights; it says whether any grew.
+  const level = (out, heights) => {
+    const rows = new Map();
+    for (const it of out) {
+      if (it.el === slot || it.h || it.el.classList.contains("off")) continue;
+      rows.set(it.y, [...(rows.get(it.y) || []), it.el]);
+    }
+    let grew = false;
+    for (const row of rows.values()) {
+      if (row.length < 2) continue;
+      const top = Math.max(...row.map((el) => heights.get(el)));
+      for (const el of row) {
+        if (heights.get(el) === top || heights.get(el) < top * 0.6) continue;
+        el.style.minHeight = top + "px";
+        heights.set(el, top);
+        grew = true;
+      }
+    }
+    return grew;
+  };
   const render = (list = items()) => {
     const m = metrics();
     const l = layout();
@@ -107,12 +134,14 @@
       const h = it.h && !it.el.classList.contains("off") ? it.h : 0;
       it.el.style.width = m.width(it.w) + "px";
       it.el.style.height = h ? h + "px" : "";
+      it.el.style.minHeight = "";
       it.el.classList.toggle("sized", h > 0);
       const size = it.el.querySelector(".bx-w");
       if (size) size.textContent = it.w + "/" + cols + (it.h ? " · " + it.h + "px" : "");
     }
     const heights = new Map(list.map((it) => [it.el, it.el === slot ? drag.h : it.el.offsetHeight]));
-    const { out, height } = pack(list, heights);
+    let { out, height } = pack(list, heights);
+    if (even && mode() !== "stack" && level(out, heights)) ({ out, height } = pack(list, heights));
     for (const it of out) it.el.style.transform = `translate(${m.left(it.x)}px, ${it.y}px)`;
     if (list.some((it) => it.el === slot)) {
       slot.style.width = m.width(drag.w) + "px";

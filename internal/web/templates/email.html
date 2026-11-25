@@ -1,0 +1,61 @@
+{{/* The Email page: the user's HuntMail inbox (mail.go). */}}
+{{define "topbar-title"}}<h1>Email</h1>{{if .Data.CanNL}}{{template "nl-toggle" .Data}}{{end}}{{end}}
+
+{{/* Mail, Newsletters or All, when HuntMail tells newsletters apart: in
+     the title bar, or at the top of the page where that has no room. */}}
+{{define "nl-toggle"}}<nav class="seg vis-toggle" aria-label="Newsletters">{{range .NLSegments}}<a{{if .On}} class="on" aria-current="true"{{end}} href="{{.URL}}" title="{{.Title}}">{{.Label}}{{if .Counted}} <em>{{num .Count}}</em>{{end}}</a>{{end}}</nav>{{end}}
+
+{{define "content"}}{{with .Data}}
+<h1 class="m-heading">Email</h1>
+{{if .CanNL}}<div class="vis-toggle-m">{{template "nl-toggle" .}}</div>{{end}}
+{{if not .Configured}}
+<section class="panel">
+  <div class="panel-head"><h2>Set up HuntMail</h2><span class="aside">not set up</span></div>
+  <div class="panel-body mail-intro">
+    <p>Email shows your <a class="link" href="https://github.com/mdpsec/huntmail" target="_blank" rel="noopener noreferrer">HuntMail</a> inbox: a catch-all on a spare domain of yours that runs on your own Cloudflare account (the free plan is enough). Every address on the domain works, so each signup can have its own.</p>
+    <p>Once it's set up, each program gets an <b>Email</b> tab: make an address for it in one click, and its mail lists there and here, with the codes and links ready to copy.</p>
+    {{if .CanSetUp}}<p>HuntDeck sets it up for you: all it needs is a domain on Cloudflare and an API token. <a class="button small" href="/email/setup#msetup-form">Set up HuntMail</a></p>
+    <p class="muted small">Already running HuntMail? Enter its address and API key in <a class="link" href="/email/setup">HuntMail › Setup</a>.</p>
+    {{else}}<p>Set HuntMail up with its own setup, then enter the address and API key it printed in <a class="link" href="/email/setup">HuntMail › Setup</a>.</p>{{end}}
+  </div>
+</section>
+{{else}}
+<div class="mpanes">
+<section class="panel ptable">
+  <form class="activef mfilter" method="get" action="/email">
+    <label class="search-field"><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{.Q}}" placeholder="Subject, sender or address" aria-label="Search mail" maxlength="200"></label>
+    {{if .Programs}}<select name="program" aria-label="Program">
+      <option value="">Every program</option>
+      {{range .Programs}}<option value="{{.ProgramID}}"{{if eq (printf "%d" .ProgramID) $.Data.ProgramID}} selected{{end}}>{{.Name}} ({{platformShort .Platform}})</option>{{end}}
+    </select>{{end}}
+    {{if gt (len .Domains) 1}}<select name="domain" aria-label="Domain">
+      <option value="">Every domain</option>
+      {{range .Domains}}<option value="{{.}}"{{if eq . $.Data.Domain}} selected{{end}}>{{.}}</option>{{end}}
+    </select>{{end}}
+    {{with .To}}<input type="hidden" name="to" value="{{.}}">{{end}}
+    {{if ne .Size 30}}<input type="hidden" name="n" value="{{.Size}}">{{end}}
+    {{with .NL}}<input type="hidden" name="nl" value="{{.}}">{{end}}
+    <button type="submit" class="small">Show</button>
+    {{with .To}}<a class="pill" href="{{$.Data.FilterOn "to" ""}}" title="Show every address">to {{.}} <span aria-hidden="true">×</span></a>{{end}}
+    <span class="what">newest first{{with .Total}} · {{num .}} {{if eq $.Data.NL "only"}}newsletters{{else}}messages{{end}}{{end}}</span>
+    <a class="button secondary small mrefresh" href="{{.Here}}" title="Ask HuntMail for new mail: the page doesn't check by itself, so it costs nothing until you do"><svg class="i"><use href="#i-refresh"/></svg> Refresh</a>
+  </form>
+  {{with .Problem}}<div class="empty-state err">{{.}}</div>{{end}}
+  {{if .Rows}}{{template "mail-table" .Table}}
+  {{else if not .Problem}}<div class="empty-state">{{if eq .NL "only"}}No newsletters{{if or .Q .To .Program .Domain}} match{{end}}. <a class="link" href="{{.FilterOn "nl" ""}}">Show the rest of the mail</a>{{else if or .Q .To .Program .Domain}}No mail matches. <a class="link" href="/email">Show all mail</a>{{else}}No mail yet. Make an address on a program's Email tab, or use any address on your HuntMail domain.{{end}}</div>{{end}}
+  {{if and .Rows (or .NextURL .PrevURL (ne .Size 30))}}<nav class="pager mpager" aria-label="Pages">
+    <span>{{num .From}}–{{num .Last}}{{with .Total}} of {{num .}}{{end}} · page {{.Page}}
+      <span class="mp-size">· show {{range $i, $n := .Sizes}}{{if $i}} / {{end}}{{if eq $n $.Data.Size}}<b>{{$n}}</b>{{else}}<a class="link" href="{{$.Data.SizeURL $n}}">{{$n}}</a>{{end}}{{end}}</span></span>
+    <span class="buttons">
+      {{if gt .Page 2}}<a class="button secondary small" href="{{.FirstURL}}" title="The newest mail">« Newest</a>{{end}}
+      {{with .PrevURL}}<a class="button secondary small" href="{{.}}" rel="prev">← Newer</a>{{else}}<span class="button secondary small disabled">← Newer</span>{{end}}
+      {{with .NextURL}}<a class="button secondary small" href="{{.}}" rel="next">Older →</a>{{else}}<span class="button secondary small disabled">Older →</span>{{end}}
+    </span>
+  </nav>{{end}}
+</section>
+<aside class="mpane" data-mail-pane aria-label="The message" aria-live="polite">{{template "mail-pane" .Open}}</aside>
+</div>
+<p class="mail-foot muted small">Mail is shown as text: anyone can send to your domain and write anything. Open a message for its links and HuntMail's own view.</p>
+<script src="{{static "mailpane.js"}}" defer></script>
+{{end}}
+{{end}}{{end}}

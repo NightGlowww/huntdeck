@@ -484,3 +484,79 @@ func TestBarkAndServerChanDeliveries(t *testing.T) {
 		t.Errorf("serverchan desp = %q", form.Get("desp"))
 	}
 }
+
+// News on the user's reports goes to the channels that choose it, whatever
+// their program filters, as one message; the first listing is the
+// account's past and sends nothing.
+func TestReportNews(t *testing.T) {
+	e := newEnv(t)
+	ctx := context.Background()
+	hook, discord := newSink(t), newSink(t)
+	rules := DefaultRules()
+	rules.BountyOnly, rules.PrivateOnly = true, true // for programs to hunt: not the user's reports
+	e.channel("hook", store.NotifyWebhook, Config{URL: hook.srv.URL + "/hook"}, rules, true, "")
+	e.channel("discord", store.NotifyDiscord, Config{URL: discord.srv.URL + "/api/webhooks/1/tok"},
+		Rules{Events: []string{EventScopeAdded}}, true, "")
+	r := platform.Report{Key: "r1", ProgramName: "Acme", Title: "Stored XSS in <profile>", URL: "https://platform.example/r1",
+		State: platform.ReportNew, SubmittedAt: e.clock.Add(-48 * time.Hour), PaymentsKnown: true, Detailed: true}
+	if _, err := e.store.SaveReports(ctx, "fake", []platform.Report{r}); err != nil {
+		t.Fatal(err)
+	}
+	if err := e.store.SetReportsSynced(ctx, "fake"); err != nil {
+		t.Fatal(err)
+	}
+	e.tick()
+	if got := hook.got(); len(got) != 0 {
+		t.Fatalf("the first listing notified: %q", got)
+	}
+	e.clock = e.clock.Add(time.Minute)
+	r.State, r.WaitingOn = platform.ReportResolved, "you"
+	r.Payments = []platform.ReportPayment{{Kind: "bounty", Amount: 1500, Currency: "USD", AwardedAt: e.clock}}
+	if _, err := e.store.SaveReports(ctx, "fake", []platform.Report{r}); err != nil {
+		t.Fatal(err)
+	}
+	e.tick()
+	got := hook.got()
+	if len(got) != 1 {
+		t.Fatalf("webhook got %d messages, want 1", len(got))
+	}
+	var body struct {
+		Events []Event `json:"events"`
+	}
+	if err := json.Unmarshal([]byte(got[0]), &body); err != nil {
+		t.Fatal(err)
+	}
+	var kinds []string
+	for _, ev := range body.Events {
+		kinds = append(kinds, ev.Kind)
+		if ev.Report == nil || ev.Report.Title != "Stored XSS in <profile>" || ev.Report.ProgramName != "Acme" {
+			t.Errorf("event without its report: %+v", ev)
+		}
+	}
+	if strings.Join(kinds, ",") != "report_state,report_bounty,report_waiting" {
+		t.Errorf("kinds %v", kinds)
+	}
+	if len(discord.got()) != 0 {
+		t.Error("a channel that didn't choose report news got it")
+	}
+	if ns, _ := e.store.ReportNotices(ctx); len(ns) != 0 {
+		t.Errorf("notices left: %d", len(ns))
+	}
+}
+
+// A report event reads as the program and the report, linked to its page
+// here when the address is known.
+func TestReportEventRendering(t *testing.T) {
+	amount := 1500.0
+	e := Event{Kind: EventReportBounty, Platform: "hackerone", Detail: "Bounty of $1,500",
+		Report: &Report{ID: 7, Title: "IDOR <b>", URL: "https://platform.example/7", ProgramName: "Acme", Amount: &amount, Currency: "USD"}}
+	msg := renderer{st: telegramStyle{}, base: "http://hd.example", loc: time.UTC}.event(e)
+	for _, want := range []string{"Bounty awarded", "<b>Acme</b>", `href="http://hd.example/reports/7"`, "IDOR &lt;b&gt;", "Bounty of $1,500"} {
+		if !strings.Contains(msg, want) {
+			t.Errorf("message lacks %q:\n%s", want, msg)
+		}
+	}
+	if msg := (renderer{st: telegramStyle{}, loc: time.UTC}).event(e); !strings.Contains(msg, `href="https://platform.example/7"`) {
+		t.Errorf("without an address, not linked to the platform:\n%s", msg)
+	}
+}

@@ -37,7 +37,7 @@ func apiSchemaRoots() []any {
 	return []any{apiErrorJSON{}, apiOKJSON{}, apiStatusJSON{}, apiProgramListJSON{}, apiProgramJSON{},
 		apiProgramListV2JSON{}, apiProgramV2JSON{}, apiStatsListJSON{},
 		apiTargetListJSON{}, apiChangeListJSON{}, apiDisclosedListJSON{}, apiHostMatchJSON{}, apiBulkMatchJSON{},
-		apiStatsOverviewJSON{}, apiStatsPlatformJSON{}, apiBoardJSON{}}
+		apiStatsOverviewJSON{}, apiStatsPlatformJSON{}, apiBoardJSON{}, apiMyReportListJSON{}, apiReportsAnalyticsJSON{}}
 }
 
 // openAPI is the spec, parsed once at startup.

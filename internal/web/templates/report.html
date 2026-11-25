@@ -1,0 +1,67 @@
+{{define "topbar-actions"}}<a class="tb-btn" href="/reports" title="All your reports"><svg class="i"><use href="#i-flag"/></svg><span class="label">Reports</span></a>{{end}}
+{{define "content"}}{{with .Data}}
+<div class="page-head rhead">
+  <div>
+    <div class="crumbs"><a href="/reports">Reports</a> › {{platformLabel .Platform}}</div>
+    <h1>{{.Title}}{{with .URL}} <a class="ext" href="{{.}}" target="_blank" rel="noopener noreferrer" title="Open on the platform" aria-label="Open on the platform"><svg class="i"><use href="#i-external"/></svg></a>{{end}}</h1>
+    <div class="sub title-row">
+      {{if .Program.ID}}{{template "pname" (plink .Program)}}{{else}}<span class="pn">{{template "ptag" .Platform}}<span class="name">{{or .ProgramName "—"}}</span>{{if .ProgramName}} <span class="muted small">(not in HuntDeck)</span>{{end}}</span>{{end}}
+      <span class="rstate {{.StateClass}}" title="{{with .RawState}}On the platform: {{.}}{{end}}">{{.StateLabel}}</span>
+      <span class="rsev">{{template "rsev" .}}</span>
+      {{- if .NeedsYou}} <span class="chip waiting">needs you</span>{{end}}
+      {{- if .Stale}} <span class="chip paused">gone quiet</span>{{end}}
+      {{- if .Muted}} <span class="chip req">muted</span>{{end}}
+      {{- with .Snoozed}} <span class="chip req">snoozed until {{date .}}</span>{{end}}
+      {{- if .GoneAt}} <span class="chip removed" title="No longer listed by the platform">gone</span>{{end}}
+      {{- if eq .Source "manual"}} <span class="chip req">added by hand</span>{{end}}
+    </div>
+  </div>
+  <div class="actions">
+    {{if .Snoozed}}<form method="post" action="/reports/{{.ID}}/snooze"><input type="hidden" name="days" value="0"><button class="button secondary small" type="submit">Wake</button></form>
+    {{else}}<form method="post" action="/reports/{{.ID}}/snooze" title="Leave it out of Needs you and Gone quiet for a week"><input type="hidden" name="days" value="7"><button class="button secondary small" type="submit">Snooze a week</button></form>
+    <form method="post" action="/reports/{{.ID}}/snooze"><input type="hidden" name="days" value="30"><button class="button secondary small" type="submit">Snooze a month</button></form>{{end}}
+    <form method="post" action="/reports/{{.ID}}/mute" title="{{if .Muted}}Show it in Needs you and Gone quiet again, and notify about it{{else}}No notifications about it, and never in Needs you or Gone quiet{{end}}"><input type="hidden" name="muted" value="{{if .Muted}}0{{else}}1{{end}}"><button class="button secondary small" type="submit">{{if .Muted}}Unmute{{else}}Mute{{end}}</button></form>
+    <a class="button small" href="/reports/{{.ID}}/edit">Edit</a>
+  </div>
+</div>
+
+<div class="split">
+<div class="stack">
+<section class="panel">
+  <div class="panel-head"><h2>Times</h2><span class="aside">from submission</span></div>
+  <table class="kv rfacts">
+    {{range .Steps}}<tr><th>{{.Label}}</th><td>{{with .At}}<span title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td><td class="num muted">{{with .After}}{{.}}{{end}}</td></tr>{{end}}
+    <tr><th>Last activity</th><td colspan="2">{{with .LastActivityAt}}<span title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">—</span>{{end}}</td></tr>
+  </table>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Timeline</h2><span class="aside">{{len .Events}} {{plural (len .Events) "step" "steps"}} · comments are counted, never kept</span></div>
+  {{if .Events}}<ol class="rtimeline">
+    {{range .Events}}<li class="{{.Class}}"><span class="when" title="{{datetime .At}}">{{date .At}}</span><span>{{.Label}}</span></li>{{end}}
+  </ol>{{else}}<div class="empty-state">{{if eq .Source "manual"}}Reports added by hand have no timeline.{{else}}Not read yet: the next sync reads it.{{end}}</div>{{end}}
+</section>
+</div>
+<div class="stack">
+<section class="panel">
+  <div class="panel-head"><h2>Earned</h2></div>
+  {{if .Payments}}<table class="kv">
+    {{range .Payments}}<tr><th>{{.Kind}}</th><td class="num"><span title="{{moneyFull .Amount .Currency}}">{{money .Amount .Currency}}</span></td><td class="muted">{{date .AwardedAt}}{{with .PaidAt}} · paid {{date .}}{{end}}</td></tr>{{end}}
+  </table>{{else}}<div class="empty-state">Nothing awarded.</div>{{end}}
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Details</h2></div>
+  <table class="kv">
+    <tr><th>Waiting on</th><td>{{if eq .WaitingOn "you"}}You{{else if eq .WaitingOn "program"}}The program{{else}}<span class="zero">—</span>{{end}}</td></tr>
+    <tr><th>Comments</th><td>{{.Comments}}{{if .Unread}} <span class="chip creds">unread</span>{{end}}</td></tr>
+    {{with .CVSS}}<tr><th>CVSS</th><td>{{printf "%.1f" (floatv .)}}</td></tr>{{end}}
+    {{with .RawState}}<tr><th>On the platform</th><td>{{.}}</td></tr>{{end}}
+    {{with .DuplicateOf}}<tr><th>Duplicate of</th><td>{{.}}</td></tr>{{end}}
+    <tr><th>First seen</th><td><span title="{{datetime .FirstSeenAt}}">{{date .FirstSeenAt}}</span></td></tr>
+  </table>
+  {{if and .Edits (ne .Source "manual")}}<div class="panel-body small muted">You set {{range $k, $v := .Edits}}{{$k}} {{end}}by hand; syncs keep your values.
+    <form method="post" action="/reports/{{.ID}}/reset" class="inline"><button class="link" type="submit">Use the platform's values</button></form></div>{{end}}
+  {{if eq .Source "manual"}}<div class="panel-body"><form method="post" action="/reports/{{.ID}}/delete" data-confirm="Delete this report? This can't be undone."><button class="button danger small" type="submit">Delete report</button></form></div>{{end}}
+</section>
+</div>
+</div>
+{{end}}{{end}}

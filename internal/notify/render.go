@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/humanize"
+	"github.com/mdpsec/huntdeck/internal/reports"
 	"github.com/mdpsec/huntdeck/internal/scope"
 	"github.com/mdpsec/huntdeck/internal/store"
 )
@@ -66,6 +67,7 @@ var emoji = map[string]string{
 	EventInvite: "🔒", EventLaunch: "🚀", EventScopeAdded: "🎯", EventScopeRemoved: "➖", EventScopeOut: "🚫",
 	EventScopeChanged: "✏️", EventReopened: "▶️", EventPaused: "⏸️", EventRemoved: "🗑️", EventBountyRaised: "💰",
 	EventRewardsChanged: "💱", EventPolicyChanged: "📝", EventAnnouncement: "📣", EventScanHandoff: "🛰️", EventScanBlocked: "🛑", EventPlatformProblem: "⚠️", EventPlatformRecovered: "✅", EventTest: "🔔",
+	EventReportBounty: "💵", EventReportState: "📄", EventReportWaiting: "💬", EventReportSeverity: "🎚️", EventReportNew: "📨",
 }
 
 // parts renders a message's events as one or more messages under limit.
@@ -162,6 +164,13 @@ func (r renderer) event(e Event) string {
 		return title
 	}
 	lines := []string{title + " · " + st.esc(c.Platform)}
+	if e.Report != nil {
+		lines = append(lines, r.reportLine(e.Report))
+		if e.Detail != "" {
+			lines = append(lines, st.esc(e.Detail))
+		}
+		return strings.Join(lines, "\n")
+	}
 	if p := e.Program; p != nil {
 		about := []string{st.link(st.bold(st.esc(p.Name)), r.programURL(p))}
 		for _, a := range c.About {
@@ -247,6 +256,13 @@ func (e Event) CardIn(tr Text) Card {
 			c.About = append(c.About, text(tr, "HuntScore %.0f", *p.HuntScore))
 		}
 	}
+	if rep := e.Report; rep != nil {
+		c.About = nil
+		c.Detail = rep.ProgramName + " · " + rep.Title
+		if e.Detail != "" {
+			c.Detail += " · " + e.Detail
+		}
+	}
 	for i, a := range e.Assets {
 		if i == assetsShown {
 			break
@@ -315,6 +331,16 @@ func title(e Event, tr Text) string {
 		return text(tr, "Polls working again")
 	case EventTest:
 		return text(tr, "Test message: this channel works")
+	case EventReportBounty:
+		return text(tr, "Bounty awarded")
+	case EventReportState:
+		return text(tr, "Report %s", strings.ToLower(reports.Label(e.New)))
+	case EventReportWaiting:
+		return text(tr, "Waiting on you")
+	case EventReportSeverity:
+		return text(tr, "Severity changed")
+	case EventReportNew:
+		return text(tr, "New report found")
 	}
 	return e.Kind
 }
@@ -355,6 +381,11 @@ func webhookBody(kind string, events []Event, at time.Time, base string) ([]byte
 			p := *e.Program
 			p.HuntDeckURL = renderer{base: base}.programURL(&p)
 			e.Program = &p
+		}
+		if e.Report != nil && base != "" {
+			rep := *e.Report
+			rep.HuntDeckURL = renderer{base: base}.reportURL(&rep)
+			e.Report = &rep
 		}
 		out[i] = e
 	}

@@ -171,6 +171,22 @@ func (f *fakeBugcrowd) serveBase(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", js)
 			_, _ = w.Write([]byte(`{}`))
 		}
+	case "/submissions.json":
+		if !f.loggedIn(r) {
+			http.Redirect(w, r, "/user/sign_in", http.StatusFound)
+			return
+		}
+		f.write(w, js, "submissions_"+r.URL.Query().Get("offset[]")+".json")
+	case "/submissions/aaaaaaaa-0000-4000-8000-000000000003":
+		f.write(w, js, "submission_3.json")
+	case "/submissions/aaaaaaaa-0000-4000-8000-000000000002":
+		f.write(w, js, "submission_2.json")
+	case "/submissions/aaaaaaaa-0000-4000-8000-000000000001":
+		f.write(w, js, "submission_1.json")
+	case "/acme/submissions/r3/activities":
+		f.write(w, js, "activities_3.json")
+	case "/acme/submissions/r2/activities":
+		f.write(w, js, "activities_2.json")
 	case "/engagements/acme-bb/changelog.json":
 		f.write(w, js, "changelog_acme.json")
 	case "/engagements/acme-bb/changelog/0d5e0c1a-1111-4aaa-8bbb-000000000002.json":

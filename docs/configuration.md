@@ -4,7 +4,8 @@ Environment variables. Every one can also be read from a file via
 `NAME_FILE=/path`, for Docker secrets. See [.env.example](../.env.example).
 
 **Settings › Accounts** sets the platforms' credentials, rates and public-only
-switches, and the proxy, without editing `.env`. A value saved there takes
+switches, and the proxy, without editing `.env`; **Email › HuntMail › Setup** does
+the same for `HUNTMAIL_*`. A value saved there takes
 precedence over the environment's until you press "Reset to .env". Saved
 values are encrypted in the database with a key HuntDeck keeps beside it
 (`secret.key` in the data directory, readable by HuntDeck only), so a copy of
@@ -35,13 +36,13 @@ stay browsable.
 | `HUNTDECK_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `HUNTDECK_LOG_FORMAT` | `text` | `text` or `json` |
 | `HUNTDECK_PROXY` | — | Proxy for all platform traffic, e.g. Burp on your machine: `http://host.docker.internal:8080` (on Linux, add `extra_hosts: ["host.docker.internal:host-gateway"]` to the compose service; `127.0.0.1` inside the container is HuntDeck itself): every platform's requests, custom sources read over http(s), and the login browser (one Chrome, used by every platform's login). With any platform login set it must be `http://` (`socks5://` works for API tokens only); it may carry credentials (`http://user:password@host:port`). Notifications and the starter seed download don't use it |
-| `H1_USERNAME`, `H1_TOKEN` | — | HackerOne API credentials ([create a token](https://hackerone.com/settings/api_token/edit)) |
+| `H1_USERNAME`, `H1_TOKEN` | — | HackerOne API credentials ([create a token](https://hackerone.com/settings/api_token/edit)); they also read your own reports (Reports, Analytics) |
 | `H1_EMAIL`, `H1_PASSWORD`, `H1_TOTP_SECRET` | — | Optional HackerOne website login (Chrome, like Intigriti's), for private programs' stats and pending invitations, which HuntDeck lists and can accept. `H1_OTP` is read as `H1_TOTP_SECRET` too |
 | `H1_FULL_INTERVAL` | `6h` | Refresh every program's scope (`0` disables) |
 | `H1_QUICK_INTERVAL` | `15m` | List programs and fetch new ones only (`0` disables) |
 | `H1_RATE` | `5` | Requests per second (HackerOne allows 10) |
 | `H1_CONCURRENCY` | `4` | Parallel scope fetches |
-| `BC_EMAIL`, `BC_PASSWORD` | — | Bugcrowd login, for private programs and pending invitations (listed with their scope, and accepted from HuntDeck). It runs in the login browser (a Bugcrowd tab in Settings › Browser), ticking Okta's "remember me" boxes; the session is saved in the data directory, and HuntDeck signs in again by itself when it ends |
+| `BC_EMAIL`, `BC_PASSWORD` | — | Bugcrowd login, for private programs and pending invitations (listed with their scope, and accepted from HuntDeck). It runs in the login browser (a Bugcrowd tab in Settings › Browser), ticking Okta's "remember me" boxes; the session is saved in the data directory, and HuntDeck signs in again by itself when it ends; it also reads your own reports (Reports, Analytics) |
 | `BC_TOTP_SECRET` | — | Base32 secret of your Bugcrowd authenticator app (needed if 2FA is on) |
 | `BC_SESSION` | — | Alternative to a password: the `_bugcrowd_session` cookie from your browser (lasts about 14 days) |
 | `BC_PUBLIC_ONLY` | `false` | Poll Bugcrowd's public programs without credentials |
@@ -52,7 +53,7 @@ stay browsable.
 | `IT_TOKEN` | — | Intigriti personal access token |
 | `IT_FULL_INTERVAL`, `IT_QUICK_INTERVAL` | `6h`, `15m` | Intigriti polling (`0` disables) |
 | `IT_RATE`, `IT_CONCURRENCY` | `2`, `2` | Intigriti request rate and parallel fetches |
-| `IT_EMAIL`, `IT_PASSWORD`, `IT_TOTP_SECRET` | — | Optional Intigriti web login, for what the API lacks (hunters, response times, payouts, updates, the brief's out-of-scope, severity and FAQ sections, test credentials, terms and collaboration, and which invitations you haven't accepted yet). It runs as a browser sync, once a day by default (Settings › Polling, the browser sync under Intigriti). The first login runs a windowed Chrome; use a residential `HUNTDECK_PROXY`, as the login page scores visitors with reCAPTCHA. The session is saved in the data directory (`sessions/`, owner-only), so restarts don't log in again; changing `IT_EMAIL` clears it, and the new account signs in afresh. `IT_TOKEN` must be the same account's. Quote values containing `#` or `$` in single quotes |
+| `IT_EMAIL`, `IT_PASSWORD`, `IT_TOTP_SECRET` | — | Optional Intigriti web login, for what the API lacks (hunters, response times, payouts, updates, the brief's out-of-scope, severity and FAQ sections, test credentials, terms and collaboration, and which invitations you haven't accepted yet). It runs as a browser sync, once a day by default (Settings › Polling, the browser sync under Intigriti). The first login runs a windowed Chrome; use a residential `HUNTDECK_PROXY`, as the login page scores visitors with reCAPTCHA. The session is saved in the data directory (`sessions/`, owner-only), so restarts don't log in again; changing `IT_EMAIL` clears it, and the new account signs in afresh. `IT_TOKEN` must be the same account's. Quote values containing `#` or `$` in single quotes; it is also what reads your own reports (Reports, Analytics) |
 | `HUNTDECK_CHROME` | on `PATH` | The Chrome or Chromium for that login (the image includes Google Chrome; Chromium when built for arm64) |
 | `HUNTDECK_CHROME_TIMEZONE` | `HUNTDECK_TIMEZONE` | The browser's clock: match it to the proxy's country |
 | `HUNTDECK_CHROME_HEADLESS` | `false` | Run the browser without a window (login pages trust that less) |
@@ -86,6 +87,15 @@ on unless passed).
 | `YWH_PUBLIC_ONLY` | `false` | Poll YesWeHack's public programs without an account |
 | `YWH_FULL_INTERVAL`, `YWH_QUICK_INTERVAL` | `6h`, `30m` | YesWeHack polling (`0` disables) |
 | `YWH_RATE`, `YWH_CONCURRENCY` | `2`, `2` | YesWeHack request rate and parallel fetches |
+| `HUNTMAIL_URL`, `HUNTMAIL_API_KEY` | — | Your [HuntMail](https://github.com/mdpsec/huntmail) inbox, for the Email page and each program's Email tab: the address with its base path and the API key, as HuntMail's setup printed them (`https://<worker>.<subdomain>.workers.dev/<base path>`), or as HuntDeck saved them when it set HuntMail up (Email › HuntMail › Setup). Both or neither; the address is kept secret like the key, since its path is one. HuntDeck reads it from the server only, straight to Cloudflare (not through `HUNTDECK_PROXY`), when you open a page that shows mail |
+| `HUNTMAIL_DOMAINS` | HuntMail's | Domains to make new addresses on, comma-separated (`example.com, example.net`); empty: the ones HuntMail was set up for, the busiest first |
+
+**Setting HuntMail up from HuntDeck** (Email › HuntMail › Setup)
+needs a domain on Cloudflare and an API token with: Account › Workers
+Scripts: Edit, Account › D1: Edit, Account › Account Settings: Read,
+Zone › Zone: Read, Zone › Zone Settings: Edit and Zone › Email Routing
+Rules: Edit. HuntDeck uses it for that run only and never stores it; the
+address and key it saves are the two variables above.
 
 
 In `.env`, wrap any value containing `$` in single quotes

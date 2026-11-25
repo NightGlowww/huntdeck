@@ -1,28 +1,7 @@
 {{/* Settings' Accounts tab (accountsData): each platform's credentials and
-    the proxy, saved encrypted over .env's. Secrets are never sent back:
-    their inputs start empty and say whether one is set.
-
-    Fields are grouped by what they are for (API / website login / advanced) so
-    the token you must set is not the same weight as a concurrency limit. */}}
-{{define "acct-field"}}
-<div class="acct-field">
-  <label for="acct-{{.Name}}" class="acct-label">{{T .Label}}<code>{{.Name}}</code></label>
-  <div class="acct-input">
-    {{if eq .Kind "bool"}}<label class="toggle"><input type="checkbox" id="acct-{{.Name}}" name="{{.Name}}" value="true"{{if .On}} checked{{end}}> <span class="muted small">{{if .On}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label>
-    {{else if .Secret}}<input type="password" id="acct-{{.Name}}" name="{{.Name}}" autocomplete="new-password" spellcheck="false" maxlength="4096"
-      placeholder="{{if .Unreadable}}{{T "enter it again"}}{{else if .Set}}{{T "set · type to replace"}}{{else}}{{T "not set"}}{{end}}">
-      {{if or .Set .Unreadable}}<label class="acct-clear" title="{{T "Clear what is saved here: the field stays empty even if your environment sets it, until you save a value or reset to .env"}}">
-        <input type="checkbox" name="clear_{{.Name}}" value="1">
-        <span class="acct-clear-face">{{T "Clear"}}</span>
-      </label>{{end}}
-    {{else}}<input type="text" id="acct-{{.Name}}" name="{{.Name}}" value="{{.Value}}" spellcheck="false" maxlength="512"{{if eq .Kind "number"}} inputmode="decimal"{{end}}
-      placeholder="{{if .Default}}{{.Default}} {{T "(default)"}}{{else}}{{T "not set"}}{{end}}">{{end}}
-  </div>
-  <span class="acct-src small">{{if .Unreadable}}<span class="chip failed">{{T "can't be decrypted"}}</span>{{else if eq .From "saved"}}<span class="src-dot saved" title="{{T "Saved here, encrypted"}}{{if .EnvSet}}{{T "; it takes precedence over your environment's"}}{{end}}"></span>{{else if eq .From "env"}}<span class="chip" title="{{T "Set in your environment (.env)"}}">.env</span>{{end}}</span>
-  {{with .Help}}<p class="acct-help muted small">{{T .}}</p>{{end}}
-</div>
-{{end}}
-
+   the proxy, saved encrypted over .env's; or (Tab "email") HuntMail's box
+   on its Setup tab. Secrets are never sent back:
+   their inputs start empty and say whether one is set. */}}
 {{define "accounts"}}
 {{with .Restart}}
 <div class="restart-bar" data-restart role="status" aria-live="polite">
@@ -43,9 +22,11 @@
 <div class="acct-grid">
 {{range .Groups}}
 <section class="panel acct" id="acct-{{.Key}}">
-  <div class="panel-head"><h2>{{if .Platform}}{{template "pf" .Key}}{{else}}{{.Label}}{{end}}</h2>
-    <span class="aside">{{if or (eq .Key "ai") (eq .Key "pojia") (eq .Key "scan") (eq .Key "jev")}}{{T "optional"}}{{else if not .Platform}}{{T "every platform's traffic"}}{{else if .Polled}}{{T "polled"}}{{else}}{{T "not set up"}}{{end}}</span></div>
+  <div class="panel-head"><h2>{{if .Platform}}{{template "pf" .Key}}{{else}}{{T .Label}}{{end}}</h2>
+    <span class="aside">{{T .Aside}}</span></div>
   {{if .SignIn}}<div class="acct-signin signins">{{range .SignIn}}{{template "signin" .}}{{end}}</div>{{end}}
+  {{if eq .Key "huntmail"}}<div class="acct-signin small">{{with .MailStatus}}{{if .OK}}<span class="chip ok">connected</span>{{with .Version}} HuntMail {{.}} ·{{end}} {{num .Messages}} {{if eq .Messages 1}}message{{else}}messages{{end}}{{with .Newest}}, the newest <span title="{{datetime .}}">{{ago .}}</span>{{end}} · <a class="link" href="/email">Email</a>{{else}}<span class="chip failed">not working</span> {{.Problem}}{{end}}{{else}}<span class="muted">Your <a class="link" href="https://github.com/mdpsec/huntmail" target="_blank" rel="noopener noreferrer">HuntMail</a> inbox, a catch-all on your own Cloudflare account, for the Email page and each program's Email tab.</span>{{end}}
+</div>{{end}}
   <form method="post" action="/settings/accounts" class="acct-form" autocomplete="off">
     <input type="hidden" name="group" value="{{.Key}}">
     {{if or (eq .Key "ai") (eq .Key "pojia")}}
@@ -74,5 +55,26 @@
 </section>
 {{end}}
 </div>
+{{if eq .Tab "email"}}<p class="acct-foot muted small">The address and API key are saved encrypted in the database, with a key kept beside it in the data directory, and take precedence over your environment's (<code>.env</code>) until reset. They're never shown again, and seeds and exports never include them. Saving restarts HuntDeck to use them.</p>
+{{else}}<p class="acct-foot muted small">Saved values are encrypted in the database with a key kept beside it in the data directory (<code>secret.key</code>, readable by HuntDeck only), and take precedence over your environment's (<code>.env</code>) until reset. Secrets are never shown again, and seeds and exports never include any of this. Saving restarts HuntDeck to use them once no poll is running (a few seconds), then polls that platform to sign in.
+  The listen address, data directory, allowed hosts, logging and VNC stay in <code>.env</code>: HuntDeck needs them before it starts.</p>{{end}}
+{{end}}
 
+{{define "acct-field"}}
+<div class="acct-field">
+  <label for="acct-{{.Name}}" class="acct-label">{{T .Label}}<code>{{.Name}}</code></label>
+  <div class="acct-input">
+    {{if eq .Kind "bool"}}<label class="toggle"><input type="checkbox" id="acct-{{.Name}}" name="{{.Name}}" value="true"{{if .On}} checked{{end}}> <span class="muted small">{{if .On}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label>
+    {{else if .Secret}}<input type="password" id="acct-{{.Name}}" name="{{.Name}}" autocomplete="new-password" spellcheck="false" maxlength="4096"
+      placeholder="{{if .Unreadable}}{{T "enter it again"}}{{else if .Set}}{{T "set · type to replace"}}{{else}}{{T "not set"}}{{end}}">
+      {{if or .Set .Unreadable}}<label class="acct-clear" title="{{T "Clear what is saved here: the field stays empty even if your environment sets it, until you save a value or reset to .env"}}">
+        <input type="checkbox" name="clear_{{.Name}}" value="1">
+        <span class="acct-clear-face">{{T "Clear"}}</span>
+      </label>{{end}}
+    {{else}}<input type="text" id="acct-{{.Name}}" name="{{.Name}}" value="{{.Value}}" spellcheck="false" maxlength="512"{{if eq .Kind "number"}} inputmode="decimal"{{end}}
+      placeholder="{{if .Default}}{{.Default}} {{T "(default)"}}{{else}}{{T "not set"}}{{end}}">{{end}}
+  </div>
+  <span class="acct-src small">{{if .Unreadable}}<span class="chip failed">{{T "can't be decrypted"}}</span>{{else if eq .From "saved"}}<span class="src-dot saved" title="{{T "Saved here, encrypted"}}{{if .EnvSet}}{{T "; it takes precedence over your environment's"}}{{end}}"></span>{{else if eq .From "env"}}<span class="chip" title="{{T "Set in your environment (.env)"}}">.env</span>{{end}}</span>
+  {{with .Help}}<p class="acct-help muted small">{{T .}}</p>{{end}}
+</div>
 {{end}}

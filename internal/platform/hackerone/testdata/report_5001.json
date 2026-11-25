@@ -1,0 +1,22 @@
+{
+  "data": {
+    "id": "5001", "type": "report",
+    "attributes": {"title": "Stored XSS in profile name", "state": "resolved", "vulnerability_information": "WRITE-UP THAT MUST NEVER BE STORED"},
+    "relationships": {
+      "reporter": {"data": {"id": "77", "type": "user"}},
+      "activities": {"data": [
+        {"id": "1", "type": "activity-bug-new", "attributes": {"created_at": "2026-02-01T10:00:00.000Z", "internal": null}, "relationships": {"actor": {"data": {"id": "77", "type": "user"}}}},
+        {"id": "2", "type": "activity-comment", "attributes": {"message": "COMMENT TEXT THAT MUST NEVER BE STORED", "created_at": "2026-02-02T08:00:00.000Z", "internal": null}, "relationships": {"actor": {"data": {"id": "88", "type": "user"}}}},
+        {"id": "3", "type": "activity-bug-pending-program-review", "attributes": {"created_at": "2026-02-02T09:00:00.000Z", "internal": null}, "relationships": {"actor": {"data": {"id": "88", "type": "user"}}}},
+        {"id": "4", "type": "activity-report-severity-updated", "attributes": {"created_at": "2026-02-02T09:05:00.000Z", "internal": null},
+          "relationships": {"actor": {"data": {"id": "88", "type": "user"}},
+            "old_severity": {"data": {"id": "900", "type": "severity", "attributes": {"rating": "medium", "author_type": "User"}}},
+            "new_severity": {"data": {"id": "901", "type": "severity", "attributes": {"rating": "high", "author_type": "Team"}}}}},
+        {"id": "5", "type": "activity-comment", "attributes": {"created_at": "2026-02-05T07:00:00.000Z", "internal": null}, "relationships": {"actor": {"data": {"id": "77", "type": "user"}}}},
+        {"id": "6", "type": "activity-bug-triaged", "attributes": {"created_at": "2026-02-03T09:00:00.000Z", "internal": null}, "relationships": {"actor": {"data": {"id": "99", "type": "user"}}}},
+        {"id": "7", "type": "activity-bounty-awarded", "attributes": {"created_at": "2026-02-18T08:00:00.000Z", "internal": null, "bounty_amount": "1000.0", "bonus_amount": "100.0"}, "relationships": {"actor": {"data": {"id": "99", "type": "user"}}}},
+        {"id": "8", "type": "activity-bug-resolved", "attributes": {"created_at": "2026-02-20T12:00:00.000Z", "internal": null}, "relationships": {"actor": {"data": {"id": "99", "type": "user"}}}}
+      ]}
+    }
+  }
+}

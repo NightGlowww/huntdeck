@@ -1,0 +1,25 @@
+{"id": "ACME-AAAA1111", "programId": "11111111-1111-4111-8111-111111111111", "programName": "Acme",
+ "title": "SSRF in PDF export", "state": {"status": 5, "closeReason": 1, "duplicateSubmission": null},
+ "severity": 4, "createdAt": 1790000000, "lastUpdatedAt": 1791000000,
+ "report": "WRITE-UP THAT MUST NEVER BE STORED", "pocDescription": "NEVER", "impact": "NEVER", "ipAddress": "192.0.2.1",
+ "events": [
+   {"discriminator": 1, "createdAt": 1790000100, "isInternal": false, "message": "NEVER", "user": {"role": "RESEARCHER", "userName": "hunter"}},
+   {"discriminator": 3, "createdAt": 1790003600, "isInternal": false, "from": 3, "to": 4, "fromVector": null, "toVector": "x", "user": {"role": "TRIAGE", "userName": "triager"}},
+   {"discriminator": 2, "createdAt": 1790003700, "isInternal": false, "from": {"status": 1}, "to": {"status": 2}, "user": {"role": "TRIAGE"}},
+   {"discriminator": 12, "createdAt": 1790003800, "isInternal": true, "user": {"role": "TRIAGE"}},
+   {"discriminator": 1, "createdAt": 1790090000, "isInternal": false, "message": "NEVER", "user": {"role": "COMPANY", "userName": "company"}},
+   {"discriminator": 2, "createdAt": 1790100000, "isInternal": false, "from": {"status": 2}, "to": {"status": 3}, "user": {"role": "COMPANY"}},
+   {"discriminator": 10, "createdAt": 1790200000, "isInternal": false, "amount": {"value": 1500, "currency": "EUR"}, "user": {"role": "COMPANY"}},
+   {"discriminator": 2, "createdAt": 1791000000, "isInternal": false, "from": {"status": 3}, "to": {"status": 4, "closeReason": 1}, "user": {"role": "BOT"}}
+ ],
+ "stateTimeline": [
+   {"state": {"status": 1}, "timestamp": 1790000000},
+   {"state": {"status": 2}, "timestamp": 1790003700},
+   {"state": {"status": 3}, "timestamp": 1790100000},
+   {"state": {"status": 4, "closeReason": 1}, "timestamp": 1791000000},
+   {"state": {"status": 5, "closeReason": 1}, "timestamp": 1791500000}
+ ],
+ "payouts": [
+   {"id": "pay-1", "amount": {"value": 1500, "currency": "eur"}, "status": 3, "type": 1, "createdAt": 1790200000, "researcher": {"userName": "hunter"}},
+   {"id": "pay-2", "amount": {"value": 150, "currency": "EUR"}, "status": 5, "type": 3, "createdAt": 1790300000}
+ ]}

@@ -1,0 +1,125 @@
+/* Your reports (reports.html, report.html, reportform.html,
+   reportsanalytics.html): private pages of the user's own reports. */
+.rlist th.c-prog { width: 230px; }
+.rlist th.c-sev { width: 150px; }
+.rlist th.c-state { width: 124px; }
+.rlist th.c-bounty { width: 96px; }
+.rlist th:is(.c-submitted, .c-triaged, .c-closed) { width: 104px; }
+.rlist th.c-activity { width: 112px; }
+table.rlist :is(.c-triaged, .c-closed):not(.col-show) { display: none !important; } /* until chosen in Customize; cards too */
+.rlist td.c-bounty { line-height: 1.25; }
+.rlist tr.quiet td { opacity: .62; }
+.rlist .ic { width: 12px; height: 12px; margin-left: 2px; vertical-align: -2px; }
+.rlist .c-report .chip { margin-left: 2px; vertical-align: 1px; }
+.c-report .ext, .rhead .ext { display: inline-flex; margin-left: 4px; color: var(--muted); vertical-align: -2px; }
+.c-report .ext:hover, .rhead .ext:hover { color: var(--accent); }
+.c-report .ext .i { width: 13px; height: 13px; }
+@media (max-width: 1600px) {
+  .rlist th.c-prog { width: 190px; }
+  .rlist th.c-sev { width: 128px; }
+}
+@media (min-width: 2200px) { .rlist th.c-prog { width: 300px; } }
+
+/* A report's state: open neutral, valid good, duplicate or informative a
+   warning, the rest rejected. */
+.rstate { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.rstate.open { background: var(--info-weak); color: var(--info); }
+.rstate.valid { background: var(--good-weak); color: var(--good); }
+.rstate.dup { background: var(--warn-weak); color: var(--warn); }
+.rstate.rejected { background: var(--surface-3); color: var(--muted); }
+.sev.was { opacity: .7; text-decoration: line-through; text-decoration-thickness: 1px; }
+.c-sev .arrow, .rfacts .arrow { color: var(--faint); }
+
+.rstats { margin-bottom: 16px; }
+
+/* A report's page: its times and details as label and value rows, and its
+   timeline. */
+.rhead h1 { overflow-wrap: anywhere; }
+.rhead .sub { gap: 8px; }
+.rfacts, .kv { width: 100%; border-collapse: collapse; }
+.kv th { width: 42%; padding: 9px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 600; text-align: left; vertical-align: top; }
+.kv td { padding: 9px 16px; border-top: 1px solid var(--border); vertical-align: top; }
+.kv tr:first-child :is(th, td) { border-top: 0; }
+.kv td.num { font-variant-numeric: tabular-nums; text-align: right; }
+.rtimeline { margin: 0; padding: 6px 0; list-style: none; }
+.rtimeline li { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 6px 16px; border-left: 3px solid transparent; }
+.rtimeline li .when { color: var(--muted); font-variant-numeric: tabular-nums; }
+.rtimeline li.state { border-left-color: var(--info); }
+.rtimeline li.severity { border-left-color: var(--warn); }
+.rtimeline li.bounty { border-left-color: var(--good); }
+.rtimeline li.program { color: var(--text-2); }
+.rtimeline li.you { color: var(--muted); }
+.rhead .actions form { display: inline; }
+.rpays { display: grid; gap: 12px; }
+.rpays input.cur { width: 64px; text-transform: uppercase; }
+button.danger, .button.danger { border-color: color-mix(in srgb, var(--bad) 45%, transparent); background: var(--bad-weak); color: var(--bad); }
+input[type="date"] { color-scheme: light dark; }
+.rpays .profile-form { gap: 10px 20px; }
+.rpays .profile-form + .profile-form > label > span:first-child { display: none; } /* the labels once, over the first row */
+
+/* Analytics (reportsanalytics.html). */
+.ahead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 16px; }
+.arange { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.arange input[type="month"] { height: 28px; padding: 0 6px; border: 1px solid var(--border-2); border-radius: 6px; background: var(--surface); color: var(--text); color-scheme: light dark; }
+.alegend { flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; }
+.alegend > span { white-space: nowrap; }
+.sw { display: inline-block; width: 10px; height: 10px; margin: 0 6px 0 0; border-radius: 2px; vertical-align: -1px; background: var(--faint); }
+.sw.valid, .bc-valid { background: var(--good); fill: var(--good); }
+.sw.dup, .bc-dup { background: var(--warn); fill: var(--warn); }
+.sw.rejected, .bc-rejected { background: var(--faint); fill: var(--faint); }
+.sw.open, .bc-open { background: var(--info); fill: var(--info); }
+.bc-money { fill: var(--accent); }
+.bchart { position: relative; }
+svg.bc-plot { display: block; width: 100%; height: 200px; overflow: visible; }
+.bc-grid { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
+.bc-base { stroke: var(--border-2); stroke-width: 1; }
+.bc-axis { fill: var(--faint); font: 10.5px var(--mono); text-anchor: end; }
+.bc-total { fill: var(--text-2); font: 600 11px var(--mono); text-anchor: middle; }
+.bc-hit { fill: transparent; }
+.bc-col:hover .bc-hit { fill: color-mix(in srgb, var(--surface-3) 55%, transparent); }
+svg.bc-months { display: block; width: 100%; height: 18px; margin-top: 4px; overflow: visible; }
+.bc-months text { fill: var(--muted); font: 10.5px var(--mono); text-anchor: middle; }
+.alegend b { margin-left: 3px; color: var(--text-2); font: 600 11.5px var(--mono); }
+/* Analytics is a board (board.js): its boxes keep the page's own heading
+   style, not the Hunt board's. */
+.aboard .panel-head h2 { color: var(--text-2); font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; }
+.aboard .stats { margin-bottom: 0; }
+.atable { width: 100%; border-collapse: collapse; }
+@media (max-width: 700px) {
+  .aboard .panel-head { flex-wrap: wrap; }
+  .arange input[type="month"] { width: 9.5em; }
+}
+.atable th { padding: 8px 14px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+.atable td { padding: 8px 14px; border-top: 1px solid var(--border); }
+.atable .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.atable .c-prog { max-width: 320px; }
+.aboard .atable th, .aboard .atable td { padding-inline: 10px; }
+.atable tr.overall td { font-weight: 600; }
+.atime.good b { color: var(--good); }
+.atime.bad b { color: var(--bad); }
+svg.agree { display: block; width: 100%; height: 12px; margin-bottom: 10px; border-radius: 3px; overflow: hidden; }
+.a-match { fill: var(--good); background: var(--good); }
+.a-up { fill: var(--info); background: var(--info); }
+.a-down { fill: var(--warn); background: var(--warn); }
+.a-changed { fill: var(--faint); background: var(--faint); }
+.kv th .sw { margin: 0 6px 0 0; }
+
+/* A program's "Your reports" (partials/program-mine.html). */
+.pmine .kv { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; }
+.pmine .kv > div { min-width: 0; padding: 11px 16px; border-bottom: 1px solid var(--border); }
+.pmine .kv dt { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.pmine .kv dd { margin: 3px 0 0; font: 600 15px/1.3 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pmine .kv dd .muted { font-size: 12px; }
+.pmine .atable th, .pmine .atable td { padding: 7px 16px; }
+.pmine .atable th { border-top: 1px solid var(--border); }
+.pmine .atable tr:first-child th { border-top: 0; }
+.mine-list td { padding: 8px 16px; border-top: 1px solid var(--border); }
+.mine-list .ml-when { width: 34px; padding-right: 6px; color: var(--muted); }
+.mine-list .ml-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mine-list .ml-state { width: 104px; padding-left: 6px; text-align: right; }
+
+/* Settings › Reports: a number of days. */
+.zone-field input.quiet-days { width: 120px; max-width: 100%; }
+/* Earned in all sits beside the bar charts on wide screens: as tall as they are. */
+.aboard .mchart .mc-plot { height: 193px; }
+@container (max-width: 560px) { .bc-total, .bc-axis, .bc-months text { font-size: 9px; } }

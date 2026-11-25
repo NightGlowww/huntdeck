@@ -3,13 +3,16 @@ package web
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/humanize"
 	"github.com/mdpsec/huntdeck/internal/huntscore"
+	"github.com/mdpsec/huntdeck/internal/reports"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
 	"github.com/mdpsec/huntdeck/internal/store"
 	"github.com/mdpsec/huntdeck/internal/syncer"
@@ -24,6 +27,8 @@ type settingsData struct {
 	Live       map[int64]liveRun // the running ones' progress, by run ID
 	MoreRuns   string            // a link to more poll history, if there is more
 	HuntPreset string            // the chosen HuntScore preset's key
+	QuietDays  int               // Reports: gone quiet after this many days
+	QuietSet   bool              // set here, not the default
 	Zone       zoneForm
 	Browser    *browserData  // the Browser tab, if there's a login browser
 	Accounts   *accountsData // the Accounts tab, where settings can be saved
@@ -43,7 +48,7 @@ type settingsTab struct {
 
 // settingsTabs are the tabs' keys and labels, the first the default.
 var settingsTabs = []settingsTab{{Key: "polling", Label: "Polling"}, {Key: "accounts", Label: "Accounts"}, {Key: "browser", Label: "Browser"},
-	{Key: "you", Label: "HuntScore"}, {Key: "display", Label: "Display"}}
+	{Key: "you", Label: "HuntScore"}, {Key: "reports", Label: "Reports"}, {Key: "display", Label: "Display"}}
 
 // URL is the tab's address.
 func (t settingsTab) URL() string {
@@ -59,6 +64,8 @@ func openTab(r *http.Request) string {
 	switch r.URL.Path {
 	case "/settings/huntscore":
 		return "you"
+	case "/settings/reports":
+		return "reports"
 	case "/settings/timezone":
 		return "display"
 	case "/settings/accounts", "/settings/accounts/reset", "/settings/restart":
@@ -94,6 +101,16 @@ type platformRow struct {
 	// CapsRemaining and CapsCap are the Bugcrowd submission allowance; a zero cap
 	// means there is nothing to show. The template composes the sentence, so the
 	// words stay translatable.
+	Reports *reportsRow // reading the user's own reports, if it can: a row under it
+}
+
+// reportsRow is a platform's switch for reading the user's own reports.
+type reportsRow struct {
+	Name       string
+	Enabled    bool
+	Configured bool // it has the login reading them needs
+	SyncedAt   *time.Time
+	Count      int
 }
 
 // platformSettings returns a platform's current settings; without a
@@ -106,11 +123,25 @@ func (s *server) platformSettings(name string) scheduler.Settings {
 }
 
 func (s *server) settings(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Query().Get("tab") == "api" { // the API has its own page now
+	switch r.URL.Query().Get("tab") {
+	case "api": // the API has its own page now
 		http.Redirect(w, r, "/api", http.StatusMovedPermanently)
+		return
+	case "email": // and HuntMail's settings are on its page
+		s.mailSettingsMoved(w, r)
 		return
 	}
 	s.renderSettings(w, r, http.StatusOK, "")
+}
+
+// mailSettingsMoved sends Settings › Email's old addresses to HuntMail's
+// Setup tab, or in a read-only copy, which has none, to its HuntMail tour.
+func (s *server) mailSettingsMoved(w http.ResponseWriter, r *http.Request) {
+	to := "/email/setup"
+	if s.ReadOnly {
+		to = "/email/stats"
+	}
+	http.Redirect(w, r, to, http.StatusMovedPermanently)
 }
 
 func (s *server) renderSettings(w http.ResponseWriter, r *http.Request, status int, flashErr string) {
@@ -120,7 +151,7 @@ func (s *server) renderSettings(w http.ResponseWriter, r *http.Request, status i
 	d.AI = s.aiStateFor(r.Context())
 	hidden := map[string]bool{"browser": !s.hasBrowser(), "accounts": !d.CanSave}
 	if s.ReadOnly {
-		hidden = nil // a tour: every tab, with nothing in it
+		hidden = map[string]bool{"reports": true} // a tour: every tab but the user's reports', with nothing in it
 	}
 	if hidden[d.Tab] {
 		d.Tab = settingsTabs[0].Key
@@ -147,13 +178,16 @@ func (s *server) renderSettings(w http.ResponseWriter, r *http.Request, status i
 			row.Web = &webs[i]
 		}
 		row.SignIn = s.signIns(p, d.LatestRuns, row.Web)
+		if p.Reports != nil && err == nil {
+			row.Reports, err = s.reportsRow(r.Context(), p)
+		}
 		d.Platforms = append(d.Platforms, row)
 	}
 	if d.Tab == "browser" {
 		d.Browser = s.browserTab(d.Platforms)
 	}
 	if err == nil && d.Tab == "accounts" {
-		d.Accounts, err = s.accountsTab(r.Context(), d.Platforms)
+		d.Accounts, err = s.accountsTab(r.Context(), d.Platforms, d.Tab)
 	}
 	if err == nil && d.Tab == "polling" {
 		limit := runsShown
@@ -178,6 +212,10 @@ func (s *server) renderSettings(w http.ResponseWriter, r *http.Request, status i
 	}
 	if err == nil {
 		d.Zone, err = s.zoneForm(r.Context())
+	}
+	if err == nil && d.Tab == "reports" {
+		d.QuietDays, _ = s.quietAfter(r.Context())
+		d.QuietSet = d.QuietDays != reports.DefaultQuietDays
 	}
 	if err != nil {
 		s.serverError(w, r, err)
@@ -270,6 +308,25 @@ func (s *server) saveSchedule(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		webs[name] = ws
+	}
+	// So does the switch for reading the user's reports.
+	for _, raw := range r.PostForm["reports"] {
+		name := canonicalPlatform(raw)
+		i := slices.IndexFunc(s.Platforms, func(p PlatformInfo) bool { return p.Name == name })
+		if i < 0 || s.Platforms[i].Reports == nil {
+			s.renderSettings(w, r, http.StatusNotFound, "HuntDeck can't read your reports there.")
+			return
+		}
+		on := isTrue(r.PostFormValue("reports_enabled_" + raw))
+		if was, _, err := s.Store.ReportSync(r.Context(), name); err != nil {
+			s.serverError(w, r, err)
+			return
+		} else if was != on {
+			if err := s.Store.SetReportsEnabled(r.Context(), name, on); err != nil {
+				s.serverError(w, r, err)
+				return
+			}
+		}
 	}
 	for name, ws := range webs {
 		if ws == s.Schedule.Web(name) {
@@ -419,4 +476,38 @@ func (s *server) fillBugcrowdCaps(ctx context.Context, rows []platformRow) {
 		}
 		rows[i].CapsRemaining, rows[i].CapsCap = caps.WeeklyRemaining, caps.WeeklyCap
 	}
+}
+
+func (s *server) reportsRow(ctx context.Context, p PlatformInfo) (*reportsRow, error) {
+	on, synced, err := s.Store.ReportSync(ctx, p.Name)
+	if err != nil {
+		return nil, err
+	}
+	rs, err := s.Store.MyReports(ctx, store.ReportFilter{Platform: p.Name})
+	if err != nil {
+		return nil, err
+	}
+	return &reportsRow{Name: p.Name, Enabled: on, Configured: p.Reports(), SyncedAt: synced, Count: len(rs)}, nil
+}
+
+// saveReportSettings stores how many days without a word from the program
+// make a report gone quiet; "reset" (or the default) goes back to it.
+func (s *server) saveReportSettings(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 4<<10)
+	days := 0
+	if r.PostFormValue("reset") == "" {
+		n, err := strconv.Atoi(strings.TrimSpace(r.PostFormValue("quiet_days")))
+		if err != nil || n < 1 || n > store.MaxQuietDays {
+			s.renderSettings(w, r, http.StatusBadRequest, fmt.Sprintf("Gone quiet takes a number of days from 1 to %d.", store.MaxQuietDays))
+			return
+		}
+		if n != reports.DefaultQuietDays {
+			days = n
+		}
+	}
+	if err := s.Store.SetReportQuietDays(r.Context(), days); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/settings?tab=reports&msg=reports-saved", http.StatusSeeOther)
 }

@@ -1,0 +1,6 @@
+{{/* A report's severity: what it was submitted as, and what it is now when
+triage changed it. */}}
+{{define "rsev"}}{{$cur := .Severity}}{{$sub := .SubmittedSeverity}}
+{{- if and $sub (ne $sub $cur)}}<span class="sev {{$sub}} was" title="Submitted as {{$sub}}">{{$sub}}</span> <span class="arrow" aria-label="changed to">→</span> {{end}}
+{{- if $cur}}<span class="sev {{$cur}}" title="{{if eq .Agreement "match"}}As submitted{{else if eq .Agreement "upgraded"}}Raised by triage{{else if eq .Agreement "downgraded"}}Lowered by triage{{else if eq .Agreement "changed"}}Changed by triage (the platform doesn't say from what){{else}}Severity{{end}}{{with .SeverityLabel}} · {{.}}{{end}}">{{with .SeverityLabel}}{{.}}{{else}}{{$cur}}{{end}}</span>{{else}}<span class="zero" title="{{with .SeverityLabel}}{{.}}{{else}}Not rated{{end}}">—</span>{{end}}
+{{- if and (not $sub) .SeverityChanged}} <span class="muted small" title="Triage changed it; the platform doesn't say from what">changed</span>{{end}}{{end}}

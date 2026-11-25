@@ -55,7 +55,7 @@ func eventTone(kind string) string {
 	switch kind {
 	case notify.EventInvite, notify.EventLaunch, notify.EventReopened, notify.EventPlatformRecovered:
 		return "good"
-	case notify.EventScopeAdded, notify.EventBountyRaised, notify.EventAnnouncement:
+	case notify.EventScopeAdded, notify.EventBountyRaised, notify.EventAnnouncement, notify.EventReportBounty:
 		return "accent"
 	case notify.EventPlatformProblem:
 		return "bad"

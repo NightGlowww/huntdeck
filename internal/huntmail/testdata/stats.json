@@ -1,0 +1,16 @@
+{
+  "messages": 1234,
+  "newsletters": 56,
+  "today": 12,
+  "stored_bytes": 52428800,
+  "max_store_bytes": 419430400,
+  "retention_days": 30,
+  "oldest": "2026-10-20T00:00:00.000Z",
+  "newest": "2026-11-18T10:00:00.123Z",
+  "parse_pending": 0,
+  "parse_failed": 1,
+  "store_failures": 0,
+  "last_store_failure": null,
+  "domains": [{"domain": "example.com", "received": 900, "today": 10}, {"domain": "example.net", "received": 334, "today": 2}],
+  "domains_set_up": ["example.com", "example.net"]
+}

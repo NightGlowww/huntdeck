@@ -1,0 +1,30 @@
+{{/* A list of HuntMail mail (mailTable): the Email page's and a program's
+   Email tab. Everything in a row was written by the sender; it's shown as
+   text only. The program comes first, as on every list. */}}
+{{define "mail-table"}}
+<div class="table-wrap">
+<table class="fixed flist mlist cards">
+  <thead><tr>
+    {{if .Program}}<th class="c-prog">Program</th>{{end}}
+    <th class="c-to">To</th>
+    <th class="c-from">From{{if .Pane}}<span class="mto-sub"> / to</span>{{end}}</th>
+    <th class="c-subj">Subject</th>
+    <th class="c-code" title="The likeliest one-time code; without one, the link the mail is about (verify, reset, sign in, invite)">Code/link</th>
+    <th class="c-when">Received</th>
+  </tr></thead>
+  <tbody>
+  {{range .Rows}}{{$r := .}}
+    <tr data-href="/email/{{.ID}}"{{if $.Pane}} data-mail="{{.ID}}"{{end}}{{if and $.Open (eq .ID $.Open)}} class="on" aria-current="true"{{end}}>
+      {{if $.Program}}<td class="c-prog">{{with .Program}}<div class="pn">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}?tab=email" title="{{.Name}} ({{platformLabel .Platform}})">{{.Name}}</a></div>{{else}}{{with .Guess}}{{$p := index . 0}}<div class="pn mguess" title="A guess: {{$r.GuessWhy}}{{if gt (len .) 1}} ({{len .}} programs match){{end}}">{{template "ptag" $p.Platform}}<a class="name" href="/programs/{{$p.Platform}}/{{$p.Handle}}" title="{{$p.Name}} ({{platformLabel $p.Platform}})">{{$p.Name}}</a>{{if gt (len .) 1}} <span class="muted small">+{{sub (len .) 1}}</span>{{end}}</div>{{else}}<span class="zero" title="Not an address HuntDeck made for a program, and neither the address nor the sender's domain names one">—</span>{{end}}{{end}}</td>{{end}}
+      <td class="c-to mono small" title="{{.To}}">{{.To}}</td>
+      <td class="c-from" data-label="From" title="{{.HeaderFrom}}{{if ne .HeaderFrom .From}}&#10;envelope: {{.From}}{{end}}"><span class="msender">{{.Sender}}{{if .Verified}} <span class="chip ok mverified" title="Sender verified (DKIM or DMARC): {{range $i, $d := .Auth.VerifiedDomains}}{{if $i}}, {{end}}{{$d}}{{end}}">✓</span>{{end}}</span>{{if $.Pane}}<span class="mto-sub mono small" title="{{.To}}">{{.To}}</span>{{end}}</td>
+      <td class="c-subj" title="{{.Subject}}">{{if and $.MarkNL .Newsletter}}<span class="chip mnl" title="HuntMail took it for a newsletter: list headers, no code or link to act on">news</span>{{end}}<a class="link" href="/email/{{.ID}}">{{or .Subject "(no subject)"}}</a>
+        {{- with .Attachments}} <span class="muted small" title="{{len .}} {{plural (len .) "attachment" "attachments"}}">📎{{len .}}</span>{{end}}</td>
+      <td class="c-code nowrap" data-label="Code">{{with .Code}}<code class="mcode">{{.}}</code><button type="button" class="icon-btn" data-copy-text="{{.}}" title="Copy {{.}}" aria-label="Copy the code"><svg class="i"><use href="#i-copy"/></svg></button>{{else}}{{with .Action}}<a class="mlinkbtn" href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow" title="{{.Text}}&#10;{{.URL}}&#10;Opening it is a click: it can use it up">{{.Kind}} <svg class="i"><use href="#i-external"/></svg></a><button type="button" class="icon-btn" data-copy-text="{{.URL}}" title="Copy the {{.Kind}} link" aria-label="Copy the link"><svg class="i"><use href="#i-copy"/></svg></button>{{else}}<span class="zero">—</span>{{end}}{{end}}</td>
+      <td class="c-when nowrap" data-label="Received"><span class="when" title="{{datetime .ReceivedAt}}">{{ago .ReceivedAt}}</span></td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+</div>
+{{end}}

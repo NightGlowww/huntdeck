@@ -248,8 +248,8 @@
 /* The feed's segments wrap under the title when narrow, without counts. */
 .pchanges .panel-head, .pchanges .panel-head .aside { flex-wrap: wrap; }
 @media (max-width: 700px) { .pchanges .seg em { display: none; } }
-.pchanges .panel-head .seg a { color: var(--text-2); }
-.pchanges .panel-head .seg a:hover, .pchanges .panel-head .seg a.on { color: var(--text); }
+.panel-head .aside .seg a { color: var(--text-2); } /* a toggle in a panel's head: not the head's link colour */
+.panel-head .aside .seg a:hover, .panel-head .aside .seg a.on { color: var(--text); }
 @media (max-width: 700px) {
   .pfeed li, .pfeed li.dayfold > details > summary { grid-template-columns: 80px minmax(0, 1fr); }
   .pfeed li.dayfold > details > summary :is(.tag, .what) { grid-column: 2; }

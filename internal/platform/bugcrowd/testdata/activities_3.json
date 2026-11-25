@@ -1,0 +1,9 @@
+{"activities": [
+  {"key": "submission.reward_created", "uuid": "act-5", "created_at": "2026-03-12T10:00:00.000Z", "created_by_staff": false, "created_by_customer": true,
+   "actor": {"name": "NEVER", "email": "NEVER@example.com"}, "params": {"amount": "$2,500"}},
+  {"key": "comment.created", "uuid": "act-4", "created_at": "2026-03-11T12:00:00.000Z", "created_by_staff": true, "created_by_customer": false, "params": {"message": "NEVER"}},
+  {"key": "submission.transitioned", "uuid": "act-3", "created_at": "2026-03-11T10:00:00.000Z", "created_by_staff": false, "created_by_customer": true, "params": {"substate": "unresolved"}},
+  {"key": "submission.priority_set", "uuid": "act-2", "created_at": "2026-03-10T15:00:00.000Z", "created_by_staff": true, "params": {"priority": 2}},
+  {"key": "comment.created", "uuid": "act-1", "created_at": "2026-03-10T11:00:00.000Z", "created_by_staff": false, "created_by_customer": false, "params": {"message": "NEVER"}},
+  {"key": "submission.created", "uuid": "act-0", "created_at": "2026-03-10T10:00:00.000Z", "params": {}}
+], "paginationMeta": {"totalPages": 1, "currentPage": 1, "olderItemsCount": 0}}

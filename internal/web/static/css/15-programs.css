@@ -5,7 +5,8 @@
 /* Wide screens, rail beside the table: the page stays put and only the
    table's rows scroll, under headings that stay at its top. The rail and
    table fill the window below the top bar (56px) and the page's padding
-   (22px above and below); a rail taller than that scrolls on its own. */
+   (22px above and below); a rail taller than that scrolls on its own.
+   Only beside a rail: a .ptable elsewhere (Email) scrolls with its page. */
 @media (min-width: 1601px) {
   .page:has(> .plist) { padding-bottom: 22px; }
   .plist { align-items: stretch; height: calc(100dvh - 56px - 44px); grid-template-rows: minmax(0, 1fr); }
@@ -19,8 +20,14 @@
   .plist > .facets { mask-image: linear-gradient(#000 calc(100% - 24px), transparent); }
   .plist > .facets, .ptable > .table-wrap { scrollbar-width: none; }
   .plist > .facets::-webkit-scrollbar, .ptable > .table-wrap::-webkit-scrollbar { display: none; }
+  .plist > .ptable > :is(.activef, .note-bar, .pager, .empty-state) { flex: none; }
+  .plist > .ptable > .table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+  .plist > .ptable thead { position: sticky; top: 0; z-index: 3; background: var(--surface-2); }
+  /* They scroll with the wheel or trackpad, without bars showing. */
+  .plist > .facets, .plist > .ptable > .table-wrap { scrollbar-width: none; }
+  .plist > .facets::-webkit-scrollbar, .plist > .ptable > .table-wrap::-webkit-scrollbar { display: none; }
   /* A pinned heading drops collapsed borders, so its lines are shadows. */
-  .ptable thead th { border-bottom-color: transparent; box-shadow: inset 0 -1px var(--border); }
+  .plist > .ptable thead th { border-bottom-color: transparent; box-shadow: inset 0 -1px var(--border); }
 }
 .facets { padding: 12px 12px 6px; }
 .fhead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }

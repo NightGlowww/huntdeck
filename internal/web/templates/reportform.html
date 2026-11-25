@@ -1,0 +1,40 @@
+{{/* Add a report by hand, or correct one (myreportform.go). */}}
+{{define "content"}}{{with .Data}}
+<h1 class="m-heading">{{.Heading}}</h1>
+<form method="post" action="{{.Action}}" class="channel-form own-form">
+  <section class="panel">
+    <div class="panel-head"><h2>Report</h2><span class="aside">{{if .Manual}}one HuntDeck can't read from a platform; it counts in Analytics like the others{{else}}what you change here stays as you set it: syncs won't overwrite it{{end}}</span></div>
+    <div class="panel-body profile-form">
+      <label class="wide"><span>Title</span><input type="text" name="title" value="{{.Title}}" maxlength="500" required></label>
+      {{if .Manual}}<label><span>Platform</span><select name="platform">{{range .Platforms}}<option value="{{.}}"{{if eq . $.Data.Platform}} selected{{end}}>{{if eq . "other"}}Other{{else}}{{platformLabel .}}{{end}}</option>{{end}}</select></label>{{end}}
+      <label class="wide"><span>Program</span><input type="text" name="program" value="{{.ProgramName}}" maxlength="200" placeholder="Its name, as on the platform"></label>
+      <label class="wide"><span>Link</span><input type="url" name="url" value="{{.URL}}" maxlength="2000" placeholder="https://" spellcheck="false"></label>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>Outcome</h2></div>
+    <div class="panel-body profile-form">
+      <label><span>State</span><select name="state">{{range .States}}<option value="{{.Key}}"{{if eq .Key $.Data.State}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+      <label><span>Submitted</span><input type="date" name="submitted" value="{{.Submitted}}" required></label>
+      {{if .Manual}}<label><span>Closed</span><input type="date" name="closed" value="{{.Closed}}"></label>{{end}}
+      <label title="The severity you submitted it as"><span>Submitted as</span><select name="submitted_severity"><option value="">Not known</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.SubmittedSeverity}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+      <label><span>Severity now</span><select name="severity"><option value="">Unrated</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.Severity}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+    </div>
+  </section>
+  {{if .Manual}}<section class="panel">
+    <div class="panel-head"><h2>Earned</h2><span class="aside">in the currency paid; leave an amount blank to skip the row</span></div>
+    <div class="panel-body rpays">
+      {{range $i, $p := .Payments}}<div class="profile-form">
+        <label><span>Kind</span><select name="pay_kind_{{$i}}">{{range list "bounty" "bonus" "retest" "other"}}<option value="{{.}}"{{if eq . $p.Kind}} selected{{end}}>{{.}}</option>{{end}}</select></label>
+        <label><span>Amount</span><input type="text" name="pay_amount_{{$i}}" value="{{$p.Amount}}" inputmode="decimal" placeholder="e.g. 1500" class="interval amount"></label>
+        <label><span>Currency</span><input type="text" name="pay_currency_{{$i}}" value="{{or $p.Currency "USD"}}" maxlength="3" class="interval cur"></label>
+        <label><span>Awarded</span><input type="date" name="pay_date_{{$i}}" value="{{$p.Date}}"></label>
+      </div>{{end}}
+    </div>
+  </section>{{end}}
+  <div class="actbar">
+    <button type="submit" class="act-save">{{if .ID}}Save{{else}}Add report{{end}}</button>
+    <a class="button ghost act-cancel" href="{{if .ID}}/reports/{{.ID}}{{else}}/reports{{end}}">Cancel</a>
+  </div>
+</form>
+{{end}}{{end}}

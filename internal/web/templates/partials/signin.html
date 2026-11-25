@@ -1,0 +1,3 @@
+{{/* A credential's sign-in: how it did, for Settings › Polling and the
+   Accounts boxes (Settings › Accounts, HuntMail › Setup). */}}
+{{define "signin"}}<div class="signin" title="{{.Title}}"><span class="chip {{.State}}">{{.Label}}</span><span class="sn">{{.Name}}</span>{{with .Parts}}<span class="muted small sp">{{range $i, $p := .}}{{if $i}} · {{end}}{{$p.Text}}{{with $p.When}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{with $p.In}} <span title="{{datetime .}}">{{until .}}</span>{{end}}{{with $p.At}} {{datetime .}}{{end}}{{end}}</span>{{end}}{{with .Watch}} <a class="link small" href="{{.}}" title="See the login browser: watch a login, or finish one by hand">watch</a>{{end}}</div>{{with .Problem}}<div class="signin-why small">{{.}}</div>{{end}}{{end}}

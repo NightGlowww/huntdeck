@@ -13,6 +13,14 @@
 .acct { display: flex; flex-direction: column; min-width: 0; }
 .acct .panel-head h2 { font-size: calc(15.5px * var(--fs, 1)); }
 .acct-form { display: flex; flex-direction: column; gap: 18px; padding: 16px 18px 18px; }
+/* A panel per platform (and the proxy), two a row where there's room: a
+   label, the input and where the value comes from on one line, help under it. */
+/* Two platforms to a row, ending level, their Save buttons on one line. */
+.acct-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.acct-grid > .panel { display: flex; flex-direction: column; }
+.acct-grid > .panel > .acct-form { flex: 1; display: flex; flex-direction: column; }
+.acct-grid > .panel > .acct-form > .acct-actions { margin-top: auto; }
+.acct-grid > .panel + .panel { margin-top: 0; }
 .acct-signin { padding: 10px 16px; border-bottom: 1px solid var(--border); }
 
 /* A section inside a card: API keys, the website login, the tuning. */

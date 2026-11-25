@@ -7,7 +7,8 @@ async function check() {
   try {
     const res = await fetch('/settings/restart', { cache: 'no-store', headers: { Accept: 'application/json' } });
     if (res.ok && !(await res.json()).pending) {
-      location.replace(location.pathname + '?tab=accounts' + location.hash);
+      const tab = new URLSearchParams(location.search).get('tab') || 'accounts';
+      location.replace(location.pathname + '?tab=' + encodeURIComponent(tab) + location.hash);
       return;
     }
   } catch {

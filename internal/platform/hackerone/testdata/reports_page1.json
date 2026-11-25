@@ -1,0 +1,36 @@
+{
+  "data": [
+    {
+      "id": "5001", "type": "report",
+      "attributes": {
+        "title": "Stored XSS in profile name", "state": "resolved",
+        "created_at": "2026-02-01T10:00:00.000Z", "submitted_at": "2026-02-01T10:00:00.000Z",
+        "triaged_at": "2026-02-03T09:00:00.000Z", "closed_at": "2026-02-20T12:00:00.000Z",
+        "bounty_awarded_at": "2026-02-18T08:00:00.000Z", "first_program_activity_at": "2026-02-02T08:00:00.000Z",
+        "last_program_activity_at": "2026-02-20T12:00:00.000Z", "last_reporter_activity_at": "2026-02-05T07:00:00.000Z",
+        "last_activity_at": null, "disclosed_at": null, "cve_ids": [],
+        "vulnerability_information": "WRITE-UP THAT MUST NEVER BE STORED"
+      },
+      "relationships": {
+        "program": {"data": {"id": "11", "type": "program", "attributes": {"handle": "acme"}}},
+        "reporter": {"data": {"id": "77", "type": "user", "attributes": {"username": "hunter"}}},
+        "severity": {"data": {"id": "901", "type": "severity", "attributes": {"rating": "high", "score": 7.5, "author_type": "Team"}}},
+        "weakness": {"data": {"id": "60", "type": "weakness", "attributes": {"name": "Cross-site Scripting (XSS) - Stored"}}}
+      }
+    },
+    {
+      "id": "5002", "type": "report",
+      "attributes": {
+        "title": "Open redirect", "state": "needs-more-info",
+        "created_at": "2026-03-04T10:00:00.000Z", "submitted_at": "2026-03-04T10:00:00.000Z",
+        "first_program_activity_at": "2026-03-05T10:00:00.000Z", "last_program_activity_at": "2026-03-05T10:00:00.000Z",
+        "last_reporter_activity_at": "2026-03-04T10:00:00.000Z"
+      },
+      "relationships": {
+        "program": {"data": {"id": "12", "type": "program", "attributes": {"handle": "globex"}}},
+        "severity": {"data": {"id": "902", "type": "severity", "attributes": {"rating": "low", "score": 3.1, "author_type": "User"}}}
+      }
+    }
+  ],
+  "links": {"next": "{{BASE}}/hackers/me/reports?page%5Bsize%5D=100&page%5Bnumber%5D=2"}
+}

@@ -1,0 +1,11 @@
+{{/* Columns over time (barChart): stacked parts per column, gridlines
+   with their values on the right, and the time under them. Analytics'
+   months and Email stats' days. */}}
+{{define "bar-chart"}}{{if .Bars}}<div class="bchart">
+  <svg class="bc-plot" role="img" aria-label="{{.Label}}">
+    {{range .Grid}}<line class="bc-grid" x1="0" x2="100%" y1="{{.Y}}" y2="{{.Y}}"/><text class="bc-axis" x="100%" y="{{.Y}}" dy="-4">{{.Label}}</text>{{end}}
+    <line class="bc-base" x1="0" x2="100%" y1="{{.H}}" y2="{{.H}}"/>
+    {{range .Bars}}<g class="bc-col"><title>{{.Tip}}</title><rect class="bc-hit" x="{{.SlotX}}" y="0" width="{{.SlotW}}" height="100%"/>{{$x := .X}}{{$w := .W}}{{range .Parts}}<rect class="bc-{{.Class}}" x="{{$x}}" y="{{.Y}}" width="{{$w}}" height="{{.H}}" rx="2"/>{{end}}{{if .Total}}<text class="bc-total" x="{{.Mid}}" y="{{.TotalY}}">{{.Total}}</text>{{end}}</g>{{end}}
+  </svg>
+  <svg class="bc-months" aria-hidden="true">{{range .Ticks}}<text x="{{.At}}" y="12">{{.Label}}</text>{{end}}</svg>
+</div>{{end}}{{end}}

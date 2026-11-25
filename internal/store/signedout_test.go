@@ -45,6 +45,8 @@ func TestCheckSignedOut(t *testing.T) {
 		{"a signed-out seed", load(SeedOptions{SignedOut: true}), "", ""},
 		{"with a private program", load(SeedOptions{SignedOut: true}), `UPDATE programs SET private = 1`, "private, invited or joined"},
 		{"with a tag", load(SeedOptions{SignedOut: true}), `INSERT INTO program_tags (program_id, tag) VALUES (1, 'x')`, "tags"},
+		{"with one of the user's reports", load(SeedOptions{SignedOut: true}), `INSERT INTO my_reports (platform, report_key, state,
+			submitted_at, first_seen_at, updated_at) VALUES ('hackerone', '1', 'new', '2026-01-01T00:00:00.000Z', '', '')`, "own reports"},
 		{"with a saved account setting", load(SeedOptions{SignedOut: true}), `INSERT INTO settings (key, value, updated_at) VALUES ('accounts.H1_TOKEN', 'x', '')`, "settings"},
 	} {
 		if tt.fix != "" {
