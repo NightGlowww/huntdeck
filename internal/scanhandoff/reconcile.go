@@ -26,7 +26,13 @@ type ReconcileSummary struct {
 	Done   int
 	Failed int
 	Gone   int
+	// RateLimited is the scanner asking us to slow down: the pass stopped early
+	// and the next one carries on from the tasks it did not reach.
+	RateLimited bool
 }
+
+// pace is how long to wait between task reads: the scanner rates its MCP.
+const pace = 400 * time.Millisecond
 
 func Reconcile(ctx context.Context, st *store.Store, client *scopesentry.Client, limit int, now time.Time) (ReconcileSummary, error) {
 	var sum ReconcileSummary
@@ -35,7 +41,14 @@ func Reconcile(ctx context.Context, st *store.Store, client *scopesentry.Client,
 		return sum, err
 	}
 	sum.Tasks = len(tasks)
-	for _, t := range tasks {
+	for i, t := range tasks {
+		if i > 0 && pace > 0 {
+			select {
+			case <-ctx.Done():
+				return sum, ctx.Err()
+			case <-time.After(pace):
+			}
+		}
 		if t.State == "done" || t.State == "failed" {
 			continue
 		}
@@ -48,6 +61,13 @@ func Reconcile(ctx context.Context, st *store.Store, client *scopesentry.Client,
 			}
 			sum.Gone++
 			continue
+		}
+		if errors.Is(err, scopesentry.ErrRateLimited) {
+			// The scanner is refusing for a moment. Stop here: the tasks after this
+			// one keep their old state and the next pass picks them up, which is
+			// better than hammering a limiter or recording a lie.
+			sum.RateLimited = true
+			return sum, nil
 		}
 		if err != nil {
 			// A network or auth failure: the pass stops rather than recording

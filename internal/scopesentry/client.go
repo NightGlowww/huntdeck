@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -50,6 +51,10 @@ type rpcResponse struct {
 const maxBody = 1 << 20
 
 // Call runs one tool and returns its first text answer.
+// ErrRateLimited is the scanner refusing for a moment: the caller should stop
+// and try again later, not treat the pass as failed.
+var ErrRateLimited = errors.New("scopesentry: rate limited")
+
 func (c *Client) Call(ctx context.Context, tool string, args map[string]any) (string, error) {
 	if c.BaseURL == "" || c.Key == "" {
 		return "", fmt.Errorf("scopesentry: no endpoint or key configured")
@@ -105,6 +110,10 @@ func (c *Client) do(ctx context.Context, req rpcRequest) (string, error) {
 		return "", fmt.Errorf("scopesentry %s: %w", req.Method, err)
 	}
 	defer func() { _ = res.Body.Close() }()
+	if res.StatusCode == http.StatusTooManyRequests {
+		_, _ = io.ReadAll(io.LimitReader(res.Body, 512))
+		return "", ErrRateLimited
+	}
 	if res.StatusCode != http.StatusOK {
 		_, _ = io.ReadAll(io.LimitReader(res.Body, 512))
 		return "", fmt.Errorf("scopesentry %s: HTTP %d", req.Method, res.StatusCode)
