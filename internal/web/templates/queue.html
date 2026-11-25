@@ -21,7 +21,7 @@
 
 {{if .Chips}}
 <p class="queue-filters">
-  {{range .Chips}}<a href="{{.Href}}"{{if .On}} class="chip on"{{else if .Clear}} class="chip clear"{{else}} class="chip"{{end}}>{{if .Clear}}<span aria-hidden="true">×</span> {{T "Clear filters"}}{{else if eq .Label "All platforms"}}{{T "All platforms"}}{{else if eq .Label "Paying only"}}{{T "Paying only"}}{{else if eq .Label "Added in 7 days"}}{{T "Added in 7 days"}}{{else if eq .Label "One per program"}}{{T "One per program"}}{{else}}{{platformLabel .Label}}{{end}}</a> {{end}}
+  {{range .Chips}}<a href="{{.Href}}"{{if .On}} class="chip on"{{else if .Clear}} class="chip clear"{{else}} class="chip"{{end}}>{{if .Clear}}<span aria-hidden="true">×</span> {{T "Clear filters"}}{{else if eq .Label "All platforms"}}{{T "All platforms"}}{{else if eq .Label "Paying only"}}{{T "Paying only"}}{{else if eq .Label "Added in 7 days"}}{{T "Added in 7 days"}}{{else if eq .Label "One per program"}}{{T "One per program"}}{{else}}{{platformLabel .Label}}{{end}}{{if .HasCount}} <span class="n muted">{{num .Count}}</span>{{end}}</a> {{end}}
 </p>
 {{end}}
 <section class="panel">

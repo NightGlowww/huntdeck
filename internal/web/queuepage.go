@@ -58,6 +58,10 @@ type queueData struct {
 	GatedBy  []store.QueueGate
 	// Chips are the filter toggles, each keeping the others.
 	Chips []queueChip
+	// ScanYes and ScanNo are how many rows the two scanned chips would show,
+	// under the filters already chosen: a chip says how much it is worth.
+	ScanYes int
+	ScanNo  int
 }
 
 type queueRowView struct {
@@ -122,7 +126,21 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	d := queueData{ComputedAt: computed, Stale: time.Since(computed) > 2*time.Hour, Filter: filter, Platforms: s.platformNames()}
-	d.Chips = queueChips(q, filter, s.platformNames())
+	// How the queue splits between targets the scanner already has and ones it
+	// does not, under the filters in force: the chips filter by it, and a chip that
+	// says nothing about how much it would show is a click into the dark.
+	for _, f2 := range []struct {
+		scanned string
+		dst     *int
+	}{{"yes", &d.ScanYes}, {"no", &d.ScanNo}} {
+		f2 := f2
+		f := filter
+		f.Scanned = f2.scanned
+		if n, _, err := s.Store.HuntQueueCount(ctx, f); err == nil {
+			*f2.dst = n
+		}
+	}
+	d.Chips = queueChips(q, filter, s.platformNames(), d.ScanYes, d.ScanNo)
 	d.IgnoredWindow = ignored
 	if days, err := s.Store.ScoreDays(ctx); err == nil {
 		d.Cuts = len(days)
@@ -215,9 +233,13 @@ type queueChip struct {
 	On    bool
 	// Clear marks the one chip that drops every filter.
 	Clear bool
+	// Count, when HasCount, is how many rows the chip would show: a filter that
+	// does not say how much it hides is a click into the dark.
+	Count    int
+	HasCount bool
 }
 
-func queueChips(q url.Values, f store.QueueFilter, platforms []string) []queueChip {
+func queueChips(q url.Values, f store.QueueFilter, platforms []string, scanYes, scanNo int) []queueChip {
 	with := func(key, value string) string {
 		v := url.Values{}
 		for k, vals := range q {
@@ -247,8 +269,8 @@ func queueChips(q url.Values, f store.QueueFilter, platforms []string) []queueCh
 		{Label: "One per program", Href: toggle("one", boolParam(f.OnePerProgram), "1", ""), On: f.OnePerProgram},
 		// The scanner's side of the queue: with hundreds handed over, "which of
 		// these has it already taken" has to be answerable from the page.
-		{Label: "Already handed over", Href: toggle("scanned", f.Scanned, "yes", ""), On: f.Scanned == "yes"},
-		{Label: "Not handed over yet", Href: toggle("scanned", f.Scanned, "no", ""), On: f.Scanned == "no"},
+		{Label: "Already handed over", Href: toggle("scanned", f.Scanned, "yes", ""), On: f.Scanned == "yes", Count: scanYes, HasCount: true},
+		{Label: "Not handed over yet", Href: toggle("scanned", f.Scanned, "no", ""), On: f.Scanned == "no", Count: scanNo, HasCount: true},
 	}
 	for _, p := range platforms {
 		chips = append(chips, queueChip{Label: p, Href: with("platform", p), On: f.Platform == p})
