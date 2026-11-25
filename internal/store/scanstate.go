@@ -85,3 +85,14 @@ func (s *Store) HandoffStates(ctx context.Context) (map[string]int, error) {
 	}
 	return out, rows.Err()
 }
+
+// HandoffsWithoutTask counts the rows that carry no task id. They are excluded
+// from HandoffTasks ("WHERE task_id <> ”"), so no pass can ever read them:
+// a target recorded without a receipt stays "handed over, unread" for good.
+func (s *Store) HandoffsWithoutTask(ctx context.Context) (int, error) {
+	var n int
+	if err := s.db.R.QueryRowContext(ctx, `SELECT COUNT(*) FROM scan_handoffs WHERE task_id = ''`).Scan(&n); err != nil {
+		return 0, fmt.Errorf("handoffs without a task: %w", err)
+	}
+	return n, nil
+}

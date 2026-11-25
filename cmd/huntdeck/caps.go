@@ -135,6 +135,9 @@ func scanReconcileCmd(args []string, stdout, stderr io.Writer) int {
 			parts = append(parts, name+"="+strconv.Itoa(states[k]))
 		}
 		fmt.Fprintf(stdout, "targets by state: %s\n", strings.Join(parts, " "))
+		if n, err := app.store.HandoffsWithoutTask(ctx); err == nil && n > 0 {
+			fmt.Fprintf(stdout, "without a task: %d (recorded with no receipt: no pass can read them)\n", n)
+		}
 	}
 	return 0
 }
