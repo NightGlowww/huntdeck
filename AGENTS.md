@@ -315,6 +315,16 @@ disagree in either direction.
   number was wrong. Name the observable first - the row count in the body, the
   total in the filter's own words, the line that separates "nothing to do" from
   "could not do it" - and check it goes red when the fix is reverted.
+- **A gate is an observation too, and it can lie the same way.** The deploy grew a
+  check that refuses to ship when the performance snapshot measures fewer routes
+  than last time. Its two counts come from SSH, the script runs under
+  `set -euo pipefail`, and a remote command exiting non-zero aborted the whole
+  deploy *after* the release had gone out: service healthy on the new version, exit
+  code 2, no message. A simulation of the gate's logic passed; the real deploy
+  failed twice. So: run a new gate's failing path against the real system (a deploy
+  that must exit 0, a page that must be refused), not against a hand-written
+  snippet of its condition, before believing it.
+
 - Tests are table-driven. Platform clients are tested against `httptest`
   servers replaying fixtures (pagination, 429, 5xx, auth failure, partial
   failure); the sync engine with `internal/platform/fake`, including "a
