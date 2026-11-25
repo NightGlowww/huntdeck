@@ -120,6 +120,10 @@ func (s *server) mailBlockAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := strconv.FormatInt(added.ID, 10)
+	if r.PostFormValue("from") == "senders" { // back to the row it was blocked from
+		http.Redirect(w, r, "/email/stats?added="+id+"#mail-senders", http.StatusSeeOther)
+		return
+	}
 	http.Redirect(w, r, "/email/stats?added="+id+"#block-"+id, http.StatusSeeOther)
 }
 
@@ -138,6 +142,10 @@ func (s *server) mailBlockDelete(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	if err := s.Mail.DeleteBlock(ctx, id); err != nil && !errors.Is(err, huntmail.ErrNotFound) { // gone already is done
 		s.renderError(w, r, http.StatusBadGateway, mailProblem(err))
+		return
+	}
+	if r.PostFormValue("from") == "senders" { // back to the row it was unblocked from
+		http.Redirect(w, r, "/email/stats#mail-senders", http.StatusSeeOther)
 		return
 	}
 	http.Redirect(w, r, "/email/stats#mail-blocks", http.StatusSeeOther)

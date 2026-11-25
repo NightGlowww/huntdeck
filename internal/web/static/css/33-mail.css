@@ -220,3 +220,13 @@ h2.mpane-title { margin: 0 0 6px; font-size: 18px; line-height: 1.3; overflow-wr
 }
 .msetup-about { margin-top: 16px; }
 .msetup-about .msetup-intro p, .msetup-about .msetup-perms { max-width: 120ch; }
+
+/* HuntMail › Overview: top senders, each with its block. */
+#mail-senders { margin-top: 16px; }
+.mlists { align-items: start; margin-top: 16px; }
+.mlists > #mail-senders, .mlists > #mail-blocks { margin-top: 0; }
+@media (max-width: 1500px) { .mlists { grid-template-columns: minmax(0, 1fr); } .mlists > #mail-blocks { margin-top: 0; } }
+.msenders th.c-n { width: 110px; }
+.msenders th.c-acts { width: 270px; } /* "newsletters blocked" and Unblock side by side */
+.msenders td.c-what { overflow-wrap: anywhere; }
+.msenders td.c-acts { text-align: right; }

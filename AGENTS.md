@@ -96,6 +96,7 @@ once no poll is running.
 | Bugcrowd blocked for hours | Its WAF; keep `BC_RATE` at 1 or lower |
 | Intigriti's website login keeps failing | Its login page scores visitors with reCAPTCHA: use a residential `HUNTDECK_PROXY` (an `http://` one) and set `HUNTDECK_CHROME_TIMEZONE` to the proxy's country. `HUNTDECK_VNC=true` shows the login browser in Settings › Browser |
 | A poll is "partial" | One platform request failed; nothing is removed on a partial poll, and the next one retries. The poll history in Settings says why |
+| A mail you triggered (a signup, a reset) never shows up on the Email page | A HuntMail block may have turned it away: blocked mail is bounced, never stored. Look at Email › HuntMail › Blocks (or `GET /api/blocks` on HuntMail) for one covering the sender's domain or the address, unblock it, trigger the mail again, and tell the user which block it was |
 | Set up HuntMail stops at a step | The token lacks a permission (the step names it; the list is on the setup page and in `docs/configuration.md`), or the domain isn't on that Cloudflare account. Fix it and run setup again: it carries on from what it already made |
 
 ## Changing the code

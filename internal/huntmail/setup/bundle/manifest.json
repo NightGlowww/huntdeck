@@ -1,12 +1,12 @@
 {
   "name": "huntmail",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "main_module": "index.js",
   "modules": [
     {
       "name": "index.js",
       "type": "esm",
-      "sha256": "61af2dd38b0170d2388c5f59669419d85bc46d08c2fddcf7f2ab6563c1679544"
+      "sha256": "360bd83bfdf4887e5d2247b5bf60bf3b7eb53ebb3799d8d7b9810ec13cf38b2f"
     }
   ],
   "compatibility_date": "2026-10-01",

@@ -28,6 +28,20 @@ type fakeMail struct {
 	old    bool              // a HuntMail before 1.1: no daily counts, no to_domain
 	nl     bool              // a HuntMail that tells newsletters apart
 	blocks *[]huntmail.Block // a HuntMail with blocks: its blocks
+	// senders are a HuntMail's top senders, nil for one without them;
+	// sendersAsked the window it was asked for.
+	senders      []huntmail.Sender
+	sendersAsked [2]int
+}
+
+func (f *fakeMail) Senders(_ context.Context, days, limit int) ([]huntmail.Sender, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.senders == nil {
+		return nil, huntmail.ErrNotFound
+	}
+	f.sendersAsked = [2]int{days, limit}
+	return slices.Clone(f.senders), nil
 }
 
 func (f *fakeMail) Blocks(context.Context) ([]huntmail.Block, error) {
@@ -707,5 +721,79 @@ func TestMailLinks(t *testing.T) {
 	v.LinkDetails = l.Main[:1]
 	if !v.LinksOpen() {
 		t.Error("a single content link starts folded")
+	}
+}
+
+// The HuntMail page lists the top senders, when HuntMail has them: a
+// sender with newsletters can have them blocked from its row (and the page
+// comes back to the table), one already blocked or without any says so.
+func TestMailStatsSenders(t *testing.T) {
+	mail := newFakeMail()
+	blocks := []huntmail.Block{}
+	mail.blocks = &blocks
+	e := newTestEnv(t, func(d *Deps) { d.Mail = mail })
+	c := e.client()
+	if _, body := e.do(c, "GET", "/email/stats", nil, nil); strings.Contains(body, `id="mail-senders"`) {
+		t.Error("a HuntMail without top senders shows them")
+	}
+
+	mail.senders = []huntmail.Sender{
+		{Domain: "shop.example", Messages: 40, Newsletters: 38, Bytes: 2 << 20},
+		{Domain: "news.example", Messages: 20, Newsletters: 20, Blocked: huntmail.BlockNewsletters, BlockID: new(int64(11))},
+		{Domain: "loud.example", Messages: 9, Newsletters: 3, Blocked: huntmail.BlockAll, BlockID: new(int64(12))},
+		{Domain: "old.example", Messages: 7, Newsletters: 7, Blocked: huntmail.BlockAll}, // from a HuntMail that doesn't say which block
+		{Domain: "acme.example", Messages: 5},
+	}
+	_, body := e.do(c, "GET", "/email/stats", nil, nil)
+	if mail.sendersAsked != [2]int{mailSenderDays, mailSenderRows} {
+		t.Errorf("asked for %v", mail.sendersAsked)
+	}
+	row := func(domain string) string {
+		i := strings.Index(body, `href="/email?q=`+domain+`"`)
+		if i < 0 {
+			t.Fatalf("no row for %s", domain)
+		}
+		return body[i:min(len(body), i+1200)]
+	}
+	for domain, want := range map[string]string{
+		"shop.example": `<input type="hidden" name="value" value="shop.example"><input type="hidden" name="scope" value="newsletters"><input type="hidden" name="from" value="senders">`,
+		"news.example": `newsletters blocked</a><form method="post" action="/email/blocks/11/delete" data-confirm="Unblock news.example?`,
+		"loud.example": `all blocked</a><form method="post" action="/email/blocks/12/delete"`,
+		"old.example":  "all blocked</a></div>",
+		"acme.example": "no newsletters",
+	} {
+		r := row(domain)
+		if end := strings.Index(r, "</tr>"); end >= 0 {
+			r = r[:end]
+		}
+		if !strings.Contains(r, want) {
+			t.Errorf("%s: no %q in\n%s", domain, want, r)
+		}
+		if domain != "shop.example" && strings.Contains(r, `action="/email/blocks"`) {
+			t.Errorf("%s offers a block", domain)
+		}
+	}
+	if !strings.Contains(body, "Top senders <span class=\"count\">5</span>") || !strings.Contains(body, "2.1 MB") {
+		t.Error("the table's heading or sizes")
+	}
+
+	res, _ := e.do(c, "POST", "/email/blocks", url.Values{"kind": {"sender"}, "value": {"shop.example"}, "scope": {"newsletters"}, "from": {"senders"}}, nil)
+	if loc := res.Header.Get("Location"); res.StatusCode != http.StatusSeeOther || !strings.HasSuffix(loc, "#mail-senders") {
+		t.Errorf("blocking from the table goes to %d %q", res.StatusCode, loc)
+	}
+	if len(blocks) != 1 || blocks[0].Value != "shop.example" || blocks[0].Scope != huntmail.BlockNewsletters {
+		t.Errorf("blocks: %+v", blocks)
+	}
+
+	// Unblocking from the table comes back to it.
+	res, _ = e.do(c, "POST", "/email/blocks/"+strconv.FormatInt(blocks[0].ID, 10)+"/delete", url.Values{"from": {"senders"}}, nil)
+	if loc := res.Header.Get("Location"); res.StatusCode != http.StatusSeeOther || !strings.HasSuffix(loc, "#mail-senders") || len(blocks) != 0 {
+		t.Errorf("unblocking from the table: %d %q, %d left", res.StatusCode, loc, len(blocks))
+	}
+
+	// A HuntMail without blocks lists its senders without the button.
+	mail.blocks = nil
+	if _, body := e.do(c, "GET", "/email/stats", nil, nil); !strings.Contains(body, `id="mail-senders"`) || strings.Contains(body, `name="from" value="senders"`) {
+		t.Error("without blocks: the table, without its buttons")
 	}
 }

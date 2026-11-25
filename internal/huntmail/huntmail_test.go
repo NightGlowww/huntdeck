@@ -268,3 +268,48 @@ func TestBlocks(t *testing.T) {
 		t.Errorf("delete a missing block: %v", err)
 	}
 }
+
+// Senders asks for the window and the number wanted, kept to what HuntMail
+// takes, and reads a block's scope (null when there's none); an older
+// HuntMail, without the route, answers ErrNotFound.
+func TestSenders(t *testing.T) {
+	var got atomic.Value
+	old := atomic.Bool{}
+	c, _ := fakeHuntMail(t, func(w http.ResponseWriter, r *http.Request) bool {
+		path, _ := strings.CutPrefix(r.URL.Path, "/"+basePath)
+		if path != "/api/senders" {
+			return false
+		}
+		got.Store(r.URL.RawQuery)
+		w.Header().Set("Content-Type", "application/json")
+		if old.Load() {
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"error":"not found"}`))
+			return true
+		}
+		_, _ = w.Write([]byte(`{"days":7,"senders":[{"domain":"shop.example","messages":40,"newsletters":38,"bytes":2048000,"blocked":"newsletters","block_id":7},` +
+			`{"domain":"acme.example","messages":12,"newsletters":0,"bytes":51200,"blocked":null}]}`))
+		return true
+	})
+	ctx := context.Background()
+	ss, err := c.Senders(ctx, 7, 25)
+	if err != nil || len(ss) != 2 || ss[0].Domain != "shop.example" || ss[0].Blocked != BlockNewsletters || ss[0].BlockID == nil || *ss[0].BlockID != 7 || ss[1].BlockID != nil || ss[0].Newsletters != 38 || ss[1].Blocked != "" || ss[1].Bytes != 51200 {
+		t.Fatalf("senders: %+v %v", ss, err)
+	}
+	if q := got.Load().(string); q != "days=7&limit=25" {
+		t.Errorf("query %q", q)
+	}
+	for _, tt := range []struct {
+		days, limit int
+		want        string
+	}{{0, 0, "days=1&limit=1"}, {999, 500, "days=400&limit=100"}} {
+		_, _ = c.Senders(ctx, tt.days, tt.limit)
+		if q := got.Load().(string); q != tt.want {
+			t.Errorf("%d, %d: query %q, want %q", tt.days, tt.limit, q, tt.want)
+		}
+	}
+	old.Store(true)
+	if _, err := c.Senders(ctx, 7, 25); !errors.Is(err, ErrNotFound) {
+		t.Errorf("an older HuntMail: %v", err)
+	}
+}

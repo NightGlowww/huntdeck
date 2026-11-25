@@ -5,6 +5,17 @@ the API under `/api/v1` and `/api/v2`, the configuration variables and the
 database (upgraded in place on start) stay compatible within a major
 version.
 
+## v1.3.0 (2026-11-25)
+
+- Email › HuntMail › Overview lists the **top senders** of the last 7 days
+  (HuntMail 1.6 or later): how much each site sent, how much of
+  it was newsletters and its size, with **Block newsletters** on its row,
+  or **Unblock** on one a block already covers. Beside the blocks where
+  there's room.
+- HuntDeck sets up and updates to HuntMail 1.6.0: its top senders, and
+  fewer false codes and links (numbers in postal addresses aren't codes;
+  verify and reset links need account wording).
+
 ## v1.2.0 (2026-11-24)
 
 - Everything about HuntMail is on one page, **Email › HuntMail**, in two

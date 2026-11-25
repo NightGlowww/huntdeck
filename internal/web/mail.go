@@ -31,6 +31,7 @@ type MailReader interface {
 	Blocks(ctx context.Context) ([]huntmail.Block, error)
 	AddBlock(ctx context.Context, b huntmail.NewBlock) (huntmail.Block, error)
 	DeleteBlock(ctx context.Context, id int64) error
+	Senders(ctx context.Context, days, limit int) ([]huntmail.Sender, error)
 }
 
 // mailPageSize is how many messages a page of mail lists, as Programs.

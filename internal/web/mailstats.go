@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"slices"
 	"strconv"
@@ -13,10 +14,19 @@ import (
 
 // Email › HuntMail: HuntMail's own numbers, as its stats page shows them
 // (how much mail it holds and how full it is, mail per day, mail by
-// domain), and its blocks (mailblocks.go), to add, switch and unblock.
+// domain, its top senders), and its blocks (mailblocks.go), to add,
+// switch and unblock.
 
 // mailStatsDays is how many days the chart and the domains cover.
 const mailStatsDays = 30
+
+// mailSenderDays and mailSenderRows are the top senders' window and how
+// many it lists. HuntMail reads every message in the window for them, so
+// the page asks once as it opens.
+const (
+	mailSenderDays = 7
+	mailSenderRows = 25
+)
 
 type mailStatsView struct {
 	Configured bool
@@ -40,6 +50,11 @@ type mailStatsView struct {
 	Form      huntmail.NewBlock  // the one refused, to try again
 	Prefixes  []store.MailPrefix // programs' prefixes, offered for prefix blocks
 	Bundle    string
+	// Senders are its top senders over SenderDays, when it lists them
+	// (HasSenders).
+	Senders    []huntmail.Sender
+	HasSenders bool
+	SenderDays int
 }
 
 // mailDomainRow is a domain's mail over the window.
@@ -90,6 +105,12 @@ func (s *server) renderMailStats(w http.ResponseWriter, r *http.Request, status 
 		if v.Blocks.Rows, err = s.mailBlockRows(ctx, v.Prefixes); err != nil {
 			s.Log.Warn("huntmail page: blocks", "err", err)
 		}
+	}
+	switch ss, err := s.Mail.Senders(ctx, mailSenderDays, mailSenderRows); {
+	case err == nil:
+		v.HasSenders, v.Senders, v.SenderDays = true, ss, mailSenderDays
+	case !errors.Is(err, huntmail.ErrNotFound): // not found: a HuntMail without them
+		s.Log.Warn("huntmail page: top senders", "err", err)
 	}
 	if s.MailBundle != nil && st.Version != "" && versionLess(st.Version, s.MailBundle.Version()) {
 		v.CanUpdate, v.Bundle = true, s.MailBundle.Version()
