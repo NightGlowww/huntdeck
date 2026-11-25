@@ -95,6 +95,7 @@ func (s *server) queuePage(w http.ResponseWriter, r *http.Request) {
 		Paying:        q.Get("paying") == "1",
 		Added:         addedWindow,
 		OnePerProgram: q.Get("one") == "1",
+		Scanned:       q.Get("scanned"),
 	}
 	const perPage = 50
 	page := pageFrom(r)
@@ -244,6 +245,10 @@ func queueChips(q url.Values, f store.QueueFilter, platforms []string) []queueCh
 		{Label: "Paying only", Href: toggle("paying", boolParam(f.Paying), "1", ""), On: f.Paying},
 		{Label: "Added in 7 days", Href: toggle("added", f.Added, "7d", ""), On: f.Added == "7d"},
 		{Label: "One per program", Href: toggle("one", boolParam(f.OnePerProgram), "1", ""), On: f.OnePerProgram},
+		// The scanner's side of the queue: with hundreds handed over, "which of
+		// these has it already taken" has to be answerable from the page.
+		{Label: "Already handed over", Href: toggle("scanned", f.Scanned, "yes", ""), On: f.Scanned == "yes"},
+		{Label: "Not handed over yet", Href: toggle("scanned", f.Scanned, "no", ""), On: f.Scanned == "no"},
 	}
 	for _, p := range platforms {
 		chips = append(chips, queueChip{Label: p, Href: with("platform", p), On: f.Platform == p})

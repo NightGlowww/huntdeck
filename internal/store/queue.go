@@ -322,6 +322,9 @@ type QueueFilter struct {
 	// OnePerProgram keeps a program's best target only: a queue of five rows
 	// from one program is not a plan for the day.
 	OnePerProgram bool
+	// Scanned keeps only targets the scanner already has ("yes") or only those
+	// it does not ("no"); empty keeps both.
+	Scanned string
 	// Added keeps targets first seen within this window ("7d", "30d").
 	Added string
 }
@@ -344,6 +347,11 @@ func (f QueueFilter) where() (string, []any) {
 	// SQL alone cannot give without either a window function over the whole
 	// filtered set or a subquery that repeats the filter. HuntQueueTop dedupes
 	// in Go and HuntQueueCount counts distinct programs.
+	if f.Scanned == "yes" {
+		clauses = append(clauses, "EXISTS (SELECT 1 FROM scan_handoffs h WHERE h.target = q.value OR h.target = q.apex)")
+	} else if f.Scanned == "no" {
+		clauses = append(clauses, "NOT EXISTS (SELECT 1 FROM scan_handoffs h WHERE h.target = q.value OR h.target = q.apex)")
+	}
 	if f.Added != "" {
 		if days, ok := AddedDays(f.Added); ok {
 			clauses = append(clauses, "ts.added_at >= ?")

@@ -2506,6 +2506,8 @@
   "Hand the chosen ones over again": "重新派发所选任务",
   "hand this target over again": "把这些目标重新派发",
   "A failed task, or one the scanner no longer has: its targets go back in the queue.": "失败的任务、或扫描器已不存在的任务：它的目标会重新回到队列。",
-  "%d target(s) are back in the queue.": "%d 个目标已回到队列。"
+  "%d target(s) are back in the queue.": "%d 个目标已回到队列。",
+  "Already handed over": "已派发过",
+  "Not handed over yet": "还没派发"
  }
 }
