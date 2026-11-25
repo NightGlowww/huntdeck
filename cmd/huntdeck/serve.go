@@ -382,6 +382,15 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 			return
 		}
 		tick := time.NewTicker(30 * time.Minute)
+		// Declared here, outside the loop: inside it, the zero value made
+		// time.Since(...) always past a minute and every tick fired a read - which
+		// spent the scanner's whole rate budget on itself.
+		//
+		// Reading the tasks back shares that budget with the handoff and with
+		// anyone running the CLI: the scanner answers about ten calls a minute, so
+		// eight a minute leaves room and still clears a 170-task backlog in half an
+		// hour.
+		var lastReconcile time.Time
 		defer tick.Stop()
 		for {
 			// One HuntScore row per day: the backtest in docs/design/ai-layer.md
@@ -408,11 +417,6 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 			// The same clock hands new targets to the scanner, when the operator
 			// turned that on: off is the default and the honest one.
 			if a.cfg.ScanKey.Reveal() != "" {
-				// Reading the tasks back shares one rate limit with the handoff and
-				// with anyone running the CLI by hand: the scanner's MCP answers about
-				// ten calls a minute, so eight a minute leaves room and still clears a
-				// 170-task backlog inside half an hour.
-				var lastReconcile time.Time
 				client := &scopesentry.Client{BaseURL: a.cfg.ScanURL, Key: a.cfg.ScanKey.Reveal()}
 				if sum, err := scanhandoff.Run(ctx, a.store, client, false); err != nil {
 					if ctx.Err() == nil {
