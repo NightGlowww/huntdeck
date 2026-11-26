@@ -421,7 +421,7 @@ func TestEmailOldHuntMail(t *testing.T) {
 	if _, body := e.do(e.client(), "GET", "/email?domain=example.com", nil, nil); !strings.Contains(body, "can&#39;t keep to a domain") || mail.last.ToDomain != "" {
 		t.Errorf("a domain asked of an old HuntMail: %+v", mail.last)
 	}
-	if _, body := e.do(e.client(), "GET", "/email/stats", nil, nil); !strings.Contains(body, "doesn't send its daily counts") {
+	if _, body := e.do(e.client(), "GET", "/email/stats", nil, nil); !strings.Contains(body, "doesn&#39;t send its daily counts") {
 		t.Error("the stats don't say why there's no chart")
 	}
 }

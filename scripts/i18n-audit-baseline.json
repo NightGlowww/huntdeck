@@ -1,7 +1,7 @@
 {
  "accounts": 6,
  "analytics": 11,
- "api": 121,
+ "api": 104,
  "changes": 40,
  "dashboard": 60,
  "disclosed": 275,
@@ -11,15 +11,15 @@
  "integrations": 2,
  "invites": 2,
  "llm": 2,
- "mcp": 124,
+ "mcp": 87,
  "methodology": 10,
- "notifications": 5,
- "pojia": 17,
+ "notifications": 2,
+ "pojia": 2,
  "programs": 24,
  "queue": 2,
  "reports": 5,
  "settings": 3,
- "stats": 3,
+ "stats": 2,
  "system": 2,
  "targets": 97
 }
