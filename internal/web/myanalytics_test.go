@@ -57,7 +57,7 @@ func TestReportsAnalytics(t *testing.T) {
 		want []string
 	}{
 		{"/reports/analytics", []string{"$1.5k", "Reports per month", `class="bc-valid"`, `class="bc-open"`, `href="/programs/fake/acme"`,
-			"Lowered by triage", `class="on" aria-current="true">All time`}},
+			"Lowered by triage", `class="on" aria-current="true">All time`, `class="seg rsubnav"`, `class="ibar"`, ">until<"}},
 		{"/reports/analytics?range=3m", []string{`aria-current="true">3 months`, "$1.5k"}},
 		{"/reports/analytics?from=2020-01&to=2020-02", []string{"Jan 2020 – Feb 2020", "Nothing awarded in this range"}},
 	} {
@@ -65,6 +65,9 @@ func TestReportsAnalytics(t *testing.T) {
 		if res.StatusCode != http.StatusOK {
 			t.Errorf("%s: status %d", tc.path, res.StatusCode)
 			continue
+		}
+		if strings.Contains(body, "{{.") || strings.Contains(body, "{{$") {
+			t.Errorf("%s leaked raw template syntax", tc.path)
 		}
 		for _, w := range tc.want {
 			if !strings.Contains(body, w) {

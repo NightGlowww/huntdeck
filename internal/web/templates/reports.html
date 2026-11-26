@@ -1,17 +1,35 @@
-{{define "topbar-actions"}}<a class="tb-btn" href="/reports/analytics" title="{{T "Your numbers over time"}}"><svg class="i"><use href="#i-chart"/></svg><span class="label">Analytics</span></a><a class="tb-btn" href="/reports/new" title="{{T "Add a report HuntDeck can't read from a platform"}}"><svg class="i"><use href="#i-plus"/></svg><span class="label">{{T "Add a report"}}</span></a><a class="tb-btn" href="{{.Data.CSVURL}}" data-csv-cols="reports" title="{{T "These reports as a spreadsheet (CSV): every page, the columns shown"}}"><svg class="i"><use href="#i-download"/></svg><span class="label">CSV</span></a>{{template "colpick" .Data.Columns}}{{end}}
+{{define "topbar-actions"}}<a class="tb-btn" href="/reports/new" title="{{T "Add a report HuntDeck can't read from a platform"}}"><svg class="i"><use href="#i-plus"/></svg><span class="label">{{T "Add a report"}}</span></a><a class="tb-btn" href="{{.Data.CSVURL}}" data-csv-cols="reports" title="{{T "These reports as a spreadsheet (CSV): every page, the columns shown"}}"><svg class="i"><use href="#i-download"/></svg><span class="label">CSV</span></a>{{template "colpick" .Data.Columns}}{{end}}
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T "Reports"}}</h1>
+<nav class="seg rsubnav" aria-label="{{T "Reports sections"}}"><a class="on" aria-current="page" href="/reports">{{T "Reports"}}</a><a href="/reports/analytics">{{T "Analytics"}}</a></nav>
 <div class="stats rstats">
   <a class="stat" href="/reports"><span class="l">{{T "Open"}}</span><span class="v{{if not .Open}} zero{{end}}">{{num .Open}}</span><span class="h">{{T "of"}} {{num .Total}} {{T (plural .Total "report" "reports")}}</span></a>
   <a class="stat{{if .NeedsYou}} hot{{end}}" href="/reports?status=you" title="{{T "Open reports where the program is waiting on you"}}"><span class="l">{{T "Needs you"}}</span><span class="v{{if not .NeedsYou}} zero{{end}}">{{num .NeedsYou}}</span><span class="h">{{T "waiting on your reply"}}</span></a>
-  <a class="stat" href="/reports?status=stale" title="{{T "Not decided yet, and no word from the program for {{.QuietDays}} days (Settings › Reports)"}}"><span class="l">{{T "Gone quiet"}}</span><span class="v{{if not .Stale}} zero{{end}}">{{num .Stale}}</span><span class="h">{{T "no word in"}} {{.QuietDays}} {{T (plural .QuietDays "day" "days")}}</span></a>
+  <a class="stat" href="/reports?status=stale" title="{{if eq .QuietDays 1}}{{TF "Not decided yet, and no word from the program for %s day (Settings › Reports)" (num .QuietDays)}}{{else}}{{TF "Not decided yet, and no word from the program for %s days (Settings › Reports)" (num .QuietDays)}}{{end}}"><span class="l">{{T "Gone quiet"}}</span><span class="v{{if not .Stale}} zero{{end}}">{{num .Stale}}</span><span class="h">{{T "no word in"}} {{.QuietDays}} {{T (plural .QuietDays "day" "days")}}</span></a>
   <a class="stat" href="/reports/analytics?range=year" title="{{T "Bounties, bonuses and retests awarded this year, per currency"}}"><span class="l">{{T "Earned"}} {{.Year}}</span><span class="v{{if not .EarnedYTD}} zero{{end}}">{{with .EarnedYTD}}{{with index . 0}}<span title="{{moneyFull .Value .Currency}}">{{money .Value .Currency}}</span>{{end}}{{else}}0{{end}}</span><span class="h">{{if gt (len .EarnedYTD) 1}}{{range $i, $a := .EarnedYTD}}{{if $i}}<span title="{{moneyFull $a.Value $a.Currency}}">+ {{money $a.Value $a.Currency}}</span> {{end}}{{end}}{{else}}{{T "bounties, bonuses, retests"}}{{end}}</span></a>
 </div>
 <div class="plist">
 {{template "rail" .RailView}}
 <section class="panel ptable">
+{{if gt .Total 0}}
+  <div class="rdist">
+    <svg class="rdist-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="{{T "Report distribution"}}">
+      {{range .Dist}}{{if gt .Count 0}}<rect class="{{.Class}}" x="{{.X}}" y="0" width="{{.W}}" height="6"><title>{{TF "%s: %s" (T .Label) (num .Count)}}</title></rect>{{end}}{{end}}
+    </svg>
+    <div class="rdist-top">
+      <div class="rdist-legend">
+        {{range .Dist}}<a class="rdist-item{{if not .Count}} zero{{end}}" href="{{.URL}}"><span class="sw {{.Sw}}"></span>{{T .Label}} <b>{{num .Count}}</b></a>{{end}}
+      </div>
+      {{if .PlatformCounts}}<div class="rdist-plats">
+        {{range .PlatformCounts}}<a class="rplat-badge" href="/reports?platform={{.Key}}&amp;status=all" title="{{TF "%s: %s" (platformLabel .Key) (num .Count)}}">{{template "ptag" .Key}}<span class="rplat-n">{{num .Count}}</span></a>{{end}}
+      </div>{{end}}
+    </div>
+  </div>
+{{end}}
   <div class="activef">
-    <span class="total">{{num .Pager.Total}} {{if and .OpenOnly (not .Pills)}}{{T "open reports"}}{{else}}{{T (plural .Pager.Total "report" "reports")}}{{end}}</span>
+    <span class="total">{{num .Pager.Total}} {{if and .OpenOnly (not .Pills)}}{{T (plural .Pager.Total "open report" "open reports")}}{{else}}{{T (plural .Pager.Total "report" "reports")}}{{end}}</span>
+    {{if .Total}}<nav class="seg rstatus-segs" aria-label="{{T "Status"}}">{{range .StatusTabs}}<a href="{{.URL}}"{{if .On}} class="on" aria-current="true"{{end}} title="{{T .Title}}">{{T .Label}} <em>{{num .Count}}</em></a>{{end}}</nav>{{end}}
+    {{if and .OpenOnly (gt .Total .Open)}}<a class="link rview-all" href="/reports?status=all">{{TF "View all %s reports →" (num .Total)}}</a>{{end}}
     {{template "pills" .}}
   </div>
 {{if .Rows}}
@@ -31,22 +49,22 @@
     <tbody>
     {{range .Rows}}
       <tr data-href="/reports/{{.ID}}"{{if .Quiet}} class="quiet"{{end}}>
-        <td class="c-prog">{{if .Program.ID}}{{template "pname" (plink .Program)}}{{else}}<div class="pn">{{template "ptag" .Platform}}<span class="name" title="{{T "{{.ProgramName}} (not in HuntDeck)"}}">{{or .ProgramName "—"}}</span></div>{{end}}</td>
-        <td class="c-report" title="{{.Title}}"><a class="link" href="/reports/{{.ID}}">{{.Title}}</a>
-          {{- if .NeedsYou}} <span class="chip waiting" title="{{T "The program is waiting on you"}}">{{T "needs you"}}</span>{{end}}
-          {{- if .Stale}} <span class="chip paused" title="{{T "No word from the program for {{$.Data.QuietDays}} days or more"}}">{{T "quiet"}}</span>{{end}}
-          {{- if .Unread}} <span class="chip creds" title="{{T "Unread messages on the platform"}}">unread</span>{{end}}
-          {{- if .Muted}} <span class="chip req">muted</span>{{else if .Quiet}} <span class="chip req" title="{{T "Snoozed until {{with .SnoozedUntil}}{{date .}}{{end}}"}}">snoozed</span>{{end}}
-          {{- if .GoneAt}} <span class="chip removed" title="{{T "No longer listed by the platform since {{with .GoneAt}}{{date .}}{{end}}"}}">gone</span>{{end}}
-          {{- if eq .Source "manual"}} <span class="chip req" title="{{T "Added by hand"}}">manual</span>{{end}}
-          {{- with .URL}} <a class="ext" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "Open on the platform"}}" aria-label="{{T "Open on the platform"}}"><svg class="i"><use href="#i-external"/></svg></a>{{end}}</td>
-        <td class="c-sev nowrap" data-label="Severity">{{template "rsev" .}}</td>
-        <td class="c-state" data-label="State"><span class="rstate {{.StateClass}}" title="{{with .RawState}}{{T "On the platform:"}} {{.}}{{end}}">{{T .StateLabel}}</span></td>
-        <td class="c-bounty num nowrap" data-label="Earned">{{range $i, $a := .Earned}}{{if $i}}<br>{{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
-        <td class="c-submitted nowrap" data-label="Submitted"><span class="when" title="{{datetime .SubmittedAt}}">{{date .SubmittedAt}}</span></td>
-        <td class="c-activity nowrap" data-label="Activity">{{with .LastActivityAt}}<span class="when" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">—</span>{{end}}{{if .Comments}} <span class="muted small" title="{{.Comments}} {{plural .Comments "comment" "comments"}}">· {{.Comments}}<svg class="i ic"><use href="#i-chat"/></svg></span>{{end}}</td>
-        <td class="c-triaged nowrap" data-label="Triaged">{{with .TriagedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
-        <td class="c-closed nowrap" data-label="Closed">{{with .ClosedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+        <td class="c-prog">{{if .Program.ID}}{{template "pname" (plink .Program)}}{{else}}<div class="pn">{{template "ptag" .Platform}}<span class="name" title="{{TF "%s (not in HuntDeck)" (or .ProgramName "—")}}">{{or .ProgramName "—"}}</span></div>{{end}}</td>
+        <td class="c-report" title="{{.Title}}"><div class="rtitle-row"><a class="link rtitle" href="/reports/{{.ID}}">{{.Title}}</a>
+          {{- if .NeedsYou}}<span class="chip waiting" title="{{T "The program is waiting on you"}}">{{T "needs you"}}</span>{{end}}
+          {{- if .Stale}}<span class="chip paused" title="{{if eq $.Data.QuietDays 1}}{{TF "No word from the program for %s day or more" (num $.Data.QuietDays)}}{{else}}{{TF "No word from the program for %s days or more" (num $.Data.QuietDays)}}{{end}}">{{T "quiet"}}</span>{{end}}
+          {{- if .Unread}}<span class="chip creds" title="{{T "Unread messages on the platform"}}">{{T "unread"}}</span>{{end}}
+          {{- if .Muted}}<span class="chip req">{{T "muted"}}</span>{{else if .Quiet}}<span class="chip req"{{with .SnoozedUntil}} title="{{TF "Snoozed until %s" (datePtr .)}}"{{end}}>{{T "snoozed"}}</span>{{end}}
+          {{- if .GoneAt}}<span class="chip removed" title="{{TF "No longer listed by the platform since %s" (datePtr .GoneAt)}}">{{T "gone"}}</span>{{end}}
+          {{- if eq .Source "manual"}}<span class="chip req" title="{{T "Added by hand"}}">{{T "manual"}}</span>{{end}}
+          {{- with .URL}}<a class="ext" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "Open on the platform"}}" aria-label="{{T "Open on the platform"}}"><svg class="i"><use href="#i-external"/></svg></a>{{end}}</div></td>
+        <td class="c-sev nowrap" data-label="{{T "Severity"}}">{{template "rsev" .}}</td>
+        <td class="c-state" data-label="{{T "State"}}"><span class="rstate {{.StateClass}}" title="{{with .RawState}}{{T "On the platform:"}} {{.}}{{end}}">{{T .StateLabel}}</span></td>
+        <td class="c-bounty num nowrap" data-label="{{T "Earned"}}">{{range $i, $a := .Earned}}{{if $i}}<br>{{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+        <td class="c-submitted nowrap" data-label="{{T "Submitted"}}"><span class="when" title="{{datetime .SubmittedAt}}">{{date .SubmittedAt}}</span></td>
+        <td class="c-activity nowrap" data-label="{{T "Activity"}}">{{with .LastActivityAt}}<span class="when" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">—</span>{{end}}{{if .Comments}} <span class="rcomments muted small" title="{{.Comments}} {{plural .Comments "comment" "comments"}}"><span aria-hidden="true">·</span><span>{{num .Comments}}</span><svg class="i ic" aria-hidden="true"><use href="#i-chat"/></svg></span>{{end}}</td>
+        <td class="c-triaged nowrap" data-label="{{T "Triaged"}}">{{with .TriagedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+        <td class="c-closed nowrap" data-label="{{T "Closed"}}">{{with .ClosedAt}}<span class="when" title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
       </tr>
     {{end}}
     </tbody>
@@ -57,9 +75,9 @@
 {{else if .Pager.Beyond}}
   {{template "past-end" .Pager}}
 {{else if .Total}}
-  <div class="empty-state">{{T "No reports match these filters."}}<a class="link" href="{{.ClearURL}}">{{T "Clear filters"}}</a></div>
+  <div class="empty-state">{{T "No reports match these filters."}} <a class="link" href="{{.ClearURL}}">{{T "Clear filters"}}</a></div>
 {{else}}
-  <div class="empty-state">{{T "No reports yet. HuntDeck reads your reports from HackerOne (its API token), Bugcrowd (a login or session) and Intigriti (its web login) as it polls; for others,"}}<a class="link" href="/reports/new">{{T "add one by hand"}}</a>.</div>
+  <div class="empty-state">{{T "No reports yet. HuntDeck reads your reports from HackerOne (its API token), Bugcrowd (a login or session), Intigriti (its web login) and YesWeHack (a login or token) as it polls; for others,"}} <a class="link" href="/reports/new">{{T "add one by hand"}}</a>.</div>
 {{end}}
 </section>
 </div>

@@ -1,29 +1,30 @@
-{{define "topbar-actions"}}<a class="tb-btn" href="/reports" title="{{T "All your reports"}}"><svg class="i"><use href="#i-flag"/></svg><span class="label">Reports</span></a>{{if .Data.Total}}<button type="button" class="tb-btn" data-board-edit hidden><svg class="i"><use href="#i-grid"/></svg><span class="label">Customize</span></button>{{end}}{{end}}
+{{define "topbar-actions"}}<a class="tb-btn" href="/reports" title="{{T "All your reports"}}"><svg class="i"><use href="#i-flag"/></svg><span class="label">{{T "Reports"}}</span></a>{{if .Data.Total}}<button type="button" class="tb-btn" data-board-edit hidden><svg class="i"><use href="#i-grid"/></svg><span class="label">{{T "Customize"}}</span></button>{{end}}{{end}}
 {{define "content"}}{{with .Data}}
-<h1 class="m-heading">Analytics</h1>
+<h1 class="m-heading">{{T "Analytics"}}</h1>
+<nav class="seg rsubnav" aria-label="{{T "Reports sections"}}"><a href="/reports">{{T "Reports"}}</a><a class="on" aria-current="page" href="/reports/analytics">{{T "Analytics"}}</a></nav>
 <div class="ahead">
   <nav class="segs" aria-label="{{T "Range"}}">{{range .Ranges}}<a href="{{$.Data.RangeURL .Key}}"{{if eq .Key $.Data.RangeKey}} class="on" aria-current="true"{{end}}>{{T .Label}}</a>{{end}}</nav>
   <form class="arange" method="get" action="/reports/analytics">
-    <label><span class="sr-only">From</span><input type="month" name="from" value="{{.From}}" aria-label="{{T "From month"}}"></label>
-    <span class="muted">to</span>
-    <label><span class="sr-only">To</span><input type="month" name="to" value="{{.To}}" aria-label="{{T "To month"}}"></label>
+    <label><span class="sr-only">{{T "From month"}}</span><input type="month" name="from" value="{{.From}}" aria-label="{{T "From month"}}"></label>
+    <span class="muted">{{T "until"}}</span>
+    <label><span class="sr-only">{{T "To month"}}</span><input type="month" name="to" value="{{.To}}" aria-label="{{T "To month"}}"></label>
     <button class="button secondary small" type="submit">{{T "Show"}}</button>
   </form>
-  <span class="muted small">Reports by when you submitted them, money by when it was awarded · {{.RangeLabel}}</span>
+  <span class="muted small">{{T "Reports by when you submitted them, money by when it was awarded"}} · {{if .RangeLabelKey}}{{T .RangeLabelKey}}{{else}}{{.RangeLabel}}{{end}}</span>
 </div>
 {{if not .Total}}
-<section class="panel"><div class="empty-state">{{T "No reports yet. Once HuntDeck has read yours (or you've"}}<a class="link" href="/reports/new">{{T "added some"}}</a>{{T "), your numbers show here."}}</div></section>
+<section class="panel"><div class="empty-state">{{T "No reports yet. Once HuntDeck has read yours (or you've"}} <a class="link" href="/reports/new">{{T "added some"}}</a>{{T "), your numbers show here."}}</div></section>
 {{else}}
 {{template "board-editbar"}}
 <div class="board aboard" data-board="analytics" data-board-even>
-<section class="bx" data-box="totals" data-place="0 12" data-place-wide="0 12" data-title="Totals">
+<section class="bx" data-box="totals" data-place="0 12" data-place-wide="0 12" data-title="{{T "Totals"}}">
 <div class="stats astats">
   <div class="stat"><span class="l">{{T "Reports"}}</span><span class="v{{if not .Reports}} zero{{end}}">{{num .Reports}}</span><span class="h">{{TF "%s open · %s this month" (num .Open) (num .ThisMonth)}}</span></div>
   <div class="stat" title="{{T "Valid (accepted, resolved, or valid but not to be fixed) of the reports decided"}}"><span class="l">{{T "Acceptance"}}</span><span class="v">{{.Pct .Acceptance}}</span><span class="h">{{TF "%s valid of %s decided" (num .Valid) (num .Decided)}}</span></div>
   <div class="stat" title="{{T "Duplicates of the reports decided"}}"><span class="l">{{T "Duplicates"}}</span><span class="v">{{.Pct .DuplicateRate}}</span><span class="h">{{TF "%s duplicates" (num .Duplicates)}}</span></div>
   <div class="stat" title="{{T "Bounties, bonuses and retests awarded in the range, per currency (never converted)"}}"><span class="l">{{T "Earned"}}</span><span class="v{{if not .Earned}} zero{{end}}">{{with .Earned}}{{with index . 0}}<span title="{{moneyFull .Value .Currency}}">{{money .Value .Currency}}</span>{{end}}{{else}}0{{end}}</span><span class="h">{{if gt (len .Earned) 1}}{{range $i, $a := .Earned}}{{if $i}}<span title="{{moneyFull $a.Value $a.Currency}}">+ {{money $a.Value $a.Currency}}</span> {{end}}{{end}}{{else}}{{T "this month"}} {{with .ThisMonthEarned}}{{with index . 0}}{{money .Value .Currency}}{{end}}{{else}}0{{end}}{{end}}</span></div>
   <div class="stat" title="{{T "Reports submitted per week and per month, over the range"}}"><span class="l">{{T "Pace"}}</span><span class="v">{{printf "%.1f" .PerWeek}}</span><span class="h">{{TF "%s a week · %s a month" (printf "%.1f" .PerWeek) (printf "%.1f" .PerMonth)}}</span></div>
-  <div class="stat" title="{{T "Earned per month on average over the range, in {{.Main}}"}}"><span class="l">{{T "Per month"}}</span><span class="v{{if not .EarnedPerMonth}} zero{{end}}">{{if .Main}}{{money .EarnedPerMonth .Main}}{{else}}0{{end}}</span><span class="h">{{T "earned, on average"}}</span></div>
+  <div class="stat" {{with .Main}}title="{{TF "Earned per month on average over the range, in %s" .}}"{{else}}title="{{T "Earned per month on average over the range"}}"{{end}}><span class="l">{{T "Per month"}}</span><span class="v{{if not .EarnedPerMonth}} zero{{end}}">{{if .Main}}{{money .EarnedPerMonth .Main}}{{else}}0{{end}}</span><span class="h">{{T "earned, on average"}}</span></div>
 </div>
 </section>
 <section class="panel bx" data-box="outcomes" data-place="0 6" data-place-wide="0 4" data-title="{{T "Reports per month"}}">
@@ -36,14 +37,14 @@
   <div class="panel-body">{{if .HasMoney}}{{template "bar-chart" .Money}}{{else}}<div class="empty-state small">{{T "Nothing awarded in this range."}}</div>{{end}}</div>
 </section>
 <section class="panel bx" data-box="cumulative" data-place="0 12" data-place-wide="8 4" data-title="{{T "Earned in all"}}">
-  <div class="panel-head"><h2>{{T "Earned in all"}}{{with .Main}} · {{.}}{{end}}</h2><span class="aside">{{T "over the range"}}{{if gt (len .Earned) 1}}; other currencies in the tiles{{end}}</span></div>
+  <div class="panel-head"><h2>{{T "Earned in all"}}{{with .Main}} · {{.}}{{end}}</h2><span class="aside">{{T "over the range"}}{{if gt (len .Earned) 1}}{{T "; other currencies in the tiles"}}{{end}}</span></div>
   <div class="panel-body">{{if .HasMoney}}{{template "line-chart" .Cumulative}}{{else}}<div class="empty-state small">{{T "Nothing awarded in this range."}}</div>{{end}}</div>
 </section>
 <section class="panel bx" data-box="severity" data-place="0 6" data-place-wide="0 6" data-title="{{T "By severity"}}">
-  <div class="panel-head"><h2>{{T "By severity"}}</h2><span class="aside">bounties in {{or .Main "—"}}</span></div>
+  <div class="panel-head"><h2>{{T "By severity"}}</h2><span class="aside">{{TF "bounties in %s" (or .Main "—")}}</span></div>
   <div class="table-wrap"><table class="atable">
-    <thead><tr><th>{{T "Severity"}}</th><th class="num" title="{{T "Reports you submitted as this severity"}}">{{T "Submitted"}}</th><th class="num" title="{{T "Reports rated this severity now"}}">{{T "Rated"}}</th><th class="num">{{T "Valid"}}</th><th class="num" title="{{T "Earned by reports rated this severity now"}}">{{T "Earned"}}</th><th class="num" title="{{T "Per paid report"}}">{{T "Average"}}</th></tr></thead>
-    <tbody>{{$m := .Main}}{{range .Severities}}<tr><td><span class="sev {{.Key}}">{{.Label}}</span></td><td class="num">{{num .Submitted}}</td><td class="num">{{num .Final}}</td><td class="num">{{num .Valid}}</td>
+    <thead><tr><th>{{T "Severity"}}</th><th class="num" title="{{T "Reports you submitted as this severity"}}">{{T "Submitted as"}}</th><th class="num" title="{{T "Reports rated this severity now"}}">{{T "Rated"}}</th><th class="num">{{T "Valid"}}</th><th class="num" title="{{T "Earned by reports rated this severity now"}}">{{T "Earned"}}</th><th class="num" title="{{T "Per paid report"}}">{{T "Average"}}</th></tr></thead>
+    <tbody>{{$m := .Main}}{{range .Severities}}<tr><td><span class="sev {{.Key}}">{{T .Label}}</span></td><td class="num">{{num .Submitted}}</td><td class="num"><span class="ibar-cell"><svg class="ibar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true"><rect class="ibar-bg" width="100" height="4" rx="2"/><rect class="ibar-fill" width="{{$.Data.BarPct .Final $.Data.MaxSeverityReports}}" height="4" rx="2"/></svg><span class="ibar-n">{{num .Final}}</span></span></td><td class="num">{{num .Valid}}</td>
       <td class="num">{{if .Earned}}<span title="{{moneyFull .Earned $m}}">{{money .Earned $m}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
       <td class="num">{{if .Paid}}{{money .Average $m}}{{else}}<span class="zero">—</span>{{end}}</td></tr>{{end}}</tbody>
   </table></div>
@@ -51,7 +52,7 @@
 <section class="panel bx" data-box="agreement" data-place="6 6" data-place-wide="6 6" data-title="{{T "Triage and your severity"}}">
   <div class="panel-head"><h2>{{T "Triage and your severity"}}</h2><span class="aside">{{T "decided reports"}}</span></div>
   {{with .Agreement}}{{$k := .Known}}<div class="panel-body">
-    {{with $.Data.AgreeBar}}<svg class="agree" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="{{T "How triage treated your severities"}}">{{range .}}<rect class="{{.Class}}" x="{{.X}}" y="0" width="{{.W}}" height="6"><title>{{.Title}}</title></rect>{{end}}</svg>{{end}}
+    {{with $.Data.AgreeBar}}<svg class="agree" viewBox="0 0 100 6" preserveAspectRatio="none" role="img" aria-label="{{T "How triage treated your severities"}}">{{range .}}<rect class="{{.Class}}" x="{{.X}}" y="0" width="{{.W}}" height="6"><title>{{TF "%s: %s" (T .LabelKey) (num .Count)}}</title></rect>{{end}}</svg>{{end}}
     <table class="kv">
       <tr><th><span class="sw a-match"></span>{{T "Kept as submitted"}}</th><td class="num">{{num .Match}}</td><td class="num muted">{{$.Data.Share .Match $k}}</td></tr>
       <tr><th><span class="sw a-up"></span>{{T "Raised by triage"}}</th><td class="num">{{num .Upgraded}}</td><td class="num muted">{{$.Data.Share .Upgraded $k}}</td></tr>
@@ -62,12 +63,12 @@
     <p class="note">{{T "Bugcrowd says triage changed a priority, never from what: those count as changed unless you enter what you submitted."}}</p>
   </div>{{end}}
 </section>
-<section class="panel bx" data-box="platforms" data-place="0 12" data-place-wide="0 6" data-title="Platforms">
-  <div class="panel-head"><h2>Platforms</h2></div>
+<section class="panel bx" data-box="platforms" data-place="0 12" data-place-wide="0 6" data-title="{{T "Platforms"}}">
+  <div class="panel-head"><h2>{{T "Platforms"}}</h2></div>
   <div class="table-wrap"><table class="atable">
     <thead><tr><th>{{T "Platform"}}</th><th class="num">{{T "Reports"}}</th><th class="num">{{T "Valid"}}</th><th class="num">{{T "Acceptance"}}</th><th class="num">{{T "Duplicates"}}</th><th class="num">{{T "Earned"}}</th><th class="num" title="{{T "Your average time from submission to triage"}}">{{T "To triage"}}</th><th class="num" title="{{T "Your average time from submission to the first bounty"}}">{{T "To bounty"}}</th></tr></thead>
-    <tbody>{{range .Platforms}}<tr><td>{{template "ptag" .Platform}} {{platformLabel .Platform}}</td><td class="num">{{num .Reports}}</td><td class="num">{{num .Valid}}</td>
-      <td class="num">{{$.Data.Pct .Acceptance}}</td><td class="num">{{$.Data.Pct .DuplicateRate}}</td>
+    <tbody>{{range .Platforms}}<tr><td>{{template "ptag" .Platform}} {{platformLabel .Platform}}</td><td class="num"><span class="ibar-cell"><svg class="ibar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true"><rect class="ibar-bg" width="100" height="4" rx="2"/><rect class="ibar-fill" width="{{$.Data.BarPct .Reports $.Data.MaxPlatformReports}}" height="4" rx="2"/></svg><span class="ibar-n">{{num .Reports}}</span></span></td><td class="num">{{num .Valid}}</td>
+      <td class="num">{{if $.Data.HasRate .Acceptance}}<span class="ibar-cell"><svg class="ibar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true"><rect class="ibar-bg" width="100" height="4" rx="2"/><rect class="ibar-fill good" width="{{$.Data.RatePct .Acceptance}}" height="4" rx="2"/></svg><span class="ibar-n">{{$.Data.Pct .Acceptance}}</span></span>{{else}}<span class="zero">—</span>{{end}}</td><td class="num">{{$.Data.Pct .DuplicateRate}}</td>
       <td class="num">{{range $i, $a := .Earned}}{{if $i}} + {{end}}<span title="{{moneyFull $a.Value $a.Currency}}">{{money $a.Value $a.Currency}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
       <td class="num">{{or ($.Data.Hours .Triage) "—"}}</td><td class="num">{{or ($.Data.Hours .Bounty) "—"}}</td></tr>{{end}}</tbody>
   </table></div>
@@ -77,7 +78,7 @@
   <div class="table-wrap"><table class="atable times">
     <thead><tr><th class="c-prog">{{T "All programs"}}</th><th class="num">{{T "First response"}}</th><th class="num">{{T "Triage"}}</th><th class="num">{{T "Bounty"}}</th><th class="num">{{T "Resolution"}}</th></tr></thead>
     <tbody>
-      <tr class="overall"><td>{{T "Your average"}}</td>{{with .Times}}<td class="num" title="median {{$.Data.Median .FirstResponse}}">{{or ($.Data.Hours .FirstResponse) "—"}}</td><td class="num" title="median {{$.Data.Median .Triage}}">{{or ($.Data.Hours .Triage) "—"}}</td><td class="num" title="median {{$.Data.Median .Bounty}}">{{or ($.Data.Hours .Bounty) "—"}}</td><td class="num" title="median {{$.Data.Median .Resolution}}">{{or ($.Data.Hours .Resolution) "—"}}</td>{{end}}</tr>
+      <tr class="overall"><td>{{T "Your average"}}</td>{{with .Times}}<td class="num" title="{{TF "median %s" ($.Data.Median .FirstResponse)}}">{{or ($.Data.Hours .FirstResponse) "—"}}</td><td class="num" title="{{TF "median %s" ($.Data.Median .Triage)}}">{{or ($.Data.Hours .Triage) "—"}}</td><td class="num" title="{{TF "median %s" ($.Data.Median .Bounty)}}">{{or ($.Data.Hours .Bounty) "—"}}</td><td class="num" title="{{TF "median %s" ($.Data.Median .Resolution)}}">{{or ($.Data.Hours .Resolution) "—"}}</td>{{end}}</tr>
       {{range .Compared}}<tr><td class="c-prog">{{template "aprog" .}}</td>
         {{template "atime" (list ($.Data.Hours .Yours.FirstResponse) ($.Data.Published .Theirs.FirstResponse) ($.Data.Versus .Yours.FirstResponse .Theirs.FirstResponse))}}
         {{template "atime" (list ($.Data.Hours .Yours.Triage) ($.Data.Published (or .Theirs.Triage .Theirs.Validation)) ($.Data.Versus .Yours.Triage (or .Theirs.Triage .Theirs.Validation)))}}
@@ -88,7 +89,7 @@
   <p class="panel-foot">{{T "Green: quicker for you than the program's published average by a fifth or more; red: slower. Programs publish averages over recent months; yours cover the range shown."}}</p>
 </section>
 <section class="panel bx" data-box="programs" data-place="0 12" data-place-wide="0 6" data-title="{{T "Top programs"}}">
-  <div class="panel-head"><h2>{{T "Top programs"}}</h2><span class="aside">by earnings in {{or .Main "—"}}, then valid reports</span></div>
+  <div class="panel-head"><h2>{{T "Top programs"}}</h2><span class="aside">{{TF "by earnings in %s, then valid reports" (or .Main "—")}}</span></div>
   <div class="table-wrap"><table class="atable">
     <thead><tr><th class="c-prog">{{T "Program"}}</th><th class="num">{{T "Reports"}}</th><th class="num">{{T "Valid"}}</th><th class="num">{{T "Duplicates"}}</th><th class="num">{{T "Earned"}}</th></tr></thead>
     <tbody>{{range .Programs}}<tr><td class="c-prog">{{template "aprog" .}}</td><td class="num">{{num .Reports}}</td><td class="num">{{num .Valid}}</td><td class="num">{{num .Duplicates}}</td>
@@ -100,6 +101,6 @@
 {{end}}
 {{end}}{{end}}
 
-{{define "aprog"}}<div class="pn">{{template "ptag" .Platform}}{{if .ProgramID}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}" title="{{.Name}}">{{.Name}}</a>{{else}}<span class="name" title="{{.Name}}">{{or .Name "—"}}</span>{{end}}{{if .Private}} <span class="chip private">private</span>{{end}}</div>{{end}}
+{{define "aprog"}}<div class="pn">{{template "ptag" .Platform}}{{if .ProgramID}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}" title="{{.Name}}">{{.Name}}</a>{{else}}<span class="name" title="{{.Name}}">{{or .Name "—"}}</span>{{end}}{{if .Private}} <span class="chip private">{{T "private"}}</span>{{end}}</div>{{end}}
 
 {{define "atime"}}{{$y := index . 0}}{{$t := index . 1}}{{$v := index . 2}}<td class="num atime{{with $v}} {{.}}{{end}}">{{if or $y $t}}<b>{{or $y "—"}}</b> <span class="muted">/ {{or $t "—"}}</span>{{else}}<span class="zero">—</span>{{end}}</td>{{end}}

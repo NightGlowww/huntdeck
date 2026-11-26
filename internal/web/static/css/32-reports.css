@@ -9,9 +9,14 @@
 table.rlist :is(.c-triaged, .c-closed):not(.col-show) { display: none !important; } /* until chosen in Customize; cards too */
 .rlist td.c-bounty { line-height: 1.25; }
 .rlist tr.quiet td { opacity: .62; }
-.rlist .ic { width: 12px; height: 12px; margin-left: 2px; vertical-align: -2px; }
-.rlist .c-report .chip { margin-left: 2px; vertical-align: 1px; }
-.c-report .ext, .rhead .ext { display: inline-flex; margin-left: 4px; color: var(--muted); vertical-align: -2px; }
+.rlist .rtitle-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-width: 0; }
+.rlist .rtitle { min-width: 0; overflow-wrap: anywhere; }
+.rlist .ic { width: 12px; height: 12px; margin-left: 0; vertical-align: middle; }
+.rlist .c-report .chip { margin-left: 0; vertical-align: middle; flex: none; }
+.rlist td.c-activity .rcomments { display: inline-flex; align-items: center; gap: 3px; vertical-align: middle; }
+.c-report .ext, .rhead .ext { display: inline-flex; align-items: center; color: var(--muted); }
+.c-report .ext { flex: none; margin-left: 0; vertical-align: middle; }
+.rhead .ext { margin-left: 4px; vertical-align: -2px; }
 .c-report .ext:hover, .rhead .ext:hover { color: var(--accent); }
 .c-report .ext .i { width: 13px; height: 13px; }
 @media (max-width: 1600px) {
@@ -31,6 +36,23 @@ table.rlist :is(.c-triaged, .c-closed):not(.col-show) { display: none !important
 .c-sev .arrow, .rfacts .arrow { color: var(--faint); }
 
 .rstats { margin-bottom: 16px; }
+.rsubnav { margin-bottom: 14px; }
+.plist > .ptable > .rdist { flex: none; }
+.rdist { display: grid; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+svg.rdist-bar { display: block; width: 100%; height: 6px; border-radius: 3px; overflow: hidden; background: var(--surface-3); }
+.rdist-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.rdist-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: calc(12px * var(--fs, 1)); }
+.rdist-item { display: inline-flex; align-items: center; color: var(--text-2); white-space: nowrap; }
+.rdist-item:hover { color: var(--accent); }
+.rdist-item.zero { color: var(--faint); }
+.rdist-item b { margin-left: 4px; color: var(--text); font: 600 calc(11.5px * var(--fs, 1)) var(--mono); font-variant-numeric: tabular-nums; }
+.rdist-item.zero b { color: var(--faint); }
+.rdist-plats { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rplat-badge { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 7px 0 3px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); color: var(--text-2); font-size: calc(11.5px * var(--fs, 1)); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rplat-badge:hover { border-color: var(--accent); color: var(--text); }
+.rplat-n { font-family: var(--mono); font-weight: 600; }
+.rstatus-segs { flex-wrap: wrap; }
+.rview-all { font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; white-space: nowrap; }
 
 /* A report's page: its times and details as label and value rows, and its
    timeline. */
@@ -59,8 +81,17 @@ input[type="date"] { color-scheme: light dark; }
 
 /* Analytics (reportsanalytics.html). */
 .ahead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 16px; }
-.arange { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.arange input[type="month"] { height: 28px; padding: 0 6px; border: 1px solid var(--border-2); border-radius: 6px; background: var(--surface); color: var(--text); color-scheme: light dark; }
+.ahead .segs, .arange { align-items: center; }
+.ahead .segs a { height: 30px; }
+.arange { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.arange input[type="month"] { height: 30px; padding: 0 6px; border: 1px solid var(--border-2); border-radius: 6px; background: var(--surface); color: var(--text); color-scheme: light dark; }
+.arange button { height: 30px; }
+.ibar-cell { display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.ibar-n { min-width: 2.2ch; text-align: right; }
+svg.ibar { width: 48px; height: 4px; flex: none; overflow: visible; }
+.ibar-bg { fill: var(--surface-3); }
+.ibar-fill { fill: var(--accent); }
+.ibar-fill.good { fill: var(--good); }
 .alegend { flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; }
 .alegend > span { white-space: nowrap; }
 .sw { display: inline-block; width: 10px; height: 10px; margin: 0 6px 0 0; border-radius: 2px; vertical-align: -1px; background: var(--faint); }

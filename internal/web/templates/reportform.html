@@ -1,12 +1,12 @@
 {{/* Add a report by hand, or correct one (myreportform.go). */}}
 {{define "content"}}{{with .Data}}
-<h1 class="m-heading">{{.Heading}}</h1>
+<h1 class="m-heading">{{T .Heading}}</h1>
 <form method="post" action="{{.Action}}" class="channel-form own-form">
   <section class="panel">
-    <div class="panel-head"><h2>{{T "Report"}}</h2><span class="aside">{{if .Manual}}{{T "one HuntDeck can't read from a platform; it counts in Analytics like the others"}}{{else}}what you change here stays as you set it: syncs won't overwrite it{{end}}</span></div>
+    <div class="panel-head"><h2>{{T "Report"}}</h2><span class="aside">{{if .Manual}}{{T "one HuntDeck can't read from a platform; it counts in Analytics like the others"}}{{else}}{{T "what you change here stays as you set it: syncs won't overwrite it"}}{{end}}</span></div>
     <div class="panel-body profile-form">
       <label class="wide"><span>{{T "Title"}}</span><input type="text" name="title" value="{{.Title}}" maxlength="500" required></label>
-      {{if .Manual}}<label><span>{{T "Platform"}}</span><select name="platform">{{range .Platforms}}<option value="{{.}}"{{if eq . $.Data.Platform}} selected{{end}}>{{if eq . "other"}}Other{{else}}{{platformLabel .}}{{end}}</option>{{end}}</select></label>{{end}}
+      {{if .Manual}}<label><span>{{T "Platform"}}</span><select name="platform">{{range .Platforms}}<option value="{{.}}"{{if eq . $.Data.Platform}} selected{{end}}>{{if eq . "other"}}{{T "Other"}}{{else}}{{platformLabel .}}{{end}}</option>{{end}}</select></label>{{end}}
       <label class="wide"><span>{{T "Program"}}</span><input type="text" name="program" value="{{.ProgramName}}" maxlength="200" placeholder="{{T "Its name, as on the platform"}}"></label>
       <label class="wide"><span>{{T "Link"}}</span><input type="url" name="url" value="{{.URL}}" maxlength="2000" placeholder="https://" spellcheck="false"></label>
     </div>
@@ -14,11 +14,11 @@
   <section class="panel">
     <div class="panel-head"><h2>{{T "Outcome"}}</h2></div>
     <div class="panel-body profile-form">
-      <label><span>{{T "State"}}</span><select name="state">{{range .States}}<option value="{{.Key}}"{{if eq .Key $.Data.State}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+      <label><span>{{T "State"}}</span><select name="state">{{range .States}}<option value="{{.Key}}"{{if eq .Key $.Data.State}} selected{{end}}>{{T .Label}}</option>{{end}}</select></label>
       <label><span>{{T "Submitted"}}</span><input type="date" name="submitted" value="{{.Submitted}}" required></label>
       {{if .Manual}}<label><span>{{T "Closed"}}</span><input type="date" name="closed" value="{{.Closed}}"></label>{{end}}
-      <label title="{{T "The severity you submitted it as"}}"><span>{{T "Submitted as"}}</span><select name="submitted_severity"><option value="">{{T "Not known"}}</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.SubmittedSeverity}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
-      <label><span>{{T "Severity now"}}</span><select name="severity"><option value="">{{T "Unrated"}}</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.Severity}} selected{{end}}>{{.Label}}</option>{{end}}</select></label>
+      <label title="{{T "The severity you submitted it as"}}"><span>{{T "Submitted as"}}</span><select name="submitted_severity"><option value="">{{T "Not known"}}</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.SubmittedSeverity}} selected{{end}}>{{T .Label}}</option>{{end}}</select></label>
+      <label><span>{{T "Severity now"}}</span><select name="severity"><option value="">{{T "Unrated"}}</option>{{range .Severities}}<option value="{{.Key}}"{{if eq .Key $.Data.Severity}} selected{{end}}>{{T .Label}}</option>{{end}}</select></label>
     </div>
   </section>
   {{if .Manual}}<section class="panel">
@@ -33,7 +33,7 @@
     </div>
   </section>{{end}}
   <div class="actbar">
-    <button type="submit" class="act-save">{{if .ID}}Save{{else}}Add report{{end}}</button>
+    <button type="submit" class="act-save">{{if .ID}}{{T "Save"}}{{else}}{{T "Add report"}}{{end}}</button>
     <a class="button ghost act-cancel" href="{{if .ID}}/reports/{{.ID}}{{else}}/reports{{end}}">{{T "Cancel"}}</a>
   </div>
 </form>

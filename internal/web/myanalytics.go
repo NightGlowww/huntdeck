@@ -178,18 +178,20 @@ func niceCeil(v float64) float64 {
 
 type analyticsView struct {
 	reports.Analytics
-	RangeKey, RangeLabel string
-	From, To             string // the custom range's months
-	Ranges               []struct{ Key, Label string }
-	Outcomes             barChart
-	Money                barChart
-	Cumulative           lineChart
-	HasMoney             bool
-	Total                int // reports stored, whatever the range
-	Platforms            []analyticsPlatform
-	Programs             []reports.ProgramRow
-	Compared             []reports.ProgramRow // programs with both your times and theirs
-	Sum                  reports.Month        // the months' outcomes added up, for the legend
+	RangeKey, RangeLabel, RangeLabelKey string
+	From, To                            string // the custom range's months
+	Ranges                              []struct{ Key, Label string }
+	Outcomes                            barChart
+	Money                               barChart
+	Cumulative                          lineChart
+	HasMoney                            bool
+	Total                               int // reports stored, whatever the range
+	MaxSeverityReports                  int
+	MaxPlatformReports                  int
+	Platforms                           []analyticsPlatform
+	Programs                            []reports.ProgramRow
+	Compared                            []reports.ProgramRow // programs with both your times and theirs
+	Sum                                 reports.Month        // the months' outcomes added up, for the legend
 }
 
 type analyticsPlatform struct {
@@ -251,10 +253,30 @@ func (analyticsView) Median(s reports.Stat) string {
 	return humanize.Hours(s.Median)
 }
 
+// HasRate reports whether a ratio is defined (not NaN).
+func (analyticsView) HasRate(f float64) bool { return !math.IsNaN(f) }
+
+// BarPct returns n as a 0-100 percentage of max for inline SVG bars.
+func (analyticsView) BarPct(n, maxVal int) string {
+	if maxVal <= 0 || n <= 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(round1(100*float64(n)/float64(maxVal)), 'f', -1, 64)
+}
+
+// RatePct returns a [0,1] rate as a 0-100 SVG bar width (0 when NaN).
+func (analyticsView) RatePct(f float64) string {
+	if math.IsNaN(f) || f <= 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(round1(math.Min(100, 100*f)), 'f', -1, 64)
+}
+
 // agreePart is one part of the triage-agreement bar, in a 100-wide box.
 type agreePart struct {
-	Class, Title string
-	X, W         float64
+	Class, Title, LabelKey string
+	Count                  int
+	X, W                   float64
 }
 
 // AgreeBar splits a bar by how triage treated the severities.
@@ -275,7 +297,7 @@ func (v analyticsView) AgreeBar() []agreePart {
 			continue
 		}
 		w := 100 * float64(p.n) / float64(k)
-		out = append(out, agreePart{Class: p.class, Title: fmt.Sprintf("%s: %d", p.title, p.n), X: round1(x), W: round1(math.Max(w-.4, .3))})
+		out = append(out, agreePart{Class: p.class, Title: fmt.Sprintf("%s: %d", p.title, p.n), LabelKey: p.title, Count: p.n, X: round1(x), W: round1(math.Max(w-.4, .3))})
 		x += w
 	}
 	return out
@@ -313,6 +335,15 @@ func (s *server) reportsAnalytics(w http.ResponseWriter, r *http.Request) {
 	a := reports.Analyse(all, rg, zone, published, now)
 	v := analyticsView{Analytics: a, RangeKey: key, RangeLabel: label, Ranges: analyticsRanges, Total: len(all),
 		From: r.URL.Query().Get("from"), To: r.URL.Query().Get("to")}
+	switch key {
+	case "all", "3m", "12m":
+		v.RangeLabelKey = label
+	}
+	for _, sv := range a.Severities {
+		if sv.Final > v.MaxSeverityReports {
+			v.MaxSeverityReports = sv.Final
+		}
+	}
 	months := make([]time.Time, len(a.Months))
 	totals := make([]float64, len(a.Months))
 	money := make([]float64, len(a.Months))
@@ -360,6 +391,9 @@ func (s *server) reportsAnalytics(w http.ResponseWriter, r *http.Request) {
 			Format: func(f float64) string { return humanize.Money(f, a.Main) }})
 	}
 	for _, p := range a.Platforms {
+		if p.Reports > v.MaxPlatformReports {
+			v.MaxPlatformReports = p.Reports
+		}
 		v.Platforms = append(v.Platforms, analyticsPlatform{p})
 	}
 	for i, p := range a.Programs {

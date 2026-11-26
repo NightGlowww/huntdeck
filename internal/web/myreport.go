@@ -2,6 +2,7 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"slices"
 	"strconv"
@@ -24,17 +25,32 @@ type reportStep struct {
 }
 
 type reportEventView struct {
-	At    time.Time
-	Label string
-	Class string
+	At       time.Time
+	Label    string
+	LabelKey string
+	Arg1     string
+	Arg2     string
+	ArgCount int
+	Class    string
 }
 
 type reportView struct {
 	reportRow
-	Steps  []reportStep
-	Events []reportEventView
+	Steps      []reportStep
+	Events     []reportEventView
+	EditLabels []string
 	// Snoozed is the date the report sleeps until, when it does.
 	Snoozed *time.Time
+}
+
+var reportEditFieldOrder = []struct{ Key, Label string }{
+	{"title", "Title"},
+	{"program_name", "Program"},
+	{"url", "Link"},
+	{"state", "State"},
+	{"severity", "Severity now"},
+	{"submitted_severity", "Submitted as"},
+	{"submitted_at", "Submitted"},
 }
 
 func reportID(r *http.Request) (int64, bool) {
@@ -83,6 +99,11 @@ func (s *server) myReport(w http.ResponseWriter, r *http.Request) {
 		{Label: "Closed", At: rep.ClosedAt, After: after(rep.ClosedAt)},
 	}
 	v.Events = reportTimeline(events, rep.Payments)
+	for _, ef := range reportEditFieldOrder {
+		if rep.Edits[ef.Key] {
+			v.EditLabels = append(v.EditLabels, ef.Label)
+		}
+	}
 	s.render(w, r, http.StatusOK, "report", pageData{Title: rep.Title, Nav: "reports", Data: v})
 }
 
@@ -104,7 +125,7 @@ func reportTimeline(events []store.MyReportEvent, pays []store.MyPayment) []repo
 		return f, err == nil
 	}
 	for _, p := range pays {
-		label := paymentLabel(p)
+		label, key, arg := paymentLabel(p)
 		if p.Kind == "bounty" {
 			match := slices.IndexFunc(bounties, func(i int) bool { a, ok := amountOf(i); return ok && a == p.Amount })
 			if match < 0 {
@@ -114,52 +135,69 @@ func reportTimeline(events []store.MyReportEvent, pays []store.MyPayment) []repo
 			}
 			if match >= 0 {
 				out[bounties[match]].Label = label
+				out[bounties[match]].LabelKey = key
+				out[bounties[match]].Arg1 = arg
+				out[bounties[match]].Arg2 = ""
+				out[bounties[match]].ArgCount = 1
 				bounties = slices.Delete(bounties, match, match+1)
 				continue
 			}
 		}
-		out = append(out, reportEventView{At: p.AwardedAt, Label: label, Class: "bounty"})
+		out = append(out, reportEventView{At: p.AwardedAt, Label: label, LabelKey: key, Arg1: arg, ArgCount: 1, Class: "bounty"})
 	}
 	slices.SortStableFunc(out, func(a, b reportEventView) int { return a.At.Compare(b.At) })
 	return out
 }
 
 // paymentLabel says what a payment was: "Retest paid: $150".
-func paymentLabel(p store.MyPayment) string {
+func paymentLabel(p store.MyPayment) (string, string, string) {
 	amount := humanize.MoneyFull(p.Amount, p.Currency)
+	key := "Paid: %s"
 	switch p.Kind {
 	case "bounty":
-		return "Bounty awarded: " + amount
+		key = "Bounty awarded: %s"
 	case "bonus":
-		return "Bonus awarded: " + amount
+		key = "Bonus awarded: %s"
 	case "retest":
-		return "Retest paid: " + amount
+		key = "Retest paid: %s"
 	}
-	return "Paid: " + amount
+	return fmt.Sprintf(key, amount), key, amount
 }
 
 func eventView(e store.MyReportEvent) reportEventView {
 	ev := reportEventView{At: e.At}
 	switch e.Kind {
 	case platform.EventState:
-		ev.Label, ev.Class = "State: "+e.To, "state"
+		ev.Class = "state"
 		if e.From != "" {
 			ev.Label = "State: " + e.From + " → " + e.To
+			ev.LabelKey, ev.Arg1, ev.Arg2, ev.ArgCount = "State: %s → %s", e.From, e.To, 2
+		} else {
+			ev.Label = "State: " + e.To
+			ev.LabelKey, ev.Arg1, ev.ArgCount = "State: %s", e.To, 1
 		}
 	case platform.EventSeverity:
-		ev.Label, ev.Class = "Severity: "+orUnrated(e.To), "severity"
+		ev.Class = "severity"
 		if e.From != "" {
 			ev.Label = "Severity: " + e.From + " → " + orUnrated(e.To)
+			ev.LabelKey, ev.Arg1, ev.Arg2, ev.ArgCount = "Severity: %s → %s", e.From, orUnrated(e.To), 2
+		} else {
+			ev.Label = "Severity: " + orUnrated(e.To)
+			ev.LabelKey, ev.Arg1, ev.ArgCount = "Severity: %s", orUnrated(e.To), 1
 		}
 	case platform.EventBounty:
-		ev.Label, ev.Class = "Bounty awarded", "bounty"
+		ev.Class = "bounty"
 		if e.To != "" && e.To != "bounty" {
 			ev.Label = "Awarded: " + e.To
+			ev.LabelKey, ev.Arg1, ev.ArgCount = "Awarded: %s", e.To, 1
+		} else {
+			ev.Label = "Bounty awarded"
+			ev.LabelKey = "Bounty awarded"
 		}
 	case platform.EventCommentProgram:
-		ev.Label, ev.Class = "The program commented", "program"
+		ev.Label, ev.LabelKey, ev.Class = "The program commented", "The program commented", "program"
 	case platform.EventCommentYou:
-		ev.Label, ev.Class = "You commented", "you"
+		ev.Label, ev.LabelKey, ev.Class = "You commented", "You commented", "you"
 	default:
 		ev.Label = e.Kind
 	}

@@ -1,4 +1,4 @@
-{{define "topbar-actions"}}<a class="tb-btn" href="/reports" title="{{T "All your reports"}}"><svg class="i"><use href="#i-flag"/></svg><span class="label">Reports</span></a>{{end}}
+{{define "topbar-actions"}}<a class="tb-btn" href="/reports" title="{{T "All your reports"}}"><svg class="i"><use href="#i-flag"/></svg><span class="label">{{T "Reports"}}</span></a>{{end}}
 {{define "content"}}{{with .Data}}
 <div class="page-head rhead">
   <div>
@@ -10,9 +10,9 @@
       <span class="rsev">{{template "rsev" .}}</span>
       {{- if .NeedsYou}} <span class="chip waiting">{{T "needs you"}}</span>{{end}}
       {{- if .Stale}} <span class="chip paused">{{T "gone quiet"}}</span>{{end}}
-      {{- if .Muted}} <span class="chip req">muted</span>{{end}}
-      {{- with .Snoozed}} <span class="chip req">snoozed until {{date .}}</span>{{end}}
-      {{- if .GoneAt}} <span class="chip removed" title="{{T "No longer listed by the platform"}}">gone</span>{{end}}
+      {{- if .Muted}} <span class="chip req">{{T "muted"}}</span>{{end}}
+      {{- with .Snoozed}} <span class="chip req">{{TF "snoozed until %s" (datePtr .)}}</span>{{end}}
+      {{- if .GoneAt}} <span class="chip removed" title="{{T "No longer listed by the platform"}}">{{T "gone"}}</span>{{end}}
       {{- if eq .Source "manual"}} <span class="chip req">{{T "added by hand"}}</span>{{end}}
     </div>
   </div>
@@ -28,39 +28,39 @@
 <div class="split">
 <div class="stack">
 <section class="panel">
-  <div class="panel-head"><h2>Times</h2><span class="aside">{{T "from submission"}}</span></div>
+  <div class="panel-head"><h2>{{T "Times"}}</h2><span class="aside">{{T "from submission"}}</span></div>
   <table class="kv rfacts">
-    {{range .Steps}}<tr><th>{{.Label}}</th><td>{{with .At}}<span title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td><td class="num muted">{{with .After}}{{.}}{{end}}</td></tr>{{end}}
+    {{range .Steps}}<tr><th>{{T .Label}}</th><td>{{with .At}}<span title="{{datetime .}}">{{date .}}</span>{{else}}<span class="zero">—</span>{{end}}</td><td class="num muted">{{with .After}}{{.}}{{end}}</td></tr>{{end}}
     <tr><th>{{T "Last activity"}}</th><td colspan="2">{{with .LastActivityAt}}<span title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">—</span>{{end}}</td></tr>
   </table>
 </section>
 <section class="panel">
-  <div class="panel-head"><h2>Timeline</h2><span class="aside">{{len .Events}} {{plural (len .Events) "step" "steps"}} · comments are counted, never kept</span></div>
+  <div class="panel-head"><h2>{{T "Timeline"}}</h2><span class="aside">{{len .Events}} {{plural (len .Events) "step" "steps"}} · {{T "comments are counted, never kept"}}</span></div>
   {{if .Events}}<ol class="rtimeline">
-    {{range .Events}}<li class="{{.Class}}"><span class="when" title="{{datetime .At}}">{{date .At}}</span><span>{{.Label}}</span></li>{{end}}
-  </ol>{{else}}<div class="empty-state">{{if eq .Source "manual"}}Reports added by hand have no timeline.{{else}}Not read yet: the next sync reads it.{{end}}</div>{{end}}
+    {{range .Events}}<li class="{{.Class}}"><span class="when" title="{{datetime .At}}">{{date .At}}</span><span>{{if .LabelKey}}{{if eq .ArgCount 2}}{{TF .LabelKey .Arg1 .Arg2}}{{else if eq .ArgCount 1}}{{TF .LabelKey .Arg1}}{{else}}{{T .LabelKey}}{{end}}{{else}}{{.Label}}{{end}}</span></li>{{end}}
+  </ol>{{else}}<div class="empty-state">{{if eq .Source "manual"}}{{T "Reports added by hand have no timeline."}}{{else}}{{T "Not read yet: the next sync reads it."}}{{end}}</div>{{end}}
 </section>
 </div>
 <div class="stack">
 <section class="panel">
-  <div class="panel-head"><h2>Earned</h2></div>
+  <div class="panel-head"><h2>{{T "Earned"}}</h2></div>
   {{if .Payments}}<table class="kv">
-    {{range .Payments}}<tr><th>{{.Kind}}</th><td class="num"><span title="{{moneyFull .Amount .Currency}}">{{money .Amount .Currency}}</span></td><td class="muted">{{date .AwardedAt}}{{with .PaidAt}} · paid {{date .}}{{end}}</td></tr>{{end}}
+    {{range .Payments}}<tr><th>{{T .Kind}}</th><td class="num"><span title="{{moneyFull .Amount .Currency}}">{{money .Amount .Currency}}</span></td><td class="muted">{{date .AwardedAt}}{{with .PaidAt}} · {{TF "paid %s" (datePtr .)}}{{end}}</td></tr>{{end}}
   </table>{{else}}<div class="empty-state">{{T "Nothing awarded."}}</div>{{end}}
 </section>
 <section class="panel">
-  <div class="panel-head"><h2>Details</h2></div>
+  <div class="panel-head"><h2>{{T "Details"}}</h2></div>
   <table class="kv">
-    <tr><th>{{T "Waiting on"}}</th><td>{{if eq .WaitingOn "you"}}You{{else if eq .WaitingOn "program"}}The program{{else}}<span class="zero">—</span>{{end}}</td></tr>
-    <tr><th>{{T "Comments"}}</th><td>{{.Comments}}{{if .Unread}} <span class="chip creds">unread</span>{{end}}</td></tr>
+    <tr><th>{{T "Waiting on"}}</th><td>{{if eq .WaitingOn "you"}}{{T "You"}}{{else if eq .WaitingOn "program"}}{{T "The program"}}{{else}}<span class="zero">—</span>{{end}}</td></tr>
+    <tr><th>{{T "Comments"}}</th><td>{{.Comments}}{{if .Unread}} <span class="chip creds">{{T "unread"}}</span>{{end}}</td></tr>
     {{with .CVSS}}<tr><th>CVSS</th><td>{{printf "%.1f" (floatv .)}}</td></tr>{{end}}
     {{with .RawState}}<tr><th>{{T "On the platform"}}</th><td>{{.}}</td></tr>{{end}}
     {{with .DuplicateOf}}<tr><th>{{T "Duplicate of"}}</th><td>{{.}}</td></tr>{{end}}
     <tr><th>{{T "First seen"}}</th><td><span title="{{datetime .FirstSeenAt}}">{{date .FirstSeenAt}}</span></td></tr>
   </table>
-  {{if and .Edits (ne .Source "manual")}}<div class="panel-body small muted">You set {{range $k, $v := .Edits}}{{$k}} {{end}}by hand; syncs keep your values.
+  {{if and .EditLabels (ne .Source "manual")}}<div class="panel-body small muted">{{T "Set by hand:"}} {{range $i, $l := .EditLabels}}{{if $i}}, {{end}}{{T $l}}{{end}} · {{T "syncs keep your values."}}
     <form method="post" action="/reports/{{.ID}}/reset" class="inline"><button class="link" type="submit">{{T "Use the platform's values"}}</button></form></div>{{end}}
-  {{if eq .Source "manual"}}<div class="panel-body"><form method="post" action="/reports/{{.ID}}/delete" data-confirm="Delete this report? This can't be undone."><button class="button danger small" type="submit">{{T "Delete report"}}</button></form></div>{{end}}
+  {{if eq .Source "manual"}}<div class="panel-body"><form method="post" action="/reports/{{.ID}}/delete" data-confirm="{{T "Delete this report? This can't be undone."}}"><button class="button danger small" type="submit">{{T "Delete report"}}</button></form></div>{{end}}
 </section>
 </div>
 </div>

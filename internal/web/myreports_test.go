@@ -52,6 +52,27 @@ func TestReportsPages(t *testing.T) {
 	if strings.Contains(body, "Stored &lt;b&gt;XSS") || !strings.Contains(body, "1 open report") {
 		t.Error("the list doesn't keep to open reports by default")
 	}
+	// Sub-nav, distribution bar, status segmented switcher, and "View all" escape hatch.
+	for _, want := range []string{
+		`class="seg rsubnav"`,
+		`href="/reports/analytics">Analytics</a>`,
+		`class="rdist-bar"`,
+		`href="/reports?status=valid"`,
+		`href="/reports?platform=fake&amp;status=all"`,
+		`class="seg rstatus-segs"`,
+		`href="/reports?status=all">View all 2 reports →</a>`,
+		`class="rtitle-row"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("/reports lacks %q", want)
+		}
+	}
+	if strings.Contains(body, `class="tb-btn" href="/reports/analytics"`) {
+		t.Error("/reports topbar-actions still has redundant Analytics button")
+	}
+	if strings.Contains(body, "{{.") || strings.Contains(body, "{{$") {
+		t.Error("/reports leaked raw template syntax into rendered HTML")
+	}
 	// Latest activity first by default.
 	if !strings.Contains(body, `class="sort on" href="/reports?rev=1&amp;sort=activity">Activity`) {
 		t.Error("the list isn't sorted by latest activity by default")
@@ -86,6 +107,13 @@ func TestReportsPages(t *testing.T) {
 	}
 	if res, _ := e.do(c, "GET", "/reports/999999", nil, nil); res.StatusCode != http.StatusNotFound {
 		t.Errorf("missing report: %d", res.StatusCode)
+	}
+
+	// Empty state mentions all four platforms including YesWeHack.
+	empty := newTestEnv(t)
+	_, emptyBody := empty.do(empty.client(), "GET", "/reports", nil, nil)
+	if !strings.Contains(emptyBody, "YesWeHack") {
+		t.Error("empty /reports state does not mention YesWeHack")
 	}
 }
 

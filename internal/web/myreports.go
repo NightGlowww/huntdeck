@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"maps"
+	"math"
 	"net/http"
 	"net/url"
 	"slices"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mdpsec/huntdeck/internal/platform"
 	"github.com/mdpsec/huntdeck/internal/reports"
 	"github.com/mdpsec/huntdeck/internal/store"
 )
@@ -156,24 +158,44 @@ type reportRow struct {
 	Agreement  string
 }
 
+type reportDistPart struct {
+	Key, Label, Class, Sw, URL string
+	Count                      int
+	X, W                       float64
+}
+
+type reportPlatformCount struct {
+	Key   string
+	Count int
+}
+
+type reportStatusTab struct {
+	Key, Label, Title, URL string
+	Count                  int
+	On                     bool
+}
+
 type reportsView struct {
-	RailView  railView
-	Pills     []pill
-	ClearURL  string
-	Rows      []reportRow
-	Pager     pager
-	Sort      string
-	Reverse   bool
-	Query     listQuery
-	Total     int  // reports stored, before filters
-	QuietDays int  // gone quiet after (Settings › Reports)
-	OpenOnly  bool // the list keeps to open reports (the default)
-	Open      int
-	NeedsYou  int
-	Stale     int
-	EarnedYTD []reports.Amount
-	Year      int
-	Synced    bool // any platform's reports were read
+	RailView       railView
+	Pills          []pill
+	ClearURL       string
+	Rows           []reportRow
+	Pager          pager
+	Sort           string
+	Reverse        bool
+	Query          listQuery
+	Total          int  // reports stored, before filters
+	QuietDays      int  // gone quiet after (Settings › Reports)
+	OpenOnly       bool // the list keeps to open reports (the default)
+	Open           int
+	NeedsYou       int
+	Stale          int
+	EarnedYTD      []reports.Amount
+	Year           int
+	Synced         bool // any platform's reports were read
+	Dist           []reportDistPart
+	PlatformCounts []reportPlatformCount
+	StatusTabs     []reportStatusTab
 }
 
 // SortURL is the list sorted by key (again: turned around).
@@ -250,17 +272,47 @@ func (s *server) myReports(w http.ResponseWriter, r *http.Request) {
 	// The filter rail. Status is one choice, Open by default; the rest
 	// take several.
 	status := q.Get("status")
+	openCount := count("status", func(rep store.MyReport) bool { return inReportGroup(rep, "open", now, quiet) })
 	statusOpts := []railOption{lq.fallback("Open", "Not decided yet, or valid and waiting for a fix (the default)", "status",
-		status == "" || status == "open", count("status", func(rep store.MyReport) bool { return inReportGroup(rep, "open", now, quiet) }), true)}
+		status == "" || status == "open", openCount, true)}
+	v.StatusTabs = []reportStatusTab{{
+		Key:   "open",
+		Label: "Open",
+		Title: "Not decided yet, or valid and waiting for a fix (the default)",
+		URL:   lq.with("status", ""),
+		Count: openCount,
+		On:    status == "" || status == "open",
+	}}
+	allCount := count("status", func(store.MyReport) bool { return true })
+	v.StatusTabs = append(v.StatusTabs, reportStatusTab{
+		Key:   "all",
+		Label: "All",
+		Title: "Every report, open or not",
+		URL:   lq.with("status", "all"),
+		Count: allCount,
+		On:    status == "all",
+	})
 	for _, g := range reportGroups {
 		if g.View || g.Key == "open" {
 			continue
 		}
-		statusOpts = append(statusOpts, lq.option(g.Label, g.Title, "status", g.Key,
-			count("status", func(rep store.MyReport) bool { return inReportGroup(rep, g.Key, now, quiet) }), true))
+		n := count("status", func(rep store.MyReport) bool { return inReportGroup(rep, g.Key, now, quiet) })
+		statusOpts = append(statusOpts, lq.option(g.Label, g.Title, "status", g.Key, n, true))
+		v.StatusTabs = append(v.StatusTabs, reportStatusTab{
+			Key:   g.Key,
+			Label: g.Label,
+			Title: g.Title,
+			URL:   lq.with("status", g.Key),
+			Count: n,
+			On:    status == g.Key,
+		})
 	}
 	statusOpts = append(statusOpts, lq.option("All", "Every report, open or not", "status", "all",
-		count("status", func(store.MyReport) bool { return true }), true))
+		allCount, true))
+
+	if len(all) > 0 {
+		v.Dist, v.PlatformCounts = buildReportSummary(all)
+	}
 
 	var stateOpts []railOption
 	stateKeys := make([]string, len(reports.States))
@@ -451,4 +503,68 @@ func (s *server) quietAfter(ctx context.Context) (int, time.Duration) {
 		days = reports.DefaultQuietDays
 	}
 	return days, time.Duration(days) * 24 * time.Hour
+}
+
+// buildReportSummary partitions all stored reports into Valid, Open (undecided),
+// Duplicate and Rejected for the distribution bar, plus per-platform counts.
+func buildReportSummary(all []store.MyReport) ([]reportDistPart, []reportPlatformCount) {
+	var validN, openN, dupN, rejectedN int
+	var rejectedStates []string
+	platMap := map[string]int{}
+	for _, rep := range all {
+		platMap[rep.Platform]++
+		switch {
+		case reports.Valid(rep.State):
+			validN++
+		case reports.Open(rep.State):
+			openN++
+		case rep.State == platform.ReportDuplicate:
+			dupN++
+		default:
+			rejectedN++
+			if rep.State != "" && !slices.Contains(rejectedStates, rep.State) {
+				rejectedStates = append(rejectedStates, rep.State)
+			}
+		}
+	}
+	slices.Sort(rejectedStates)
+	rejectedURL := "/reports?status=closed"
+	if len(rejectedStates) > 0 {
+		rejectedURL = "/reports?status=all&state=" + url.QueryEscape(strings.Join(rejectedStates, ","))
+	}
+	parts := []reportDistPart{
+		{Key: "valid", Label: "Valid", Class: "bc-valid", Sw: "valid", URL: "/reports?status=valid", Count: validN},
+		{Key: "open", Label: "Open", Class: "bc-open", Sw: "open", URL: "/reports?status=all&state=new%2Ctriaged", Count: openN},
+		{Key: "dup", Label: "Duplicate", Class: "bc-dup", Sw: "dup", URL: "/reports?status=all&state=duplicate", Count: dupN},
+		{Key: "rejected", Label: "Rejected", Class: "bc-rejected", Sw: "rejected", URL: rejectedURL, Count: rejectedN},
+	}
+	total := float64(len(all))
+	x := 0.0
+	lastNonZero := -1
+	for i := range parts {
+		if parts[i].Count > 0 {
+			lastNonZero = i
+		}
+	}
+	for i := range parts {
+		if parts[i].Count == 0 {
+			continue
+		}
+		w := 100 * float64(parts[i].Count) / total
+		parts[i].X = round1(x)
+		if i == lastNonZero {
+			parts[i].W = round1(math.Max(100-parts[i].X, 0.4))
+		} else {
+			parts[i].W = round1(math.Max(w-0.3, 0.4))
+		}
+		x += w
+	}
+	plats := make([]reportPlatformCount, 0, len(platMap))
+	for k, n := range platMap {
+		plats = append(plats, reportPlatformCount{Key: k, Count: n})
+	}
+	slices.SortFunc(plats, func(a, b reportPlatformCount) int {
+		return cmp.Or(cmp.Compare(b.Count, a.Count), strings.Compare(a.Key, b.Key))
+	})
+	return parts, plats
 }
