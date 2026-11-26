@@ -3,13 +3,13 @@ package scanhandoff
 import (
 	"context"
 	"encoding/json"
-	"github.com/mdpsec/huntdeck/internal/store"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/scopesentry"
+	"github.com/mdpsec/huntdeck/internal/store"
 )
 
 // TestReconcileRecordsWhatTheScannerSays pins the last link of the pipeline: a

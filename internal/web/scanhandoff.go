@@ -222,7 +222,7 @@ func (s *server) scanRetry(w http.ResponseWriter, r *http.Request) {
 	n, err := s.Store.ClearHandoffs(r.Context(), clear)
 	if err != nil {
 		s.Log.WarnContext(r.Context(), "scan: cannot clear the handoffs", "error", err)
-		http.Redirect(w, r, "/scan?error="+urlQuery(err.Error()), http.StatusSeeOther)
+		http.Redirect(w, r, "/scan?"+url.Values{"error": {err.Error()}}.Encode(), http.StatusSeeOther)
 		return
 	}
 	http.Redirect(w, r, "/scan?retried="+strconv.Itoa(n), http.StatusSeeOther)

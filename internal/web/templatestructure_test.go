@@ -4,7 +4,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -57,8 +56,6 @@ func TestNoTemplateTextOutsideDefine(t *testing.T) {
 		t.Errorf("%s is outside every {{define}}: a template never executes it", b)
 	}
 }
-
-var templateAction = regexp.MustCompile(`(?s)\{\{.*?\}\}`)
 
 // textOutsideDefine returns the first line holding text where no define is open,
 // and that text. Every action opens or closes a block: {{if}}, {{range}},

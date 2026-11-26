@@ -16,14 +16,14 @@ func TestMaterialisedQueueKeepsTheScanState(t *testing.T) {
 	now := time.Date(2026, 11, 19, 12, 0, 0, 0, time.UTC)
 	q.seed(t, queueSeedRows(time.Now()))
 
-	before, _, err := q.s.HuntQueueTop(ctx, QueueFilter{}, 2000, 0)
+	_, _, err := q.s.HuntQueueTop(ctx, QueueFilter{}, 2000, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := q.s.RefreshHuntQueue(ctx, now); err != nil {
 		t.Fatal(err)
 	}
-	before, _, err = q.s.HuntQueueTop(ctx, QueueFilter{}, 2000, 0)
+	before, _, err := q.s.HuntQueueTop(ctx, QueueFilter{}, 2000, 0)
 	if err != nil || len(before) == 0 {
 		t.Fatalf("no rows: %v", err)
 	}

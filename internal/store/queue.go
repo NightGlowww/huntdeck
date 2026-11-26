@@ -350,9 +350,10 @@ func (f QueueFilter) where() (string, []any) {
 	// SQL alone cannot give without either a window function over the whole
 	// filtered set or a subquery that repeats the filter. HuntQueueTop dedupes
 	// in Go and HuntQueueCount counts distinct programs.
-	if f.Scanned == "yes" {
+	switch f.Scanned {
+	case "yes":
 		clauses = append(clauses, "EXISTS (SELECT 1 FROM scan_handoffs h WHERE h.target = q.value OR h.target = q.apex)")
-	} else if f.Scanned == "no" {
+	case "no":
 		clauses = append(clauses, "NOT EXISTS (SELECT 1 FROM scan_handoffs h WHERE h.target = q.value OR h.target = q.apex)")
 	}
 	if f.Added != "" {

@@ -122,8 +122,12 @@ if [ -n "$check" ]; then
 fi
 
 echo "==> tests"
-run go vet ./...
-run go test ./...
+if [ "${SKIP_TESTS:-0}" = "1" ]; then
+  echo "  skipped (already verified in CI)"
+else
+  run go vet ./...
+  run go test ./...
+fi
 
 # One name for this deploy, whichever mode builds it.
 ver="${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)}"

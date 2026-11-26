@@ -1,47 +1,102 @@
 name: ci
 
-# Every check a change must pass, on a runner rather than only on a laptop:
-# the local Makefile says the same things, but nothing enforced them before.
+# Self-hosted CI on dev-tx-sh-app-01 (43.143.38.5) and automatic CD to 1.15.46.212.
 on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: cicd-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  GOPROXY: https://goproxy.cn,direct
+  GOTOOLCHAIN: auto
+  PATH: /home/ubuntu/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, huntdeck-ci]
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: true
+      - name: Toolchain
+        run: go version
 
       - name: gofmt
         run: make fmtcheck
 
-      - name: vet
-        run: go vet ./...
+      - name: vet & lint
+        run: |
+          go vet ./...
+          if ! command -v golangci-lint >/dev/null 2>&1 || ! golangci-lint version 2>/dev/null | grep -Eq '(^| )v?2\.'; then
+            go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+          fi
+          golangci-lint run --timeout=5m ./...
 
       - name: tests (race)
         run: go test -race -timeout 20m ./...
 
       - name: interface copy
-        run: python3 scripts/i18n-lint.py --count
-
-      - name: lint
-        # v2: .golangci.yml is written for it (version: "2").
         run: |
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
-          golangci-lint run
+          out=$(python3 scripts/i18n-lint.py --count 2>&1)
+          echo "$out"
+          echo "$out" | grep -q "english left: 0"
+
+      - name: shell gates
+        run: make gates
 
       - name: vulnerabilities
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
-      - name: container builds
-        run: docker build -t huntdeck:ci .
+      - name: binaries build
+        run: make build && make clean
+
+  deploy:
+    needs: [check]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, linux, x64, huntdeck-ci]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for idle polls on 1.15.46.212
+        run: |
+          for i in $(seq 1 18); do
+            status_out=$(ssh -o BatchMode=yes -o ConnectTimeout=10 1.15.46.212 "cd /opt/huntdeck && sudo docker compose exec -T huntdeck /huntdeck status 2>/dev/null" || true)
+            if printf '%s\n' "$status_out" | grep -q ' running '; then
+              echo "Poll active on 1.15.46.212 (attempt $i/18), waiting 5s..."
+              sleep 5
+            else
+              echo "No active poll running; proceeding with deploy."
+              break
+            fi
+          done
+
+      - name: Deploy to 1.15.46.212
+        run: |
+          DEPLOY_VERSION="ci-$(date -u +%Y%m%d%H%M)-${GITHUB_SHA::7}"
+          echo "DEPLOY_VERSION=$DEPLOY_VERSION" >> "$GITHUB_ENV"
+          SKIP_TESTS=1 DEPLOY_VERSION="$DEPLOY_VERSION" bash scripts/deploy.sh --host 1.15.46.212 --mode binary
+
+      - name: Verify live release & summary
+        run: |
+          check_out=$(bash scripts/deploy.sh --host 1.15.46.212 --check --expect "$DEPLOY_VERSION")
+          echo "$check_out"
+          {
+            echo "### HuntDeck Deploy Summary"
+            echo ""
+            echo "- **Version**: \`$DEPLOY_VERSION\`"
+            echo "- **Commit**: \`$GITHUB_SHA\`"
+            echo ""
+            echo '```'
+            echo "$check_out"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

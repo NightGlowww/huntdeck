@@ -36,12 +36,12 @@ func TestRetryOnlyClearsFailedTasks(t *testing.T) {
 	}
 
 	form := url.Values{"task": {"task-failed", "task-running"}}
-	res, body := e.do(e.client(), "POST", "/scan/retry", form, nil)
+	res, _ := e.do(e.client(), "POST", "/scan/retry", form, nil)
 	if res.StatusCode != 303 {
 		t.Fatalf("retry = %d, want a redirect back to the page", res.StatusCode)
 	}
 	loc := res.Header.Get("Location")
-	res, body = e.do(e.client(), "GET", loc, nil, nil)
+	res, body := e.do(e.client(), "GET", loc, nil, nil)
 	if res.StatusCode != 200 {
 		t.Fatalf("page after retry = %d (%s)", res.StatusCode, loc)
 	}

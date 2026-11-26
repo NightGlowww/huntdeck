@@ -47,7 +47,7 @@ func (s *Store) QuietReports(ctx context.Context, days int, now time.Time) ([]Qu
 	if err != nil {
 		return nil, fmt.Errorf("quiet reports: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	var out []QuietReport
 	for rows.Next() {
 		var q QuietReport
