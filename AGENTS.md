@@ -325,6 +325,14 @@ disagree in either direction.
   that must exit 0, a page that must be refused), not against a hand-written
   snippet of its condition, before believing it.
 
+- **A page is not reviewed until its empty and error states have been seen.** The
+  email page was signed off as clean in a screenshot of a list with mail in it; its
+  empty state was English - "No mail yet. Make an address on a program's Email tab…"
+  - and had been since it shipped, because nothing ever rendered that branch. The
+  same is true of a form's error line, a failed load, and a page with no rows. Cheap
+  way in: a query that matches nothing (`?q=zzzznomatch`), a view of a service that is
+  not configured, and a filter combination with no results.
+
 - Tests are table-driven. Platform clients are tested against `httptest`
   servers replaying fixtures (pagination, 429, 5xx, auth failure, partial
   failure); the sync engine with `internal/platform/fake`, including "a
