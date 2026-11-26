@@ -52,8 +52,13 @@ case "$mode" in binary|full) ;; *) echo "--mode must be binary or full" >&2; exi
 lock="/tmp/huntdeck-deploy-$(printf %s "$host" | tr -c 'a-zA-Z0-9' '_').lock.d"
 lock_held=""
 tmp=""
+SSH_CTL="/tmp/hd-ssh-$$.sock"
 cleanup() {
-  [ -n "$tmp" ] && rm -rf "$tmp"
+  if [ -n "${SSH_CTL:-}" ] && [ -S "$SSH_CTL" ]; then
+    ssh -S "$SSH_CTL" -O exit "$host" >/dev/null 2>&1 || true
+    rm -f "$SSH_CTL"
+  fi
+  [ -n "$tmp" ] && rm -rf "$tmp" || true
   [ -n "$lock_held" ] && rmdir "$lock" 2>/dev/null || true
 }
 trap cleanup EXIT
@@ -85,7 +90,7 @@ fi
 run() {
   if [ -n "$dry" ]; then printf '  [dry-run] %s\n' "$*"; else "$@"; fi
 }
-SSH_OPTS="-o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4"
+SSH_OPTS="-o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -o ControlMaster=auto -o ControlPath=$SSH_CTL -o ControlPersist=120"
 remote() { run ssh $SSH_OPTS "$host" "$@"; }
 
 # ship_rsync copies one file, retrying a transfer the network dropped. Twice in
@@ -94,7 +99,7 @@ remote() { run ssh $SSH_OPTS "$host" "$@"; }
 ship_rsync() {
   local attempt=1
   while [ $attempt -le 3 ]; do
-    if run rsync -az "$1" "$2"; then return 0; fi
+    if run rsync -az -e "ssh $SSH_OPTS" "$1" "$2"; then return 0; fi
     echo "  transfer failed (attempt $attempt of 3); retrying" >&2
     attempt=$((attempt + 1))
     sleep 2
