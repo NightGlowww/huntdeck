@@ -14,7 +14,7 @@
 
 <section class="panel ptable">
   <div class="activef">
-    <span class="total">{{num .Pager.Total}} {{T (lower (kindLabel .KindParam))}}</span>
+    <span class="total" role="status" aria-live="polite">{{num .Pager.Total}} {{T (lower (kindLabel .KindParam))}}</span>
     <span class="what">{{if .Best}}{{TF "best new: in scope, added %s, on programs you can hunt" .AddedText}}{{else if eq .KindParam "root"}}{{T "of in-scope wildcards, domains and URLs: a root domain itself is often not in scope"}}{{else if .Filter.OutOfScope}}{{T "out of scope"}}{{else}}{{T "in scope"}}{{end}}{{if .Filter.OnePerProgram}} · {{T "one row per program: open a row for the rest of its targets"}}{{end}}</span>
     {{template "pills" .}}
     <span class="quick">
@@ -43,8 +43,8 @@
         <td class="c-check"><input type="checkbox" class="pick" value="{{.Value}}" aria-label="{{TF "Select %s" .Value}}"></td>
         <td class="c-prog">{{template "pname" (plink .Program)}}</td>
         <td class="c-target asset" title="{{.Value}}{{with .Reasons}}&#10;{{reasons .}}{{end}}">{{.Value}}</td>
-        <td class="c-bounty num nowrap">{{if not .OffersBounty}}<span class="chip vdp" title="{{T "Vulnerability disclosure, no bounties"}}">VDP</span>{{else if not .Bounty}}<span class="zero" title="{{T "Not bounty-eligible"}}">{{T "no bounty"}}</span>{{else if .PayMax}}<span title="{{template "pay-title" .}}">{{if not .PayMin}}<span class="upto">{{T "up to"}}</span> {{end}}<span class="amt">{{amountRange .PayMin .PayMax .Currency}}</span></span>{{else if .PayMin}}<span title="{{template "pay-title" .}}"><span class="upto">from</span> <span class="amt">{{amount .PayMin .Currency}}</span></span>{{else}}<span class="chip yes" title="{{template "pay-title" .}}">{{T "bounty"}}</span>{{end}}</td>
-        <td class="c-score num" data-label="Score">{{if .Scored}}<b class="score"{{with .Reasons}} title="{{join . " · "}}"{{end}}>{{printf "%.0f" .Score}}</b>{{else}}<span class="zero" title="{{T "Not scored: only in-scope targets added in the last 90 days, on programs you can hunt, are"}}">{{T "not scored"}}</span>{{end}}</td>
+        <td class="c-bounty num nowrap">{{if not .OffersBounty}}<span class="chip vdp" title="{{T "Vulnerability disclosure, no bounties"}}">VDP</span>{{else if not .Bounty}}<span class="zero" title="{{T "Not bounty-eligible"}}">{{T "no bounty"}}</span>{{else if .PayMax}}<span title="{{template "pay-title" .}}">{{if not .PayMin}}<span class="upto">{{T "up to"}}</span> {{end}}<span class="amt">{{amountRange .PayMin .PayMax .Currency}}</span></span>{{else if .PayMin}}<span title="{{template "pay-title" .}}"><span class="upto">{{T "from"}}</span> <span class="amt">{{amount .PayMin .Currency}}</span></span>{{else}}<span class="chip yes" title="{{template "pay-title" .}}">{{T "bounty"}}</span>{{end}}</td>
+        <td class="c-score num" data-label="{{T "Score"}}">{{if .Scored}}<b class="score"{{with .Reasons}} title="{{join . " · "}}"{{end}}>{{printf "%.0f" .Score}}</b>{{else}}<span class="zero" title="{{T "Not scored: only in-scope targets added in the last 90 days, on programs you can hunt, are"}}">{{T "not scored"}}</span>{{end}}</td>
         <td class="c-added nowrap">{{if and .Joined .AddedAt}}<span class="chip joined" title="{{TF "New to you: in scope when you got access to this private program, %s" (datetime .AddedAt)}}">{{T "joined"}}</span> <span class="muted small">{{age .AddedAt}}</span>{{else}}{{with .AddedAt}}<span class="when{{if recent .}} fresh{{end}}" title="{{datetime .}}">{{date .}}</span> <span class="muted small">{{age .}}</span>{{else}}<span class="zero" title="{{T "Already in scope when HuntDeck started tracking; the platform doesn't date its assets"}}">—</span>{{end}}{{end}}</td>
         <td class="c-open">{{template "open-ext" .Program}}</td>
       </tr>

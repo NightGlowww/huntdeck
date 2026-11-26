@@ -29,7 +29,7 @@
     <li>
       <span class="qs-score">{{printf "%.1f" .Score}}</span>
       <a class="link" href="/programs/{{.Platform}}/{{.Handle}}">{{.Handle}}</a>
-      <code class="mono small">{{.Kind}} {{.Value}}</code>
+      <span class="qtarget"><code class="mono small">{{.Kind}} {{.Value}}</code><button type="button" class="icon-btn qcopy" data-copy-text="{{.Value}}" title="{{T "Copy"}}: {{.Value}}" aria-label="{{T "Copy"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button></span>
       <span class="small muted">{{range $i, $r := .Reasons}}{{if $i}} · {{end}}{{$r}}{{end}}</span>
     </li>
   {{end}}
@@ -84,7 +84,7 @@
           <td class="c-pay" title="{{template "pay-title" .}}"><div class="pay">{{if .PayMax}}{{if not .PayMin}}<span class="upto">{{T "up to"}}</span>{{end}}<span class="amt">{{amountRange .PayMin .PayMax .Currency}}</span>{{else if and .OffersBounty .PayMin}}<span class="upto">{{T "from"}}</span><span class="amt">{{amount .PayMin .Currency}}</span>{{else if not .OffersBounty}}<span class="none" title="{{T "Pays no bounties"}}">—</span>{{else if not .Bounty}}<span class="none">{{T "no bounty"}}</span>{{else}}<span class="none" title="{{TF "%s doesn't share this for the program" (platformLabel .Program.Platform)}}">—</span>{{end}}</div></td>
           <td class="c-ptotal">{{template "m-ptotal" (paidAllOf $t)}}</td>
           <td class="nowrap c-added">{{if .Joined}}<span class="chip joined" title="{{TF "New to you: in scope when you got access to this private program, %s" (datePtr .AddedAt)}}">{{T "joined"}} {{agoPtr .AddedAt}}</span>{{else}}<span class="when{{if freshPtr .AddedAt}} fresh{{end}}" data-ago data-at="{{isoPtr .AddedAt}}" title="{{datePtr .AddedAt}}">{{agoPtr .AddedAt}}</span>{{end}}</td>
-          <td class="c-acts acts"><button type="button" class="icon-btn" data-copy-text="{{.Value}}" title="Copy {{.Value}}" aria-label="{{T "Copy"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button>{{template "open-ext" $t.Program}}</td>
+          <td class="c-acts acts"><button type="button" class="icon-btn" data-copy-text="{{.Value}}" title="{{T "Copy"}}: {{.Value}}" aria-label="{{T "Copy"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button>{{template "open-ext" $t.Program}}</td>
         </tr>
       {{end}}{{end}}
       </tbody>

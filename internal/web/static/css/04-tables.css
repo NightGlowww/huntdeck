@@ -100,3 +100,13 @@ col.w-you { width: 112px; }
 @media (max-width: 700px) {
   .table-wrap.tall { max-height: none; overflow: visible; }
 }
+
+/* Compact target + copy button used in Hunt Queue and Hunt Board strip. */
+.qtarget { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; min-width: 0; }
+.qtarget code { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icon-btn.qcopy, button.icon-btn.qcopy { flex: none; width: 22px; height: 22px; opacity: .7; }
+.icon-btn.qcopy .i { width: 13px; height: 13px; }
+tr:hover .qcopy, li:hover .qcopy, .qcopy:hover, .qcopy:focus-visible, .qcopy.copied { opacity: 1; }
+@media (pointer: coarse) {
+  .icon-btn.qcopy, button.icon-btn.qcopy { opacity: 1; }
+}

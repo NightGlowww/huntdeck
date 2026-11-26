@@ -12,14 +12,9 @@
   .plist { align-items: stretch; height: calc(100dvh - 56px - 44px); grid-template-rows: minmax(0, 1fr); }
   .plist > .facets { overflow-y: auto; overscroll-behavior: contain; }
   .plist > .ptable { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-  .ptable > .activef, .ptable > .note-bar, .ptable > .pager, .ptable > .empty-state { flex: none; }
-  .ptable > .table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
-  .ptable thead { position: sticky; top: 0; z-index: 3; background: var(--surface-2); }
   /* They scroll with the wheel or trackpad, without bars showing: say that
      there is more below with a fade that only shows when it overflows. */
   .plist > .facets { mask-image: linear-gradient(#000 calc(100% - 24px), transparent); }
-  .plist > .facets, .ptable > .table-wrap { scrollbar-width: none; }
-  .plist > .facets::-webkit-scrollbar, .ptable > .table-wrap::-webkit-scrollbar { display: none; }
   .plist > .ptable > :is(.activef, .note-bar, .pager, .empty-state) { flex: none; }
   .plist > .ptable > .table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
   .plist > .ptable thead { position: sticky; top: 0; z-index: 3; background: var(--surface-2); }
@@ -28,6 +23,15 @@
   .plist > .facets::-webkit-scrollbar, .plist > .ptable > .table-wrap::-webkit-scrollbar { display: none; }
   /* A pinned heading drops collapsed borders, so its lines are shadows. */
   .plist > .ptable thead th { border-bottom-color: transparent; box-shadow: inset 0 -1px var(--border); }
+}
+/* Laptop widths (901px-1600px): the rail sits above the table and the page
+   scrolls as a whole, so pin column headings under the sticky topbar when the
+   table fits horizontally (.is-wide added by columns.js keeps its own
+   horizontal scroll instead). */
+@media (min-width: 901px) and (max-width: 1600px) {
+  .plist > .ptable > .table-wrap:not(.is-wide) { overflow-x: clip; }
+  .plist > .ptable > .table-wrap:not(.is-wide) thead { position: sticky; top: calc(56px + var(--db-h)); z-index: 3; background: var(--surface-2); }
+  .plist > .ptable > .table-wrap:not(.is-wide) thead th { border-bottom-color: transparent; box-shadow: inset 0 -1px var(--border); }
 }
 .facets { padding: 12px 12px 6px; }
 .fhead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }

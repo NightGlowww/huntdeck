@@ -100,5 +100,9 @@
  "not an interval: try 30m, 6h, 1d or off": "不是有效间隔：试试 30m、6h、1d 或 off",
  "%s is faster than the %s floor": "%s 快于 %s 的下限",
  "Yes, do it": "确定执行",
- "g then a letter": "g 再按一个字母"
+ "g then a letter": "g 再按一个字母",
+ "Show the sidebar's names": "显示侧边栏名称",
+ "Fold the sidebar to its icons": "将侧边栏收起为图标",
+ "Unfold the sidebar": "展开侧边栏",
+ "Fold the sidebar": "收起侧边栏"
 }

@@ -283,6 +283,16 @@ document.addEventListener("click", (e) => {
   const fit = () => { box.placeholder = narrow.matches ? t("Search, or paste a host") : long; };
   fit();
   narrow.addEventListener("change", fit);
+  // Escape inside #omni clears typed text first; pressing it again blurs.
+  box.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (box.value) {
+      e.preventDefault();
+      box.value = "";
+    } else {
+      box.blur();
+    }
+  });
 })();
 
 // Phones: the Menu button drops the page list down; a click elsewhere,
@@ -798,38 +808,13 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
   setInterval(tick, 30000);
 })();
 
-// A poll runs in the background: watch /api/v1/status while the page is visible
-// and show a small pill when one is in flight. Fifteen seconds is cheap (the
-// route is one query) and stops entirely when the tab is hidden.
+// Watch /api/v1/status while the page is visible with a single poll: update
+// the in-flight poll pill and surface the reload hint when a newer poll
+// finishes after this page loaded.
 (() => {
   const pill = document.querySelector("[data-poll-watch]");
-  if (!pill) return;
-  const check = async () => {
-    try {
-      const res = await fetch("/api/v1/status", { headers: { Accept: "application/json" } });
-      if (!res.ok) {
-        window.hdConn?.fail();
-        return;
-      }
-      window.hdConn?.ok();
-      const d = await res.json();
-      const running = (d.last_polls || []).some((p) => p.started_at && !p.finished_at);
-      pill.hidden = !running;
-    } catch {
-      window.hdConn?.fail();
-    }
-  };
-  check();
-  setInterval(() => { if (!document.hidden) check(); }, 15000);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) check(); });
-})();
-
-// When a poll finishes while a page is open, its numbers are stale: say so and
-// let the reader reload, instead of reloading under their cursor. The baseline
-// is the newest poll at load, so the page's own poll never counts as new.
-(() => {
   const hint = document.querySelector("[data-reload-hint]");
-  if (!hint) return;
+  if (!pill && !hint) return;
   let baseline = null;
   const newest = (d) => {
     let t = 0;
@@ -848,29 +833,30 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
         return;
       }
       window.hdConn?.ok();
-      const t = newest(await res.json());
-      if (!t) return;
-      if (baseline === null) {
-        baseline = t;
-        return;
+      const d = await res.json();
+      if (pill) {
+        const running = (d.last_polls || []).some((p) => p.started_at && !p.finished_at);
+        pill.hidden = !running;
       }
-      // Half a minute of slack: the page's own poll may be the one that
-      // produced what it is showing.
-      hint.hidden = !(t > baseline + 30000);
+      if (hint) {
+        const t = newest(d);
+        if (t) {
+          if (baseline === null) {
+            baseline = t;
+          } else {
+            // Half a minute of slack: the page's own poll may be the one that
+            // produced what it is showing.
+            hint.hidden = !(t > baseline + 30000);
+          }
+        }
+      }
     } catch {
-      /* offline or signed out: leave the hint as it is */
+      if (pill) window.hdConn?.fail();
     }
   };
   check();
-  setInterval(() => { if (!document.hidden) check(); }, 30000);
-})();
-// A select that submits itself hides its button, but only once the script is
-// running: without JS the button is the only way to apply the choice.
-(() => {
-  for (const form of document.querySelectorAll("form:has([data-autosubmit])")) {
-    const button = form.querySelector("[data-autosubmit-button]");
-    if (button) button.hidden = true;
-  }
+  setInterval(() => { if (!document.hidden) check(); }, pill ? 15000 : 30000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) check(); });
 })();
 
 // The filter rail scrolls on its own on wide screens. Clicking a chip reloads the
@@ -1148,8 +1134,8 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
   const show = () => {
     const min = root.dataset.side === "min";
     btn.setAttribute("aria-pressed", String(min));
-    btn.title = min ? "Show the sidebar's names" : "Fold the sidebar to its icons";
-    btn.setAttribute("aria-label", min ? "Unfold the sidebar" : "Fold the sidebar");
+    btn.title = min ? t("Show the sidebar's names") : t("Fold the sidebar to its icons");
+    btn.setAttribute("aria-label", min ? t("Unfold the sidebar") : t("Fold the sidebar"));
   };
   show();
   btn.addEventListener("click", () => {

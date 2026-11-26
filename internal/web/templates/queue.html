@@ -36,9 +36,9 @@
     <thead><tr><th>{{T "Program"}}</th><th>{{T "Target"}}</th><th class="num">{{T "Score"}}</th><th>{{T "Why"}}</th></tr></thead>
     <tbody>
     {{range .Rows}}
-      <tr>
+      <tr data-href="/programs/{{.Platform}}/{{.Handle}}?tab=scope">
         <td class="c-prog"><a class="link" href="/programs/{{.Platform}}/{{.Handle}}">{{.Handle}}</a><span class="muted small prog-platform">{{platformLabel .Platform}}</span></td>
-        <td class="c-target"><code class="mono small">{{.Kind}} {{.Value}}</code></td>
+        <td class="c-target"><div class="qtarget"><code class="mono small">{{.Kind}} {{.Value}}</code><button type="button" class="icon-btn qcopy" data-copy-text="{{.Value}}" title="{{T "Copy"}}: {{.Value}}" aria-label="{{T "Copy"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button></div></td>
         <td class="c-open num" data-label="{{T "Score"}}">
           {{if .Factors}}
           <details class="why-score"><summary><span class="sr-only">{{T "Score"}} </span>{{printf "%.1f" .Score}}</summary>
