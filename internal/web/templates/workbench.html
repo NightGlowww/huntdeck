@@ -1,3 +1,4 @@
+{{define "topbar-title"}}<nav class="trail" aria-label="{{T "Main"}}"><span class="here">{{T .Title}}</span></nav>{{end}}
 {{define "content"}}{{with .Data}}
 <header class="workbench-hero">
   <div><span class="workbench-kicker">{{if eq $.Nav "system"}}{{T "System"}}{{else}}{{T "Integrations"}}{{end}}</span><h1>{{T .Title}}</h1><p>{{T .Description}}</p></div>
@@ -9,9 +10,9 @@
 <section class="workbench-grid" aria-label="{{T .Title}}">
 {{range .Cards}}
 <article class="workbench-card">
-  <div class="workbench-card-top"><span class="workbench-icon"><svg class="i" aria-hidden="true"><use href="#i-{{.Icon}}"/></svg></span><span class="workbench-status">{{T .Status}}</span></div>
-  <h2>{{T .Title}}</h2><p>{{T .Description}}</p>
-  <a class="button secondary small" href="{{.ActionURL}}">{{T .Action}}<svg class="i" aria-hidden="true"><use href="#i-external"/></svg></a>
+  <div class="workbench-card-top"><span class="workbench-icon"><svg class="i" aria-hidden="true"><use href="#i-{{.Icon}}"/></svg></span><span class="workbench-status{{if or (eq .Status "Ready") (eq .Status "Configured") (eq .Status "Available")}} ok{{else if eq .Status "Review"}} warn{{end}}">{{T .Status}}</span></div>
+  <h2><a class="workbench-card-link" href="{{.URL}}">{{T .Title}}</a></h2><p>{{T .Description}}</p>
+  <a class="button secondary small" href="{{.ActionURL}}">{{T .Action}}<span aria-hidden="true">→</span></a>
 </article>
 {{end}}
 </section>

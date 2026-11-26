@@ -127,7 +127,7 @@ func TestPagesRenderAndEscape(t *testing.T) {
 		{"/match?q=192.0.2.7", []string{"in scope", "192.0.2.0/24"}},
 		{"/settings", []string{"Quick poll", `name="quick_fake" value="15m"`, `name="full_fake" value="6h"`, "Save intervals",
 			`<a href="/settings" class="on" aria-current="page">Polling`, `<a href="/settings?tab=display">Display</a>`}},
-		{"/api", []string{`<div class="tb-title"><h1>API</h1></div>`, `<section class="panel ep" id="listPrograms">`, `<span class="mth get">GET</span><code>/api/v1/programs</code>`,
+		{"/api", []string{`<nav class="trail" aria-label="Back to"><a href="/integrations">Integrations</a><span class="sep">/</span><span class="here">API</span></nav>`, `<section class="panel ep" id="listPrograms">`, `<span class="mth get">GET</span><code>/api/v1/programs</code>`,
 			`/api/v1/programs/fake/acme`, `<form class="try" data-try hidden>`, `href="/api/v1/openapi.json"`, `<a href="/api" aria-current="page">`}},
 		{"/settings?tab=display", []string{`<section class="panel" id="theme" data-palettes hidden>`, `<label class="palette" data-palette="midnight">`,
 			`<label class="palette" data-palette="nord">`, `<label class="palette" data-palette="graphite">`, `value="graphite" data-palette-pick>`}},

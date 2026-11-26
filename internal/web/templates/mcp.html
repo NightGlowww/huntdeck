@@ -1,3 +1,4 @@
+{{define "topbar-title"}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/integrations">{{T "Integrations"}}</a><span class="sep">/</span><span class="here">{{T .Title}}</span></nav>{{end}}
 {{define "content"}}{{with .Data}}
 <header class="integration-page-head">
   <div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "MCP server"}}</h1><p>{{T "Connect desktop agents over HTTP or stdio."}}</p></div>

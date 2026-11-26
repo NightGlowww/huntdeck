@@ -1,3 +1,4 @@
+{{define "topbar-title"}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/integrations">{{T "Integrations"}}</a><span class="sep">/</span><span class="here">{{T .Title}}</span></nav>{{end}}
 {{define "content"}}{{with .Data}}
 <header class="page-workbench-head"><div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "Scan handoff"}}</h1><p>{{T "Send new targets to ScopeSentry with task history."}}</p></div><a class="button secondary small" href="/integrations">{{T "Integrations workbench"}}</a></header>
 {{if not .Off}}<section class="integration-status-strip scan-status" aria-label="{{T "Scanner status"}}">
@@ -74,12 +75,12 @@
   </div>
 </section>{{end}}
 {{if .RecentOrder}}{{$d := .}}
-<section class="panel"><div class="panel-head"><h2>{{T "Handed over lately"}}</h2>
+<section class="panel" id="scan"><div class="panel-head"><h2>{{T "Handed over lately"}}</h2>
       <span class="aside">{{with index .ScanCounts "done"}}<b>{{num .}}</b> {{T "finished"}} · {{end}}{{with index .ScanCounts "running"}}<b>{{num .}}</b> {{T "running"}} · {{end}}{{with index .ScanCounts "queued"}}<b>{{num .}}</b> {{T "queued"}} · {{end}}{{with index .ScanCounts "paused"}}<b>{{num .}}</b> {{T "paused"}} · {{end}}{{with index .ScanCounts "failed"}}<b>{{num .}}</b> {{T "failed"}} · {{end}}{{with index .ScanCounts ""}}<b>{{num .}}</b> {{T "not read yet"}} · {{end}}{{if .ReadKnown}}{{T "last read"}} {{ago .LastRead}}{{end}}</span>
       <span class="aside">{{TF "the last %d" (len .RecentOrder)}}<form method="post" action="/scan/read" data-busy="{{T "Asking the scanner…"}}"><button type="submit" class="small secondary" title="{{TF "Asks the scanner about the next %d tasks: about ten calls a minute is all it allows" .ReadBatch}}">{{T "Read their state now"}}</button></form></span></div>
-<form method="post" action="/scan/retry"><table class="table"><thead><tr><th class="c-check"></th><th>{{T "Task"}}</th><th>{{T "Platform"}}</th><th>{{T "Targets"}}</th><th>{{T "State"}}</th><th>{{T "When"}}</th></tr></thead><tbody>
-{{range .RecentOrder}}{{$b := index $d.Recent .}}<tr><td class="c-check">{{with index $d.RecentState $b.TaskID}}{{if or (eq .State "failed") (eq .State "gone")}}<input type="checkbox" name="task" value="{{$b.TaskID}}" aria-label="{{T "hand this target over again"}}">{{end}}{{end}}</td><td class="mono small">{{$b.TaskID}}</td><td>{{$b.Platform}}</td><td class="small">{{range $i, $t := $b.Targets}}{{if lt $i 3}}{{$t}} {{end}}{{end}}{{with len $b.Targets}}{{if gt . 3}}<span class="muted">+{{sub . 3}}</span>{{end}}{{end}}</td><td>{{template "taskstate" (index $d.RecentState $b.TaskID)}}</td><td class="small muted" title="{{$b.At}}">{{agoOf $b.At}}</td></tr>{{end}}
-</tbody></table>
+<form method="post" action="/scan/retry"><div class="table-wrap"><table class="cards scan-recent-table"><thead><tr><th class="c-check"></th><th>{{T "Task"}}</th><th>{{T "Platform"}}</th><th>{{T "Targets"}}</th><th>{{T "State"}}</th><th>{{T "When"}}</th></tr></thead><tbody>
+{{range .RecentOrder}}{{$b := index $d.Recent .}}<tr><td class="c-check">{{with index $d.RecentState $b.TaskID}}{{if or (eq .State "failed") (eq .State "gone")}}<input type="checkbox" name="task" value="{{$b.TaskID}}" aria-label="{{T "hand this target over again"}}">{{end}}{{end}}</td><td class="c-name mono small">{{$b.TaskID}}</td><td data-label="{{T "Platform"}}">{{$b.Platform}}</td><td class="c-wide small">{{range $i, $t := $b.Targets}}{{if lt $i 3}}{{$t}} {{end}}{{end}}{{with len $b.Targets}}{{if gt . 3}}<span class="muted">+{{sub . 3}}</span>{{end}}{{end}}</td><td class="c-side">{{template "taskstate" (index $d.RecentState $b.TaskID)}}</td><td class="small muted" data-label="{{T "When"}}" title="{{$b.At}}">{{agoOf $b.At}}</td></tr>{{end}}
+</tbody></table></div>
 <p class="panel-foot"><button type="submit" class="small">{{T "Hand the chosen ones over again"}}</button> <span class="muted small">{{T "A failed task, or one the scanner no longer has: its targets go back in the queue."}}</span></p></form></section>
 {{end}}
 
