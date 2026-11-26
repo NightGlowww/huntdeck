@@ -11,8 +11,8 @@
 {{range .Cards}}
 <article class="workbench-card">
   <div class="workbench-card-top"><span class="workbench-icon"><svg class="i" aria-hidden="true"><use href="#i-{{.Icon}}"/></svg></span><span class="workbench-status{{if or (eq .Status "Ready") (eq .Status "Configured") (eq .Status "Available")}} ok{{else if eq .Status "Review"}} warn{{end}}">{{T .Status}}</span></div>
-  <h2><a class="workbench-card-link" href="{{.URL}}">{{T .Title}}</a></h2><p>{{T .Description}}</p>
-  <a class="button secondary small" href="{{.ActionURL}}">{{T .Action}}<span aria-hidden="true">→</span></a>
+  <div class="workbench-card-body"><h2><a class="workbench-card-link" href="{{.URL}}">{{T .Title}}</a></h2><p>{{T .Description}}</p></div>
+  <div class="workbench-card-foot"><a class="button secondary small" href="{{.ActionURL}}">{{T .Action}} <span aria-hidden="true">→</span></a></div>
 </article>
 {{end}}
 </section>

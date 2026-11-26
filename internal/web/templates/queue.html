@@ -1,6 +1,12 @@
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T "Hunt queue"}}</h1>
-<p class="lead">{{T "Targets ranked by whether you can start today and what the work is worth per hour. A hard gate keeps out what cannot be started; the rest is a weighted score of the program's value, the best-case payout, how fast it accepts, how crowded it is, how fresh the target is and how much arranging it needs."}} <a class="link" href="/scan">{{T "Hand them to the scanner"}}</a>{{T ", or work them by hand — a target marked 'already handed to the scanner' is queued there, not done."}}</p>
+<div class="queue-lead">
+  <p class="lead">{{T "Targets ranked by whether you can start today and what the work is worth per hour."}} <a class="link" href="/scan">{{T "Hand them to the scanner"}}</a>{{T ", or work them by hand."}}</p>
+  <details class="lead-more">
+    <summary>{{T "Scoring formula"}}</summary>
+    <p>{{T "A hard gate keeps out what cannot be started; the rest is a weighted score of the program's value, the best-case payout, how fast it accepts, how crowded it is, how fresh the target is and how much arranging it needs. A target marked 'already handed to the scanner' is queued there, not done."}}</p>
+  </details>
+</div>
 
 {{if .ComputedAt.IsZero}}
   <section class="panel queue-empty" aria-live="polite">
@@ -32,8 +38,8 @@
   <p class="empty-state">{{T "No target matches these filters."}} <a class="link" href="/queue">{{T "Clear the filters"}}</a></p>
   {{else}}
   <div class="table-wrap tall" id="list" tabindex="-1">
-  <table class="fixed cards">
-    <thead><tr><th>{{T "Program"}}</th><th>{{T "Target"}}</th><th class="num">{{T "Score"}}</th><th>{{T "Why"}}</th></tr></thead>
+  <table class="fixed cards qlist">
+    <thead><tr><th class="c-prog">{{T "Program"}}</th><th>{{T "Target"}}</th><th class="num c-qscore">{{T "Score"}}</th><th>{{T "Why"}}</th></tr></thead>
     <tbody>
     {{range .Rows}}
       <tr data-href="/programs/{{.Platform}}/{{.Handle}}?tab=scope">
@@ -41,13 +47,13 @@
         <td class="c-target"><div class="qtarget"><code class="mono small">{{.Kind}} {{.Value}}</code><button type="button" class="icon-btn qcopy" data-copy-text="{{.Value}}" title="{{T "Copy"}}: {{.Value}}" aria-label="{{T "Copy"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button></div></td>
         <td class="c-open num" data-label="{{T "Score"}}">
           {{if .Factors}}
-          <details class="why-score"><summary><span class="sr-only">{{T "Score"}} </span>{{printf "%.1f" .Score}}</summary>
+          <details class="why-score"><summary><span class="qscore-wrap"><span class="qmeter" aria-hidden="true"><span style="width:{{printf "%.1f" .Score}}%"></span></span><span class="qscore"><span class="sr-only">{{T "Score"}} </span>{{printf "%.1f" .Score}}</span></span></summary>
             <ul class="factors">
               {{$pct := .LossPct}}{{with .LossName}}<li class="loss"><span class="fname">{{T "Biggest loss"}}</span> <span class="muted">{{T .}} −{{$pct}}%</span></li>{{end}}
-              {{range .Factors}}<li><span class="fname">{{T .Name}}</span> <span class="muted">×{{printf "%.2f" .Effect}}</span></li>{{end}}
+              {{range .Factors}}<li><span class="fname">{{T .Name}}</span><span class="fbar" aria-hidden="true"><span style="width:{{percent .Effect}}"></span></span><span class="muted fval">×{{printf "%.2f" .Effect}}</span></li>{{end}}
             </ul>
           </details>
-          {{else}}{{printf "%.1f" .Score}}{{end}}
+          {{else}}<span class="qscore-wrap"><span class="qmeter" aria-hidden="true"><span style="width:{{printf "%.1f" .Score}}%"></span></span><span class="qscore">{{printf "%.1f" .Score}}</span></span>{{end}}
         </td>
         <td class="c-wide small muted" data-label="{{T "Why"}}">{{range $i, $r := .Reasons}}{{if $i}} · {{end}}{{$r}}{{end}}</td>
       </tr>

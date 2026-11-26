@@ -12,9 +12,10 @@
 .title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 
 /* ---------- stat strip ---------- */
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 16px;
-  border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
-.stat { display: grid; gap: 2px; padding: 13px 18px 14px; border-left: 1px solid var(--border); margin-left: -1px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; margin-bottom: 16px;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--border); overflow: hidden; }
+.stat { display: grid; grid-template-rows: auto 1fr auto; align-content: start; gap: 2px; padding: 13px 18px 14px;
+  border-left: 0; margin-left: 0; background: var(--surface); }
 a.stat:hover { background: var(--surface-2); color: inherit; }
 .stat .l { color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 .stat .v { font: 600 calc(24px * var(--fs, 1))/1.2 var(--mono); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }

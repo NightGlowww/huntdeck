@@ -61,9 +61,9 @@ col.w-you { width: 112px; }
 
 /* A score that unfolds into its factors: the number is the summary, the list
    says what moved it. No script, and it works on a card as well as in a table. */
-.why-score > summary { cursor: pointer; list-style: none; font-variant-numeric: tabular-nums; }
+.why-score > summary { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; list-style: none; font-variant-numeric: tabular-nums; }
 .why-score > summary::-webkit-details-marker { display: none; }
-.why-score > summary::after { content: "▾"; margin-left: 4px; font-size: calc(9px * var(--fs, 1)); opacity: .55; }
+.why-score > summary::after { content: "▾"; font-size: calc(9px * var(--fs, 1)); opacity: .55; }
 .why-score[open] > summary::after { content: "▴"; }
 .why-score .factors { margin: 6px 0 0; padding: 0; list-style: none; text-align: left; font-weight: 400; }
 .why-score .factors li { display: flex; gap: 6px; justify-content: space-between; white-space: nowrap; font-size: calc(11px * var(--fs, 1)); }

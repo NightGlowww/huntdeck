@@ -17,6 +17,33 @@ table.fixed.flist td.asset { white-space: nowrap; }
 .queue-empty p { max-width: 54ch; }
 .empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
 
+/* Hunt queue header & visual score meters */
+.queue-lead { margin: 0 2px 14px; }
+.queue-lead .lead { margin: 0 0 6px; }
+.lead-more { color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); }
+.lead-more > summary { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; color: var(--accent); font-weight: 550; list-style: none; }
+.lead-more > summary::-webkit-details-marker { display: none; }
+.lead-more > summary::after { content: "▾"; font-size: calc(10px * var(--fs, 1)); opacity: .75; }
+.lead-more[open] > summary::after { content: "▴"; }
+.lead-more > p { max-width: min(1400px, 100%); margin: 6px 0 0; line-height: 1.55; text-wrap: pretty; }
+
+.qlist th.c-prog { width: 210px; }
+.qlist th.c-qscore { width: 176px; }
+.qscore-wrap { display: inline-flex; align-items: center; gap: 7px; justify-content: flex-end; }
+.qmeter { display: inline-block; width: 44px; height: 6px; border-radius: 999px; background: var(--surface-3); overflow: hidden; flex: none; }
+.qmeter > span { display: block; height: 100%; max-width: 100%; border-radius: inherit; background: var(--accent); }
+.qscore { font-weight: 650; color: var(--text); font-variant-numeric: tabular-nums; }
+.qlist .why-score .factors { display: grid; gap: 4px; min-width: 150px; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
+.qlist .why-score .factors li { display: grid; grid-template-columns: minmax(0, 1fr) 42px auto; align-items: center; gap: 6px; }
+.qlist .why-score .factors li.loss { grid-template-columns: auto 1fr; }
+.qlist .why-score .factors li.loss .muted { text-align: right; }
+.qlist .why-score .fbar { display: block; height: 5px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+.qlist .why-score .fbar > span { display: block; height: 100%; max-width: 100%; border-radius: inherit; background: var(--info); }
+.qlist .why-score .fval { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+@media (max-width: 900px) {
+  table.cards.qlist td.c-open[data-label] { align-items: flex-start; }
+}
+
 .tlist th.c-prog { width: 300px; }
 .tlist th.c-bounty { width: 190px; }
 .tlist td.c-bounty .amt { font: calc(12.5px * var(--fs, 1)) var(--mono); font-variant-numeric: tabular-nums; }

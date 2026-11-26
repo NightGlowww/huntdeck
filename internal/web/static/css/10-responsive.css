@@ -8,7 +8,8 @@
   .nav .label, .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* icons alone show, the labels still name them */
   .demo-note { padding: 4px 2px; font-size: calc(11px * var(--fs, 1)); }
   .nav a { justify-content: center; width: 42px; padding: 0; }
-  .sidebar .foot { border-top: 0; width: 100%; align-items: center; }
+  .sidebar .foot { border-top: 0; width: 100%; align-items: center; justify-items: center; }
+  .foot-row { justify-content: center; }
   /* The rail is 60px: the switcher stacks, the sign-out shortens, and the
      search box drops its "/" hint so the buttons beside it keep their room. */
   .lang-switch { flex-direction: column; gap: 0; padding: 0; }
@@ -22,7 +23,9 @@
   .omni input[type="search"] { padding-right: 12px; }
   .demo-note { padding: 4px 2px; font-size: 11px; }
   .nav a, .nav a.sub { justify-content: center; width: 42px; padding: 0; }
+  .nav a.sub::after { content: none; }
   .nav a.nav-group-link { width: 24px; height: 1px; min-height: 0; margin: 8px auto; padding: 0; border-radius: 1px; background: var(--border-2); }
+  .nav a.nav-group-link::before, .nav a.nav-group-link::after { content: none; }
   .nav a.nav-group-link .group-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .nav a.nav-group-link .group-chev { display: none; }
   .sidebar .foot { border-top: 0; }
@@ -37,10 +40,21 @@
   :root[data-side="min"] .nav .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   :root[data-side="min"] .demo-note { padding: 4px 2px; font-size: 11px; }
   :root[data-side="min"] :is(.nav a, .nav a.sub) { justify-content: center; width: 42px; padding: 0; }
+  :root[data-side="min"] .nav a.sub::after { content: none; }
   :root[data-side="min"] .nav a.nav-group-link { width: 24px; height: 1px; min-height: 0; margin: 8px auto; padding: 0; border-radius: 1px; background: var(--border-2); }
+  :root[data-side="min"] .nav a.nav-group-link::before, :root[data-side="min"] .nav a.nav-group-link::after { content: none; }
   :root[data-side="min"] .nav a.nav-group-link .group-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   :root[data-side="min"] .nav a.nav-group-link .group-chev { display: none; }
-  :root[data-side="min"] .sidebar .foot { border-top: 0; }
+  :root[data-side="min"] .sidebar .foot { border-top: 0; width: 100%; justify-items: center; }
+  :root[data-side="min"] .foot-row { flex-direction: column; align-items: center; gap: 6px; }
+  :root[data-side="min"] .lang-switch { flex-direction: column; gap: 0; padding: 0; }
+  :root[data-side="min"] .lang-switch .i, :root[data-side="min"] .lang-switch .full { display: none; }
+  :root[data-side="min"] .lang-switch .short { display: inline; }
+  :root[data-side="min"] .lang-switch button { font-size: calc(11px * var(--fs, 1)); padding: 1px 5px; }
+  :root[data-side="min"] .sign-out button { height: 28px; padding: 0 4px; font-size: calc(11px * var(--fs, 1)); }
+  :root[data-side="min"] .sign-out .i { display: block; }
+  :root[data-side="min"] .sign-out .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  :root[data-side="min"] .side-toggle { margin-left: 0; justify-self: center; }
   :root[data-side="min"] .side-toggle .i { transform: rotate(0deg); }
 }
 @media (max-width: 700px) {
@@ -49,9 +63,10 @@
   .brand { padding: 0 6px 0 0; }
   .nav { display: flex; flex: 1; justify-content: space-between; min-width: 0; }
   .nav a { flex: 0 1 42px; min-width: 28px; width: auto; } /* every page's icon fits, down to 360px */
+  .nav a[aria-current="page"]::before { display: none; }
   .nav a.nav-group-link { display: none; }
   .sidebar .spacer, .version { display: none; }
-  .sidebar .foot { padding: 0; }
+  .sidebar .foot { padding: 0; width: auto; }
   .topbar { position: static; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 0 14px; } /* search, then the buttons beside it */
   .tb-title { display: none; } /* the sidebar marks the page */
   .m-heading { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; margin: 0 0 12px; font-size: calc(18px * var(--fs, 1)); font-weight: 650; line-height: 1.25; }
@@ -81,17 +96,25 @@
     max-height: calc(100dvh - 90px); overflow-y: auto; padding: 8px; border: 1px solid var(--border-input); border-radius: 10px; background: var(--surface);
     box-shadow: 0 12px 32px rgb(0 0 0 / .2); justify-content: stretch; }
   .js .sidebar.nav-open .nav a { justify-content: flex-start; width: auto; height: 40px; padding: 0 12px; }
+  .js .sidebar.nav-open .nav a[aria-current="page"]::before { display: block; }
   .js .sidebar.nav-open .nav a.sub { padding-left: 34px; }
+  .js .sidebar.nav-open .nav a.sub::after { content: ""; }
   .js .sidebar.nav-open .nav .label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: nowrap; } /* undo the narrow sidebar's visually hidden names */
-  .js .sidebar.nav-open .nav .group { display: block; margin: 10px 12px 4px; }
-  .js .sidebar.nav-open .nav .group:first-child { margin-top: 2px; }
-  .js .sidebar.nav-open .nav a.nav-group-link { display: flex; justify-content: space-between; width: auto; height: 28px; margin: 10px 4px 2px; padding: 0 12px; border-radius: 5px; background: transparent; }
+  .js .sidebar.nav-open .nav .group { display: block; margin: 10px 12px 4px; padding-top: 8px; }
+  .js .sidebar.nav-open .nav .group:first-child { margin-top: 2px; padding-top: 0; }
+  .js .sidebar.nav-open .nav a.nav-group-link { display: flex; justify-content: space-between; width: auto; height: 28px; margin: 12px 4px 2px; padding: 0 12px; border-radius: 5px; background: transparent; }
+  .js .sidebar.nav-open .nav a.nav-group-link::after { content: ""; top: -6px; }
   .js .sidebar.nav-open .nav a.nav-group-link[aria-current="page"] { background: var(--accent-weak); }
   .js .sidebar.nav-open .nav a.nav-group-link .group-label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: nowrap; }
   .js .sidebar.nav-open .nav a.nav-group-link .group-chev { display: block; opacity: .6; }
   /* Sign out and the language switch live in .foot, and the menu used to bring
      back only the nav: on a phone they were unreachable. They come with it. */
   .js .sidebar.nav-open .foot { display: grid; gap: 8px; margin-top: 8px; padding: 8px 12px 4px; border-top: 1px solid var(--border); }
+  .js .sidebar.nav-open .foot-row { justify-content: flex-start; }
+  .js .sidebar.nav-open .lang-switch { flex-direction: row; gap: 2px; }
+  .js .sidebar.nav-open .lang-switch .i { display: block; }
+  .js .sidebar.nav-open .lang-switch .full { display: inline; }
+  .js .sidebar.nav-open .lang-switch .short { display: none; }
 }
 @media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
   .js .sidebar.nav-open .nav { animation: hd-menu-in .18s ease both; transform-origin: top right; }
