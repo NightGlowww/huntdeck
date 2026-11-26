@@ -15,7 +15,7 @@
 <header class="page-head">
   <div>
     {{$kind := ""}}{{if .Rewards}}{{$kind = T "changed"}}{{else if not $c.OldValue}}{{$kind = T "added"}}{{else if not $c.NewValue}}{{$kind = T "removed"}}{{else}}{{$kind = T "edited"}}{{end}}
-    <h1>{{TF "%[1]s %[2]s" .Label $kind}}</h1>
+    <h1>{{TF "%[1]s %[2]s" (T .Label) $kind}}</h1>
     <div class="sub">{{template "pname" (plink $c.Program)}}
       · <span title="{{datetime $c.OccurredAt}}">{{datetime $c.OccurredAt}} ({{ago $c.OccurredAt}})</span>
       · <a href="/changes?group=rules">{{T "all policy and reward changes"}}</a></div>
