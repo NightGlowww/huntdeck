@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"io/fs"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -125,5 +126,49 @@ func TestNoTemplateSyntaxInsideT(t *testing.T) {
 	if len(bad) > 0 {
 		sort.Strings(bad)
 		t.Errorf("%d template or catalog entry(ies) contain {{ or }}:\n%s", len(bad), strings.Join(bad, "\n"))
+	}
+}
+
+// TestReportsAndAnalyticsRenderCleanChinese verifies that key Chinese pages
+// render without raw Go template braces ({{ or }}), without outdated
+// machine/court translations ("三审", "维持原判"), and with expected Chinese copy.
+func TestReportsAndAnalyticsRenderCleanChinese(t *testing.T) {
+	e := newTestEnv(t, func(d *Deps) { d.Mail = newFakeMail() })
+	e.addReports(t)
+	h := http.Header{"Accept-Language": {"zh-CN"}}
+	for _, p := range []string{"/", "/queue", "/disclosed", "/email", "/email/stats", "/email/m1", "/system", "/integrations", "/reports", "/reports/analytics"} {
+		res, body := e.do(e.client(), "GET", p, nil, h)
+		if res.StatusCode != http.StatusOK {
+			t.Errorf("%s: status %d", p, res.StatusCode)
+			continue
+		}
+		if strings.Contains(body, "{{") || strings.Contains(body, "}}") {
+			t.Errorf("%s rendered raw template braces ({{ or }})", p)
+		}
+		for _, bad := range []string{"三审", "维持原判"} {
+			if strings.Contains(body, bad) {
+				t.Errorf("%s rendered deprecated translation %q", p, bad)
+			}
+		}
+	}
+	_, disc := e.do(e.client(), "GET", "/disclosed", nil, h)
+	if !strings.Contains(disc, "披露于") {
+		t.Error("/disclosed missing Chinese disclosure tooltip")
+	}
+	_, email := e.do(e.client(), "GET", "/email", nil, h)
+	if !strings.Contains(email, "条消息") && !strings.Contains(email, "收件人") {
+		t.Error("/email missing Chinese mail UI copy")
+	}
+	_, rep := e.do(e.client(), "GET", "/reports", nil, h)
+	for _, want := range []string{"待你回复", "久无回应"} {
+		if !strings.Contains(rep, want) {
+			t.Errorf("/reports missing %q", want)
+		}
+	}
+	_, ana := e.do(e.client(), "GET", "/reports/analytics", nil, h)
+	for _, want := range []string{"分诊", "报告分析", "与提交一致"} {
+		if !strings.Contains(ana, want) {
+			t.Errorf("/reports/analytics missing %q", want)
+		}
 	}
 }
