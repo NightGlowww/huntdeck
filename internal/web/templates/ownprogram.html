@@ -2,7 +2,7 @@
 
 {{/* Add or edit a program that isn't on a supported platform (ownprograms.go). */}}
 {{define "content"}}{{with .Data}}
-<h1 class="m-heading">{{T .Title}}</h1>
+<h1 class="m-heading">{{if .Handle}}{{TF "Edit %s" .Name}}{{else}}{{T "Add a program"}}{{end}}</h1>
 {{if .ReadOnly}}<div class="demo-tour" role="note"><b>{{T "Self-hosted"}}</b><span>{{if .Handle}}{{T "On your own HuntDeck, this form edits a program you added by hand: its scope, bounties and rules, with each save shown on its Changes tab."}}{{else}}{{T "On your own HuntDeck, this form adds programs that aren't on a supported platform, such as ones companies run themselves."}}{{end}} {{T "Here it can't be saved."}}{{with repoURL}} <a class="link" href="{{.}}" target="_blank" rel="noopener noreferrer">{{T "Self-host HuntDeck"}}</a>{{end}}</span></div>{{end}}
 <form method="post" action="{{.Action}}" class="channel-form own-form">
   <section class="panel">
