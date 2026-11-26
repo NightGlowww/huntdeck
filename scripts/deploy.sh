@@ -50,7 +50,14 @@ case "$mode" in binary|full) ;; *) echo "--mode must be binary or full" >&2; exi
 # mkdir is atomic and portable (flock is not on macOS). A lock older than half an
 # hour is a deploy that was killed: take it over rather than block forever.
 lock="/tmp/huntdeck-deploy-$(printf %s "$host" | tr -c 'a-zA-Z0-9' '_').lock.d"
-if [ -z "$dry" ]; then
+lock_held=""
+tmp=""
+cleanup() {
+  [ -n "$tmp" ] && rm -rf "$tmp"
+  [ -n "$lock_held" ] && rmdir "$lock" 2>/dev/null || true
+}
+trap cleanup EXIT
+if [ -z "$dry" ] && [ -z "$check" ]; then
   if ! mkdir "$lock" 2>/dev/null; then
     # A lock with no deploy process behind it is a leftover: the script that took
     # it was killed, or exited in a way that skipped its trap. Age alone is the
@@ -72,7 +79,7 @@ if [ -z "$dry" ]; then
       exit 3
     fi
   fi
-  trap 'rmdir "$lock" 2>/dev/null' EXIT
+  lock_held="1"
 fi
 
 run() {
@@ -153,7 +160,6 @@ else
   # against the running process afterwards, so a deploy that ships nothing
   # cannot pass.
   tmp=$(mktemp -d)
-  trap 'rm -rf "$tmp"' EXIT
   run env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -trimpath -ldflags "-s -w -X github.com/mdpsec/huntdeck/internal/version.Version=$ver -X github.com/mdpsec/huntdeck/internal/version.Pending=$(git -C "$(dirname "$0")/.." status --porcelain 2>/dev/null | wc -l | tr -d " ")" \
     -o "$tmp/huntdeck" ./cmd/huntdeck
