@@ -333,6 +333,13 @@ disagree in either direction.
   way in: a query that matches nothing (`?q=zzzznomatch`), a view of a service that is
   not configured, and a filter combination with no results.
 
+- **When a page cannot be screenshotted, render it and read the text.** The mail
+  message page cannot be reached on an instance without HuntMail: in the fixture it
+  renders in a test, and stripping the tags off that body prints every word the
+  reader sees - which is how "to", "Program?" and a tooltip in English turned up on
+  a page that four content assertions had called fine. Text beats a screenshot here:
+  a tooltip and a collapsed section never appear in one.
+
 - Tests are table-driven. Platform clients are tested against `httptest`
   servers replaying fixtures (pagination, 429, 5xx, auth failure, partial
   failure); the sync engine with `internal/platform/fake`, including "a
