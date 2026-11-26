@@ -1,3 +1,5 @@
+{{define "topbar-title"}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/system">{{T "System"}}</a><span class="sep">/</span><span class="here">{{T .Title}}</span></nav>{{end}}
+
 {{define "content"}}{{with .Data}}
 <header class="page-workbench-head"><div><span class="workbench-kicker">{{T "System"}}</span><h1>{{T "Settings"}}</h1><p>{{T "Runtime, credentials and operator preferences."}}</p></div><a class="button secondary small" href="/system">{{T "System workbench"}}</a></header>
 <nav class="ptabs" aria-label="{{T "Settings sections"}}">
@@ -23,10 +25,10 @@
           </form>{{end}}</td>
         <td data-label="{{T "Enabled"}}"><label class="toggle"><input type="checkbox" name="enabled_{{$p.Name}}" value="1" form="sched" aria-label="{{TF "Enable %s" $p.Name}}"{{if $p.Enabled}} checked{{end}}> <span class="muted small">{{if $p.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
         <td class="c-wide">{{if $p.SignIn}}<div class="signins">{{range $p.SignIn}}{{template "signin" .}}{{end}}</div>{{else}}<span class="zero">—</span>{{end}}</td>
-<span class="ival-hint" aria-live="polite"></span>        <td data-label="{{T "Quick poll"}}"><div class="pollc"><input type="text" class="interval" data-kind="quick" name="quick_{{$p.Name}}" value="{{interval $p.Quick}}" form="sched" aria-label="{{TF "%s quick poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
-          title="{{TF "every %s" (interval $p.Quick)}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Quick)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "quick")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}{{with $p.NextQuick}}<span class="muted small next-due">{{TF "next about %s" .}}</span>{{end}}</div></td>
-<span class="ival-hint" aria-live="polite"></span>        <td data-label="{{T "Full poll"}}"><div class="pollc"><input type="text" class="interval" data-kind="full" name="full_{{$p.Name}}" value="{{interval $p.Full}}" form="sched" aria-label="{{TF "%s full poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
-          title="{{TF "every %s" (interval $p.Full)}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Full)}}{{end}}">{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "full")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}{{with $p.NextFull}}<span class="muted small next-due">{{TF "next about %s" .}}</span>{{end}}</div></td>
+        <td data-label="{{T "Quick poll"}}"><div class="pollc"><span class="ival-box"><input type="text" class="interval" data-kind="quick" name="quick_{{$p.Name}}" value="{{interval $p.Quick}}" form="sched" aria-label="{{TF "%s quick poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
+          title="{{TF "every %s" (interval $p.Quick)}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Quick)}}{{end}}"><span class="ival-hint" aria-live="polite"></span></span>{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "quick")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}{{with $p.NextQuick}}<span class="muted small next-due">{{TF "next about %s" .}}</span>{{end}}</div></td>
+        <td data-label="{{T "Full poll"}}"><div class="pollc"><span class="ival-box"><input type="text" class="interval" data-kind="full" name="full_{{$p.Name}}" value="{{interval $p.Full}}" form="sched" aria-label="{{TF "%s full poll interval" $p.Name}}" spellcheck="false" autocomplete="off" maxlength="12"
+          title="{{TF "every %s" (interval $p.Full)}}{{if $p.Overridden}}{{TF "; default %s" (interval $p.Default.Full)}}{{end}}"><span class="ival-hint" aria-live="polite"></span></span>{{range $.Data.LatestRuns}}{{if and (eq .Platform $p.Name) (eq .Mode "full")}}<span>{{template "lastrun" .}}</span>{{end}}{{end}}{{with $p.NextFull}}<span class="muted small next-due">{{TF "next about %s" .}}</span>{{end}}</div></td>
         <td class="c-side num">
           {{if $p.Enabled}}<form method="post" action="/settings/poll" class="inline" data-busy="{{T "Polling…"}}">
             <input type="hidden" name="platform" value="{{$p.Name}}">
@@ -44,7 +46,7 @@
           </form>{{end}}</td>
         <td data-label="{{T "Enabled"}}"><label class="toggle"><input type="checkbox" name="web_enabled_{{$w.Name}}" value="1" form="sched" aria-label="{{TF "Enable the %s browser sync" $w.Name}}"{{if $w.Enabled}} checked{{end}}> <span class="muted small">{{if $w.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
         <td colspan="3" class="c-wide"><div class="pollc subc"><span class="muted small" title="{{TF "Reads for each program: %s" $w.PullsText}}">{{T "uses the website login, every"}}</span>
-          <input type="text" class="interval" name="web_interval_{{$w.Name}}" value="{{interval $w.Interval}}" form="sched" aria-label="{{TF "%s browser sync interval" $w.Name}}" spellcheck="false" autocomplete="off" maxlength="12"><span class="ival-hint" aria-live="polite"></span><span class="ival-hint" aria-live="polite"></span>
+          <span class="ival-box"><input type="text" class="interval" name="web_interval_{{$w.Name}}" value="{{interval $w.Interval}}" form="sched" aria-label="{{TF "%s browser sync interval" $w.Name}}" spellcheck="false" autocomplete="off" maxlength="12"><span class="ival-hint" aria-live="polite"></span></span>
           <span class="muted small">{{T "last run"}}</span>{{with $w.Last}}<span>{{template "lastrun" .}}</span>{{else}}<span class="zero">{{T "never"}}</span>{{end}}</div></td>
         <td class="c-side num">
           {{if $w.Running}}<form method="post" action="/settings/poll" class="inline" data-busy="{{T "Polling…"}}">
@@ -185,7 +187,7 @@
       {{if .QuietSet}}<button type="submit" name="reset" value="1" class="small secondary" formnovalidate>{{T "Reset to 14"}}</button>{{end}}
     </div>
   </form>
-  <p class="panel-foot">{{T "A report that's still new or triaged is"}}<b>{{T "gone quiet"}}</b>{{T "once the program has said nothing for this many days (counting from submission if it never has): the Reports tile, the Gone quiet view and filter, its quiet mark, and the API's"}}<code>{{T "gone_quiet"}}</code>{{T "follow it. Accepted reports waiting for a fix, and ones you snoozed, muted or added by hand, are never flagged."}}</p>
+  <p class="panel-foot">{{T "A report that's still new or triaged is"}} <b>{{T "gone quiet"}}</b> {{T "once the program has said nothing for this many days (counting from submission if it never has): the Reports tile, the Gone quiet view and filter, its quiet mark, and the API's"}} <code>{{T "gone_quiet"}}</code> {{T "follow it. Accepted reports waiting for a fix, and ones you snoozed, muted or added by hand, are never flagged."}}</p>
 </section>
 
 {{else}}

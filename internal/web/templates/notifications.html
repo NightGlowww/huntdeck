@@ -1,3 +1,5 @@
+{{define "topbar-title"}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/system">{{T "System"}}</a><span class="sep">/</span><span class="here">{{T .Title}}</span></nav>{{end}}
+
 {{define "content"}}{{with .Data}}
 <header class="page-workbench-head"><div><span class="workbench-kicker">{{T "System"}}</span><h1>{{T "Notifications"}}</h1><p>{{T "Deliver operational events through channels you control."}}</p></div><a class="button secondary small" href="/system">{{T "System workbench"}}</a></header>
 <section class="integration-status-strip notification-status" aria-label="{{T "Notification status"}}">

@@ -13,7 +13,8 @@
 /* ---------- Settings: tabs, as on a program's page ---------- */
 .page > .ptabs:first-child, .page > .flash + .ptabs { margin-top: 0; }
 .savebar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--border); }
-#theme .palettes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#theme { grid-column: 1 / -1; }
+#theme .palettes { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 @media (max-width: 700px) { #theme .palettes { grid-template-columns: minmax(0, 1fr); } }
 /* Platforms: each credential's sign-in on a line; a browser sync is a
    row under its platform's. */
@@ -40,6 +41,8 @@ table.schedule tr.sub td { padding-top: 4px; padding-bottom: 10px; border-top: 0
 }
 /* A poll's interval and how its last run went, side by side. */
 .pollc { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.ival-box { display: inline-grid; align-items: start; vertical-align: middle; max-width: 100%; }
+.ival-box .ival-hint { white-space: normal; }
 /* As cards (26-cards.css): a browser sync's line wraps, and its card is
    shaded as its row was. */
 @media (max-width: 900px) {
