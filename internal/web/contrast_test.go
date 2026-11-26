@@ -40,6 +40,10 @@ func TestPaletteContrast(t *testing.T) {
 		{"warn", "surface"}, {"bad", "surface"}, {"priv", "surface"},
 	}
 	for name, vars := range palettes {
+		borderInput, okBorder := vars["border-input"]
+		if !okBorder {
+			t.Errorf("%s: missing --border-input", name)
+		}
 		for mode, idx := range []int{0, 1} {
 			for _, p := range pairs {
 				fg, okF := vars[p[0]]
@@ -49,6 +53,17 @@ func TestPaletteContrast(t *testing.T) {
 				}
 				if got := contrastRatio(fg[idx], bg[idx]); got < 4.5 {
 					t.Errorf("%s (%s): %s on %s is %.2f:1, want 4.5", name, []string{"light", "dark"}[mode], p[0], p[1], got)
+				}
+			}
+			if okBorder {
+				for _, bgName := range []string{"surface", "bg"} {
+					bg, okB := vars[bgName]
+					if !okB {
+						continue
+					}
+					if got := contrastRatio(borderInput[idx], bg[idx]); got < 3.0 {
+						t.Errorf("%s (%s): border-input on %s is %.2f:1, want 3.0", name, []string{"light", "dark"}[mode], bgName, got)
+					}
 				}
 			}
 		}

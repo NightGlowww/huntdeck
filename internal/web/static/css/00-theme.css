@@ -23,7 +23,7 @@
   --surface-2: light-dark(#f8f6fe, #101c31);
   --surface-3: light-dark(#efebfb, #16233b);
   --border:    light-dark(#e4def5, #18233a);
-  --border-input: light-dark(#8b81ad, #4b5a78); /* a control's edge: 3.17:1 or more */
+  --border-input: light-dark(#8b81ad, #58688a); /* a control's edge: 3.21:1 or more */
   --border-2:  light-dark(#d2c9ee, #26354f);
   --text:      light-dark(#0b1220, #e6edf7);
   --text-2:    light-dark(#263247, #cdd6e4);
@@ -53,6 +53,7 @@
   --surface-2:    light-dark(#f4f6f9, #333a47);
   --surface-3:    light-dark(#e5e9f0, #3b4252);
   --border:       light-dark(#d8dee9, #3b4252);
+  --border-input: light-dark(#6c788e, #7b88a1);
   --border-2:     light-dark(#c2cad8, #4c566a);
   --text:         light-dark(#2e3440, #eceff4);
   --text-2:       light-dark(#3b4252, #d8dee9);
@@ -80,6 +81,7 @@
   --surface-2:    light-dark(#f7f7f8, #1c1d21);
   --surface-3:    light-dark(#ececee, #25262b);
   --border:       light-dark(#e2e2e5, #24252a);
+  --border-input: light-dark(#71717a, #6e7078);
   --border-2:     light-dark(#cfcfd4, #35363d);
   --text:         light-dark(#111214, #ececee);
   --text-2:       light-dark(#2c2d31, #c8c9ce);
