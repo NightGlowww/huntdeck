@@ -2556,12 +2556,10 @@
   "%s available": "%s 可用",
   "%s couldn't be looked through": "%s 封未能解析",
   "%s link": "%s链接",
-  "%s more": "另有 %s 项",
+  "%s more": "%s 项",
   "%s of %s points": "%s / %s 分",
   "%s%% of %s": "已用 %s%%（上限 %s）",
   "%s's addresses": "%s 的地址",
-  "+%d more": "另有 +%d 项",
-  "+%s more": "另有 +%s 项",
   ", receiving mail for": "，接收以下域名的邮件：",
   "(no subject)": "（无主题）",
   "(no text)": "（无文本）",
@@ -2722,6 +2720,7 @@
   "the last 12 months": "近 12 个月",
   "the last 3 months": "近 3 个月",
   "unread": "未读",
-  "what you change here stays as you set it: syncs won't overwrite it": "你在此修改的内容会保留：后续同步不会覆盖"
+  "what you change here stays as you set it: syncs won't overwrite it": "你在此修改的内容会保留：后续同步不会覆盖",
+  "%d more": "%d 项"
  }
 }
