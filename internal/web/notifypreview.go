@@ -132,3 +132,19 @@ func (s *server) channelPreview(w http.ResponseWriter, r *http.Request) {
 
 // previewShown is how many example messages the channel form shows.
 const previewShown = 4
+
+// exampleKinds lists the distinct event kinds among the cards, in the order the
+// kinds are declared, so the picker does not reshuffle as events arrive.
+func exampleKinds(cards []messageCard) []string {
+	have := map[string]bool{}
+	for _, c := range cards {
+		have[c.Kind] = true
+	}
+	out := make([]string, 0, len(have))
+	for _, k := range notify.EventKinds {
+		if have[k.Key] {
+			out = append(out, k.Key)
+		}
+	}
+	return out
+}

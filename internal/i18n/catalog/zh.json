@@ -2557,6 +2557,7 @@
   "No newsletters": "没有邮件通讯",
   "match": "匹配",
   "No mail matches.": "没有匹配的邮件。",
-  "No mail yet. Make an address on a program's Email tab, or use any address on your HuntMail domain.": "还没有邮件。在某个项目的邮箱标签页里生成一个地址，或使用你 HuntMail 域名下的任意地址。"
+  "No mail yet. Make an address on a program's Email tab, or use any address on your HuntMail domain.": "还没有邮件。在某个项目的邮箱标签页里生成一个地址，或使用你 HuntMail 域名下的任意地址。",
+  "every kind": "全部类型"
  }
 }

@@ -42,6 +42,10 @@ type notificationsData struct {
 	Suggested       string // how this browser reached HuntDeck
 	Timezone        string
 	Examples        previewView // this week's messages, every kind
+	// Kinds are the event kinds the examples carry, and Sample is the one asked
+	// for: the picker shows what a channel would actually send.
+	Kinds           []string
+	Sample          string
 	EnabledChannels int
 	Failed          int
 	Waiting         int
@@ -103,6 +107,20 @@ func (s *server) renderNotifications(w http.ResponseWriter, r *http.Request, sta
 	if d.Examples, err = s.preview(ctx, s.langOf(r), "", every, true, "", examplesShown); err != nil {
 		s.serverError(w, r, err)
 		return
+	}
+	// The examples can be narrowed to one kind: "what would a new-scope message
+	// look like" is the question a channel's form asks, and the three newest
+	// events are usually not that kind.
+	d.Kinds = exampleKinds(d.Examples.Cards)
+	if want := oneOf(r.URL.Query().Get("sample"), d.Kinds...); want != "" {
+		d.Sample = want
+		kept := make([]messageCard, 0, len(d.Examples.Cards))
+		for _, c := range d.Examples.Cards {
+			if c.Kind == want {
+				kept = append(kept, c)
+			}
+		}
+		d.Examples.Cards = kept
 	}
 	set, err := s.Store.Settings(ctx, notify.BaseURLSetting)
 	if err != nil {

@@ -94,7 +94,7 @@
 </div>
 
 <aside class="panel nexamples">
-  <div class="panel-head"><h2>{{T "What a message looks like"}}</h2><span class="aside">{{T "from the last week's changes"}}</span></div>
+  <div class="panel-head"><h2>{{T "What a message looks like"}}</h2><span class="aside">{{if .Kinds}}<span class="quick sample-pick"><a class="qv{{if not .Sample}} on{{end}}" href="?">{{T "every kind"}}</a>{{range .Kinds}}<a class="qv{{if eq . $.Data.Sample}} on{{end}}" href="?sample={{.}}">{{T .}}</a>{{end}}</span> · {{end}}{{T "from the last week's changes"}}</span></div>
   <div class="panel-body msgs">
     {{range .Examples.Cards}}{{template "message" .}}{{else}}<p class="muted">{{T "Nothing has changed in the last week, so there's nothing to show yet."}}</p>{{end}}
   </div>
