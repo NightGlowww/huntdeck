@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -436,16 +437,37 @@ func assetType(t, ident string) string {
 // getJSON sends an authenticated GET when credentials exist, logging in
 // first or again as needed.
 func (c *Client) getJSON(ctx context.Context, u string, into any) error {
+	return c.doJSON(ctx, http.MethodGet, u, nil, into)
+}
+
+// postJSON sends an authenticated POST with a JSON body, logging in first or
+// again as needed.
+func (c *Client) postJSON(ctx context.Context, u string, body, into any) error {
+	b, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	return c.doJSON(ctx, http.MethodPost, u, b, into)
+}
+
+func (c *Client) doJSON(ctx context.Context, method, u string, body []byte, into any) error {
 	for attempt := 0; ; attempt++ {
 		token, err := c.currentToken(ctx)
 		if err != nil {
 			return err
 		}
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+		var br io.Reader
+		if body != nil {
+			br = bytes.NewReader(body)
+		}
+		req, err := http.NewRequestWithContext(ctx, method, u, br)
 		if err != nil {
 			return err
 		}
 		req.Header.Set("Accept", "application/json")
+		if body != nil {
+			req.Header.Set("Content-Type", "application/json")
+		}
 		if token != "" {
 			req.Header.Set("Authorization", "Bearer "+token)
 		}

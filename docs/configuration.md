@@ -81,9 +81,9 @@ on unless passed).
 | `HUNTDECK_AI_KEY` | — | The endpoint's API key. Prompted for a local model with no key, leave it unset |
 | `HUNTDECK_X_ACCOUNT` | — | An X account to follow for news (e.g. `huntdeck`): a read-only copy links to it and its link previews name it |
 | `HUNTDECK_REPO_URL` | the project's | HuntDeck's source repository as the UI links it, for a fork that would rather point home |
-| `YWH_EMAIL`, `YWH_PASSWORD` | — | YesWeHack login. It runs in the login browser (a YesWeHack tab in Settings › Browser); HuntDeck takes the web app's token, saves it in the data directory and renews it as the web app does, signing in again only when it can't |
+| `YWH_EMAIL`, `YWH_PASSWORD` | — | YesWeHack login. It runs in the login browser (a YesWeHack tab in Settings › Browser); HuntDeck takes the web app's token, saves it in the data directory and renews it as the web app does, signing in again only when it can't; it also reads your own reports (Reports, Analytics) |
 | `YWH_TOTP_SECRET` | — | Base32 secret of your YesWeHack authenticator app (if 2FA is on) |
-| `YWH_TOKEN` | — | Alternative: a bearer token from your browser (expires within hours) |
+| `YWH_TOKEN` | — | Alternative: a bearer token from your browser (expires within hours); also reads your own reports (Reports, Analytics) |
 | `YWH_PUBLIC_ONLY` | `false` | Poll YesWeHack's public programs without an account |
 | `YWH_FULL_INTERVAL`, `YWH_QUICK_INTERVAL` | `6h`, `30m` | YesWeHack polling (`0` disables) |
 | `YWH_RATE`, `YWH_CONCURRENCY` | `2`, `2` | YesWeHack request rate and parallel fetches |

@@ -10,8 +10,9 @@ and the ones that can take `--data` say so.
 - **`huntdeck status`** — programs and scope per platform, and the last polls.
 - **`huntdeck changes [--since 24h] [--limit 200]`** — recent changes, newest first.
 - **`huntdeck reports [--platform h1]`** — read your own reports from the
-  platforms now (titles, states, severities, dates and bounties; never
-  write-ups or comments), the same reading the Polling tab switches on.
+  configured platforms (HackerOne, Bugcrowd, Intigriti and YesWeHack) now
+  (titles, states, severities, dates and bounties; never write-ups or comments),
+  the same reading the Polling tab switches on.
 - **`huntdeck score [-n 25]`** — recompute HuntsScores now and print the best.
 - **`huntdeck queue [-limit 40] [-explain] [-candidates 2000] [-platform P] [-kind K] [-paying] [-fresh]`** —
   the HuntQueue ranking: which targets can start today and what the work is
