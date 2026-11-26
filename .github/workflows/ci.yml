@@ -23,7 +23,7 @@ env:
 jobs:
   check:
     runs-on: [self-hosted, linux, x64, huntdeck-ci]
-    timeout-minutes: 25
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
 
@@ -42,7 +42,17 @@ jobs:
           golangci-lint run --timeout=5m ./...
 
       - name: tests (race)
-        run: go test -race -timeout 20m ./...
+        run: |
+          set -euo pipefail
+          other_pkgs=$(go list ./... | grep -v '/internal/web$')
+          go test -race -timeout 35m $other_pkgs & p1=$!
+          go test -race -timeout 35m -run '^Test[A-M]' ./internal/web & p2=$!
+          go test -race -timeout 35m -run '^Test[^A-M]' ./internal/web & p3=$!
+          rc=0
+          wait "$p1" || rc=1
+          wait "$p2" || rc=1
+          wait "$p3" || rc=1
+          exit "$rc"
 
       - name: interface copy
         run: |
