@@ -2553,6 +2553,10 @@
   "bonus": "奖金",
   "retest": "复测",
   "e.g. 1500": "例如 1500",
-  "one HuntDeck can't read from a platform; it counts in Analytics like the others": "这条平台读不到；它和其余的一样计入分析"
+  "one HuntDeck can't read from a platform; it counts in Analytics like the others": "这条平台读不到；它和其余的一样计入分析",
+  "No newsletters": "没有邮件通讯",
+  "match": "匹配",
+  "No mail matches.": "没有匹配的邮件。",
+  "No mail yet. Make an address on a program's Email tab, or use any address on your HuntMail domain.": "还没有邮件。在某个项目的邮箱标签页里生成一个地址，或使用你 HuntMail 域名下的任意地址。"
  }
 }

@@ -42,7 +42,7 @@
   </form>
   {{with .Problem}}<div class="empty-state err">{{.}}</div>{{end}}
   {{if .Rows}}{{template "mail-table" .Table}}
-  {{else if not .Problem}}<div class="empty-state">{{if eq .NL "only"}}No newsletters{{if or .Q .To .Program .Domain}} match{{end}}. <a class="link" href="{{.FilterOn "nl" ""}}">{{T "Show the rest of the mail"}}</a>{{else if or .Q .To .Program .Domain}}No mail matches. <a class="link" href="/email">{{T "Show all mail"}}</a>{{else}}No mail yet. Make an address on a program's Email tab, or use any address on your HuntMail domain.{{end}}</div>{{end}}
+  {{else if not .Problem}}<div class="empty-state">{{if eq .NL "only"}}{{T "No newsletters"}}{{if or .Q .To .Program .Domain}} {{T "match"}}{{end}}. <a class="link" href="{{.FilterOn "nl" ""}}">{{T "Show the rest of the mail"}}</a>{{else if or .Q .To .Program .Domain}}{{T "No mail matches."}} <a class="link" href="/email">{{T "Show all mail"}}</a>{{else}}{{T "No mail yet. Make an address on a program's Email tab, or use any address on your HuntMail domain."}}{{end}}</div>{{end}}
   {{if and .Rows (or .NextURL .PrevURL (ne .Size 30))}}<nav class="pager mpager" aria-label="Pages">
     <span>{{num .From}}–{{num .Last}}{{with .Total}} of {{num .}}{{end}} · page {{.Page}}
       <span class="mp-size">· show {{range $i, $n := .Sizes}}{{if $i}} / {{end}}{{if eq $n $.Data.Size}}<b>{{$n}}</b>{{else}}<a class="link" href="{{$.Data.SizeURL $n}}">{{$n}}</a>{{end}}{{end}}</span></span>
