@@ -54,8 +54,8 @@ func TestSettingsUX(t *testing.T) {
 				t.Errorf("input.interval %q has nil parent", attrVal(in, "name"))
 				continue
 			}
-			if !hasClass(parent, "ival-box") {
-				t.Errorf("input.interval %q parent has class %q, want .ival-box", attrVal(in, "name"), attrVal(parent, "class"))
+			if !hasClass(parent, "ival-box") || parent.Data != "div" {
+				t.Errorf("input.interval %q parent is <%s class=%q>, want <div class=\"ival-box\"> (span would be hidden by #platforms .pollc > span)", attrVal(in, "name"), parent.Data, attrVal(parent, "class"))
 			}
 			var siblingHints int
 			walkHTML(parent, func(n *html.Node) {
