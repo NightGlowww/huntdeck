@@ -2560,6 +2560,9 @@
   "No mail yet. Make an address on a program's Email tab, or use any address on your HuntMail domain.": "还没有邮件。在某个项目的邮箱标签页里生成一个地址，或使用你 HuntMail 域名下的任意地址。",
   "every kind": "全部类型",
   "Add a program": "添加项目",
-  "Edit %s": "编辑 %s"
+  "Edit %s": "编辑 %s",
+  "to": "收件人",
+  "Program?": "所属项目？",
+  "verified": "已验证"
  }
 }

@@ -13,7 +13,7 @@
     <div class="sub title-row">
       <span>{{.Sender}}</span>
       {{if .Verified}}<span class="chip ok" title="{{T "DKIM or DMARC passed for {{range $i, $d := .Auth.VerifiedDomains}}{{if $i}}, {{end}}{{$d}}{{end}}"}}">verified</span>{{else}}<span class="chip req" title="{{T "No passing DKIM or DMARC: the sender may not be who the mail says"}}">{{T "not verified"}}</span>{{end}}
-      <span class="muted">to <a class="link mono small" href="/email?to={{.To}}">{{.To}}</a></span>
+      <span class="muted">{{T "to"}} <a class="link mono small" href="/email?to={{.To}}">{{.To}}</a></span>
       <span class="muted" title="{{datetime .ReceivedAt}}">{{ago .ReceivedAt}}</span>
       {{if .Newsletter}}<span class="chip" title="{{T "HuntMail took it for a newsletter: list headers, no code or link to act on. The Email page leaves these out unless you ask for them"}}">newsletter</span>{{end}}
     </div>
@@ -42,7 +42,7 @@
     <tr><th>{{T "To"}}</th><td class="mono small">{{.To}}</td></tr>
     {{- if not .Pane}}{{/* beside the list, the list shows it */}}
     {{with .Program}}<tr><th>{{T "Program"}}</th><td><div class="pn">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}?tab=email">{{.Name}}</a></div></td></tr>
-    {{- else}}{{with .Guess}}<tr><th title="{{T "A guess: {{$.GuessWhy}}"}}">Program?</th><td>{{range .}}<div class="pn mguess">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}">{{.Name}}</a></div>{{end}}<span class="muted small">a guess: {{$.GuessWhy}}</span></td></tr>{{end}}{{end}}{{end}}
+    {{- else}}{{with .Guess}}<tr><th title="{{T "A guess: {{$.GuessWhy}}"}}">{{T "Program?"}}</th><td>{{range .}}<div class="pn mguess">{{template "ptag" .Platform}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}">{{.Name}}</a></div>{{end}}<span class="muted small">a guess: {{$.GuessWhy}}</span></td></tr>{{end}}{{end}}{{end}}
   </table>
   <table class="kv mside">
     <tr><th>{{T "Received"}}</th><td><span title="{{datetime .ReceivedAt}}">{{datetime .ReceivedAt}}</span></td></tr>
