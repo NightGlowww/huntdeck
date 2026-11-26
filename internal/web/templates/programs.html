@@ -2,7 +2,9 @@
 
 {{define "content"}}{{with .Data}}
 <div class="plist">
-{{template "rail" .RailView}}
+{{/* On the invites page an empty list needs no filter rail: it filters nothing,
+     and it is the first thing a reader sees. */}}
+{{if or (not .Invites) .Pager.Total}}{{template "rail" .RailView}}{{end}}
 
 <section class="panel ptable">
   <div class="activef">
