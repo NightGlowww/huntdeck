@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  GOPROXY: https://goproxy.cn,direct
+  GOPROXY: https://goproxy.cn|https://goproxy.io|direct
   GOTOOLCHAIN: auto
   PATH: /home/ubuntu/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -64,7 +64,11 @@ jobs:
         run: make gates
 
       - name: vulnerabilities
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+        run: |
+          if ! command -v govulncheck >/dev/null 2>&1; then
+            go install golang.org/x/vuln/cmd/govulncheck@latest
+          fi
+          govulncheck ./...
 
       - name: binaries build
         run: make build && make clean
