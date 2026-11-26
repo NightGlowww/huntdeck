@@ -1,4 +1,4 @@
-{{define "topbar-actions"}}<a class="tb-btn" href="/email/stats" title="{{T "Ask HuntMail again: the page doesn't refresh by itself"}}"><svg class="i"><use href="#i-refresh"/></svg><span class="label">Refresh</span></a><a class="tb-btn" href="/email" title="{{T "Your HuntMail inbox"}}"><svg class="i"><use href="#i-inbox"/></svg><span class="label">Inbox</span></a>{{end}}
+{{define "topbar-actions"}}<a class="tb-btn" href="/email/stats" title="{{T "Ask HuntMail again: the page doesn't refresh by itself"}}"><svg class="i"><use href="#i-refresh"/></svg><span class="label">{{T "Refresh"}}</span></a><a class="tb-btn" href="/email" title="{{T "Your HuntMail inbox"}}"><svg class="i"><use href="#i-inbox"/></svg><span class="label">{{T "Inbox"}}</span></a>{{end}}
 
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">HuntMail</h1>
@@ -9,34 +9,34 @@
 <section class="panel"><div class="empty-state err">{{.Problem}}</div></section>
 {{else}}{{with .S}}
 <div class="stats astats mstats">
-  <div class="stat"><span class="l">Messages</span><span class="v{{if not .Messages}} zero{{end}}">{{num .Messages}}</span>
-    <span class="h">kept {{.RetentionDays}} days{{with .Oldest}} · the oldest <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{if $.Data.HasNL}} · <a class="link" href="/email?nl=only" title="{{T "What HuntMail took for a newsletter: hidden from the Email page's list unless you ask for them"}}">{{num $.Data.Newsletters}} newsletters</a>{{end}}</span></div>
-  <div class="stat"><span class="l">Today</span><span class="v{{if not .Today}} zero{{end}}">{{num .Today}}</span>
-    <span class="h">since midnight UTC{{with .Newest}} · the newest <span title="{{datetime .}}">{{ago .}}</span>{{end}}</span></div>
-  <div class="stat" title="{{T "Stored mail against HuntMail's cap (MAX_STORE_MB): past it, the oldest mail goes first"}}"><span class="l">Stored</span><span class="v">{{filesize .StoredBytes}}</span>
-    <span class="h">{{printf "%.0f" $.Data.StoredPct}}% of {{filesize .MaxStoreBytes}}</span>
+  <div class="stat"><span class="l">{{T "Messages"}}</span><span class="v{{if not .Messages}} zero{{end}}">{{num .Messages}}</span>
+    <span class="h">{{TF "kept %d days" .RetentionDays}}{{with .Oldest}} · {{T "the oldest"}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}{{if $.Data.HasNL}} · <a class="link" href="/email?nl=only" title="{{T "What HuntMail took for a newsletter: hidden from the Email page's list unless you ask for them"}}">{{num $.Data.Newsletters}} {{if eq $.Data.Newsletters 1}}{{T "newsletter"}}{{else}}{{T "newsletters"}}{{end}}</a>{{end}}</span></div>
+  <div class="stat"><span class="l">{{T "Today"}}</span><span class="v{{if not .Today}} zero{{end}}">{{num .Today}}</span>
+    <span class="h">{{T "since midnight UTC"}}{{with .Newest}} · {{T "the newest"}} <span title="{{datetime .}}">{{ago .}}</span>{{end}}</span></div>
+  <div class="stat" title="{{T "Stored mail against HuntMail's cap (MAX_STORE_MB): past it, the oldest mail goes first"}}"><span class="l">{{T "Stored"}}</span><span class="v">{{filesize .StoredBytes}}</span>
+    <span class="h">{{TF "%s%% of %s" (printf "%.0f" $.Data.StoredPct) (filesize .MaxStoreBytes)}}</span>
     <svg class="mbar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true"><rect class="mbar-bg" width="100" height="4" rx="2"/><rect class="mbar-fill{{if ge $.Data.StoredPct 90.0}} hot{{end}}" width="{{printf "%.1f" $.Data.StoredPct}}" height="4" rx="2"/></svg></div>
   <div class="stat" title="{{T "Mail HuntMail hasn't looked through for codes and links yet: big mail waits until something opens it, or for HuntMail's minute run when CRON_PARSE_DEFERRED is on"}}"><span class="l">{{T "Codes pending"}}</span><span class="v{{if not $.Data.Backlog}} zero{{end}}">{{num $.Data.Backlog}}</span>
-    <span class="h">{{if .ParseFailed}}{{num .ParseFailed}} couldn't be looked through{{else}}not looked through for codes yet{{end}}</span></div>
-  <div class="stat" title="{{T "Mail that arrived but couldn't be stored: anything but 0 means mail was lost"}}"><span class="l">Lost</span><span class="v{{if not .StoreFailures}} zero{{else}} bad{{end}}">{{num .StoreFailures}}</span>
-    <span class="h">{{with .LastStoreError}}the last <span title="{{datetime .}}">{{ago .}}</span>{{else}}none{{end}}</span></div>
-  {{if $.Data.HasBlocks}}<div class="stat" title="{{T "Mail your blocks turned away as it arrived: never stored"}}"><span class="l">Blocked</span><span class="v{{if not $.Data.Blocked}} zero{{end}}">{{num $.Data.Blocked}}</span>
+    <span class="h">{{if .ParseFailed}}{{TF "%s couldn't be looked through" (num .ParseFailed)}}{{else}}{{T "not looked through for codes yet"}}{{end}}</span></div>
+  <div class="stat" title="{{T "Mail that arrived but couldn't be stored: anything but 0 means mail was lost"}}"><span class="l">{{T "Lost"}}</span><span class="v{{if not .StoreFailures}} zero{{else}} bad{{end}}">{{num .StoreFailures}}</span>
+    <span class="h">{{with .LastStoreError}}{{T "the last"}} <span title="{{datetime .}}">{{ago .}}</span>{{else}}{{T "none"}}{{end}}</span></div>
+  {{if $.Data.HasBlocks}}<div class="stat" title="{{T "Mail your blocks turned away as it arrived: never stored"}}"><span class="l">{{T "Blocked"}}</span><span class="v{{if not $.Data.Blocked}} zero{{end}}">{{num $.Data.Blocked}}</span>
     <span class="h"><a class="link" href="#mail-blocks">{{T "your blocks"}}</a></span></div>{{end}}
   <div class="stat"><span class="l">HuntMail</span><span class="v">{{or .Version "—"}}</span>
-    <span class="h">{{if $.Data.CanUpdate}}<a class="link" href="/email/setup#msetup-form">{{$.Data.Bundle}} available</a>{{else}}<a class="link" href="/email/setup">{{T "setup"}}</a>{{end}}</span></div>
+    <span class="h">{{if $.Data.CanUpdate}}<a class="link" href="/email/setup#msetup-form">{{TF "%s available" $.Data.Bundle}}</a>{{else}}<a class="link" href="/email/setup">{{T "setup"}}</a>{{end}}</span></div>
 </div>
 {{end}}
 <div class="pair2">
 <section class="panel">
-  <div class="panel-head"><h2>{{T "Emails per day"}}</h2><span class="aside">the last {{len .S.Days}} days, UTC</span></div>
-  <div class="panel-body">{{if .HasDays}}{{template "bar-chart" .Chart}}{{else}}<div class="empty-state small">This HuntMail doesn't send its daily counts.{{if .CanUpdate}} <a class="link" href="/email/setup#msetup-form">Update it to {{.Bundle}}</a> to see them.{{end}}</div>{{end}}</div>
+  <div class="panel-head"><h2>{{T "Emails per day"}}</h2><span class="aside">{{TF "the last %d days, UTC" (len .S.Days)}}</span></div>
+  <div class="panel-body">{{if .HasDays}}{{template "bar-chart" .Chart}}{{else}}<div class="empty-state small">{{T "This HuntMail doesn't send its daily counts."}}{{if .CanUpdate}} <a class="link" href="/email/setup#msetup-form">{{TF "Update it to %s" .Bundle}}</a> {{T "to see them."}}{{end}}</div>{{end}}</div>
 </section>
 <section class="panel">
   <div class="panel-head"><h2>{{T "Mail by domain"}}</h2><span class="aside">{{T "the last 30 days"}}</span></div>
   {{if .Domains}}<table class="fixed mdomains">
-    <thead><tr><th>{{T "Domain"}}</th><th class="c-bar"></th><th class="num">30 days</th><th class="num">{{T "Today"}}</th></tr></thead>
+    <thead><tr><th>{{T "Domain"}}</th><th class="c-bar"></th><th class="num">{{T "30 days"}}</th><th class="num">{{T "Today"}}</th></tr></thead>
     <tbody>{{range .Domains}}<tr>
-      <td><a class="link" href="/email?domain={{.Domain}}" title="{{T "Mail to {{.Domain}}"}}">{{.Domain}}</a>{{if not .SetUp}} <span class="chip" title="{{T "Mail arrived for it, but HuntMail wasn't set up for it"}}">{{T "not set up"}}</span>{{end}}</td>
+      <td><a class="link" href="/email?domain={{.Domain}}" title="{{TF "Mail to %s" .Domain}}">{{.Domain}}</a>{{if not .SetUp}} <span class="chip" title="{{T "Mail arrived for it, but HuntMail wasn't set up for it"}}">{{T "not set up"}}</span>{{end}}</td>
       <td class="c-bar"><svg class="mbar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true"><rect class="mbar-fill" width="{{printf "%.1f" .Share}}" height="4" rx="2"/></svg></td>
       <td class="num">{{if .Received}}{{num .Received}}{{else}}<span class="zero">0</span>{{end}}</td>
       <td class="num">{{if .Today}}{{num .Today}}{{else}}<span class="zero">0</span>{{end}}</td>
@@ -47,23 +47,23 @@
 {{/* Top senders beside the blocks they lead to, where there's room. */}}
 {{if .HasSenders}}<div class="pair2 mlists">{{end}}
 {{if .HasSenders}}<section class="panel ptable" id="mail-senders">
-  <div class="panel-head"><h2>Top senders{{with .Senders}} <span class="count">{{len .}}</span>{{end}}</h2><span class="aside">the sites that sent the most mail in the last {{.SenderDays}} days; blocked mail isn't counted</span></div>
+  <div class="panel-head"><h2>{{T "Top senders"}}{{with .Senders}} <span class="count">{{len .}}</span>{{end}}</h2><span class="aside">{{TF "the sites that sent the most mail in the last %d days; blocked mail isn't counted" .SenderDays}}</span></div>
   {{if .Senders}}<div class="table-wrap"><table class="fixed msenders cards">
     <thead><tr><th class="c-what">{{T "Sender"}}</th><th class="num c-n">{{T "Messages"}}</th><th class="num c-n" title="{{T "What HuntMail took for a newsletter"}}">{{T "Newsletters"}}</th><th class="num c-n">{{T "Size"}}</th><th class="c-acts"></th></tr></thead>
     <tbody>{{range .Senders}}<tr>
-      <td class="c-what"><a class="link mono" href="/email?q={{.Domain}}" title="{{T "Mail from {{.Domain}}"}}">{{.Domain}}</a></td>
-      <td class="num c-n" data-label="Messages">{{num .Messages}}</td>
-      <td class="num c-n" data-label="Newsletters">{{if .Newsletters}}{{num .Newsletters}}{{else}}<span class="zero">0</span>{{end}}</td>
-      <td class="num c-n" data-label="Size">{{filesize .Bytes}}</td>
-      <td class="acts c-acts">{{$d := .Domain}}{{if .Blocked}}<div class="mblock-btns">{{if eq .Blocked "all"}}<a class="chip failed" href="#mail-blocks" title="{{T "A block turns away all its mail"}}">{{T "all blocked"}}</a>{{else}}<a class="chip ok" href="#mail-blocks" title="{{T "A block turns away its newsletters; its account mail gets through"}}">{{T "newsletters blocked"}}</a>{{end}}{{if $.Data.HasBlocks}}{{with .BlockID}}<form method="post" action="/email/blocks/{{.}}/delete" data-confirm="Unblock {{$d}}? What it already turned away is gone; what comes next gets through."><input type="hidden" name="from" value="senders"><button type="submit" class="secondary small" title="{{T "Remove the block: HuntMail takes this sender's mail again"}}">{{T "Unblock"}}</button></form>{{end}}{{end}}</div>{{else if not .Newsletters}}<span class="muted small" title="{{T "Nothing it sent looked like a newsletter"}}">{{T "no newsletters"}}</span>{{else if $.Data.HasBlocks}}<form method="post" action="/email/blocks" data-confirm="Turn away newsletters from {{.Domain}} from now on? Its account mail (codes, links) still gets through."><input type="hidden" name="kind" value="sender"><input type="hidden" name="value" value="{{.Domain}}"><input type="hidden" name="scope" value="newsletters"><input type="hidden" name="from" value="senders"><button type="submit" class="secondary small"><svg class="i"><use href="#i-ban"/></svg>{{T "Block newsletters"}}</button></form>{{end}}</td>
+      <td class="c-what"><a class="link mono" href="/email?q={{.Domain}}" title="{{TF "Mail from %s" .Domain}}">{{.Domain}}</a></td>
+      <td class="num c-n" data-label="{{T "Messages"}}">{{num .Messages}}</td>
+      <td class="num c-n" data-label="{{T "Newsletters"}}">{{if .Newsletters}}{{num .Newsletters}}{{else}}<span class="zero">0</span>{{end}}</td>
+      <td class="num c-n" data-label="{{T "Size"}}">{{filesize .Bytes}}</td>
+      <td class="acts c-acts">{{$d := .Domain}}{{if .Blocked}}<div class="mblock-btns">{{if eq .Blocked "all"}}<a class="chip failed" href="#mail-blocks" title="{{T "A block turns away all its mail"}}">{{T "all blocked"}}</a>{{else}}<a class="chip ok" href="#mail-blocks" title="{{T "A block turns away its newsletters; its account mail gets through"}}">{{T "newsletters blocked"}}</a>{{end}}{{if $.Data.HasBlocks}}{{with .BlockID}}<form method="post" action="/email/blocks/{{.}}/delete" data-confirm="{{TF "Unblock %s? What it already turned away is gone; what comes next gets through." $d}}"><input type="hidden" name="from" value="senders"><button type="submit" class="secondary small" title="{{T "Remove the block: HuntMail takes this sender's mail again"}}">{{T "Unblock"}}</button></form>{{end}}{{end}}</div>{{else if not .Newsletters}}<span class="muted small" title="{{T "Nothing it sent looked like a newsletter"}}">{{T "no newsletters"}}</span>{{else if $.Data.HasBlocks}}<form method="post" action="/email/blocks" data-confirm="{{TF "Turn away newsletters from %s from now on? Its account mail (codes, links) still gets through." .Domain}}"><input type="hidden" name="kind" value="sender"><input type="hidden" name="value" value="{{.Domain}}"><input type="hidden" name="scope" value="newsletters"><input type="hidden" name="from" value="senders"><button type="submit" class="secondary small"><svg class="i"><use href="#i-ban"/></svg>{{T "Block newsletters"}}</button></form>{{end}}</td>
     </tr>{{end}}</tbody>
-  </table></div>{{else}}<div class="empty-state small">No mail in the last {{.SenderDays}} days.</div>{{end}}
+  </table></div>{{else}}<div class="empty-state small">{{TF "No mail in the last %d days." .SenderDays}}</div>{{end}}
 </section>{{end}}
 {{if .HasBlocks}}<section class="panel ptable" id="mail-blocks">
-  <div class="panel-head"><h2>Blocks{{with .Blocks.Rows}} <span class="count">{{len .}}</span>{{end}}</h2><span class="aside">{{T "HuntMail turns matching mail away as it arrives: the sender gets a bounce, and nothing is stored"}}</span></div>
+  <div class="panel-head"><h2>{{T "Blocks"}}{{with .Blocks.Rows}} <span class="count">{{len .}}</span>{{end}}</h2><span class="aside">{{T "HuntMail turns matching mail away as it arrives: the sender gets a bounce, and nothing is stored"}}</span></div>
   {{with .Refused}}<p class="flash err mblock-err" role="alert">{{.}}</p>{{end}}
   <form method="post" action="/email/blocks" class="panel-body profile-form mblockf">
-    <label><span>Block</span><select name="kind">
+    <label><span>{{T "Block"}}</span><select name="kind">
       <option value="sender"{{if eq .Form.Kind "sender"}} selected{{end}}>{{T "Mail from a domain"}}</option>
       <option value="recipient"{{if eq .Form.Kind "recipient"}} selected{{end}}>{{T "Mail to an address"}}</option>
       <option value="prefix"{{if eq .Form.Kind "prefix"}} selected{{end}}>{{T "Mail to addresses starting with"}}</option>
@@ -74,7 +74,7 @@
       <option value="newsletters"{{if ne .Form.Scope "all"}} selected{{end}}>{{T "Only newsletters"}}</option>
       <option value="all"{{if eq .Form.Scope "all"}} selected{{end}}>{{T "All of it"}}</option>
     </select></label>
-    <button type="submit"><svg class="i"><use href="#i-ban"/></svg> Block</button>
+    <button type="submit"><svg class="i"><use href="#i-ban"/></svg> {{T "Block"}}</button>
   </form>
   <p class="panel-foot muted small">{{T "A domain takes its subdomains too: shop.example blocks news.shop.example, not shopx.example. It goes by the From header, so the sender's domain as the message shows it. Only newsletters lets its account mail through: codes, links and anything without list headers. Mail HuntMail already has stays; a block only turns away what comes next."}}</p>
   {{if .Blocks.Rows}}{{template "mail-blocks" .Blocks}}{{else}}<div class="empty-state small">{{T "No blocks yet. Add one above, or open a message and use its Block menu."}}</div>{{end}}

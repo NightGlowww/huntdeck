@@ -80,7 +80,7 @@
     <p class="note small">{{T "CrowdStream lists accepted reports only: duplicates, N/A and rejected ones never appear. It shows six months, so months before HuntDeck first read it have no data, and a report resolved more than six months after it was accepted is missed. Resolutions are picked up when HuntDeck re-reads the program, weekly."}}</p>
     </div>
     <div class="bars chart-grid">
-      <div class="cg"><h3>{{T "Accepted per month"}} <span class="muted">· hover for priorities · {{template "month-open" .Accepted}}</span></h3>{{template "line-chart" .Accepted}}</div>
+      <div class="cg"><h3>{{T "Accepted per month"}} <span class="muted">· {{T "hover for priorities"}} · {{template "month-open" .Accepted}}</span></h3>{{template "line-chart" .Accepted}}</div>
       {{with .Bounties}}<div class="cg"><h3 title="{{T "Bounties shown on CrowdStream for the month's accepted reports; many aren't shown"}}">{{T "Bounties per month"}}<span class="muted">· {{T "shown on CrowdStream"}} · {{template "month-open" .}}</span></h3>{{template "line-chart" .}}</div>{{end}}
       <div class="cg"><h3 title="{{T "Accepted reports by the month they were resolved"}}">{{T "Resolved per month"}}<span class="muted">· {{template "month-open" .Resolved}}</span></h3>{{template "line-chart" .Resolved}}</div>
       <div class="cg"><h3 title="{{T "Accepted reports counted by the month they were submitted: valid reports coming in. Duplicates and N/A never appear. Recent months grow as their reports get accepted."}}">{{T "Submitted per month"}}<span class="muted">· {{T "accepted since"}} · {{template "month-open" .Submitted}}</span></h3>{{template "line-chart" .Submitted}}</div>

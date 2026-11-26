@@ -24,7 +24,7 @@
 
 {{define "m-new"}}{{$p := .}}{{if .Fresh}}<span class="fresh-badge">+{{num .Fresh}}</span>{{else}}<span class="zero" title="{{T "No scope added in the last 30 days"}}">0</span>{{end}}{{end}}
 
-{{define "collecting"}}<span class="zero" title="{{TF "Worked out from %s's all-time totals once HuntDeck has saved a week of them, a day at a time" (platformLabel .Platform)}}">Pending</span>{{end}}
+{{define "collecting"}}<span class="zero" title="{{TF "Worked out from %s's all-time totals once HuntDeck has saved a week of them, a day at a time" (platformLabel .Platform)}}">{{T "Pending"}}</span>{{end}}
 
 {{/* "—" means only that the platform doesn't share the number; nomoney
    is a money cell's, which for a program that pays no bounties says so.

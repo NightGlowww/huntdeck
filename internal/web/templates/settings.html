@@ -59,9 +59,9 @@
       {{with $y := $p.Reports}}
       <tr class="sub{{if not (and $y.Enabled $y.Configured $p.Enabled)}} off{{end}}">
         <td class="c-name nowrap"><span class="subl">{{T "Your reports"}}</span></td>
-        <td data-label="Enabled"><label class="toggle"><input type="checkbox" name="reports_enabled_{{$y.Name}}" value="1" form="sched" aria-label="{{T "Read your"}} {{$y.Name}} {{T "reports"}}"{{if $y.Enabled}} checked{{end}}> <span class="muted small">{{if $y.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
+        <td data-label="{{T "Enabled"}}"><label class="toggle"><input type="checkbox" name="reports_enabled_{{$y.Name}}" value="1" form="sched" aria-label="{{TF "Read your %s reports" $y.Name}}"{{if $y.Enabled}} checked{{end}}> <span class="muted small">{{if $y.Enabled}}{{T "on"}}{{else}}{{T "off"}}{{end}}</span></label></td>
         <td colspan="3" class="c-wide"><div class="pollc subc"><span class="muted small">{{if not $y.Configured}}{{T "needs the website login, which HuntDeck doesn't have yet"}}{{else}}{{T "read with the polls, once an hour at most"}}{{end}}</span>
-          <span class="muted small">{{T "· last read"}}</span>{{with $y.SyncedAt}}<span class="when" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">never</span>{{end}}
+          <span class="muted small">{{T "· last read"}}</span>{{with $y.SyncedAt}}<span class="when" title="{{datetime .}}">{{ago .}}</span>{{else}}<span class="zero">{{T "never"}}</span>{{end}}
           {{if $y.Count}}<a class="link small" href="/reports?platform={{$y.Name}}">{{num $y.Count}} {{plural $y.Count "report" "reports"}}</a>{{end}}</div></td>
         <td class="c-side num"></td>
       </tr>
@@ -222,7 +222,7 @@
         <span class="pv-main"><span class="pv-card">
           <span class="pv-row"><i class="pv-text"></i><b class="pv-btn"></b></span>
           <span class="pv-row"><i class="pv-text short"></i></span>
-          <span class="pv-row"><span class="pv-chip add">+3</span><span class="pv-chip mod">~1</span><span class="pv-chip del">−2</span><span class="pv-chip priv">private</span></span>
+          <span class="pv-row"><span class="pv-chip add">+3</span><span class="pv-chip mod">~1</span><span class="pv-chip del">−2</span><span class="pv-chip priv">{{T "private"}}</span></span>
         </span></span>
       </span>
       <span class="pal-name">{{T .Name}}</span><span class="pal-desc">{{T .Desc}}</span>

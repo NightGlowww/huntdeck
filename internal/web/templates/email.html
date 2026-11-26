@@ -13,7 +13,7 @@
   <div class="panel-head"><h2 class="nocaps">{{T "Set up HuntMail"}}</h2><span class="aside">{{T "not set up"}}</span></div>
   <div class="panel-body mail-intro">
     <p>{{T "Email shows your"}}<a class="link" href="https://github.com/mdpsec/huntmail" target="_blank" rel="noopener noreferrer">HuntMail</a>{{T "inbox: a catch-all on a spare domain of yours that runs on your own Cloudflare account (the free plan is enough). Every address on the domain works, so each signup can have its own."}}</p>
-    <p>{{T "Once it's set up, each program gets an"}}<b>Email</b>{{T "tab: make an address for it in one click, and its mail lists there and here, with the codes and links ready to copy."}}</p>
+    <p>{{T "Once it's set up, each program gets an"}}<b>{{T "Email"}}</b>{{T "tab: make an address for it in one click, and its mail lists there and here, with the codes and links ready to copy."}}</p>
     {{if .CanSetUp}}<p>{{T "HuntDeck sets it up for you: all it needs is a domain on Cloudflare and an API token."}}<a class="button small" href="/email/setup#msetup-form">{{T "Set up HuntMail"}}</a></p>
     <p class="muted small">{{T "Already running HuntMail? Enter its address and API key in"}}<a class="link" href="/email/setup">{{T "HuntMail › Setup"}}</a>.</p>
     {{else}}<p>{{T "Set HuntMail up with its own setup, then enter the address and API key it printed in"}}<a class="link" href="/email/setup">{{T "HuntMail › Setup"}}</a>.</p>{{end}}
@@ -24,11 +24,11 @@
 <section class="panel ptable">
   <form class="activef mfilter" method="get" action="/email">
     <label class="search-field"><svg class="i"><use href="#i-search"/></svg><input type="search" name="q" value="{{.Q}}" placeholder="{{T "Subject, sender or address"}}" aria-label="{{T "Search mail"}}" maxlength="200"></label>
-    {{if .Programs}}<select name="program" aria-label="Program">
+    {{if .Programs}}<select name="program" aria-label="{{T "Program"}}">
       <option value="">{{T "Every program"}}</option>
       {{range .Programs}}<option value="{{.ProgramID}}"{{if eq (printf "%d" .ProgramID) $.Data.ProgramID}} selected{{end}}>{{.Name}} ({{platformShort .Platform}})</option>{{end}}
     </select>{{end}}
-    {{if gt (len .Domains) 1}}<select name="domain" aria-label="Domain">
+    {{if gt (len .Domains) 1}}<select name="domain" aria-label="{{T "Domain"}}">
       <option value="">{{T "Every domain"}}</option>
       {{range .Domains}}<option value="{{.}}"{{if eq . $.Data.Domain}} selected{{end}}>{{.}}</option>{{end}}
     </select>{{end}}
@@ -36,20 +36,20 @@
     {{if ne .Size 30}}<input type="hidden" name="n" value="{{.Size}}">{{end}}
     {{with .NL}}<input type="hidden" name="nl" value="{{.}}">{{end}}
     <button type="submit" class="small">{{T "Show"}}</button>
-    {{with .To}}<a class="pill" href="{{$.Data.FilterOn "to" ""}}" title="{{T "Show every address"}}">to {{.}} <span aria-hidden="true">×</span></a>{{end}}
-    <span class="what">newest first{{with .Total}} · {{num .}} {{if eq $.Data.NL "only"}}newsletters{{else}}messages{{end}}{{end}}</span>
-    <a class="button secondary small mrefresh" href="{{.Here}}" title="{{T "Ask HuntMail for new mail: the page doesn't check by itself, so it costs nothing until you do"}}"><svg class="i"><use href="#i-refresh"/></svg> Refresh</a>
+    {{with .To}}<a class="pill" href="{{$.Data.FilterOn "to" ""}}" title="{{T "Show every address"}}">{{TF "to %s" .}} <span aria-hidden="true">×</span></a>{{end}}
+    <span class="what">{{T "newest first"}}{{with .Total}} · {{num .}} {{if eq $.Data.NL "only"}}{{if eq . 1}}{{T "newsletter"}}{{else}}{{T "newsletters"}}{{end}}{{else}}{{if eq . 1}}{{T "message"}}{{else}}{{T "messages"}}{{end}}{{end}}{{end}}</span>
+    <a class="button secondary small mrefresh" href="{{.Here}}" title="{{T "Ask HuntMail for new mail: the page doesn't check by itself, so it costs nothing until you do"}}"><svg class="i"><use href="#i-refresh"/></svg> {{T "Refresh"}}</a>
   </form>
   {{with .Problem}}<div class="empty-state err">{{.}}</div>{{end}}
   {{if .Rows}}{{template "mail-table" .Table}}
   {{else if not .Problem}}<div class="empty-state">{{if eq .NL "only"}}{{T "No newsletters"}}{{if or .Q .To .Program .Domain}} {{T "match"}}{{end}}. <a class="link" href="{{.FilterOn "nl" ""}}">{{T "Show the rest of the mail"}}</a>{{else if or .Q .To .Program .Domain}}{{T "No mail matches."}} <a class="link" href="/email">{{T "Show all mail"}}</a>{{else}}{{T "No mail yet. Make an address on a program's Email tab, or use any address on your HuntMail domain."}}{{end}}</div>{{end}}
-  {{if and .Rows (or .NextURL .PrevURL (ne .Size 30))}}<nav class="pager mpager" aria-label="Pages">
-    <span>{{num .From}}–{{num .Last}}{{with .Total}} of {{num .}}{{end}} · page {{.Page}}
-      <span class="mp-size">· show {{range $i, $n := .Sizes}}{{if $i}} / {{end}}{{if eq $n $.Data.Size}}<b>{{$n}}</b>{{else}}<a class="link" href="{{$.Data.SizeURL $n}}">{{$n}}</a>{{end}}{{end}}</span></span>
+  {{if and .Rows (or .NextURL .PrevURL (ne .Size 30))}}<nav class="pager mpager" aria-label="{{T "Pages"}}">
+    <span>{{num .From}}–{{num .Last}}{{with .Total}} {{TF "of %s" (num .)}}{{end}} · {{TF "page %d" .Page}}
+      <span class="mp-size">· {{T "show"}} {{range $i, $n := .Sizes}}{{if $i}} / {{end}}{{if eq $n $.Data.Size}}<b>{{$n}}</b>{{else}}<a class="link" href="{{$.Data.SizeURL $n}}">{{$n}}</a>{{end}}{{end}}</span></span>
     <span class="buttons">
-      {{if gt .Page 2}}<a class="button secondary small" href="{{.FirstURL}}" title="{{T "The newest mail"}}">« Newest</a>{{end}}
-      {{with .PrevURL}}<a class="button secondary small" href="{{.}}" rel="prev">← Newer</a>{{else}}<span class="button secondary small disabled">← Newer</span>{{end}}
-      {{with .NextURL}}<a class="button secondary small" href="{{.}}" rel="next">Older →</a>{{else}}<span class="button secondary small disabled">Older →</span>{{end}}
+      {{if gt .Page 2}}<a class="button secondary small" href="{{.FirstURL}}" title="{{T "The newest mail"}}">{{T "« Newest"}}</a>{{end}}
+      {{with .PrevURL}}<a class="button secondary small" href="{{.}}" rel="prev">{{T "← Newer"}}</a>{{else}}<span class="button secondary small disabled">{{T "← Newer"}}</span>{{end}}
+      {{with .NextURL}}<a class="button secondary small" href="{{.}}" rel="next">{{T "Older →"}}</a>{{else}}<span class="button secondary small disabled">{{T "Older →"}}</span>{{end}}
     </span>
   </nav>{{end}}
 </section>

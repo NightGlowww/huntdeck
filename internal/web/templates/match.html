@@ -59,9 +59,9 @@
       <tr data-href="/programs/{{.Program.Platform}}/{{.Program.Handle}}">
         <td class="c-prog"><div class="prog">{{template "ptag" .Program.Platform}}<a class="name" href="/programs/{{.Program.Platform}}/{{.Program.Handle}}" title="{{.Program.Name}}">{{.Program.Name}}</a></div></td>
         <td class="c-side shrink">{{if .InScope}}<span class="verdict in">{{T "in scope"}}</span>{{else}}<span class="verdict out">{{T "out of scope"}}</span>{{end}}</td>
-        <td class="shrink"><span class="chips">{{with .Via.Kind}}<span class="chip" title="{{T "The kind of rule that decided it"}}">{{.}}</span>{{end}}{{if .Program.Private}}<span class="chip private">private</span>{{end}}{{if ne .Program.State "open"}}<span class="chip {{.Program.State}}">{{.Program.State}}</span>{{end}}</span></td>
+        <td class="shrink"><span class="chips">{{with .Via.Kind}}<span class="chip" title="{{T "The kind of rule that decided it"}}">{{.}}</span>{{end}}{{if .Program.Private}}<span class="chip private">{{T "private"}}</span>{{end}}{{if ne .Program.State "open"}}<span class="chip {{.Program.State}}">{{T .Program.State}}</span>{{end}}</span></td>
         <td class="c-wide asset">{{template "asset" .Identifier}}</td>
-        <td class="shrink nowrap" title="{{datetime .RemovedAt}}" data-label="Removed">{{.RemovedAt.Format "2006-01-02"}}</td>
+        <td class="shrink nowrap" title="{{datetime .RemovedAt}}" data-label="{{T "Removed"}}">{{.RemovedAt.Format "2006-01-02"}}</td>
       </tr>
     {{end}}
     </tbody>
@@ -77,6 +77,6 @@
 {{define "match-row"}}<tr data-href="/programs/{{.Program.Platform}}/{{.Program.Handle}}">
   <td class="c-prog"><div class="prog">{{template "ptag" .Program.Platform}}<a class="name" href="/programs/{{.Program.Platform}}/{{.Program.Handle}}" title="{{.Program.Name}}">{{.Program.Name}}</a></div></td>
   <td class="c-side shrink">{{if .InScope}}<span class="verdict in">{{T "in scope"}}</span>{{else}}<span class="verdict out">{{T "out of scope"}}</span>{{end}}</td>
-  <td class="shrink"><span class="chips">{{with .Via.Kind}}<span class="chip" title="{{T "The kind of rule that decided it"}}">{{.}}</span>{{end}}{{if .Program.Private}}<span class="chip private">private</span>{{end}}{{if ne .Program.State "open"}}<span class="chip {{.Program.State}}">{{.Program.State}}</span>{{end}}</span></td>
+  <td class="shrink"><span class="chips">{{with .Via.Kind}}<span class="chip" title="{{T "The kind of rule that decided it"}}">{{.}}</span>{{end}}{{if .Program.Private}}<span class="chip private">{{T "private"}}</span>{{end}}{{if ne .Program.State "open"}}<span class="chip {{.Program.State}}">{{T .Program.State}}</span>{{end}}</span></td>
   <td class="c-wide asset">{{.Via.Value}}</td>
 </tr>{{end}}

@@ -5,18 +5,18 @@
 {{template "huntmail-tabs" "setup"}}
 {{if .Run}}
 <section class="panel msetup-run"{{if .Busy}} data-setup-running{{end}} aria-live="polite">
-  <div class="panel-head"><h2>{{if .Busy}}Setting up HuntMail…{{else if .Err}}Stopped{{else}}Done{{end}}</h2>
-    <span class="aside">started <span title="{{datetime .Started}}">{{ago .Started}}</span></span></div>
+  <div class="panel-head"><h2>{{if .Busy}}{{T "Setting up HuntMail…"}}{{else if .Err}}{{T "Stopped"}}{{else}}{{T "Done"}}{{end}}</h2>
+    <span class="aside">{{T "started"}} <span title="{{datetime .Started}}">{{ago .Started}}</span></span></div>
   <ol class="msetup-steps">
-    {{range .Steps}}<li class="{{.State}}"><span class="chip {{if eq .State "done"}}ok{{else if eq .State "failed"}}failed{{else}}running{{end}}">{{if eq .State "done"}}done{{else if eq .State "failed"}}stopped{{else}}working{{end}}</span>
+    {{range .Steps}}<li class="{{.State}}"><span class="chip {{if eq .State "done"}}ok{{else if eq .State "failed"}}failed{{else}}running{{end}}">{{if eq .State "done"}}{{T "done"}}{{else if eq .State "failed"}}{{T "stopped"}}{{else}}{{T "working"}}{{end}}</span>
       <b>{{.Title}}</b>{{with .Detail}}<span class="{{if eq $.Data.Err .}}msetup-err{{else}}muted{{end}}">{{.}}</span>{{end}}</li>{{end}}
   </ol>
   {{if .Err}}{{if not .Steps}}<p class="msetup-err msetup-note">{{.Err}}</p>{{end}}
   <p class="msetup-note muted small">{{T "Each step looks before it changes anything: fix what it says and run it again, and it carries on from where it stopped."}}</p>
   {{else if not .Busy}}{{with .Result}}
-  <p class="msetup-note">HuntMail {{.Version}} runs at <code>{{.Origin}}</code>{{with .Domains}}, receiving mail for {{range $i, $d := .}}{{if $i}}, {{end}}<b>{{$d}}</b>{{end}}{{end}}.
-    {{if $.Data.Saved}}Its private address and API key are saved here, encrypted: HuntDeck restarts to use them.{{end}}
-    {{if not .Healthy}}It isn't answering yet: a new workers.dev address can take a few minutes.{{end}}</p>
+  <p class="msetup-note">{{TF "HuntMail %s runs at" .Version}} <code>{{.Origin}}</code>{{with .Domains}}{{T ", receiving mail for"}} {{range $i, $d := .}}{{if $i}}, {{end}}<b>{{$d}}</b>{{end}}{{end}}.
+    {{if $.Data.Saved}}{{T "Its private address and API key are saved here, encrypted: HuntDeck restarts to use them."}}{{end}}
+    {{if not .Healthy}}{{T "It isn't answering yet: a new workers.dev address can take a few minutes."}}{{end}}</p>
   <p class="msetup-note"><a class="button small" href="/email">{{T "Email"}}</a> <a class="button secondary small" href="/email/stats">{{T "Overview"}}</a></p>
   {{end}}{{end}}
 </section>
@@ -43,7 +43,7 @@
 {{end}}
 </div>
 {{if .CanSetUp}}<section class="panel msetup-about">
-  <div class="panel-head"><h2>{{T "What it does"}}</h2><span class="aside">HuntMail {{.Version}}{{with .Running}} · yours runs {{.}}{{end}}</span></div>
+  <div class="panel-head"><h2>{{T "What it does"}}</h2><span class="aside">HuntMail {{.Version}}{{with .Running}} · {{TF "yours runs %s" .}}{{end}}</span></div>
   <div class="panel-body msetup-intro">
     <p>{{T "HuntMail is a catch-all inbox that runs on your own Cloudflare account: every address on your domain works, so each signup can have its own, and HuntDeck shows the mail on the Email page and each program's Email tab. The free plan is enough. Use a domain you don't get other mail on."}}</p>
     <p>{{T "HuntDeck sets it up with Cloudflare's API: a D1 database, the HuntMail Worker on your workers.dev address, its private address and API key (saved here, encrypted), and the domain's Email Routing, with its catch-all pointed at HuntMail. Run it again to add a domain or to update HuntMail; it keeps your settings and key."}}</p>
