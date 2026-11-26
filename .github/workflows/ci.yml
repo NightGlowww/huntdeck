@@ -64,11 +64,7 @@ jobs:
         run: make gates
 
       - name: vulnerabilities
-        run: |
-          if ! command -v govulncheck >/dev/null 2>&1; then
-            go install golang.org/x/vuln/cmd/govulncheck@latest
-          fi
-          govulncheck ./...
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
       - name: binaries build
         run: make build && make clean
