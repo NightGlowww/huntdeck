@@ -25,12 +25,11 @@
   .demo-note { padding: 4px 2px; font-size: 11px; }
   .nav a, .nav a.sub { justify-content: center; width: 42px; padding: 0; }
   .nav a.sub::after { content: none; }
-  .nav-group-head { margin: 6px auto 2px; padding: 0; border-top: 0; justify-content: center; }
+  .nav-group-head { width: 42px; height: 31px; margin: 0 auto; padding: 0; justify-content: center; }
   .nav-group-toggle { display: none; }
-  .nav a.nav-group-link { width: 24px; height: 1px; min-height: 0; margin: 8px auto; padding: 0; border-radius: 1px; background: var(--border-2); }
-  .nav a.nav-group-link::before, .nav a.nav-group-link::after { content: none; }
+  .nav a.nav-group-link { width: 42px; height: 31px; margin: 0; padding: 0; justify-content: center; border-radius: 7px; }
   .nav a.nav-group-link .group-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .nav a.nav-group-link .group-chev { display: none; }
+  .nav-section { margin: 0; padding-left: 0; border-left: 0; justify-items: center; }
   .sidebar .foot { border-top: 0; }
 }
 /* Folded by its button (theme.js, app.js): the same icons-only sidebar,
@@ -44,12 +43,11 @@
   :root[data-side="min"] .demo-note { padding: 4px 2px; font-size: 11px; }
   :root[data-side="min"] :is(.nav a, .nav a.sub) { justify-content: center; width: 42px; padding: 0; }
   :root[data-side="min"] .nav a.sub::after { content: none; }
-  :root[data-side="min"] .nav-group-head { margin: 6px auto 2px; padding: 0; border-top: 0; justify-content: center; }
+  :root[data-side="min"] .nav-group-head { width: 42px; height: 31px; margin: 0 auto; padding: 0; justify-content: center; }
   :root[data-side="min"] .nav-group-toggle { display: none; }
-  :root[data-side="min"] .nav a.nav-group-link { width: 24px; height: 1px; min-height: 0; margin: 8px auto; padding: 0; border-radius: 1px; background: var(--border-2); }
-  :root[data-side="min"] .nav a.nav-group-link::before, :root[data-side="min"] .nav a.nav-group-link::after { content: none; }
+  :root[data-side="min"] .nav a.nav-group-link { width: 42px; height: 31px; margin: 0; padding: 0; justify-content: center; border-radius: 7px; }
   :root[data-side="min"] .nav a.nav-group-link .group-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  :root[data-side="min"] .nav a.nav-group-link .group-chev { display: none; }
+  :root[data-side="min"] .nav-section { margin: 0; padding-left: 0; border-left: 0; justify-items: center; }
   :root[data-side="min"] .sidebar .foot { border-top: 0; width: 100%; justify-items: center; }
   :root[data-side="min"] .foot-row { flex-direction: column; align-items: center; gap: 6px; }
   :root[data-side="min"] .foot-actions { margin-left: 0; flex-direction: column; gap: 4px; }
@@ -103,21 +101,19 @@
   .js .sidebar.nav-open .nav { position: absolute; top: calc(100% + 6px); right: 10px; display: grid; gap: 1px; width: min(280px, calc(100vw - 20px));
     max-height: calc(100dvh - 90px); overflow-y: auto; padding: 8px; border: 1px solid var(--border-input); border-radius: var(--radius); background: var(--surface);
     box-shadow: var(--shadow-pop); justify-content: stretch; }
-  .js .sidebar.nav-open .nav a { justify-content: flex-start; width: auto; height: 40px; padding: 0 12px; }
-  .js .sidebar.nav-open .nav a[aria-current="page"]::before { display: block; }
+  .js .sidebar.nav-open .nav a { justify-content: flex-start; width: auto; height: 38px; padding: 0 12px; }
   .js .sidebar.nav-open .nav a.sub { padding-left: 34px; }
   .js .sidebar.nav-open .nav a.sub::after { content: ""; }
   .js .sidebar.nav-open .nav .label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: nowrap; } /* undo the narrow sidebar's visually hidden names */
-  .js .sidebar.nav-open .nav .group { display: block; margin: 10px 12px 4px; padding-top: 8px; }
-  .js .sidebar.nav-open .nav .group:first-child { margin-top: 2px; padding-top: 0; }
-  .js .sidebar.nav-open .nav-group-head { display: flex; align-items: center; gap: 4px; margin: 10px 4px 2px; padding-top: 8px; border-top: 1px solid var(--border); }
-  .js .sidebar.nav-open .nav-group-toggle { display: inline-grid; }
-  .js .sidebar.nav-open .nav-section { display: grid; gap: 1px; }
-  .js .sidebar.nav-open .nav a.nav-group-link { display: flex; justify-content: space-between; width: auto; flex: 1; height: 28px; margin: 0; padding: 0 8px 0 12px; border-radius: var(--radius-badge); background: transparent; }
+  .js .sidebar.nav-open .nav .group { display: block; margin: 12px 12px 4px; padding-top: 0; }
+  .js .sidebar.nav-open .nav .group:first-child { margin-top: 2px; }
+  .js .sidebar.nav-open .nav-group-head { display: flex; align-items: center; width: auto; height: 38px; margin: 0; padding: 0; }
+  .js .sidebar.nav-open .nav-group-toggle { display: inline-grid; height: 38px; }
+  .js .sidebar.nav-open .nav-section { display: grid; gap: 1px; margin: 2px 0 4px 19px; padding-left: 10px; border-left: 1px solid var(--border); justify-items: stretch; }
+  .js .sidebar.nav-open .nav-section[hidden] { display: none; }
+  .js .sidebar.nav-open .nav a.nav-group-link { display: flex; justify-content: flex-start; width: auto; flex: 1; height: 38px; margin: 0; padding: 0 4px 0 12px; gap: 10px; border-radius: 7px 0 0 7px; background: transparent; }
   .js .sidebar.nav-open .nav a.nav-group-link::after { content: none; }
-  .js .sidebar.nav-open .nav a.nav-group-link[aria-current="page"] { background: var(--accent-weak); }
   .js .sidebar.nav-open .nav a.nav-group-link .group-label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: nowrap; }
-  .js .sidebar.nav-open .nav a.nav-group-link .group-chev { display: block; opacity: .6; }
   /* Sign out and the language switch live in .foot, and the menu used to bring
      back only the nav: on a phone they were unreachable. They come with it. */
   .js .sidebar.nav-open .foot { display: grid; gap: 8px; margin-top: 8px; padding: 8px 12px 4px; border-top: 1px solid var(--border); }
