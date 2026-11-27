@@ -27,6 +27,7 @@ NAMES = {
     "telegram", "webhook", "burpsuite", "scope", "insomnia", "bruno", "postman",
     "chrome", "github", "signal", "cvss", "tls", "ssl", "vnc", "env", "sqlite",
     "huntmail",  # the product's own name, like HuntDeck's
+    "claude", "desktop", "cursor", "code", "streamable", "json-rpc", "stdio",
 }
 # Two ASCII words in a row that aren't only names: prose the page still
 # writes in English.

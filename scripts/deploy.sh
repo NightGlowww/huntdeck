@@ -142,7 +142,7 @@ else
 fi
 
 # One name for this deploy, whichever mode builds it.
-ver="${DEPLOY_VERSION:-deploy-$(date +%Y%m%d%H%M)}"
+ver="${DEPLOY_VERSION:-$(bash scripts/version.sh 2>/dev/null || echo dev)}"
 
 if [ "$mode" = "full" ]; then
   echo "==> source"

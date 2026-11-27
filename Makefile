@@ -1,4 +1,4 @@
-VERSION ?= dev
+VERSION ?= $(shell bash scripts/version.sh 2>/dev/null || echo dev)
 # A build from a tree with uncommitted work stamps -dirty through Go's own VCS
 # info, which says "not this commit" but not "which uncommitted work": every
 # build from the same commit then carries an identical label. The pending count

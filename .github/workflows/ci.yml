@@ -26,6 +26,8 @@ jobs:
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Toolchain
         run: go version
@@ -76,6 +78,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Wait for idle polls on 1.15.46.212
         run: |
@@ -92,7 +96,8 @@ jobs:
 
       - name: Deploy to 1.15.46.212
         run: |
-          DEPLOY_VERSION="ci-$(date -u +%Y%m%d%H%M)-${GITHUB_SHA::7}"
+          git fetch --tags --force || true
+          DEPLOY_VERSION="$(bash scripts/version.sh)"
           echo "DEPLOY_VERSION=$DEPLOY_VERSION" >> "$GITHUB_ENV"
           SKIP_TESTS=1 DEPLOY_VERSION="$DEPLOY_VERSION" bash scripts/deploy.sh --host 1.15.46.212 --mode binary
 
