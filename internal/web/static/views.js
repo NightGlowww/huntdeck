@@ -11,9 +11,10 @@
 // - Export views and Import views move every page's views as JSON; an
 //   imported view replaces one of the same name only if it's newer.
 (() => {
+  const KEY = "huntdeck.views", FORMAT = "huntdeck-views", NAME_MAX = 60, PER_PAGE = 100;
+  const init = (_root, signal) => {
   const box = document.querySelector("[data-views]");
   if (!box) return;
-  const KEY = "huntdeck.views", FORMAT = "huntdeck-views", NAME_MAX = 60, PER_PAGE = 100;
   const page = box.dataset.views;
   const keys = new Set((box.dataset.viewKeys || "").split(",").filter(Boolean));
   const cols = box.dataset.viewCols || "";
@@ -52,7 +53,7 @@
   };
 
   // A small dialog asking for a name, or a yes; null if cancelled.
-  let dlg;
+  let dlg = document.querySelector("dialog.vdialog:not(.ask)");
   const ask = ({ title, text = "", value = null, ok }) => new Promise((resolve) => {
     if (!dlg) {
       dlg = document.createElement("dialog");
@@ -248,7 +249,10 @@
     say(`Imported ${added}${kept ? `, kept ${kept} newer here` : ""}${bad ? `, skipped ${bad}` : ""}`);
   });
 
-  window.addEventListener("storage", (e) => { if (e.key === KEY) render(); });
+  window.addEventListener("storage", (e) => { if (e.key === KEY) render(); }, { signal });
   render();
   box.hidden = false;
+  };
+  if (window.HuntDeck) window.HuntDeck.onMount(init);
+  else init(document, new AbortController().signal);
 })();

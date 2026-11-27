@@ -64,6 +64,8 @@ function copied(btn, say = t("Copied")) {
 // shown reports whether an element is laid out (rows only wide screens show aren't).
 function shown(el) { return el.offsetParent !== null; }
 
+const mount = (fn) => (window.HuntDeck ? window.HuntDeck.onMount(fn) : fn(document, new AbortController().signal));
+
 // Ticking targets shows the selection bar; data-select-all ticks them all.
 document.addEventListener("change", (e) => {
   const box = e.target;
@@ -173,7 +175,7 @@ window.addEventListener("pageshow", () => {
 // system) and the palette; Settings' picker sets the palette too. Both are
 // kept in this browser (theme.js applies them on later pages) and every
 // control shows the current choice.
-(() => {
+mount((_root, signal) => {
   const root = document.documentElement;
   const menu = document.querySelector("[data-theme-menu]");
   const settings = document.querySelector("[data-palettes]");
@@ -202,8 +204,8 @@ window.addEventListener("pageshow", () => {
       save("huntdeck-palette", r.value);
     } else return;
     show();
-  });
-  dark.addEventListener("change", show);
+  }, { signal });
+  dark.addEventListener("change", show, { signal });
   if (settings) settings.hidden = false;
   if (menu) {
     const btn = menu.querySelector("[data-theme-toggle]");
@@ -214,7 +216,7 @@ window.addEventListener("pageshow", () => {
       if (on) (pop.querySelector("input:checked") || pop.querySelector("input")).focus();
     };
     btn.addEventListener("click", () => open(pop.hidden));
-    document.addEventListener("click", (e) => { if (!pop.hidden && !menu.contains(e.target)) open(false); });
+    document.addEventListener("click", (e) => { if (!pop.hidden && !menu.contains(e.target)) open(false); }, { signal });
     menu.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !pop.hidden) { open(false); btn.focus(); }
     });
@@ -222,38 +224,42 @@ window.addEventListener("pageshow", () => {
     menu.hidden = false;
   }
   show();
-})();
+});
 
 // A read-only copy shows the user's own pages as a tour: every form that
 // would change something is switched off (the server refuses them anyway).
-if (document.documentElement.hasAttribute("data-read-only")) {
-  for (const f of document.querySelectorAll('form[method="post" i]')) {
-    if (f.action.endsWith("/api/v1/match")) continue; // only reads
-    for (const el of f.elements) {
-      el.disabled = true;
-      el.title = t("Not available in this demo");
+mount((root) => {
+  if (document.documentElement.hasAttribute("data-read-only")) {
+    for (const f of root.querySelectorAll('form[method="post" i]')) {
+      if (f.action.endsWith("/api/v1/match")) continue; // only reads
+      for (const el of f.elements) {
+        el.disabled = true;
+        el.title = t("Not available in this demo");
+      }
     }
   }
-}
+});
 
 // A read-only copy (a demo) is seen from anywhere, so its pages give times
 // in UTC ("2026-11-05 14:00 UTC"): here they're put in the visitor's own
 // zone, in text and tooltips alike. Without scripts they stay in UTC.
-if (document.documentElement.hasAttribute("data-read-only")) {
-  const utc = /(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d) UTC\b/g;
-  const pad = (n) => String(n).padStart(2, "0");
-  const zone = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" });
-  const local = (text) => text.replace(utc, (_, y, mo, d, h, mi) => {
-    const t = new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi));
-    const name = zone.formatToParts(t).find((p) => p.type === "timeZoneName")?.value || "";
-    return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())} ${name}`.trim();
-  });
-  for (const el of document.querySelectorAll('[title*=" UTC"]')) el.title = local(el.title);
-  const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
-    if (n.nodeValue.includes(" UTC")) n.nodeValue = local(n.nodeValue);
+mount((root) => {
+  if (document.documentElement.hasAttribute("data-read-only")) {
+    const utc = /(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d) UTC\b/g;
+    const pad = (n) => String(n).padStart(2, "0");
+    const zone = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" });
+    const local = (text) => text.replace(utc, (_, y, mo, d, h, mi) => {
+      const t = new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi));
+      const name = zone.formatToParts(t).find((p) => p.type === "timeZoneName")?.value || "";
+      return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())} ${pad(t.getHours())}:${pad(t.getMinutes())} ${name}`.trim();
+    });
+    for (const el of root.querySelectorAll('[title*=" UTC"]')) el.title = local(el.title);
+    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+      if (n.nodeValue.includes(" UTC")) n.nodeValue = local(n.nodeValue);
+    }
   }
-}
+});
 
 // A CSV link (data-csv-cols="table") takes the columns its table shows, in
 // their order (columns.js may have hidden or moved some): ?cols=.
@@ -269,7 +275,7 @@ document.addEventListener("click", (e) => {
 });
 
 // A phone's search box can't show the whole hint: it gets a short one.
-(() => {
+mount((_root, signal) => {
   const box = document.getElementById("omni");
   if (!box) return;
   // The box you searched with shows the words, so they can be read, edited
@@ -282,7 +288,7 @@ document.addEventListener("click", (e) => {
   const narrow = matchMedia("(max-width: 700px)");
   const fit = () => { box.placeholder = narrow.matches ? t("Search, or paste a host") : long; };
   fit();
-  narrow.addEventListener("change", fit);
+  narrow.addEventListener("change", fit, { signal });
   // Escape inside #omni clears typed text first; pressing it again blurs.
   box.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
@@ -293,7 +299,7 @@ document.addEventListener("click", (e) => {
       box.blur();
     }
   });
-})();
+});
 
 // Phones: the Menu button drops the page list down; a click elsewhere,
 // Escape or picking a page closes it.
@@ -357,11 +363,6 @@ document.addEventListener("keydown", (e) => {
     tip.style.top = Math.max(4, top) + "px";
   };
   const hide = () => { tip.hidden = true; };
-
-  for (const t of document.querySelectorAll("svg :is(g.pt, g.bar) > title")) {
-    t.parentNode.dataset.tip = t.textContent;
-    t.remove();
-  }
   document.addEventListener("pointermove", (e) => {
     const g = e.target instanceof Element ? e.target.closest("svg [data-tip]") : null;
     if (g) show(g.dataset.tip, e);
@@ -370,91 +371,102 @@ document.addEventListener("keydown", (e) => {
   document.addEventListener("pointerleave", hide);
 
   const svgNS = "http://www.w3.org/2000/svg";
-  for (const chart of document.querySelectorAll(".tchart[data-days]")) {
-    const svg = chart.querySelector("svg");
-    // A stretch of days with one value is "x0~x1|y|tip": the mark follows
-    // the pointer along it.
-    const days = chart.dataset.days.split(";").map((p) => {
-      const [x, y, text] = p.split("|");
-      const [x0, x1 = x0] = x.split("~").map(Number);
-      return { x0, x1, y: Number(y), text };
-    });
-    if (!svg || days.length < 1 || (days.length < 2 && days[0].x0 === days[0].x1) ||
-      days.some((d) => Number.isNaN(d.x0) || Number.isNaN(d.x1))) continue;
-    const off = (d, x) => (x < d.x0 ? d.x0 - x : x > d.x1 ? x - d.x1 : 0);
-    chart.removeAttribute("title"); // the tooltip below replaces it
-    const vb = svg.viewBox.baseVal;
-    const vw = (vb && vb.width) || 100, vh = (vb && vb.height) || 30;
-    // The chart is stretched to its cell, so the dot is an ellipse that
-    // looks round once stretched; the line keeps its width (CSS).
-    const mark = document.createElementNS(svgNS, "line");
-    mark.setAttribute("class", "cmark");
-    mark.setAttribute("y1", "0");
-    mark.setAttribute("y2", String(vh));
-    const dot = document.createElementNS(svgNS, "ellipse");
-    dot.setAttribute("class", "cdot");
-    const marks = [mark, dot];
-    marks.forEach((m) => { m.style.display = "none"; svg.append(m); });
-    chart.addEventListener("pointermove", (e) => {
-      const box = svg.getBoundingClientRect();
-      if (!box.width) return;
-      const x = ((e.clientX - box.left) / box.width) * vw;
-      let day = days[0];
-      for (const d of days) if (off(d, x) < off(day, x)) day = d;
-      const at = Math.min(Math.max(x, day.x0), day.x1);
-      mark.setAttribute("x1", at);
-      mark.setAttribute("x2", at);
-      dot.setAttribute("cx", at);
-      dot.setAttribute("cy", day.y);
-      dot.setAttribute("rx", (3 * vw) / box.width);
-      dot.setAttribute("ry", (3 * vh) / box.height);
-      marks.forEach((m) => { m.style.display = ""; });
-      show(day.text, e);
-    });
-    chart.addEventListener("pointerleave", () => {
-      hide();
-      marks.forEach((m) => { m.style.display = "none"; });
-    });
-  }
+  mount((root, signal) => {
+    signal.addEventListener("abort", hide, { once: true });
+    for (const t of root.querySelectorAll("svg :is(g.pt, g.bar) > title")) {
+      t.parentNode.dataset.tip = t.textContent;
+      t.remove();
+    }
+    for (const chart of root.querySelectorAll(".tchart[data-days]")) {
+      const svg = chart.querySelector("svg");
+      // A stretch of days with one value is "x0~x1|y|tip": the mark follows
+      // the pointer along it.
+      const days = chart.dataset.days.split(";").map((p) => {
+        const [x, y, text] = p.split("|");
+        const [x0, x1 = x0] = x.split("~").map(Number);
+        return { x0, x1, y: Number(y), text };
+      });
+      if (!svg || days.length < 1 || (days.length < 2 && days[0].x0 === days[0].x1) ||
+        days.some((d) => Number.isNaN(d.x0) || Number.isNaN(d.x1))) continue;
+      const off = (d, x) => (x < d.x0 ? d.x0 - x : x > d.x1 ? x - d.x1 : 0);
+      chart.removeAttribute("title"); // the tooltip below replaces it
+      const vb = svg.viewBox.baseVal;
+      const vw = (vb && vb.width) || 100, vh = (vb && vb.height) || 30;
+      // The chart is stretched to its cell, so the dot is an ellipse that
+      // looks round once stretched; the line keeps its width (CSS).
+      const mark = document.createElementNS(svgNS, "line");
+      mark.setAttribute("class", "cmark");
+      mark.setAttribute("y1", "0");
+      mark.setAttribute("y2", String(vh));
+      const dot = document.createElementNS(svgNS, "ellipse");
+      dot.setAttribute("class", "cdot");
+      const marks = [mark, dot];
+      marks.forEach((m) => { m.style.display = "none"; svg.append(m); });
+      chart.addEventListener("pointermove", (e) => {
+        const box = svg.getBoundingClientRect();
+        if (!box.width) return;
+        const x = ((e.clientX - box.left) / box.width) * vw;
+        let day = days[0];
+        for (const d of days) if (off(d, x) < off(day, x)) day = d;
+        const at = Math.min(Math.max(x, day.x0), day.x1);
+        mark.setAttribute("x1", at);
+        mark.setAttribute("x2", at);
+        dot.setAttribute("cx", at);
+        dot.setAttribute("cy", day.y);
+        dot.setAttribute("rx", (3 * vw) / box.width);
+        dot.setAttribute("ry", (3 * vh) / box.height);
+        marks.forEach((m) => { m.style.display = ""; });
+        show(day.text, e);
+      });
+      chart.addEventListener("pointerleave", () => {
+        hide();
+        marks.forEach((m) => { m.style.display = "none"; });
+      });
+    }
+  });
 })();
 
 // The filter rail's Filters button (narrower screens) folds its groups
 // away or shows them, and the choice stays for the next page (theme.js
 // applies it before first paint).
-for (const btn of document.querySelectorAll("[data-filters-toggle]")) {
-  const root = document.documentElement;
-  const sync = () => btn.setAttribute("aria-expanded", String(root.dataset.filters === "open"));
-  sync();
-  btn.addEventListener("click", () => {
-    const open = root.dataset.filters !== "open";
-    if (open) root.dataset.filters = "open";
-    else delete root.dataset.filters;
-    try {
-      if (open) localStorage.setItem("huntdeck-filters", "open");
-      else localStorage.removeItem("huntdeck-filters");
-    } catch (e) { /* storage blocked: for this page only */ }
+mount((root, signal) => {
+  for (const btn of root.querySelectorAll("[data-filters-toggle]")) {
+    const docRoot = document.documentElement;
+    const sync = () => btn.setAttribute("aria-expanded", String(docRoot.dataset.filters === "open"));
     sync();
-  });
-  // Escape folds the rail away again, focus back on its button: the panel
-  // sits at the top of the page, where a keyboard user starts.
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape" || e.defaultPrevented) return;
-    if (root.dataset.filters !== "open") return;
-    if (e.target.closest("input, textarea, select, [contenteditable]")) return;
-    delete root.dataset.filters;
-    try { localStorage.removeItem("huntdeck-filters"); } catch (err) { /* storage blocked */ }
-    sync();
-    btn.focus();
-  });
-}
+    btn.addEventListener("click", () => {
+      const open = docRoot.dataset.filters !== "open";
+      if (open) docRoot.dataset.filters = "open";
+      else delete docRoot.dataset.filters;
+      try {
+        if (open) localStorage.setItem("huntdeck-filters", "open");
+        else localStorage.removeItem("huntdeck-filters");
+      } catch (e) { /* storage blocked: for this page only */ }
+      sync();
+    });
+    // Escape folds the rail away again, focus back on its button: the panel
+    // sits at the top of the page, where a keyboard user starts.
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (docRoot.dataset.filters !== "open") return;
+      if (e.target.closest("input, textarea, select, [contenteditable]")) return;
+      delete docRoot.dataset.filters;
+      try { localStorage.removeItem("huntdeck-filters"); } catch (err) { /* storage blocked */ }
+      sync();
+      btn.focus();
+    }, { signal });
+  }
+});
 
 // Selects with data-autosubmit apply at once; their form's button is only
 // needed without scripts.
-for (const sel of document.querySelectorAll("select[data-autosubmit]")) {
-  const btn = sel.form.querySelector("[data-autosubmit-button]");
-  if (btn) btn.hidden = true;
-  sel.addEventListener("change", () => sel.form.requestSubmit());
-}
+mount((root) => {
+  for (const sel of root.querySelectorAll("select[data-autosubmit]")) {
+    const btn = sel.form.querySelector("[data-autosubmit-button]");
+    if (btn) btn.hidden = true;
+    sel.addEventListener("change", () => sel.form.requestSubmit());
+  }
+});
 
 // Menus (details[data-menu]): a click outside or Escape closes them, and
 // opening one closes the others.
@@ -486,63 +498,67 @@ document.addEventListener("toggle", (e) => {
 // Filter boxes (input[data-filter-rows="#table"]) hide the table's rows
 // that don't contain what's typed, as it's typed; pressing Enter still
 // asks the server, which searches every row, not only the ones shown.
-for (const input of document.querySelectorAll("input[data-filter-rows]")) {
-  const table = document.querySelector(input.dataset.filterRows);
-  if (!table) continue;
-  const rows = [...table.tBodies].flatMap((b) => [...b.rows]);
-  // Hiding rows silently made a filter that matches nothing look like an
-  // empty list: say how many are left, and let a screen reader hear it.
-  let status = input.parentElement && input.parentElement.querySelector(".filter-count");
-  if (!status) {
-    status = document.createElement("span");
-    status.className = "filter-count muted small";
-    status.setAttribute("role", "status");
-    status.setAttribute("aria-live", "polite");
-    input.insertAdjacentElement("afterend", status);
-  }
-  input.addEventListener("input", () => {
-    const q = input.value.trim().toLowerCase();
-    let shown = 0;
-    for (const tr of rows) {
-      tr.hidden = q !== "" && !tr.textContent.toLowerCase().includes(q);
-      if (!tr.hidden) shown++;
+mount((root) => {
+  for (const input of root.querySelectorAll("input[data-filter-rows]")) {
+    const table = document.querySelector(input.dataset.filterRows);
+    if (!table) continue;
+    const rows = [...table.tBodies].flatMap((b) => [...b.rows]);
+    // Hiding rows silently made a filter that matches nothing look like an
+    // empty list: say how many are left, and let a screen reader hear it.
+    let status = input.parentElement && input.parentElement.querySelector(".filter-count");
+    if (!status) {
+      status = document.createElement("span");
+      status.className = "filter-count muted small";
+      status.setAttribute("role", "status");
+      status.setAttribute("aria-live", "polite");
+      input.insertAdjacentElement("afterend", status);
     }
-    status.textContent = q === "" ? "" : t("%d of %d shown", shown, rows.length);
-  });
-}
+    input.addEventListener("input", () => {
+      const q = input.value.trim().toLowerCase();
+      let shown = 0;
+      for (const tr of rows) {
+        tr.hidden = q !== "" && !tr.textContent.toLowerCase().includes(q);
+        if (!tr.hidden) shown++;
+      }
+      status.textContent = q === "" ? "" : t("%d of %d shown", shown, rows.length);
+    });
+  }
+});
 
 // Contents lists (data-toc): the link to the section being read is marked
 // as it scrolls by.
-for (const toc of document.querySelectorAll("[data-toc]")) {
-  const links = [...toc.querySelectorAll('a[href^="#"]')];
-  const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
-  if (!targets.length) continue;
-  // A hidden section (the API page filters them) reports a zero rect, which
-  // would make it look like the section at the top of the page.
-  const shown = (el) => el.getClientRects().length > 0 && !el.hidden;
-  const mark = () => {
-    const line = 96; // just under the top bar
-    const live = targets.filter(shown);
-    if (!live.length) return;
-    let current = live[0];
-    for (const t of live) if (t.getBoundingClientRect().top <= line) current = t;
-    for (const a of links) {
-      const on = a.hash.slice(1) === current.id;
-      a.classList.toggle("on", on);
-      if (on && toc.scrollHeight > toc.clientHeight) {
-        const r = a.getBoundingClientRect(), box = toc.getBoundingClientRect();
-        if (r.top < box.top || r.bottom > box.bottom) toc.scrollTop += r.top - box.top - box.height / 3;
+mount((root, signal) => {
+  for (const toc of root.querySelectorAll("[data-toc]")) {
+    const links = [...toc.querySelectorAll('a[href^="#"]')];
+    const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+    if (!targets.length) continue;
+    // A hidden section (the API page filters them) reports a zero rect, which
+    // would make it look like the section at the top of the page.
+    const shown = (el) => el.getClientRects().length > 0 && !el.hidden;
+    const mark = () => {
+      const line = 96; // just under the top bar
+      const live = targets.filter(shown);
+      if (!live.length) return;
+      let current = live[0];
+      for (const t of live) if (t.getBoundingClientRect().top <= line) current = t;
+      for (const a of links) {
+        const on = a.hash.slice(1) === current.id;
+        a.classList.toggle("on", on);
+        if (on && toc.scrollHeight > toc.clientHeight) {
+          const r = a.getBoundingClientRect(), box = toc.getBoundingClientRect();
+          if (r.top < box.top || r.bottom > box.bottom) toc.scrollTop += r.top - box.top - box.height / 3;
+        }
       }
-    }
-  };
-  let queued = false;
-  window.addEventListener("scroll", () => {
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(() => { queued = false; mark(); });
-  }, { passive: true });
-  mark();
-}
+    };
+    let queued = false;
+    window.addEventListener("scroll", () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; mark(); });
+    }, { passive: true, signal });
+    mark();
+  }
+});
 
 // Rows with data-href open it when clicked anywhere other than a link,
 // button or field of their own, so a list's whole row is the target while
@@ -562,6 +578,8 @@ function rowLink(e) {
   const url = row.dataset.href;
   if ("ext" in row.dataset || e.type === "auxclick" || e.ctrlKey || e.metaKey) {
     window.open(url, "_blank", "noopener,noreferrer");
+  } else if (window.HuntDeck) {
+    window.HuntDeck.navigate(url);
   } else {
     location.href = url;
   }
@@ -572,24 +590,32 @@ document.addEventListener("auxclick", rowLink);
 // Live panels (data-live-refresh="seconds"), such as the poll history
 // while a poll runs: the panel is read again from the page every so often
 // while the tab is visible, until nothing in it is running.
-for (const panel of document.querySelectorAll("[data-live-refresh]")) {
-  const every = Math.max(5, Number(panel.dataset.liveRefresh) || 10) * 1000;
-  let current = panel;
-  const tick = async () => {
-    if (document.hidden) return setTimeout(tick, every);
-    try {
-      const res = await fetch(location.href, { headers: { Accept: "text/html" }, cache: "no-store" });
-      if (!res.ok) return setTimeout(tick, every * 3);
-      const doc = new DOMParser().parseFromString(await res.text(), "text/html");
-      const next = current.id && doc.getElementById(current.id);
-      if (!next) return;
-      current.replaceWith(next);
-      current = next;
-      if (next.hasAttribute("data-live-refresh")) setTimeout(tick, every);
-    } catch { setTimeout(tick, every * 3); }
-  };
-  setTimeout(tick, every);
-}
+mount((root, signal) => {
+  for (const panel of root.querySelectorAll("[data-live-refresh]")) {
+    const every = Math.max(5, Number(panel.dataset.liveRefresh) || 10) * 1000;
+    let current = panel;
+    let timer = 0;
+    const tick = async () => {
+      if (signal.aborted) return;
+      if (document.hidden) { timer = setTimeout(tick, every); return; }
+      try {
+        const res = await fetch(location.href, { headers: { Accept: "text/html" }, cache: "no-store", signal });
+        if (signal.aborted) return;
+        if (!res.ok) { timer = setTimeout(tick, every * 3); return; }
+        const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+        const next = current.id && doc.getElementById(current.id);
+        if (!next || !current.isConnected) return;
+        current.replaceWith(next);
+        current = next;
+        if (next.hasAttribute("data-live-refresh")) timer = setTimeout(tick, every);
+      } catch {
+        if (!signal.aborted) timer = setTimeout(tick, every * 3);
+      }
+    };
+    timer = setTimeout(tick, every);
+    signal.addEventListener("abort", () => clearTimeout(timer), { once: true });
+  }
+});
 
 // A short status line for things that leave no trace on the page: copying,
 // or a download starting. Screen readers hear it too (role=status).
@@ -749,33 +775,10 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
   });
 })();
 
-// A page on its way: a thin bar under the top bar, after a moment, because a
-// cold page can take half a second and every filter, sort and pager here is a
-// plain link. Fast pages never show it.
-(() => {
-  const bar = document.createElement("div");
-  bar.id = "navbar";
-  document.body.append(bar);
-  let timer;
-  document.addEventListener("click", (e) => {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    const a = e.target.closest("a[href]");
-    if (!a || a.target || a.hasAttribute("download")) return;
-    const url = new URL(a.href, location.href);
-    if (url.origin !== location.origin) return;
-    if (url.pathname === location.pathname && url.search === location.search) return;
-    clearTimeout(timer);
-    timer = setTimeout(() => bar.classList.add("on"), 150);
-  }, true);
-  addEventListener("pageshow", () => { clearTimeout(timer); bar.classList.remove("on"); });
-})();
-
 // Relative times are painted once by the server. Tick them, so a page left
 // open does not keep saying "5m ago" an hour later, and keep the 7-day fresh
 // highlight honest as it expires.
 (() => {
-  const at = document.querySelectorAll("[data-at]");
-  if (!at.length) return;
   const say = (s) => {
     if (s < 60) return t("just now");
     const m = Math.floor(s / 60);
@@ -804,7 +807,7 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
       }
     }
   };
-  tick();
+  mount(tick);
   setInterval(tick, 30000);
 })();
 
@@ -812,9 +815,7 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
 // the in-flight poll pill and surface the reload hint when a newer poll
 // finishes after this page loaded.
 (() => {
-  const pill = document.querySelector("[data-poll-watch]");
-  const hint = document.querySelector("[data-reload-hint]");
-  if (!pill && !hint) return;
+  if (!document.querySelector("[data-poll-watch], [data-reload-hint]")) return;
   let baseline = null;
   const newest = (d) => {
     let t = 0;
@@ -826,6 +827,9 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
     return t;
   };
   const check = async () => {
+    const pill = document.querySelector("[data-poll-watch]");
+    const hint = document.querySelector("[data-reload-hint]");
+    if (!pill && !hint) return;
     try {
       const res = await fetch("/api/v1/status", { headers: { Accept: "application/json" } });
       if (!res.ok) {
@@ -854,16 +858,16 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
       if (pill) window.hdConn?.fail();
     }
   };
-  check();
-  setInterval(() => { if (!document.hidden) check(); }, pill ? 15000 : 30000);
+  mount(() => check());
+  setInterval(() => { if (!document.hidden) check(); }, document.querySelector("[data-poll-watch]") ? 15000 : 30000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) check(); });
 })();
 
 // The filter rail scrolls on its own on wide screens. Clicking a chip reloads the
 // page, which used to put the rail back at the top and hide the chip you just
 // set; keep where it was, and on a first visit bring the active chips into view.
-(() => {
-  const rail = document.querySelector(".plist > .facets");
+mount((root) => {
+  const rail = root.querySelector(".plist > .facets");
   if (!rail) return;
   const key = "huntdeck-rail:" + location.pathname;
   let saved = null;
@@ -878,46 +882,48 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
   rail.addEventListener("scroll", () => {
     try { sessionStorage.setItem(key, String(rail.scrollTop)); } catch { /* private mode */ }
   }, { passive: true });
-})();
+});
 
 // The deliveries list shows a queue: it fills and empties while the page is
 // open. Re-fetch it quietly every half minute and swap the table only when it
 // changed, so a waiting row turns into "sent" without a reload.
-(() => {
-  const box = document.querySelector("#deliveries[data-refresh]");
+mount((root, signal) => {
+  const box = root.querySelector("#deliveries[data-refresh]");
   if (!box) return;
   const every = Number(box.dataset.refresh || 30) * 1000;
   const swap = async () => {
-    if (document.hidden) return;
+    if (document.hidden || signal.aborted) return;
     try {
-      const res = await fetch(location.href, { credentials: "same-origin" });
-      if (!res.ok) return;
+      const res = await fetch(location.href, { credentials: "same-origin", signal });
+      if (!res.ok || signal.aborted) return;
       const html = await res.text();
+      if (signal.aborted || !box.isConnected) return;
       const fresh = new DOMParser().parseFromString(html, "text/html").querySelector("#deliveries");
       if (fresh && fresh.innerHTML !== box.innerHTML) box.innerHTML = fresh.innerHTML;
     } catch {
       /* offline or signed out: try again next time */
     }
   };
-  setInterval(swap, every);
-})();
+  const iv = setInterval(swap, every);
+  signal.addEventListener("abort", () => clearInterval(iv), { once: true });
+});
 
 // The API page lists every endpoint: 40 of them is a scroll, 80 is a search
 // problem. The box narrows the nav and the sections together, and says how many
 // are left.
-(() => {
-  const box = document.querySelector("input[data-filter-api]");
+mount((root, signal) => {
+  const box = root.querySelector("input[data-filter-api]");
   if (!box) return;
   const nav = box.closest(".apinav");
   const directory = nav.querySelector("details");
   const compact = matchMedia("(max-width: 900px)");
   const fitDirectory = () => { directory.open = !compact.matches; };
   fitDirectory();
-  compact.addEventListener("change", fitDirectory);
+  compact.addEventListener("change", fitDirectory, { signal });
   const count = nav.querySelector(".filter-count");
   const links = [...nav.querySelectorAll('a[href^="#"]:not(.an-top)')];
   const groups = [...nav.querySelectorAll(".an-g")];
-  const sections = [...document.querySelectorAll(".eps > section[id], .eps > h2.apigroup")];
+  const sections = [...root.querySelectorAll(".eps > section[id], .eps > h2.apigroup")];
   const apply = () => {
     const q = box.value.trim().toLowerCase();
     let shown = 0;
@@ -953,7 +959,7 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
     count.textContent = t("%d of %d endpoints", shown, links.length);
   };
   box.addEventListener("input", apply);
-})();
+});
 
 // A page that refreshes itself (the board's reload pill, the deliveries list,
 // the relative times) is confusing when the network is gone: everything quietly
@@ -1053,14 +1059,15 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
 		waiting = 0;
 		if (!to) return;
 		e.preventDefault();
-		location.assign(to);
+		if (window.HuntDeck) window.HuntDeck.navigate(to);
+		else location.assign(to);
 	});
 })();
 
 // Settings › Display: the text size, kept in this browser and applied to the
 // shell (--fs-zoom), so every page scales without a second set of breakpoints.
-(() => {
-	const group = document.querySelector("[data-fs-group]");
+mount((root) => {
+	const group = root.querySelector("[data-fs-group]");
 	if (!group) return;
 	const steps = ["sm", "md", "lg", "xl"];
 	const apply = (v) => {
@@ -1077,7 +1084,7 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
 		localStorage.setItem("huntdeck-fs", b.dataset.fs);
 		apply(b.dataset.fs);
 	});
-})();
+});
 
 
 // A title is readable by a mouse and mostly invisible to a keyboard: focus a

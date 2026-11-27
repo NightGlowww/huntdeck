@@ -14,16 +14,18 @@
 // col-show. Loaded right after its table, without defer, so the columns
 // are in place before the page first paints.
 (() => {
+  const init = (_root, signal) => {
   for (const box of document.querySelectorAll("[data-colpick]")) {
     if (box.dataset.colpickReady) continue;
     const name = box.dataset.colpick;
     const table = document.querySelector(`table[data-cols="${name}"]`);
     if (!table) continue;
     box.dataset.colpickReady = "1";
-    picker(box, table, name);
+    picker(box, table, name, signal);
   }
+  };
 
-  function picker(box, table, name) {
+  function picker(box, table, name, signal) {
     const showKey = `huntdeck-${name}-columns-v2`;
     const orderKey = `huntdeck-${name}-column-order`;
     const menu = box.querySelector(".menu");
@@ -234,11 +236,15 @@
       btn.setAttribute("aria-expanded", String(open));
     };
     btn.addEventListener("click", () => show(menu.hidden));
-    document.addEventListener("click", (e) => { if (!box.contains(e.target)) show(false); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") show(false); });
-    window.addEventListener("resize", () => { apply(); if (!menu.hidden) refresh(); });
+    document.addEventListener("click", (e) => { if (!box.contains(e.target)) show(false); }, { signal });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") show(false); }, { signal });
+    window.addEventListener("resize", () => { apply(); if (!menu.hidden) refresh(); }, { signal });
     // The board's boxes change width without the window doing so.
-    if (window.ResizeObserver) new ResizeObserver(() => fit()).observe(table.parentElement);
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => fit());
+      ro.observe(table.parentElement);
+      signal.addEventListener("abort", () => ro.disconnect(), { once: true });
+    }
 
     const saved = load(orderKey);
     if (saved) {
@@ -248,4 +254,6 @@
     apply();
     box.hidden = false;
   }
+  if (window.HuntDeck) window.HuntDeck.onMount(init);
+  else init(document, new AbortController().signal);
 })();

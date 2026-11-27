@@ -35,7 +35,9 @@
     return isZh ? `${year} 年 ${month + 1} 月` : `${MONTHS_EN[month]} ${year}`;
   }
 
+  const init = (_root, signal) => {
   document.querySelectorAll("form.arange[data-drp]").forEach((form) => {
+    if (form.dataset.drpReady === "1") return;
     const pill = form.querySelector(".drp");
     const fromInput = form.querySelector('input[name="from"]');
     const toInput = form.querySelector('input[name="to"]');
@@ -399,14 +401,16 @@
       syncClear();
       close();
       if (hadQueryRange) {
-        window.location.assign(form.getAttribute("action") || "/reports/analytics");
+        const dest = form.getAttribute("action") || "/reports/analytics";
+        if (window.HuntDeck) window.HuntDeck.navigate(dest);
+        else window.location.assign(dest);
       }
     });
 
     document.addEventListener("mousedown", (e) => {
       if (!isOpen) return;
       if (!pill.contains(e.target) && !pop.contains(e.target)) close();
-    });
+    }, { signal });
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && isOpen) {
@@ -416,10 +420,14 @@
         fromInput.focus();
         suppressFocusOpen = false;
       }
-    });
+    }, { signal });
 
-    window.addEventListener("resize", position);
-    window.addEventListener("scroll", position, { passive: true, capture: true });
+    window.addEventListener("resize", position, { signal });
+    window.addEventListener("scroll", position, { passive: true, capture: true, signal });
+    signal.addEventListener("abort", () => pop.remove(), { once: true });
     syncClear();
   });
+  };
+  if (window.HuntDeck) window.HuntDeck.onMount(init);
+  else init(document, new AbortController().signal);
 })();

@@ -9,8 +9,10 @@
 // after the board, without defer, so the boxes are in place before the page
 // first paints.
 (() => {
+  const init = (_root, signal) => {
   const board = document.querySelector("[data-board]");
-  if (!board) return;
+  if (!board || board.dataset.boardReady) return;
+  board.dataset.boardReady = "1";
   // Each board keeps its own layout: the Hunt board's under "huntdeck-board",
   // another's (data-board="analytics") under "huntdeck-board-analytics".
   const key = board.dataset.board ? "huntdeck-board-" + board.dataset.board : "huntdeck-board";
@@ -157,9 +159,11 @@
     queued = true;
     requestAnimationFrame(() => { queued = false; render(); });
   };
-  new ResizeObserver(later).observe(board);
+  const boardObs = new ResizeObserver(later);
+  boardObs.observe(board);
   const watch = new ResizeObserver(later);
   for (const b of boxes) watch.observe(b);
+  signal.addEventListener("abort", () => { boardObs.disconnect(); watch.disconnect(); }, { once: true });
 
   const editBtn = document.querySelector("[data-board-edit]");
   const editBar = document.querySelector("[data-board-editbar]");
@@ -235,12 +239,12 @@
       e.preventDefault();
       setEditing(false);
     }
-  });
+  }, { signal });
   editBtn.hidden = mode() === "stack";
   window.addEventListener("resize", () => {
     if (mode() === "stack" && editing) setEditing(false, false);
     editBtn.hidden = editing || mode() === "stack";
-  });
+  }, { signal });
   editBtn.addEventListener("click", () => setEditing(true));
   editBar.querySelector("[data-board-done]").addEventListener("click", () => setEditing(false));
   editBar.querySelector("[data-board-reset]").addEventListener("click", () => {
@@ -443,5 +447,8 @@
     if (e.key !== "Escape") return;
     if (drag) end(false);
     else if (editing) setEditing(false);
-  });
+  }, { signal });
+  };
+  if (window.HuntDeck) window.HuntDeck.onMount(init);
+  else init(document, new AbortController().signal);
 })();

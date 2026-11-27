@@ -3,8 +3,10 @@
 // this script the form still works: the test button posts the form and
 // the page comes back with the outcome.
 (() => {
+  const init = () => {
   const form = document.getElementById("channel");
-  if (!form) return;
+  if (!form || form.dataset.channelReady) return;
+  form.dataset.channelReady = "1";
 
   // The preview gets the form's choices, never its address or secrets.
   const choice = /^(event_|platform_)|^(bounty_only|private_only|major_scope_only|min_bounty|tags|exclude_tags|instant|digest_at|enabled)$/;
@@ -46,4 +48,7 @@
       })
       .finally(() => { test.disabled = false; });
   });
+  };
+  if (window.HuntDeck) window.HuntDeck.onMount(init);
+  else init();
 })();

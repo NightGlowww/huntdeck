@@ -23,8 +23,10 @@
   const open = (row, newTab) => {
     const url = row.dataset.href;
     if ("ext" in row.dataset || newTab) window.open(url, "_blank", "noopener,noreferrer");
+    else if (window.HuntDeck) window.HuntDeck.navigate(url);
     else location.href = url;
   };
+  if (window.HuntDeck) window.HuntDeck.onMount(() => { cur = null; });
 
   let help;
   const showHelp = () => {
@@ -67,7 +69,11 @@
     if (g && Date.now() - g < 1500) {
       g = 0;
       const page = pages.find(([k]) => k === e.key);
-      if (page) { e.preventDefault(); location.href = page[1]; }
+      if (page) {
+        e.preventDefault();
+        if (window.HuntDeck) window.HuntDeck.navigate(page[1]);
+        else location.href = page[1];
+      }
       return;
     }
     g = 0;
@@ -91,7 +97,8 @@
         const tab = document.querySelector("[data-notes-tab]");
         if (!tab || tab.getAttribute("aria-current")) return;
         e.preventDefault();
-        location.href = tab.href;
+        if (window.HuntDeck) window.HuntDeck.navigate(tab.href);
+        else location.href = tab.href;
         return;
       }
       case "j":

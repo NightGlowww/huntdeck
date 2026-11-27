@@ -1,6 +1,7 @@
 // MCP Developer Portal (mcp.html): interactive client config tabs, live tool
 // directory filtering, and expand/collapse controls. Zero inline scripts.
 (() => {
+  const init = (_root, signal) => {
   // 1. Client config console tabs
   const consoleEl = document.querySelector("[data-mcp-console]");
   if (consoleEl) {
@@ -44,7 +45,7 @@
     const compact = matchMedia("(max-width: 900px)");
     const fitDirectory = () => { if (directory) directory.open = !compact.matches; };
     fitDirectory();
-    compact.addEventListener("change", fitDirectory);
+    compact.addEventListener("change", fitDirectory, { signal });
 
     const countEl = nav.querySelector(".filter-count");
     const navLinks = [...nav.querySelectorAll("[data-mcp-nav-link]")];
@@ -113,11 +114,11 @@
       syncToggleLabel();
     }
   };
-  window.addEventListener("hashchange", () => openTargetDisclosure(location.hash));
+  window.addEventListener("hashchange", () => openTargetDisclosure(location.hash), { signal });
   document.addEventListener("click", (e) => {
     const a = e.target.closest("[data-mcp-nav-link]");
     if (a && a.hash) openTargetDisclosure(a.hash);
-  });
+  }, { signal });
   openTargetDisclosure(location.hash);
 
   if (toggleAllBtn && disclosures.length > 0) {
@@ -132,4 +133,7 @@
       d.addEventListener("toggle", syncToggleLabel);
     }
   }
+  };
+  if (window.HuntDeck) window.HuntDeck.onMount(init);
+  else init(document, new AbortController().signal);
 })();

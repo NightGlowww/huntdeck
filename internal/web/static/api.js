@@ -4,6 +4,8 @@
 // - Runs GET requests via [data-try] against this HuntDeck and formats response
 //   status badge, latency, size, and JSON output in the dark console.
 
+(() => {
+const init = () => {
 const shownLines = 400; // a longer answer is cut, with a link to all of it
 const hasAuth = document.querySelector(".apid")?.dataset.auth === "1";
 
@@ -46,6 +48,8 @@ for (const box of document.querySelectorAll(".pvals")) {
 
 // Language switcher + live request runner per endpoint playground.
 for (const ex of document.querySelectorAll(".ep-ex")) {
+  if (ex.dataset.epReady) continue;
+  ex.dataset.epReady = "1";
   const curl = ex.querySelector("[data-curl]");
   if (!curl) continue;
 
@@ -224,3 +228,7 @@ for (const ex of document.querySelectorAll(".ep-ex")) {
     if (respCopy) respCopy.hidden = text === "";
   }
 }
+};
+if (window.HuntDeck) window.HuntDeck.onMount(init);
+else init();
+})();

@@ -39,6 +39,7 @@
 <link rel="icon" href="{{static "favicon.svg"}}" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{{static "apple-touch-icon.png"}}">
 {{with .Feed}}<link rel="alternate" type="application/atom+xml" title="{{$.FeedTitle}}" href="{{.}}">{{end}}
+<script src="{{static "pjax.js"}}"></script>
 <script src="{{static "app.js"}}" defer></script>
 <script src="{{static "keys.js"}}" defer></script>
 <script src="{{static "watch.js"}}" defer></script>

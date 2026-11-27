@@ -8,8 +8,10 @@
 // time zone where that's one of the input's options.
 (() => {
   const norm = (s) => s.toLowerCase().replace(/[\/_]/g, " ").replace(/−/g, "-").trim();
-
+  const init = () => {
   document.querySelectorAll("[data-combo]").forEach((combo) => {
+    if (combo.dataset.comboReady) return;
+    combo.dataset.comboReady = "1";
     const input = combo.querySelector("[data-combo-input]");
     const list = combo.querySelector("[data-combo-list]");
     const toggle = combo.querySelector("[data-combo-toggle]");
@@ -123,6 +125,8 @@
 
   // "Use this browser's": the browser's time zone, if it's on the list.
   document.querySelectorAll("[data-combo-fill-tz]").forEach((btn) => {
+    if (btn.dataset.tzReady) return;
+    btn.dataset.tzReady = "1";
     const input = document.getElementById(btn.dataset.comboFillTz);
     let tz = "";
     try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch { /* no Intl */ }
@@ -135,4 +139,7 @@
       btn.hidden = true;
     });
   });
+  };
+  if (window.HuntDeck) window.HuntDeck.onMount(init);
+  else init();
 })();

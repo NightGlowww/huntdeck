@@ -59,7 +59,9 @@
     }
   };
 
-  if (document.readyState === "loading") {
+  if (window.HuntDeck) {
+    window.HuntDeck.onMount(init);
+  } else if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
     init();

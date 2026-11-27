@@ -55,7 +55,6 @@
     show();
   });
   window.addEventListener("storage", (e) => { if (e.key === WATCH) show(); }); // another tab
-  show();
 
   // The last visit: prev is when the one before this ended.
   const now = Date.now();
@@ -64,24 +63,30 @@
   else if (now - visit.last > IDLE) visit = { prev: visit.last, last: now };
   else visit.last = now;
   write(VISIT, visit);
-  if (!visit.prev) return; // a first visit: nothing is "new since"
-  let n = 0, rows = 0;
-  for (const el of document.querySelectorAll("main [data-at]")) {
-    const at = Date.parse(el.dataset.at);
-    if (at > visit.prev) {
-      el.classList.add("since-visit");
-      if (!el.title) el.title = t("New since your last visit");
-      if (el.matches("tr")) n++;
+
+  const run = () => {
+    show();
+    if (!visit.prev) return; // a first visit: nothing is "new since"
+    let n = 0, rows = 0;
+    for (const el of document.querySelectorAll("main [data-at]")) {
+      const at = Date.parse(el.dataset.at);
+      if (at > visit.prev) {
+        el.classList.add("since-visit");
+        if (!el.title) el.title = t("New since your last visit");
+        if (el.matches("tr")) n++;
+      }
+      if (el.matches("tr")) rows++;
     }
-    if (el.matches("tr")) rows++;
-  }
-  // Every row new, and more on the next page: more than these are new.
-  const more = n === rows && document.querySelector('.pager a[rel="next"]') ? "+" : "";
-  const note = document.querySelector("[data-since-note]");
-  if (note && n) {
-    const when = new Date(visit.prev);
-    note.textContent = `${n}${more} new since your last visit`;
-    note.title = t("Your last visit ended %s (remembered in this browser)", when.toLocaleString());
-    note.hidden = false;
-  }
+    // Every row new, and more on the next page: more than these are new.
+    const more = n === rows && document.querySelector('.pager a[rel="next"]') ? "+" : "";
+    const note = document.querySelector("[data-since-note]");
+    if (note && n) {
+      const when = new Date(visit.prev);
+      note.textContent = `${n}${more} new since your last visit`;
+      note.title = t("Your last visit ended %s (remembered in this browser)", when.toLocaleString());
+      note.hidden = false;
+    }
+  };
+  if (window.HuntDeck) window.HuntDeck.onMount(run);
+  else run();
 })();
