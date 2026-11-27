@@ -1,0 +1,68 @@
+name: nightly
+
+# Deep audit off the push-to-deploy critical path: runs on pull requests,
+# overnight on a daily schedule (03:00 CST), or on manual dispatch.
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  GOPROXY: https://goproxy.cn|https://goproxy.io|direct
+  GOTOOLCHAIN: auto
+  PATH: /home/ubuntu/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+jobs:
+  audit:
+    runs-on: [self-hosted, linux, x64, huntdeck-ci]
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: go version
+
+      - name: gofmt
+        run: make fmtcheck
+
+      - name: vet & lint
+        run: |
+          go vet ./...
+          if ! command -v golangci-lint >/dev/null 2>&1 || ! golangci-lint version 2>/dev/null | grep -Eq '(^| )v?2\.'; then
+            go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+          fi
+          golangci-lint run --timeout=5m ./...
+
+      - name: tests (race)
+        run: |
+          set -euo pipefail
+          other_pkgs=$(go list ./... | grep -v '/internal/web$')
+          go test -race -timeout 35m $other_pkgs & p1=$!
+          go test -race -timeout 35m -run '^Test[A-M]' ./internal/web & p2=$!
+          go test -race -timeout 35m -run '^Test[^A-M]' ./internal/web & p3=$!
+          rc=0
+          wait "$p1" || rc=1
+          wait "$p2" || rc=1
+          wait "$p3" || rc=1
+          exit "$rc"
+
+      - name: interface copy
+        run: |
+          out=$(python3 scripts/i18n-lint.py --count 2>&1)
+          echo "$out"
+          echo "$out" | grep -q "english left: 0"
+
+      - name: shell gates
+        run: make gates
+
+      - name: vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...

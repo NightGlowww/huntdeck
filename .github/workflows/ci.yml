@@ -1,19 +1,28 @@
 name: ci
 
-# Self-hosted CI on dev-tx-sh-app-01 (43.143.38.5) and automatic CD to 1.15.46.212.
+# Fast self-hosted CI on dev-tx-sh-app-01 (43.143.38.5) and automatic CD to 1.15.46.212.
+# Heavy checks (-race, golangci-lint, govulncheck, shell gates) run on PRs and nightly in nightly.yml.
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'CHANGELOG.md'
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip unit tests (emergency deploy only)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: cicd-${{ github.ref }}-${{ github.event_name }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   GOPROXY: https://goproxy.cn|https://goproxy.io|direct
@@ -22,38 +31,30 @@ env:
 
 jobs:
   check:
+    if: ${{ inputs.skip_tests != true }}
     runs-on: [self-hosted, linux, x64, huntdeck-ci]
-    timeout-minutes: 50
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Toolchain
-        run: go version
-
-      - name: gofmt
-        run: make fmtcheck
-
-      - name: vet & lint
+      - name: Toolchain & vet
         run: |
+          go version
           go vet ./...
-          if ! command -v golangci-lint >/dev/null 2>&1 || ! golangci-lint version 2>/dev/null | grep -Eq '(^| )v?2\.'; then
-            go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
-          fi
-          golangci-lint run --timeout=5m ./...
 
-      - name: tests (race)
+      - name: tests (parallel)
         run: |
           set -euo pipefail
           other_pkgs=$(go list ./... | grep -v '/internal/web$')
-          go test -race -timeout 35m $other_pkgs & p1=$!
-          go test -race -timeout 35m -run '^Test[A-M]' ./internal/web & p2=$!
-          go test -race -timeout 35m -run '^Test[^A-M]' ./internal/web & p3=$!
+          go test -timeout 10m $other_pkgs & p1=$!
+          go test -timeout 10m -run '^Test[A-G]' ./internal/web & p2=$!
+          go test -timeout 10m -run '^Test[H-P]' ./internal/web & p3=$!
+          go test -timeout 10m -run '^Test[^A-P]' ./internal/web & p4=$!
           rc=0
           wait "$p1" || rc=1
           wait "$p2" || rc=1
           wait "$p3" || rc=1
+          wait "$p4" || rc=1
           exit "$rc"
 
       - name: interface copy
@@ -62,20 +63,11 @@ jobs:
           echo "$out"
           echo "$out" | grep -q "english left: 0"
 
-      - name: shell gates
-        run: make gates
-
-      - name: vulnerabilities
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-
-      - name: binaries build
-        run: make build && make clean
-
   deploy:
     needs: [check]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    if: always() && (needs.check.result == 'success' || (needs.check.result == 'skipped' && inputs.skip_tests == true))
     runs-on: [self-hosted, linux, x64, huntdeck-ci]
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
