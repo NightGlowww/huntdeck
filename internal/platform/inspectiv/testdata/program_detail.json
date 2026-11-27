@@ -1,0 +1,17 @@
+{
+  "uuid": "p4D5e6F7g8H9i0J1k2L3m4",
+  "title": "Standalone Detail Corp",
+  "details": "# Severity\n| Severity | Bounty |\n| --- | --- |\n| Critical | $2000 - $4000 |\n| High | $1000 |\n# Rules of Engagement\nSend header `X-Inspectiv-Tester: sample_user` on all scanner traffic.\n",
+  "private": true,
+  "date_created": "2025-06-01T12:00:00Z",
+  "critical": 2000,
+  "high": 1000,
+  "medium": 0,
+  "low": 0,
+  "active": true,
+  "frozen": false,
+  "hall_of_fame": [
+    { "category": "Top", "username": "alpha_hunter", "photo": "" }
+  ],
+  "domains": [ "standalone.example.com" ]
+}

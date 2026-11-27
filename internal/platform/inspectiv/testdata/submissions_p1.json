@@ -1,0 +1,40 @@
+{
+  "next": "https://api.bounty.inspectiv.com/api/submissions/list/?page=2",
+  "previous": null,
+  "count": 4,
+  "total_pages": 2,
+  "results": [
+    {
+      "uuid": "s1A2b3C4d5E6f7G8h9I0j1",
+      "title": "Sample IDOR on profile endpoint",
+      "priority": 1,
+      "priority_display": "High",
+      "status": 3,
+      "status_display": "Closed",
+      "resolution": 2,
+      "resolution_display": "Accepted",
+      "payout": 500,
+      "payout_display": "$500",
+      "bounty_status": "Paid",
+      "date_created": "2026-05-10T14:22:11Z",
+      "program": { "uuid": "p1A2b3C4d5E6f7G8h9I0j1", "title": "Acme Web" },
+      "vulnerability_types": [{ "uuid": "v1", "name": "Broken Access Control (BAC)" }]
+    },
+    {
+      "uuid": "s2B3c4D5e6F7g8H9i0J1k2",
+      "title": "Sample SSRF in webhook fetcher",
+      "priority": 0,
+      "priority_display": "Critical",
+      "status": 4,
+      "status_display": "Validating",
+      "resolution": 1,
+      "resolution_display": "Unresolved",
+      "payout": 0,
+      "payout_display": "$0",
+      "bounty_status": "",
+      "date_created": "2026-05-11T09:15:00Z",
+      "program": { "uuid": "p1A2b3C4d5E6f7G8h9I0j1", "title": "Acme Web" },
+      "vulnerability_types": []
+    }
+  ]
+}

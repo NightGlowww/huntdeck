@@ -1,0 +1,75 @@
+[
+  {
+    "uuid": "p1A2b3C4d5E6f7G8h9I0j1",
+    "title": "Acme Web",
+    "details": "# About Acme\nWelcome to Acme's bug bounty program.\n\n# Severity\n| Severity | Tier 1 | Tier 2 | Tier 3 |\n| --- | --- | --- | --- |\n| Critical | $500 | $1,000 | $2,500 |\n| High | $250 | $500 | $1,000 |\n| Medium | $100 | $250 | $500 |\n| Low | $50 | $100 | $200 |\n| Informational | $0 | $0 | $0 |\n\n# Scope\n| Payout Tier | Endpoint / Asset | Description | Credentials |\n| --- | --- | --- | --- |\n| Tier 2 | app.example.com | Main web app | Public signup |\n| Tier 1 | https://api.example.com/v2 | GraphQL API | - |\n| Tier 3 | https://play.google.com/store/apps/details?id=com.example.acme | Android app | N/A |\n\n# Rules of Engagement\n| Description | Requirement | Control Method |\n| --- | --- | --- |\n| Custom Inspectiv HTTP Security Header | Required | X-Inspectiv-Tester: {researcher-username} |\n\n# Out of Scope\n* *.staging.example.com\n* Social engineering and denial of service attacks\n* https://status.example.com/admin (internal status page)\n",
+    "short_description": "Acme application security program.",
+    "private": false,
+    "date_created": "2024-08-22T16:18:24.361627Z",
+    "critical": 500,
+    "high": 250,
+    "medium": 100,
+    "low": 50,
+    "informational": 0,
+    "payout_range": "$0.00 - $500.00",
+    "company_name": "Acme Corp",
+    "active": true,
+    "frozen": false,
+    "featured": false,
+    "status": "Active",
+    "payout_display": {
+      "critical": "$500",
+      "high": "$250",
+      "medium": "$100",
+      "low": "$50",
+      "informational": "$0"
+    },
+    "hall_of_fame": [
+      { "category": "First Accepted", "username": "sample_user_1", "photo": "https://s3.example.com/a.png" },
+      { "category": "Top Bounty", "username": "Sample_User_1", "photo": "https://s3.example.com/a.png" },
+      { "category": "Valid Finding", "username": "sample_user_2", "photo": "https://s3.example.com/b.png" }
+    ],
+    "domains": [ "www.example.com", "app.example.com", "*.api.example.com" ]
+  },
+  {
+    "uuid": "p2B3c4D5e6F7g8H9i0J1k2",
+    "title": "Globex Private VDP",
+    "details": "# Overview\nPrivate vulnerability disclosure program.\n# Out of Scope\n| Asset | Reason |\n| --- | --- |\n| legacy.example.net | Decommissioning |\n",
+    "short_description": "Globex private VDP.",
+    "private": true,
+    "date_created": "2025-01-15T10:00:00Z",
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "informational": 0,
+    "payout_range": "$0.00 - $0.00",
+    "company_name": "Globex Inc",
+    "active": true,
+    "frozen": true,
+    "featured": false,
+    "status": "Frozen",
+    "hall_of_fame": [],
+    "domains": [ "portal.example.net" ]
+  },
+  {
+    "uuid": "p3C4d5E6f7G8h9I0j1K2l3",
+    "title": "Initech Closed",
+    "details": "# Overview\nArchived program.",
+    "private": false,
+    "date_created": "2023-05-01T00:00:00Z",
+    "critical": 1500,
+    "high": 750,
+    "medium": 300,
+    "low": 100,
+    "informational": 0,
+    "company_name": "Initech LLC",
+    "active": false,
+    "frozen": false,
+    "status": "Closed",
+    "hall_of_fame": [
+      { "category": "Valid Finding", "username": "sample_user_3", "photo": "" }
+    ],
+    "domains": [ "initech.example.org" ]
+  }
+]
