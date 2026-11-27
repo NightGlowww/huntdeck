@@ -1,8 +1,10 @@
 package web
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/mcpserver"
@@ -24,7 +26,12 @@ func (s *server) mcpPage(w http.ResponseWriter, r *http.Request) {
 const mcpKeysShown = 20
 
 func (s *server) mcpPageData(r *http.Request) mcpPageData {
-	d := mcpPageData{Base: baseURL(r), Tools: mcpserver.Catalog()}
+	catalog := mcpserver.Catalog()
+	d := mcpPageData{
+		Base:   baseURL(r),
+		Tools:  catalog,
+		Groups: buildMCPGroups(catalog),
+	}
 	showAll := r.URL.Query().Get("all") != ""
 	if all, err := s.Store.APITokens(r.Context()); err == nil {
 		for _, t := range all {
@@ -112,9 +119,10 @@ func (s *server) mcpDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 type mcpPageData struct {
-	Base  string
-	Tools []mcpserver.ToolInfo
-	// Keys are this page's own, live and revoked.
+	Base   string
+	Tools  []mcpserver.ToolInfo
+	Groups []mcpToolGroup
+	// Keys are this page's own, live and retired.
 	Keys []store.APIToken
 	// NewToken is a key just minted, shown once in the config.
 	NewToken string
@@ -126,6 +134,248 @@ type mcpPageData struct {
 	Deleted int
 	// Flash is "", "revoked", "deleted", "deletefailed" or "missing".
 	Flash string
+}
+
+type mcpToolGroup struct {
+	ID          string
+	Name        string
+	Description string
+	Tools       []mcpToolView
+}
+
+type mcpToolView struct {
+	mcpserver.ToolInfo
+	IsWrite     bool
+	Summary     string
+	ExampleJSON string
+}
+
+type mcpCategorySpec struct {
+	id          string
+	name        string
+	description string
+	tools       []string
+}
+
+var mcpCategories = []mcpCategorySpec{
+	{
+		id:          "overview-queue",
+		name:        "Overview & Queue",
+		description: "Instance status, Hunt board snapshot, prioritized targets and platform stats.",
+		tools:       []string{"huntdeck_status", "huntdeck_board", "huntdeck_queue", "huntdeck_stats"},
+	},
+	{
+		id:          "programs-scope",
+		name:        "Programs & Scope",
+		description: "Browse programs, private invites, policy compliance and plain-text scope.",
+		tools:       []string{"huntdeck_programs", "huntdeck_programs_csv", "huntdeck_program", "huntdeck_invites", "huntdeck_scope_text", "huntdeck_policy_check"},
+	},
+	{
+		id:          "targets-matching",
+		name:        "Targets & Matching",
+		description: "Filter in-scope assets, match hosts in bulk and export scanner scopes.",
+		tools:       []string{"huntdeck_targets", "huntdeck_match", "huntdeck_match_many", "huntdeck_export"},
+	},
+	{
+		id:          "changes-actions",
+		name:        "Changes & Actions",
+		description: "Inspect scope churn, disclosed reports, trigger polls and triage findings.",
+		tools:       []string{"huntdeck_changes", "huntdeck_changes_text", "huntdeck_disclosed", "huntdeck_poll", "huntdeck_triage"},
+	},
+}
+
+func buildMCPGroups(catalog []mcpserver.ToolInfo) []mcpToolGroup {
+	byName := make(map[string]mcpserver.ToolInfo, len(catalog))
+	for _, t := range catalog {
+		byName[t.Name] = t
+	}
+
+	assigned := make(map[string]bool, len(catalog))
+	groups := make([]mcpToolGroup, 0, len(mcpCategories)+1)
+	for _, cat := range mcpCategories {
+		g := mcpToolGroup{
+			ID:          cat.id,
+			Name:        cat.name,
+			Description: cat.description,
+		}
+		for _, name := range cat.tools {
+			t, ok := byName[name]
+			if !ok {
+				continue
+			}
+			assigned[name] = true
+			g.Tools = append(g.Tools, buildMCPToolView(t))
+		}
+		if len(g.Tools) > 0 {
+			groups = append(groups, g)
+		}
+	}
+
+	var other mcpToolGroup
+	other.ID = "other"
+	other.Name = "Other"
+	other.Description = "Additional tools registered by the MCP server."
+	for _, t := range catalog {
+		if assigned[t.Name] {
+			continue
+		}
+		other.Tools = append(other.Tools, buildMCPToolView(t))
+	}
+	if len(other.Tools) > 0 {
+		groups = append(groups, other)
+	}
+	return groups
+}
+
+func buildMCPToolView(t mcpserver.ToolInfo) mcpToolView {
+	return mcpToolView{
+		ToolInfo:    t,
+		IsWrite:     t.Write || t.Name == "huntdeck_triage",
+		Summary:     summarizeMCPDescription(t.Description),
+		ExampleJSON: buildMCPExampleJSON(t),
+	}
+}
+
+func summarizeMCPDescription(desc string) string {
+	s := strings.TrimSpace(desc)
+	if s == "" {
+		return ""
+	}
+	if idx := strings.Index(s, ". "); idx > 0 && idx < 96 {
+		return s[:idx+1]
+	}
+	if r := []rune(s); len(r) > 96 {
+		return string(r[:95]) + "…"
+	}
+	return s
+}
+
+type mcpRPCExample struct {
+	JSONRPC string            `json:"jsonrpc"`
+	ID      int               `json:"id"`
+	Method  string            `json:"method"`
+	Params  mcpRPCExampleCall `json:"params"`
+}
+
+type mcpRPCExampleCall struct {
+	Name      string         `json:"name"`
+	Arguments map[string]any `json:"arguments"`
+}
+
+func buildMCPExampleJSON(t mcpserver.ToolInfo) string {
+	args := make(map[string]any)
+	for _, arg := range t.Arguments {
+		if arg.Required {
+			args[arg.Name] = mcpExampleValue(t.Name, arg)
+		}
+	}
+	// When a tool takes only optional arguments, surface a couple of
+	// representative filters so the JSON-RPC example stays concrete.
+	if len(args) == 0 && len(t.Arguments) > 0 {
+		preferred := []string{"platform", "q", "since", "kind", "limit", "paying", "bounty", "severity"}
+		byName := make(map[string]mcpserver.ArgInfo, len(t.Arguments))
+		for _, arg := range t.Arguments {
+			byName[arg.Name] = arg
+		}
+		for _, name := range preferred {
+			if arg, ok := byName[name]; ok {
+				args[arg.Name] = mcpExampleValue(t.Name, arg)
+				if len(args) >= 3 {
+					break
+				}
+			}
+		}
+		if len(args) == 0 {
+			for _, arg := range t.Arguments {
+				args[arg.Name] = mcpExampleValue(t.Name, arg)
+				if len(args) >= 2 {
+					break
+				}
+			}
+		}
+	}
+
+	payload := mcpRPCExample{
+		JSONRPC: "2.0",
+		ID:      1,
+		Method:  "tools/call",
+		Params: mcpRPCExampleCall{
+			Name:      t.Name,
+			Arguments: args,
+		},
+	}
+	raw, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		return "{}"
+	}
+	return string(raw)
+}
+
+func mcpExampleValue(toolName string, arg mcpserver.ArgInfo) any {
+	switch arg.Name {
+	case "platform":
+		return "hackerone"
+	case "handle":
+		return "acme"
+	case "host":
+		return "api.example.com"
+	case "hosts":
+		return "api.example.com\nadmin.example.com"
+	case "program":
+		return "hackerone/acme"
+	case "q":
+		return "api"
+	case "since":
+		if toolName == "huntdeck_scope_text" {
+			return "30d"
+		}
+		return "7d"
+	case "added":
+		return "7d"
+	case "kind":
+		if strings.HasPrefix(toolName, "huntdeck_changes") {
+			return "scope_added"
+		}
+		return "wildcard"
+	case "format":
+		return "burp"
+	case "parts":
+		return "facts,brief,rules"
+	case "state":
+		return "open"
+	case "bounty":
+		return "1"
+	case "sort":
+		return "huntscore"
+	case "severity":
+		return "high"
+	case "show":
+		return "in"
+	case "type":
+		return "wildcard"
+	case "limit":
+		return 20
+	case "title":
+		return "IDOR on /api/v1/invoices"
+	case "target":
+		return "api.example.com"
+	case "in_scope":
+		return "*.example.com is listed in scope for bounties"
+	case "impact":
+		return "Authenticated user can read another tenant's invoice PDF"
+	case "evidence":
+		return "HTTP 200 response returning cross-tenant invoice metadata"
+	case "plan":
+		return "Authenticated API testing at 2 req/s without automated scanners"
+	}
+	switch arg.Type {
+	case "integer", "number":
+		return 10
+	case "boolean":
+		return true
+	default:
+		return "example"
+	}
 }
 
 // mcpDeleteUnused removes the keys nobody ever used. A list of 141 identical
