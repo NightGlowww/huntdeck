@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "orgSlug": "acme",
+      "orgName": "Acme AG",
+      "slug": "acme-bounty",
+      "title": "Acme Bug Bounty",
+      "kind": "bug_bounty",
+      "summary": "Public summary for Acme Bug Bounty.",
+      "locked": false,
+      "logoUrl": "https://app.gobugfree.com/static/sample-acme.png",
+      "badges": [{"text": "Increased Bounties", "color": "green"}]
+    },
+    {
+      "orgSlug": "globex",
+      "orgName": "Globex GmbH",
+      "slug": "globex-vdp",
+      "title": "Globex VDP",
+      "kind": "vdp",
+      "summary": "Vulnerability disclosure program.",
+      "locked": false,
+      "badges": []
+    }
+  ]
+}

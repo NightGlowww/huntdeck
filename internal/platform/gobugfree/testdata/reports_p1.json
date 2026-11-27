@@ -1,0 +1,44 @@
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000101",
+      "title": "Stored XSS in profile bio",
+      "orgSlug": "acme",
+      "orgName": "Acme AG",
+      "engagementSlug": "acme-bounty",
+      "engagementTitle": "Acme Bug Bounty",
+      "status": "accepted",
+      "severity": "medium",
+      "severitySubmitted": "high",
+      "cvssScore": 6.1,
+      "submittedAt": "2026-10-15T14:22:00Z",
+      "updatedAt": "2026-10-20T09:10:00Z"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000102",
+      "title": "Duplicate SSRF on webhook",
+      "orgSlug": "globex",
+      "orgName": "Globex GmbH",
+      "engagementSlug": "globex-private",
+      "engagementTitle": "Globex Private",
+      "status": "duplicate",
+      "severity": "high",
+      "severitySubmitted": "high",
+      "cvssScore": 7.5,
+      "submittedAt": "2026-10-10T08:00:00Z",
+      "updatedAt": "2026-10-12T11:30:00Z"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000103",
+      "title": "Open redirect in callback",
+      "orgSlug": "acme",
+      "orgName": "Acme AG",
+      "engagementSlug": "acme-bounty",
+      "engagementTitle": "Acme Bug Bounty",
+      "status": "rejected",
+      "severity": "low",
+      "submittedAt": "2026-09-01T10:00:00Z",
+      "updatedAt": "2026-09-03T12:00:00Z"
+    }
+  ]
+}

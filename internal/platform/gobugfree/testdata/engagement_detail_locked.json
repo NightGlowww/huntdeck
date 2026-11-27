@@ -1,0 +1,14 @@
+{
+  "orgSlug": "globex",
+  "orgName": "Globex GmbH",
+  "slug": "globex-private",
+  "title": "Globex Private",
+  "kind": "bug_bounty",
+  "status": "active",
+  "requiredVerificationLevel": "background_check",
+  "locked": true,
+  "briefingAccessible": false,
+  "ndaRequired": true,
+  "scope": [],
+  "bounty": []
+}

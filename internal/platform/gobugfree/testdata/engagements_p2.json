@@ -1,0 +1,47 @@
+{
+  "items": [
+    {
+      "orgSlug": "acme",
+      "orgName": "Acme AG",
+      "slug": "acme-bounty",
+      "title": "Acme Bug Bounty",
+      "kind": "bug_bounty",
+      "visibility": "public",
+      "hidden": false,
+      "status": "active",
+      "summary": "Acme program summary.",
+      "industry": "software",
+      "rewardCurrency": "CHF",
+      "rewardMin": 100,
+      "rewardMax": 3000,
+      "startsOn": "2026-01-01T00:00:00Z",
+      "member": true,
+      "locked": false,
+      "invited": false,
+      "updatedAt": "2026-11-09T12:00:00Z",
+      "id": "00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "orgSlug": "globex",
+      "orgName": "Globex GmbH",
+      "slug": "globex-private",
+      "title": "Globex Private",
+      "kind": "bug_bounty",
+      "visibility": "invite_only",
+      "hidden": false,
+      "status": "paused",
+      "summary": "Private invite engagement.",
+      "industry": "finance",
+      "rewardCurrency": "EUR",
+      "rewardMin": 200,
+      "rewardMax": 5000,
+      "startsOn": "2026-02-01T00:00:00Z",
+      "member": false,
+      "locked": true,
+      "invited": true,
+      "invitedAt": "2026-11-08T10:00:00Z",
+      "updatedAt": "2026-11-08T10:00:00Z",
+      "id": "00000000-0000-4000-8000-000000000002"
+    }
+  ]
+}

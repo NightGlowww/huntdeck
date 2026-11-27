@@ -1,0 +1,82 @@
+{
+  "orgSlug": "acme",
+  "orgName": "Acme AG",
+  "orgAbout": "Acme AG develops enterprise cloud software.",
+  "slug": "acme-bounty",
+  "title": "Acme Bug Bounty",
+  "kind": "bug_bounty",
+  "status": "active",
+  "summary": "Program summary markdown.",
+  "requiredVerificationLevel": "identity",
+  "locked": false,
+  "briefingAccessible": true,
+  "ndaRequired": true,
+  "startsOn": "2026-01-01T00:00:00Z",
+  "updatedAt": "2026-11-09T12:00:00Z",
+  "scope": [
+    {
+      "scopeEntryId": "101",
+      "pattern": "Website: app.example.com",
+      "kind": "web",
+      "inScope": true,
+      "description": "Main web application",
+      "instructions": "Test with dedicated header"
+    },
+    {
+      "scopeEntryId": "102",
+      "pattern": "id.example.com (only misconfigurations)",
+      "kind": "web",
+      "inScope": true,
+      "description": "",
+      "instructions": ""
+    },
+    {
+      "scopeEntryId": "103",
+      "pattern": "*.api.example.org",
+      "kind": "api",
+      "inScope": true,
+      "description": "Public API",
+      "instructions": ""
+    },
+    {
+      "scopeEntryId": "104",
+      "pattern": "www.example.(com|ch)",
+      "kind": "web",
+      "inScope": true,
+      "description": "Regional sites",
+      "instructions": ""
+    },
+    {
+      "scopeEntryId": "105",
+      "pattern": "legacy.example.com",
+      "kind": "web",
+      "inScope": false,
+      "description": "Out-of-scope legacy portal",
+      "instructions": ""
+    }
+  ],
+  "bounty": [
+    {"severity": "critical", "min": 2000, "max": 3000, "currency": "CHF", "text": ""},
+    {"severity": "high",     "min": 1000, "max": 2000, "currency": "CHF"},
+    {"severity": "medium",   "min": 500,  "max": 1000, "currency": "CHF"},
+    {"severity": "low",      "min": 100,  "max": 500,  "currency": "CHF"}
+  ],
+  "program": {
+    "summary": "Markdown summary for Acme.",
+    "scopeNotes": "Markdown out-of-scope notes and exclusions.",
+    "rulesText": "Markdown testing rules.",
+    "testingAllowed": ["Manual testing of listed domains"],
+    "testingDisallowed": ["Social engineering", "Denial-of-service attacks"],
+    "qualifiedText": "Eligible vulnerability classes:",
+    "qualifiedVulns": ["XSS", "RCE"],
+    "nonQualifiedText": "Out-of-scope classes:",
+    "nonQualifiedVulns": ["Self-XSS"],
+    "procedure": ["Register / Login @ GObugfree"],
+    "notes": "Additional markdown notes.",
+    "safeHarbor": "Swiss Criminal Code Art. 143 / Art. 143bis Legal Safe Harbor markdown."
+  },
+  "leaderboard": [
+    {"rank": 1, "handle": "sample_hunter_1", "points": 141},
+    {"rank": 2, "handle": "sample_hunter_2", "points": 88}
+  ]
+}
