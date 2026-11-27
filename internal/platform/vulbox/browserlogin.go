@@ -51,6 +51,7 @@ func (c *Client) browserSignIn(ctx context.Context) error {
 		if !errors.Is(err, weblogin.ErrWaiting) {
 			c.cred.Refused(err.Error(), weblogin.IsRejection(err))
 		}
+		c.log.Warn("vulbox: browser sign-in failed", "err", err)
 		return err
 	}
 	if c.currentToken() == "" {
@@ -58,6 +59,7 @@ func (c *Client) browserSignIn(ctx context.Context) error {
 	}
 	succeeded = true
 	c.cred.SignedIn(parseJWTExpiry(c.currentToken()))
+	c.log.Info("vulbox: browser sign-in succeeded", "token_len", len(c.currentToken()), "has_uuid", c.currentUUID() != "")
 	return nil
 }
 
@@ -230,6 +232,7 @@ func (c *Client) browserLogin(ctx context.Context) error {
 		// page and seeds c.jar across all VulBox hosts (including vapi.vulbox.com)
 		// because .vulbox.com cookies may otherwise only match root in keepCookies.
 		Take: func(ctx context.Context, p weblogin.Page) error {
+			_ = p.Settle(ctx, 1*time.Second)
 			var snap struct {
 				Cookie string `json:"cookie"`
 				UUID   string `json:"uuid"`
@@ -254,6 +257,7 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			if len(cookies) > 0 {
 				c.seedCookies(cookies)
 			}
+			c.log.Info("vulbox: browser sign-in captured cookies", "count", len(cookies), "token_len", len(c.currentToken()), "has_uuid", snap.UUID != "")
 			return nil
 		},
 	}

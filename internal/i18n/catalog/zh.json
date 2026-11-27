@@ -2771,6 +2771,26 @@
   "Instead of a login: vulbox_token or a Cookie header from your browser.": "替代账号登录：从浏览器复制的 vulbox_token 或完整 Cookie 请求头。",
   "Auto-join eligible projects": "自动加入符合条件的项目",
   "Confirm and join projects or agreements that unlock scope, skipping any that require a deposit or ticket.": "自动确认加入项目或签署协议以解锁测试范围，自动跳过需要冻结保证金或消耗入场券的项目。",
-  "0.1 to 5. Keep it polite for VulBox's firewall.": "0.1 – 5。请保持温和速率，避免触发漏洞盒子防火墙限制。"
+  "0.1 to 5. Keep it polite for VulBox's firewall.": "0.1 – 5。请保持温和速率，避免触发漏洞盒子防火墙限制。",
+  "Logs": "日志",
+  "Live runtime logs, login traces, proxy errors and poll events.": "实时运行日志、登录过程、代理报错与轮询事件。",
+  "Open logs": "打开日志",
+  "Log summary": "日志摘要",
+  "Total records": "日志总数",
+  "in memory (secrets redacted)": "保留在内存中（敏感凭据已自动脱敏）",
+  "Errors": "错误",
+  "failed requests or logins": "请求或登录失败记录",
+  "Warnings": "警告",
+  "retries or degraded states": "重试、限流或降级状态",
+  "Info": "信息",
+  "polls, logins and startup": "轮询、登录与启动事件",
+  "Runtime log stream": "实时运行日志流",
+  "Auto-refresh": "自动刷新",
+  "Severity": "日志级别",
+  "Error": "错误",
+  "Warn": "警告",
+  "Debug": "调试",
+  "Filter logs: vulbox, yeswehack, EOF, proxy…": "按关键词过滤：如 vulbox、yeswehack、EOF、proxy…",
+  "No log entries match the current filter.": "暂无符合当前筛选条件的日志记录。"
  }
 }

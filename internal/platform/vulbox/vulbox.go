@@ -49,10 +49,11 @@ const (
 	defaultUserURL = "https://user.vulbox.com"
 	defaultRootURL = "https://vulbox.com"
 
-	tokenCookie = "vulbox_token"
-	uuidCookie  = "uuid"
-	currencyCNY = "CNY"
-	maxPages    = 200
+	tokenCookie     = "vulbox_token"
+	uuidCookie      = "uuid"
+	currencyCNY     = "CNY"
+	maxPages        = 200
+	vulboxUserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
 
 var (
@@ -242,6 +243,7 @@ func New(opts Options) (*Client, error) {
 		Burst:         2,
 		Proxy:         proxyURL,
 		Jar:           c.jar,
+		UserAgent:     vulboxUserAgent,
 		RedirectHosts: []string{c.base.Host, c.web.Host, c.user.Host},
 	}
 	c.http = httpclient.New(ho)
@@ -349,12 +351,12 @@ func (c *Client) ensureSession(ctx context.Context) error {
 	if err := c.browserSignIn(ctx); err != nil {
 		return err
 	}
-	ok, err := c.sessionValid(ctx)
+	ok, reason, err := c.sessionCheck(ctx)
 	if err != nil {
 		return err
 	}
 	if !ok {
-		return errors.New("vulbox: login finished but VulBox did not accept the session")
+		return fmt.Errorf("vulbox: login finished but VulBox did not accept the session (%s)", reason)
 	}
 	return nil
 }
@@ -371,7 +373,7 @@ func (c *Client) renewSession(ctx context.Context) error {
 	if err := c.browserSignIn(ctx); err != nil {
 		return err
 	}
-	ok, err := c.sessionValid(ctx)
+	ok, _, err := c.sessionCheck(ctx)
 	if err != nil {
 		return err
 	}
@@ -381,8 +383,17 @@ func (c *Client) renewSession(ctx context.Context) error {
 	return nil
 }
 
-// sessionValid calls GET /web/account/basic-info and checks data.logged == true.
 func (c *Client) sessionValid(ctx context.Context) (bool, error) {
+	ok, _, err := c.sessionCheck(ctx)
+	return ok, err
+}
+
+// sessionCheck calls GET /web/account/basic-info (and /hacker/user/account/info
+// as a secondary probe when basic-info returns logged=false despite holding a
+// token) and logs structured non-secret diagnostics.
+func (c *Client) sessionCheck(ctx context.Context) (bool, string, error) {
+	tokLen := len(c.currentToken())
+	hasUUID := c.currentUUID() != ""
 	var info struct {
 		Logged flexBool `json:"logged"`
 		User   struct {
@@ -393,18 +404,52 @@ func (c *Client) sessionValid(ctx context.Context) (bool, error) {
 	err := c.getJSONNoRenew(ctx, "/web/account/basic-info", nil, &info)
 	if err != nil {
 		if errors.Is(err, ErrSessionExpired) {
-			return false, nil
+			c.log.Warn("vulbox: session check rejected", "reason", err.Error(), "token_len", tokLen, "has_uuid", hasUUID)
+			return false, err.Error(), nil
 		}
-		return false, err
+		c.log.Warn("vulbox: session check error", "err", err, "token_len", tokLen, "has_uuid", hasUUID)
+		return false, err.Error(), err
 	}
-	if !info.Logged.Bool() {
-		return false, nil
+	if info.Logged.Bool() {
+		if c.authenticated() {
+			c.cred.Accepted()
+			c.updateTokenExpiry()
+		}
+		c.log.Info("vulbox: session accepted", "endpoint", "/web/account/basic-info", "token_len", tokLen)
+		return true, "", nil
 	}
-	if c.authenticated() {
-		c.cred.Accepted()
-		c.updateTokenExpiry()
+
+	// Fallback: if we hold a non-empty vulbox_token, probe /hacker/user/account/info
+	// in case basic-info lagged or reacted differently, accepting ONLY if a real
+	// user identity (uid or username) is present.
+	if tokLen > 0 {
+		var hinfo struct {
+			UID      flexInt64 `json:"uid"`
+			Username string    `json:"username"`
+			User     struct {
+				UID      flexInt64 `json:"uid"`
+				Username string    `json:"username"`
+			} `json:"user"`
+		}
+		herr := c.getJSONNoRenew(ctx, "/hacker/user/account/info", nil, &hinfo)
+		if herr == nil && (hinfo.UID.Int64() > 0 || hinfo.Username != "" || hinfo.User.UID.Int64() > 0 || hinfo.User.Username != "") {
+			if c.authenticated() {
+				c.cred.Accepted()
+				c.updateTokenExpiry()
+			}
+			c.log.Info("vulbox: session accepted", "endpoint", "/hacker/user/account/info", "token_len", tokLen)
+			return true, "", nil
+		}
+		reason := "basic-info logged=false"
+		if herr != nil {
+			reason = fmt.Sprintf("basic-info logged=false; user/info: %v", herr)
+		}
+		c.log.Warn("vulbox: session not accepted", "reason", reason, "token_len", tokLen, "has_uuid", hasUUID)
+		return false, reason, nil
 	}
-	return true, nil
+
+	c.log.Warn("vulbox: session not accepted", "reason", "empty vulbox_token and logged=false", "token_len", tokLen, "has_uuid", hasUUID)
+	return false, "empty vulbox_token and logged=false", nil
 }
 
 // seedCookies puts cookies into the jar for all VulBox hosts.

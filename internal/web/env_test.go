@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/mdpsec/huntdeck/internal/db"
+	"github.com/mdpsec/huntdeck/internal/logging"
 	"github.com/mdpsec/huntdeck/internal/notify"
 	"github.com/mdpsec/huntdeck/internal/platform"
 	"github.com/mdpsec/huntdeck/internal/platform/fake"
@@ -148,6 +149,7 @@ func newTestEnv(t *testing.T, with ...func(*Deps)) *testEnv {
 			return []platform.Credential{{Name: "API token"}} // not used since the start: the last poll vouches for it
 		}}},
 		WebSyncs:     map[string]platform.WebSyncer{"fake": fake.Web{Platform: f}},
+		Logs:         logging.NewBuffer(500),
 		AllowedHosts: []string{"huntdeck.tailnet.example"}, SaveOwn: sy.SaveOwn}
 	for _, w := range with {
 		w(&deps)

@@ -20,6 +20,7 @@ import (
 	"github.com/mdpsec/huntdeck/internal/config"
 	"github.com/mdpsec/huntdeck/internal/huntmail/setup"
 	"github.com/mdpsec/huntdeck/internal/i18n"
+	"github.com/mdpsec/huntdeck/internal/logging"
 	"github.com/mdpsec/huntdeck/internal/overrides"
 	"github.com/mdpsec/huntdeck/internal/platform"
 	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
@@ -92,7 +93,8 @@ type Schedule interface {
 
 // Deps are the server's dependencies.
 type Deps struct {
-	Log *slog.Logger
+	Log  *slog.Logger
+	Logs *logging.Buffer
 	// Metrics is this process's request counters; /metrics renders them.
 	Metrics   *metrics
 	DB        Pinger
@@ -224,7 +226,7 @@ type server struct {
 // NewHandler returns the root HTTP handler.
 func NewHandler(d Deps) (http.Handler, error) {
 	if d.ReadOnly { // never anything of the account's, whatever the caller passed
-		d.Accounts, d.Restart, d.Browser, d.VNC, d.DemoSeed, d.WebSyncs, d.MailBundle = nil, nil, nil, nil, nil, nil, nil
+		d.Accounts, d.Restart, d.Browser, d.VNC, d.DemoSeed, d.WebSyncs, d.MailBundle, d.Logs = nil, nil, nil, nil, nil, nil, nil, nil
 	}
 	s := &server{Deps: d}
 	messages, err := i18n.Load()
@@ -346,6 +348,9 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("GET /search", s.search)
 	mux.HandleFunc("GET /settings", s.settings)
 	mux.HandleFunc("GET /system", s.systemPage)
+	mux.HandleFunc("GET /logs", s.logsPage)
+	mux.HandleFunc("GET /logs/tail", s.logsTail)
+	mux.HandleFunc("POST /logs/clear", s.logsClear)
 	mux.HandleFunc("POST /settings/poll", s.pollNow)
 	mux.HandleFunc("POST /settings/platform", s.saveSchedule)
 	mux.HandleFunc("POST /settings/platform/reset", s.resetSchedule)

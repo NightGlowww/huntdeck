@@ -45,6 +45,7 @@ const vncPort = 5900
 type app struct {
 	cfg    config.Config
 	log    *slog.Logger
+	logs   *logging.Buffer
 	db     *db.DB
 	store  *store.Store
 	syncer *syncer.Syncer
@@ -80,7 +81,8 @@ func openApp(ctx context.Context, stderr io.Writer, quiet bool) (*app, bool) {
 	if quiet {
 		level = max(level, slog.LevelWarn)
 	}
-	log := logging.New(stderr, level, cfg.LogFormat)
+	log, logBuf := logging.NewWithBuffer(stderr, level, cfg.LogFormat, 2000)
+	slog.SetDefault(log)
 
 	if err := os.MkdirAll(cfg.DataDir, 0o700); err != nil {
 		log.Error("cannot create data directory", "path", cfg.DataDir, "err", err)
@@ -91,7 +93,7 @@ func openApp(ctx context.Context, stderr io.Writer, quiet bool) (*app, bool) {
 		log.Error("cannot open database", "err", err)
 		return nil, false
 	}
-	a := &app{cfg: cfg, log: log, db: database}
+	a := &app{cfg: cfg, log: log, logs: logBuf, db: database}
 	migs, err := db.Migrations()
 	if err != nil {
 		log.Error("invalid embedded migrations", "err", err)
@@ -294,6 +296,7 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 	}
 	deps := web.Deps{
 		Log:     log,
+		Logs:    a.logs,
 		Metrics: web.NewMetrics(), DB: a.db, Store: a.store, Poller: poller, Progress: progress, Platforms: infos, BugcrowdCaps: bcCaps, WebSyncs: webSyncs, Schedule: sched,
 		Version: version.Display(), AllowedHosts: a.cfg.AllowedHosts, Timezone: a.cfg.Timezone, Notify: notifier, VNC: vnc,
 		Language: a.cfg.Language, Password: a.cfg.Password.Reveal(),

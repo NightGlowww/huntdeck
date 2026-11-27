@@ -136,7 +136,7 @@ func TestReportsAndAnalyticsRenderCleanChinese(t *testing.T) {
 	e := newTestEnv(t, func(d *Deps) { d.Mail = newFakeMail() })
 	e.addReports(t)
 	h := http.Header{"Accept-Language": {"zh-CN"}}
-	for _, p := range []string{"/", "/queue", "/disclosed", "/email", "/email/stats", "/email/m1", "/system", "/integrations", "/reports", "/reports/analytics"} {
+	for _, p := range []string{"/", "/queue", "/disclosed", "/email", "/email/stats", "/email/m1", "/system", "/integrations", "/logs", "/reports", "/reports/analytics"} {
 		res, body := e.do(e.client(), "GET", p, nil, h)
 		if res.StatusCode != http.StatusOK {
 			t.Errorf("%s: status %d", p, res.StatusCode)

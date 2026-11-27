@@ -1,0 +1,173 @@
+/* System › Logs runtime log stream */
+.logs-status {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.logs-head {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.logs-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.logs-actions form {
+  margin: 0;
+}
+
+.logs-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.logs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.logs-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+
+.logs-search input[type="search"] {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-ctrl);
+  border: 1px solid var(--border-input);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.logs-stream {
+  max-height: 62vh;
+  overflow: auto;
+  background: var(--surface);
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+
+.log-row {
+  display: grid;
+  grid-template-columns: 150px 44px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.log-row:last-child {
+  border-bottom: none;
+}
+
+.log-row:hover {
+  background: var(--row-hover);
+}
+
+.log-time {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.log-lvl {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: var(--radius-badge);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+
+.log-error .log-lvl {
+  color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 35%, transparent);
+  background: color-mix(in srgb, var(--bad) 10%, transparent);
+}
+
+.log-warn .log-lvl {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 35%, transparent);
+  background: color-mix(in srgb, var(--warn) 10%, transparent);
+}
+
+.log-info .log-lvl {
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 35%, transparent);
+  background: color-mix(in srgb, var(--info) 10%, transparent);
+}
+
+.log-debug .log-lvl {
+  color: var(--muted);
+}
+
+.log-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.log-msg {
+  color: var(--text);
+  word-break: break-word;
+}
+
+.log-attrs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.log-attr {
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-badge);
+  padding: 0 6px;
+  word-break: break-all;
+}
+
+.log-attr em {
+  font-style: normal;
+  color: var(--muted);
+}
+
+@media (max-width: 780px) {
+  .logs-status {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .log-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

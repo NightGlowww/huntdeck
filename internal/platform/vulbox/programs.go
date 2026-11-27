@@ -220,6 +220,7 @@ func (c *Client) ListPrograms(ctx context.Context) (platform.Listing, error) {
 
 	out.Programs = buildResult()
 	out.Complete = true
+	c.log.Info("vulbox: listed programs", "total", len(out.Programs), "complete", out.Complete)
 	return out, nil
 }
 

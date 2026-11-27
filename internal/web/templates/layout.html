@@ -93,6 +93,7 @@
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17h-8l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5Z"/></symbol>
   <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.79 1 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></symbol>
   <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 4.5-9 4.5-9-4.5L12 3Z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m5 7 5 5-5 5M12 19h7"/></symbol>
 </svg>
 {{- if readOnly}}
 <div class="demo-banner" role="note">
@@ -122,7 +123,7 @@
       <div class="group">{{T "Workspace"}}</div>
       <a href="/reports"{{if or (eq .Nav "reports") (eq .Nav "analytics")}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-flag"/></svg><span class="label">{{T "Reports"}}</span></a>
       <a href="/email"{{if or (eq .Nav "email") (eq .Nav "emailstats")}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-inbox"/></svg><span class="label">{{T "Email"}}</span></a>
-      {{- $sysOpen := or (eq .Nav "system") (eq .Nav "settings") (eq .Nav "notifications") (eq .Nav "methodology")}}
+      {{- $sysOpen := or (eq .Nav "system") (eq .Nav "settings") (eq .Nav "notifications") (eq .Nav "methodology") (eq .Nav "logs")}}
       <div class="nav-group-head">
         <a class="nav-group-link" href="/system"{{if eq .Nav "system"}} aria-current="page"{{end}} title="{{T "System"}}"><svg class="i" aria-hidden="true"><use href="#i-cog"/></svg><span class="group-label">{{T "System"}}</span></a>
         <button type="button" class="nav-group-toggle" data-nav-toggle-section="system" aria-expanded="{{if $sysOpen}}true{{else}}false{{end}}" aria-controls="nav-sec-system" aria-label="{{T "Toggle section"}}" title="{{T "Toggle section"}}"><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
@@ -131,6 +132,9 @@
         <a href="/settings"{{if eq .Nav "settings"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">{{T "Settings"}}</span></a>
         <a href="/settings/notifications"{{if eq .Nav "notifications"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg><span class="label">{{T "Notifications"}}</span></a>
         <a href="/methodology"{{if eq .Nav "methodology"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span class="label">{{T "Methodology"}}</span></a>
+        {{- if not readOnly}}
+        <a href="/logs"{{if eq .Nav "logs"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-terminal"/></svg><span class="label">{{T "Logs"}}</span></a>
+        {{- end}}
       </div>
       {{- $intOpen := or (eq .Nav "integrations") (eq .Nav "api") (eq .Nav "mcp") (eq .Nav "pojia") (eq .Nav "scan") (eq .Nav "llm")}}
       <div class="nav-group-head">

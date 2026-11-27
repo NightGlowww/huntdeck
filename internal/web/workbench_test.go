@@ -12,7 +12,7 @@ func TestSystemAndIntegrationsWorkbenches(t *testing.T) {
 		path string
 		want []string
 	}{
-		{"/system", []string{"System workbench", "Polling", "Accounts", "Notifications", "Interface", "Scoring"}},
+		{"/system", []string{"System workbench", "Polling", "Accounts", "Notifications", "Interface", "Scoring", "Logs"}},
 		{"/integrations", []string{"Integrations workbench", "API", "MCP", "POJIA", "Scan handoff", "AI policy extraction"}},
 	} {
 		res, body := e.do(e.client(), http.MethodGet, tc.path, nil, nil)

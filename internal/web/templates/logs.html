@@ -1,0 +1,56 @@
+{{define "topbar-title"}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/system">{{T "System"}}</a><span class="sep">/</span><span class="here">{{T .Title}}</span></nav>{{end}}
+
+{{define "content"}}{{with .Data}}
+<header class="page-workbench-head"><div><span class="workbench-kicker">{{T "System"}}</span><h1>{{T "Logs"}}</h1><p>{{T "Live runtime logs, login traces, proxy errors and poll events."}}</p></div><a class="button secondary small" href="/system">{{T "System workbench"}}</a></header>
+
+<section class="integration-status-strip logs-status" aria-label="{{T "Log summary"}}" data-logs-summary>
+  <div><span class="status-label">{{T "Total records"}}</span><b data-log-count="total">{{.Counts.Total}}</b><span class="status-hint">{{T "in memory (secrets redacted)"}}</span></div>
+  <div><span class="status-label">{{T "Errors"}}</span><b data-log-count="error">{{.Counts.Error}}</b><span class="status-hint">{{T "failed requests or logins"}}</span></div>
+  <div><span class="status-label">{{T "Warnings"}}</span><b data-log-count="warn">{{.Counts.Warn}}</b><span class="status-hint">{{T "retries or degraded states"}}</span></div>
+  <div><span class="status-label">{{T "Info"}}</span><b data-log-count="info">{{.Counts.Info}}</b><span class="status-hint">{{T "polls, logins and startup"}}</span></div>
+</section>
+
+<section class="panel" id="runtime-logs" data-logs-root data-level="{{.Level}}" data-query="{{.Query}}" data-head="{{.Head}}">
+  <div class="panel-head logs-head">
+    <h2>{{T "Runtime log stream"}}</h2>
+    <div class="logs-actions">
+      <label class="logs-auto"><input type="checkbox" data-logs-auto checked><span>{{T "Auto-refresh"}}</span></label>
+      <a class="button secondary small" href="{{.ExportURL}}" download="huntdeck.log" data-no-pjax>{{T "Export"}}</a>
+      <form method="post" action="{{.ClearURL}}">
+        <button type="submit" class="button secondary small">{{T "Clear"}}</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="logs-toolbar">
+    <nav class="seg" aria-label="{{T "Severity"}}">
+      {{range .Levels}}
+      <a href="{{.URL}}"{{if eq .Key $.Data.Level}} class="on" aria-current="true"{{end}}>{{T .Label}} <span class="count" data-tab-count="{{.Key}}">{{.Count}}</span></a>
+      {{end}}
+    </nav>
+    <form class="logs-search" method="get" action="/logs">
+      {{if ne .Level "all"}}<input type="hidden" name="level" value="{{.Level}}">{{end}}
+      <input type="search" name="q" value="{{.Query}}" placeholder="{{T "Filter logs: vulbox, yeswehack, EOF, proxy…"}}" aria-label="{{T "Search"}}">
+      <button type="submit" class="button small">{{T "Search"}}</button>
+    </form>
+  </div>
+
+  <div class="logs-stream" data-logs-list>
+    {{if .Entries}}
+    {{range .Entries}}
+    <div class="log-row log-{{.Level}}" data-seq="{{.Seq}}">
+      <span class="log-time mono" title="{{.ISO}}">{{.Time}}</span>
+      <span class="log-lvl mono">{{.Badge}}</span>
+      <div class="log-body">
+        <span class="log-msg">{{.Message}}</span>
+        {{if .Attrs}}<span class="log-attrs">{{range .Attrs}}<span class="log-attr mono"><em>{{.Key}}=</em>{{.Value}}</span>{{end}}</span>{{end}}
+      </div>
+    </div>
+    {{end}}
+    {{else}}
+    <div class="empty-state" data-logs-empty>{{T "No log entries match the current filter."}}</div>
+    {{end}}
+  </div>
+</section>
+<script src="{{static "logs.js"}}" defer></script>
+{{end}}{{end}}

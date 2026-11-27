@@ -60,6 +60,16 @@ func (s *server) systemPage(w http.ResponseWriter, r *http.Request) {
 			{Title: "Scoring", Description: "HuntScore weighting and the ranking strategy.", URL: "/settings?tab=you", Action: "Tune scoring", ActionURL: "/settings?tab=you", Status: "Ready", Icon: "chart"},
 		},
 	}
+	if !s.ReadOnly && s.Logs != nil {
+		logsStatus := "Ready"
+		if s.Logs.Counts().Error > 0 {
+			logsStatus = "Review"
+		}
+		d.Cards = append(d.Cards, workbenchCard{
+			Title: "Logs", Description: "Live runtime logs, login traces, proxy errors and poll events.",
+			URL: "/logs", Action: "Open logs", ActionURL: "/logs", Status: logsStatus, Icon: "terminal",
+		})
+	}
 	d.Metrics = []workbenchMetric{{Label: "Platforms", Value: strconv.Itoa(len(s.Platforms)), Hint: "configured sources"}, {Label: "Programs", Value: strconv.Itoa(programs), Hint: "stored programs"}, {Label: "Open", Value: strconv.Itoa(open), Hint: "accepting reports"}}
 	if len(s.Platforms) == 0 {
 		d.Notices = append(d.Notices, workbenchNotice{Tone: "warn", Title: "No platform is configured", Description: "Add an account before scheduling polls.", URL: "/settings?tab=accounts", Action: "Open accounts"})
