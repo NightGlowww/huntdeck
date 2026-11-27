@@ -30,15 +30,17 @@ table.fixed.flist td.asset { white-space: nowrap; }
 .qlist th.c-prog { width: 210px; }
 .qlist th.c-qscore { width: 176px; }
 .qscore-wrap { display: inline-flex; align-items: center; gap: 7px; justify-content: flex-end; }
-.qmeter { display: inline-block; width: 44px; height: 6px; border-radius: 999px; background: var(--surface-3); overflow: hidden; flex: none; }
-.qmeter > span { display: block; height: 100%; max-width: 100%; border-radius: inherit; background: var(--accent); }
+.qmeter { display: inline-block; width: 44px; height: 6px; flex: none; overflow: visible; }
+.qmeter-bg { fill: var(--surface-3); }
+.qmeter-fill { fill: var(--accent); }
 .qscore { font-weight: 650; color: var(--text); font-variant-numeric: tabular-nums; }
 .qlist .why-score .factors { display: grid; gap: 4px; min-width: 150px; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
 .qlist .why-score .factors li { display: grid; grid-template-columns: minmax(0, 1fr) 42px auto; align-items: center; gap: 6px; }
 .qlist .why-score .factors li.loss { grid-template-columns: auto 1fr; }
 .qlist .why-score .factors li.loss .muted { text-align: right; }
-.qlist .why-score .fbar { display: block; height: 5px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
-.qlist .why-score .fbar > span { display: block; height: 100%; max-width: 100%; border-radius: inherit; background: var(--info); }
+.qlist .why-score .fbar { display: block; width: 100%; height: 5px; overflow: visible; }
+.fbar-bg { fill: var(--surface-3); }
+.fbar-fill { fill: var(--info); }
 .qlist .why-score .fval { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
 @media (max-width: 900px) {
   table.cards.qlist td.c-open[data-label] { align-items: flex-start; }

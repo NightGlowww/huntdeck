@@ -124,7 +124,20 @@ table.glance tbody tr:hover td { background: var(--row-hover); }
 .mpreset-label { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; color: var(--text); font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; }
 .mpreset-def { padding: 1px 6px; border-radius: 999px; background: var(--accent-weak); color: var(--accent); font-size: calc(10.5px * var(--fs, 1)); font-weight: 650; }
 .mbar-stack { display: flex; height: 26px; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; background: var(--surface); }
-.mbar-seg { display: flex; align-items: center; justify-content: center; min-width: 0; font: 650 calc(11px * var(--fs, 1))/1 var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; }
+.mbar-seg { flex: none; display: flex; align-items: center; justify-content: center; min-width: 0; font: 650 calc(11px * var(--fs, 1))/1 var(--mono); color: var(--text); white-space: nowrap; overflow: hidden; }
+.mw-10 { width: 10%; }
+.mw-15 { width: 15%; }
+.mw-17 { width: 17%; }
+.mw-20 { width: 20%; }
+.mw-25 { width: 25%; }
+.mw-30 { width: 30%; }
+.mw-33 { width: 33%; }
+.mw-35 { width: 35%; }
+.mw-50 { width: 50%; }
+.mw-55 { width: 55%; }
+.mw-80 { width: 80%; }
+.mw-83 { width: 83%; }
+.mw-100 { width: 100%; }
 .mbar-seg + .mbar-seg { border-left: 1px solid var(--border); }
 .mbar-seg.fresh { background: color-mix(in srgb, var(--good) 20%, var(--surface)); box-shadow: inset 0 -3px 0 var(--good); }
 .mbar-seg.comp { background: color-mix(in srgb, var(--info) 20%, var(--surface)); box-shadow: inset 0 -3px 0 var(--info); }
@@ -157,7 +170,7 @@ table.glance tbody tr:hover td { background: var(--row-hover); }
 .mq-svg .mq-box-gate { fill: var(--surface); stroke: var(--warn); stroke-width: 1.4; }
 .mq-svg .mq-box-score { fill: var(--surface); stroke: var(--info); stroke-width: 1.4; }
 .mq-svg .mq-box-out { fill: color-mix(in srgb, var(--accent-weak) 70%, var(--surface)); stroke: var(--accent); stroke-width: 1.5; }
-.mq-svg .mq-arrow { fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mq-svg .mq-arrow { fill: none; color: var(--muted); stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .mq-svg .mq-kicker { fill: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .mq-svg .mq-title { fill: var(--text); font-size: 13px; font-weight: 700; }
 .mq-svg .mq-sub { fill: var(--text-2); font-size: 11px; }

@@ -47,13 +47,13 @@
         <td class="c-target"><div class="qtarget"><code class="mono small">{{.Kind}} {{.Value}}</code><button type="button" class="icon-btn qcopy" data-copy-text="{{.Value}}" title="{{T "Copy"}}: {{.Value}}" aria-label="{{T "Copy"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg></button></div></td>
         <td class="c-open num" data-label="{{T "Score"}}">
           {{if .Factors}}
-          <details class="why-score"><summary><span class="qscore-wrap"><span class="qmeter" aria-hidden="true"><span style="width:{{printf "%.1f" .Score}}%"></span></span><span class="qscore"><span class="sr-only">{{T "Score"}} </span>{{printf "%.1f" .Score}}</span></span></summary>
+          <details class="why-score"><summary><span class="qscore-wrap"><svg class="qmeter" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><rect class="qmeter-bg" width="100%" height="6" rx="3"/><rect class="qmeter-fill" width="{{printf "%.1f" .Score}}%" height="6" rx="3"/></svg><span class="qscore"><span class="sr-only">{{T "Score"}} </span>{{printf "%.1f" .Score}}</span></span></summary>
             <ul class="factors">
               {{$pct := .LossPct}}{{with .LossName}}<li class="loss"><span class="fname">{{T "Biggest loss"}}</span> <span class="muted">{{T .}} −{{$pct}}%</span></li>{{end}}
-              {{range .Factors}}<li><span class="fname">{{T .Name}}</span><span class="fbar" aria-hidden="true"><span style="width:{{percent .Effect}}"></span></span><span class="muted fval">×{{printf "%.2f" .Effect}}</span></li>{{end}}
+              {{range .Factors}}<li><span class="fname">{{T .Name}}</span><svg class="fbar" viewBox="0 0 100 5" preserveAspectRatio="none" aria-hidden="true"><rect class="fbar-bg" width="100%" height="5" rx="2.5"/><rect class="fbar-fill" width="{{percent .Effect}}" height="5" rx="2.5"/></svg><span class="muted fval">×{{printf "%.2f" .Effect}}</span></li>{{end}}
             </ul>
           </details>
-          {{else}}<span class="qscore-wrap"><span class="qmeter" aria-hidden="true"><span style="width:{{printf "%.1f" .Score}}%"></span></span><span class="qscore">{{printf "%.1f" .Score}}</span></span>{{end}}
+          {{else}}<span class="qscore-wrap"><svg class="qmeter" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><rect class="qmeter-bg" width="100%" height="6" rx="3"/><rect class="qmeter-fill" width="{{printf "%.1f" .Score}}%" height="6" rx="3"/></svg><span class="qscore">{{printf "%.1f" .Score}}</span></span>{{end}}
         </td>
         <td class="c-wide small muted" data-label="{{T "Why"}}">{{range $i, $r := .Reasons}}{{if $i}} · {{end}}{{$r}}{{end}}</td>
       </tr>

@@ -14,7 +14,7 @@ func TestNavGroupStylesAndMarkup(t *testing.T) {
 	}
 	shellRules := parseCSS(string(shellCSS), "02-shell.css")
 
-	var hasNavGroupLinkStyle, hasNavGroupHeadStyle bool
+	var hasNavGroupLinkStyle, hasNavGroupHeadStyle, hasToggleHoverTransparent bool
 	for _, r := range shellRules {
 		if r.sel == ".nav .group" {
 			if fsVal, ok := r.props["font-size"]; ok && !strings.Contains(fsVal, "var(--fs,") {
@@ -31,12 +31,20 @@ func TestNavGroupStylesAndMarkup(t *testing.T) {
 				hasNavGroupHeadStyle = true
 			}
 		}
+		if strings.Contains(r.sel, "button.nav-group-toggle:hover") && r.media == "" {
+			if r.props["background"] == "transparent" {
+				hasToggleHoverTransparent = true
+			}
+		}
 	}
 	if !hasNavGroupLinkStyle {
 		t.Error("02-shell.css: missing .nav a.nav-group-link section heading style")
 	}
 	if !hasNavGroupHeadStyle {
 		t.Error("02-shell.css: missing .nav-group-head flex row style")
+	}
+	if !hasToggleHoverTransparent {
+		t.Error("02-shell.css: button.nav-group-toggle:hover must set background: transparent to override button:hover in 09-forms.css")
 	}
 
 	respCSS, err := fs.ReadFile(staticFS, "static/css/10-responsive.css")
@@ -131,5 +139,26 @@ func TestNavGroupStylesAndMarkup(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("GET /: missing structured nav-group-link markup %s", want)
 		}
+	}
+}
+
+// strict CSP enforces style-src 'self' (no 'unsafe-inline'), so any inline
+// style="" attribute in a template is silently dropped by browsers.
+func TestNoInlineStylesInTemplates(t *testing.T) {
+	err := fs.WalkDir(templateFS, "templates", func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".html") {
+			return walkErr
+		}
+		b, err := fs.ReadFile(templateFS, path)
+		if err != nil {
+			return err
+		}
+		if strings.Contains(string(b), `style="`) || strings.Contains(string(b), `style='`) {
+			t.Errorf("%s contains inline style attribute (blocked by style-src 'self' CSP)", path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 }
