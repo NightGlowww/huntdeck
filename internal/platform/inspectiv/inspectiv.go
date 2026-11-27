@@ -431,7 +431,7 @@ func (c *Client) seedToken(tok string) {
 		return
 	}
 	for _, u := range urls {
-		c.jar.SetCookies(u, []*http.Cookie{{
+		c.jar.SetCookies(u, []*http.Cookie{{ //nolint:gosec // synthetic client jar entry; Secure breaks http:// httptest servers
 			Name:  tokenCookie,
 			Value: tok,
 			Path:  "/",

@@ -553,7 +553,7 @@ func TestFetchReportsAndActivitiesNeverCallsMessages(t *testing.T) {
 		t.Errorf("r1 comments=%d unread=%v", r1.Comments, r1.Unread)
 	}
 
-	// Report 902: typo "not_reproducable" + JS Date.toString() sentAt + unread=true
+	// Report 902: upstream typo status + JS Date.toString() sentAt + unread=true
 	r2 := got[1]
 	if r2.State != platform.ReportNotApplicable || !r2.Unread {
 		t.Errorf("r2 state=%q unread=%v", r2.State, r2.Unread)

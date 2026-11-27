@@ -199,7 +199,7 @@ func (c *Client) maybeAutoJoin(ctx context.Context, projectID int64, detail proj
 	}
 
 	marginGated := (detail.TakeMargin.Bool() || detail.MarginAmount.Float64() > 0 || meta.TakeMargin) &&
-		!(detail.IsMarginWhite.Bool() || meta.IsMarginWhite)
+		!detail.IsMarginWhite.Bool() && !meta.IsMarginWhite
 	if marginGated {
 		c.log.Info("vulbox: skipping auto-join for margin-gated project", "project_id", projectID)
 		return detail, nil, fmt.Errorf("vulbox: project %d requires a cash margin deposit: %w", projectID, platform.ErrScopeUnavailable)

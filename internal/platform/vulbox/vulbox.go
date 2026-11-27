@@ -49,7 +49,7 @@ const (
 	defaultUserURL = "https://user.vulbox.com"
 	defaultRootURL = "https://vulbox.com"
 
-	tokenCookie     = "vulbox_token"
+	tokenCookie     = "vulbox_token" //nolint:gosec // cookie name, not a credential
 	uuidCookie      = "uuid"
 	currencyCNY     = "CNY"
 	maxPages        = 200
@@ -657,7 +657,7 @@ func (c *Client) seedCookies(cookies []*http.Cookie) {
 	for _, u := range urls {
 		clones := make([]*http.Cookie, len(cookies))
 		for i, ck := range cookies {
-			cp := *ck
+			cp := *ck //nolint:gosec // client-side cookie jar clone preserves original attributes
 			cp.Domain = ""
 			if cp.Path == "" {
 				cp.Path = "/"

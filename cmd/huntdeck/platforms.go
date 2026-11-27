@@ -18,8 +18,11 @@ import (
 	"github.com/mdpsec/huntdeck/internal/platform"
 	"github.com/mdpsec/huntdeck/internal/platform/bugcrowd"
 	"github.com/mdpsec/huntdeck/internal/platform/custom"
+	"github.com/mdpsec/huntdeck/internal/platform/gobugfree"
 	"github.com/mdpsec/huntdeck/internal/platform/hackerone"
+	"github.com/mdpsec/huntdeck/internal/platform/inspectiv"
 	"github.com/mdpsec/huntdeck/internal/platform/intigriti"
+	"github.com/mdpsec/huntdeck/internal/platform/issuehunt"
 	"github.com/mdpsec/huntdeck/internal/platform/vulbox"
 	"github.com/mdpsec/huntdeck/internal/platform/yeswehack"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
@@ -175,11 +178,11 @@ func buildPlatforms(cfg config.Config, host *weblogin.Host) ([]configured, error
 		}
 		out = append(out, configured{Platform: c, fullInterval: y.FullInterval, quickInterval: y.QuickInterval, concurrency: y.Concurrency})
 	}
+	var proxyURL string
+	if cfg.Proxy != nil {
+		proxyURL = cfg.Proxy.String()
+	}
 	if vb := cfg.VulBox; vb.Enabled() {
-		var proxyURL string
-		if cfg.Proxy != nil {
-			proxyURL = cfg.Proxy.String()
-		}
 		o := vulbox.Options{
 			Account:     vb.Account,
 			Password:    vb.Password.Reveal(),
@@ -197,12 +200,8 @@ func buildPlatforms(cfg config.Config, host *weblogin.Host) ([]configured, error
 			// VulBox origins are saved so a restart carries on with them. A
 			// changed VB_ACCOUNT starts afresh (the shared profile stays, as
 			// for Bugcrowd).
-			dir := filepath.Join(cfg.DataDir, "sessions")
-			jarPath, loginState := filepath.Join(dir, "vulbox.json"), filepath.Join(dir, "vulbox-login.json")
-			if _, err := sessionjar.Claim(filepath.Join(dir, "vulbox-account"), vb.Account, jarPath, loginState); err != nil {
-				return nil, fmt.Errorf("vulbox: %w", err)
-			}
-			jar, err := sessionjar.Open(jarPath, "vulbox.com", "www.vulbox.com", "user.vulbox.com", "vapi.vulbox.com")
+			jar, loginState, err := openPlatformSession(cfg.DataDir, vulbox.Name, vb.Account,
+				"vulbox.com", "www.vulbox.com", "user.vulbox.com", "vapi.vulbox.com")
 			if err != nil {
 				return nil, err
 			}
@@ -216,6 +215,76 @@ func buildPlatforms(cfg config.Config, host *weblogin.Host) ([]configured, error
 			return nil, err
 		}
 		out = append(out, configured{Platform: c, fullInterval: vb.FullInterval, quickInterval: vb.QuickInterval, concurrency: vb.Concurrency})
+	}
+	if ih := cfg.IssueHunt; ih.Enabled() {
+		c, err := issuehunt.New(issuehunt.Options{
+			APIKey:      ih.APIKey.Reveal(),
+			PublicOnly:  ih.PublicOnly,
+			Rate:        ih.Rate,
+			Concurrency: ih.Concurrency,
+			ProxyURL:    proxyURL,
+			Log:         slog.Default(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, configured{Platform: c, fullInterval: ih.FullInterval, quickInterval: ih.QuickInterval, concurrency: ih.Concurrency})
+	}
+	if gbf := cfg.GObugfree; gbf.Enabled() {
+		o := gobugfree.Options{
+			Email:       gbf.Email,
+			Password:    gbf.Password.Reveal(),
+			TOTPSecret:  gbf.TOTPSecret.Reveal(),
+			Token:       gbf.Token.Reveal(),
+			PublicOnly:  gbf.PublicOnly,
+			Rate:        gbf.Rate,
+			Concurrency: gbf.Concurrency,
+			ProxyURL:    proxyURL,
+			Log:         slog.Default(),
+		}
+		if !gbf.PublicOnly && gbf.Email != "" {
+			jar, loginState, err := openPlatformSession(cfg.DataDir, gobugfree.Name, gbf.Email,
+				"app.gobugfree.com", "id.gobugfree.com", "gobugfree.com")
+			if err != nil {
+				return nil, err
+			}
+			o.WebHost, o.Jar, o.LoginState = host, jar, loginState
+			if host != nil {
+				host.Register(gobugfree.Name, gobugfree.WebHome, jar)
+			}
+		}
+		c, err := gobugfree.New(o)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, configured{Platform: c, fullInterval: gbf.FullInterval, quickInterval: gbf.QuickInterval, concurrency: gbf.Concurrency})
+	}
+	if ins := cfg.Inspectiv; ins.Enabled() {
+		o := inspectiv.Options{
+			Email:       ins.Email,
+			Password:    ins.Password.Reveal(),
+			Token:       ins.Token.Reveal(),
+			Rate:        ins.Rate,
+			Concurrency: ins.Concurrency,
+			ProxyURL:    proxyURL,
+			Log:         slog.Default(),
+		}
+		if ins.Email != "" {
+			jar, loginState, err := openPlatformSession(cfg.DataDir, inspectiv.Name, ins.Email,
+				"app.inspectiv.com", "api.bounty.inspectiv.com", "inspectiv.com")
+			if err != nil {
+				return nil, err
+			}
+			o.WebHost, o.Jar, o.LoginState = host, jar, loginState
+			if host != nil {
+				host.Register(inspectiv.Name, inspectiv.WebHome, jar)
+			}
+		}
+		c, err := inspectiv.New(o)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, configured{Platform: c, fullInterval: ins.FullInterval, quickInterval: ins.QuickInterval, concurrency: ins.Concurrency})
 	}
 	// Custom sources: platforms HuntDeck has no client for, read from a
 	// document a script of the user's writes. New programs are picked up
@@ -232,6 +301,22 @@ func buildPlatforms(cfg config.Config, host *weblogin.Host) ([]configured, error
 		out = append(out, configured{Platform: c, fullInterval: cfg.Sources.Interval, quickInterval: cfg.Sources.Interval / 4, concurrency: 4})
 	}
 	return out, nil
+}
+
+// openPlatformSession claims the persisted session jar and login-state path
+// for a platform account without wiping the shared browser profile.
+func openPlatformSession(dataDir, name, account string, hosts ...string) (*sessionjar.Jar, string, error) {
+	dir := filepath.Join(dataDir, "sessions")
+	jarPath := filepath.Join(dir, name+".json")
+	loginState := filepath.Join(dir, name+"-login.json")
+	if _, err := sessionjar.Claim(filepath.Join(dir, name+"-account"), account, jarPath, loginState); err != nil {
+		return nil, "", fmt.Errorf("%s: %w", name, err)
+	}
+	jar, err := sessionjar.Open(jarPath, hosts...)
+	if err != nil {
+		return nil, "", err
+	}
+	return jar, loginState, nil
 }
 
 // loginBrowser is the one Chrome website logins share, a tab each,
@@ -302,6 +387,7 @@ func openSchedule(ctx context.Context, st *store.Store, ps []configured) (*sched
 // platformAliases maps short names users may type to platform names.
 var platformAliases = map[string]string{
 	"h1": hackerone.Name, "bc": bugcrowd.Name, "it": intigriti.Name, "ywh": yeswehack.Name, "vb": vulbox.Name,
+	"ih": issuehunt.Name, "gbf": gobugfree.Name, "ins": inspectiv.Name,
 }
 
 func canonicalPlatform(name string) string {
@@ -338,7 +424,7 @@ func heldPlatforms(ctx context.Context, s *store.Store) ([]web.PlatformInfo, err
 		return nil, err
 	}
 	rank := func(name string) int {
-		if i := slices.Index([]string{hackerone.Name, bugcrowd.Name, intigriti.Name, yeswehack.Name, vulbox.Name}, name); i >= 0 {
+		if i := slices.Index([]string{hackerone.Name, bugcrowd.Name, intigriti.Name, yeswehack.Name, vulbox.Name, issuehunt.Name, gobugfree.Name, inspectiv.Name}, name); i >= 0 {
 			return i
 		}
 		return 99

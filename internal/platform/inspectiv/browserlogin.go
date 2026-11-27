@@ -118,7 +118,7 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			"captcha": {
 				Repeatable: true,
 				Do: func(context.Context, weblogin.Page) error {
-					return errors.New("Google reCAPTCHA challenge appeared; open Settings > Browser (VNC) to complete sign-in, or paste INS_TOKEN")
+					return errRecaptchaChallenge
 				},
 			},
 		},
@@ -177,6 +177,8 @@ const loginStepJS = `(() => {
 	return '';
 })()`
 
+var errRecaptchaChallenge = errors.New("reCAPTCHA challenge appeared; open Settings > Browser (VNC) to complete sign-in, or paste INS_TOKEN")
+
 func checkVisibleRecaptcha(ctx context.Context, p weblogin.Page) error {
 	var challengeVisible bool
 	err := p.Eval(ctx, `(() => {
@@ -193,7 +195,7 @@ func checkVisibleRecaptcha(ctx context.Context, p weblogin.Page) error {
 		return err
 	}
 	if challengeVisible {
-		return errors.New("Google reCAPTCHA challenge appeared; open Settings > Browser (VNC) to complete sign-in, or paste INS_TOKEN")
+		return errRecaptchaChallenge
 	}
 	return nil
 }

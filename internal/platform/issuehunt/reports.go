@@ -469,7 +469,7 @@ func mapReportState(raw string) string {
 		return platform.ReportDuplicate
 	case "out_of_scope":
 		return platform.ReportOutOfScope
-	case "not_applicable", "not_reproducible", "not_reproducable":
+	case "not_applicable", "not_reproducible", "not_reproducable": //nolint:misspell // IssueHunt API status spelling
 		return platform.ReportNotApplicable
 	case "spam":
 		return platform.ReportSpam

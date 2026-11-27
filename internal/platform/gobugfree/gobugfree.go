@@ -484,7 +484,7 @@ func (c *Client) seedBaseCookies(cookies []*http.Cookie) {
 		if ck == nil {
 			continue
 		}
-		cp := *ck
+		cp := *ck //nolint:gosec // client-side cookie jar clone preserves original attributes (including httptest HTTP URLs)
 		cp.Domain = ""
 		if cp.Path == "" {
 			cp.Path = "/"
