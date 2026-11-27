@@ -53,7 +53,7 @@
     },
     "acceptInvite": {
       "summary": "接受邀请",
-      "description": "在平台上接受私有项目的邀请（HackerOne 需网站登录，Bugcrowd 或 Intigriti），必要时先登录，随后在后台刷新该项目的列表、范围与统计。平台接受后返回；若平台较慢则返回 202（仍在继续）。"
+      "description": "在平台上接受私有项目的邀请（HackerOne 需网站登录，Bugcrowd、Intigriti 或 VulBox），必要时先登录，随后在后台刷新该项目的列表、范围与统计。平台接受后返回；若平台较慢则返回 202（仍在继续）。"
     },
     "getProgram": {
       "summary": "获取单个项目",
@@ -153,7 +153,7 @@
     "offset": "跳过多少条，用于下一页。",
     "order": "newest：最新在前。",
     "paid": "1：有公开赏金。",
-    "platform": "仅这些平台的项目：一个或多个，逗号分隔，如 hackerone,bugcrowd（hackerone、bugcrowd、intigriti、yeswehack；independent 为手工添加的项目）。",
+    "platform": "仅这些平台的项目：一个或多个，逗号分隔，如 hackerone,bugcrowd（hackerone、bugcrowd、intigriti、yeswehack、vulbox；independent 为手工添加的项目）。",
     "private": "1：仅私有项目。",
     "program": "仅该项目的变更，格式 platform/handle，与其变更标签页一致。",
     "q": "名称或 handle 包含该词；以 - 开头的词表示排除含它的项目（acme -staging）。",

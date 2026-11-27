@@ -27,6 +27,10 @@ var seedRawFields = map[string][]string{
 		"archived", "disabled", "country", "activity_area", "business_unit.name", "business_unit.slug",
 		"business_unit.currency", "average_first_response_time", "scopes_count", "reports_count", "last_update_at",
 		"report_submission_cost", "report_collaboration_active", "gift", "thumbnail.url"},
+	"vulbox": {"id", "project_id", "type", "status", "task_title", "task_desc", "task_is_src", "task_website",
+		"task_bonus_level", "task_stime", "task_etime", "business_type", "difficult", "difficult_name",
+		"reward_range", "serious_min", "serious_max", "high_min", "high_max", "middle_min", "middle_max",
+		"low_min", "low_max", "tags", "goto"},
 }
 
 // seedRaw is the seed's raw column: for each platform, a JSON object of

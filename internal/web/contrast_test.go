@@ -38,6 +38,7 @@ func TestPaletteContrast(t *testing.T) {
 		{"muted", "surface"}, {"faint", "surface"}, {"accent", "surface"},
 		{"on-accent", "accent"}, {"good", "surface"}, {"info", "surface"},
 		{"warn", "surface"}, {"bad", "surface"}, {"priv", "surface"},
+		{"pf-vulbox", "surface"}, {"pf-vulbox", "bg"},
 	}
 	for name, vars := range palettes {
 		borderInput, okBorder := vars["border-input"]

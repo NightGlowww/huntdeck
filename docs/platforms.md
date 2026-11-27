@@ -47,6 +47,19 @@ What HuntDeck reads from each platform, and how.
 - **YesWeHack** uses the API its website uses (`api.yeswehack.com`), logging in
   with your email, password and authenticator code like the website does.
   Unofficial in the same way as Bugcrowd.
+- **VulBox (漏洞盒子)** uses the JSON API behind `www.vulbox.com` and
+  `user.vulbox.com` (`vapi.vulbox.com`). Unofficial in the same way as
+  Bugcrowd: keep `VB_RATE` polite (default `1/s`) behind Alibaba Cloud WAF.
+  Sign in via the login browser (`VB_ACCOUNT`, `VB_PASSWORD`, optional
+  `VB_TOTP_SECRET` — turn on `HUNTDECK_VNC=true` if an image CAPTCHA appears,
+  as HuntDeck never bypasses CAPTCHAs) or paste `VB_SESSION` (`vulbox_token`
+  or `Cookie` header). Note that VulBox may enforce a single active web login
+  (`code: 401004`), so reusing your browser's `vulbox_token` avoids signing
+  out another session. With `VB_AUTO_JOIN=true` (the default), HuntDeck
+  confirms eligible projects and signs participation agreements so scope is
+  unlocked; projects that require freezing a cash deposit (`take_margin`) or
+  consuming a ticket (`use_ticket`) are always skipped for safety. Bounties
+  and reports are stored and shown in CNY (`¥`).
 - **Your own reports** are read in polls, at most once an hour (Settings ›
   Polling switches them off per platform). HackerOne: the Hacker API's list
   of your reports (100 a page), a report's activities when it changed, and
@@ -57,7 +70,9 @@ What HuntDeck reads from each platform, and how.
   payouts' dates. At most 100 reports' details a poll, so a long history is
   read over the first few. Only titles, states, severities, dates, who spoke
   last, the number of comments and payments are kept; never the write-up or
-  what anyone wrote. YesWeHack reports aren't read yet: add them by hand.
+  what anyone wrote. VulBox reads your submitted vulnerabilities across all
+  project category tabs (metadata and CNY bounties only; never write-ups or
+  comments). YesWeHack reports aren't read yet: add them by hand.
 - **Other platforms** (Inspectiv, HackenProof, a company's own portal…) can be
   added as custom sources: a script of yours reads the platform and writes a
   JSON document, which HuntDeck polls (`HUNTDECK_SOURCES`;

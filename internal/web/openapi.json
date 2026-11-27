@@ -82,7 +82,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack; independent: programs added by hand).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox; independent: programs added by hand).",
             "schema": {
               "type": "string"
             }
@@ -412,7 +412,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack; independent: programs added by hand).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox; independent: programs added by hand).",
             "schema": {
               "type": "string"
             }
@@ -743,7 +743,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox).",
             "schema": {
               "type": "string"
             }
@@ -1035,7 +1035,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox).",
             "schema": {
               "type": "string"
             }
@@ -1334,7 +1334,8 @@
               "enum": [
                 "bugcrowd",
                 "hackerone",
-                "intigriti"
+                "intigriti",
+                "vulbox"
               ]
             },
             "example": "intigriti"
@@ -1435,6 +1436,7 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
+                "vulbox",
                 "independent"
               ]
             },
@@ -1529,6 +1531,7 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
+                "vulbox",
                 "independent"
               ]
             },
@@ -1596,6 +1599,7 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
+                "vulbox",
                 "independent"
               ]
             },
@@ -1661,6 +1665,7 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
+                "vulbox",
                 "independent"
               ]
             },
@@ -1737,6 +1742,7 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
+                "vulbox",
                 "independent"
               ]
             },
@@ -1851,6 +1857,7 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
+                "vulbox",
                 "independent"
               ]
             }
@@ -2229,6 +2236,7 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
+                "vulbox",
                 "independent"
               ]
             }
@@ -2353,7 +2361,8 @@
                 "hackerone",
                 "bugcrowd",
                 "intigriti",
-                "yeswehack"
+                "yeswehack",
+                "vulbox"
               ]
             }
           },
@@ -2468,7 +2477,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox).",
             "schema": {
               "type": "string"
             }
@@ -2777,7 +2786,8 @@
                 "hackerone",
                 "bugcrowd",
                 "intigriti",
-                "yeswehack"
+                "yeswehack",
+                "vulbox"
               ]
             },
             "example": "hackerone"
@@ -2936,7 +2946,8 @@
                 "hackerone",
                 "bugcrowd",
                 "intigriti",
-                "yeswehack"
+                "yeswehack",
+                "vulbox"
               ]
             },
             "example": "hackerone"
@@ -3092,7 +3103,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Only this platform, as the platform slug (hackerone, bugcrowd, intigriti, yeswehack)."
+            "description": "Only this platform, as the platform slug (hackerone, bugcrowd, intigriti, yeswehack, vulbox)."
           },
           {
             "name": "kind",
@@ -3462,6 +3473,7 @@
                   "bugcrowd",
                   "intigriti",
                   "yeswehack",
+                  "vulbox",
                   "independent",
                   "other"
                 ]

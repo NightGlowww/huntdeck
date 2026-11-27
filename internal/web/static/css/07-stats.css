@@ -52,6 +52,7 @@ col.w-weak { width: 22%; }
 .pf-bugcrowd  { --pf: var(--pf-bugcrowd); }
 .pf-intigriti { --pf: var(--pf-intigriti); }
 .pf-yeswehack { --pf: var(--pf-yeswehack); }
+.pf-vulbox    { --pf: var(--pf-vulbox); }
 .pf-independent { --pf: var(--pf-independent); } /* programs added by hand: slate, apart from the platforms */
 
 .sev { font: 600 calc(11px * var(--fs, 1)) var(--mono); text-transform: uppercase; letter-spacing: .03em; }

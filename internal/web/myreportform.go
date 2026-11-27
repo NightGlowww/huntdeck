@@ -66,7 +66,7 @@ func (reportForm) Severities() []struct{ Key, Label string } { return reportSeve
 
 // reportFormPlatforms are the platforms a report can be added for: the
 // four, programs added by hand, and anywhere else.
-var reportFormPlatforms = []string{"hackerone", "bugcrowd", "intigriti", "yeswehack", "independent", "other"}
+var reportFormPlatforms = []string{"hackerone", "bugcrowd", "intigriti", "yeswehack", "vulbox", "independent", "other"}
 
 const paymentRows = 3
 

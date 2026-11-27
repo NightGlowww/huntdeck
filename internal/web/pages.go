@@ -128,6 +128,8 @@ func canonicalPlatform(name string) string {
 		return "intigriti"
 	case "ywh":
 		return "yeswehack"
+	case "vb":
+		return "vulbox"
 	}
 	return n
 }

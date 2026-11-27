@@ -29,7 +29,7 @@ const chromePath = flag('chrome', existsSync('/Applications/Google Chrome.app/Co
 
 // Brands, protocols and file names a page may show as they are.
 const ALLOW = new Set((
-  'huntdeck huntmail hackerone bugcrowd intigriti yeswehack pojia scopesentry huntscore ' +
+  'huntdeck huntmail hackerone bugcrowd intigriti yeswehack vulbox pojia scopesentry huntscore ' +
   'api url urls ip cidr json csv http https get post put delete cve cvss cwe bbp vdp id ids ' +
   'caido burp zap discord telegram webhook burpsuite scope insomnia bruno postman chrome github ' +
   'signal tls ssl vnc env sqlite cloudflare workers d1 openai typesafe bailian jev ssk ssv ' +

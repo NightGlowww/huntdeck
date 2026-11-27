@@ -159,10 +159,12 @@ scope tracker, on this machine with Docker Compose, then check it works.
 | Bugcrowd | Email, password and authenticator secret (`BC_EMAIL`, `BC_PASSWORD`, `BC_TOTP_SECRET`), or `BC_PUBLIC_ONLY=true` | The JSON the website uses, signed in from a built-in browser |
 | Intigriti | Personal access token (`IT_TOKEN`); optional website login for what the API lacks | Official researcher API |
 | YesWeHack | Email, password and authenticator secret (`YWH_EMAIL`, `YWH_PASSWORD`, `YWH_TOTP_SECRET`), or `YWH_PUBLIC_ONLY=true` | The API the website uses |
+| VulBox (漏洞盒子) | Account and password (`VB_ACCOUNT`, `VB_PASSWORD`, optional `VB_TOTP_SECRET`), `VB_SESSION` (`vulbox_token`), or `VB_PUBLIC_ONLY=true` | The JSON API the website uses (`vapi.vulbox.com`), signed in via browser/VNC or session token |
 | Anything else | A script of yours that writes a JSON document | [Custom sources](docs/custom-sources.md) |
 
 Your own reports (Reports, Analytics) come with the HackerOne token, the
-Bugcrowd login and the Intigriti website login; YesWeHack's aren't read yet.
+Bugcrowd login, the Intigriti website login and the VulBox login/session
+(CNY); YesWeHack's aren't read yet.
 
 Programs that aren't on any platform can be added by hand (**Add program** on
 Programs). Where HuntDeck reads a platform's website rather than an official

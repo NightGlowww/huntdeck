@@ -40,6 +40,8 @@ func platformLabel(name string) string {
 		return "Intigriti"
 	case "yeswehack":
 		return "YesWeHack"
+	case "vulbox":
+		return "VulBox"
 	}
 	return name
 }

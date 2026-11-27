@@ -37,6 +37,7 @@ const (
 	GroupBugcrowd  = "bugcrowd"
 	GroupIntigriti = "intigriti"
 	GroupYesWeHack = "yeswehack"
+	GroupVulBox    = "vulbox"
 	GroupHuntMail  = "huntmail"
 	GroupNetwork   = "network"
 	// GroupAI is the optional model: an OpenAI-compatible endpoint that reads
@@ -97,6 +98,20 @@ var Editable = []Field{
 	{Name: "YWH_PUBLIC_ONLY", Group: GroupYesWeHack, Label: "Public programs without an account", Kind: KindBool},
 	{Name: "YWH_RATE", Group: GroupYesWeHack, Label: "Requests per second", Kind: KindNumber, Default: "2", Help: "0.1 to 5."},
 	{Name: "YWH_CONCURRENCY", Group: GroupYesWeHack, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
+
+	{Name: "VB_ACCOUNT", Group: GroupVulBox, Label: "Account", Kind: KindText,
+		Help: "Username, phone number or email. Signs in in the login browser (open Settings > Browser with VNC if a CAPTCHA appears)."},
+	{Name: "VB_PASSWORD", Group: GroupVulBox, Label: "Password", Kind: KindSecret},
+	{Name: "VB_TOTP_SECRET", Group: GroupVulBox, Label: "2FA secret", Kind: KindSecret,
+		Help: "The authenticator app's secret (base32), if 2FA is on."},
+	{Name: "VB_SESSION", Group: GroupVulBox, Label: "Session token", Kind: KindSecret,
+		Help: "Instead of a login: vulbox_token or a Cookie header from your browser."},
+	{Name: "VB_AUTO_JOIN", Group: GroupVulBox, Label: "Auto-join eligible projects", Kind: KindBool, Default: "true",
+		Help: "Confirm and join projects or agreements that unlock scope, skipping any that require a deposit or ticket."},
+	{Name: "VB_PUBLIC_ONLY", Group: GroupVulBox, Label: "Public programs without an account", Kind: KindBool},
+	{Name: "VB_RATE", Group: GroupVulBox, Label: "Requests per second", Kind: KindNumber, Default: "1",
+		Help: "0.1 to 5. Keep it polite for VulBox's firewall."},
+	{Name: "VB_CONCURRENCY", Group: GroupVulBox, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
 
 	{Name: "HUNTMAIL_URL", Group: GroupHuntMail, Label: "Address", Kind: KindSecret,
 		Help: "Your HuntMail's address with its base path, as its setup printed it: https://<worker>.<subdomain>.workers.dev/<base path>. Kept secret like the key."},

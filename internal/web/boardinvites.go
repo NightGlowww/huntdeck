@@ -17,7 +17,10 @@ const (
 
 // acceptURLs are where each platform's pending invitations are accepted;
 // others link the program's own page.
-var acceptURLs = map[string]string{"intigriti": "https://app.intigriti.com/researcher/programs/invites-and-applications"}
+var acceptURLs = map[string]string{
+	"intigriti": "https://app.intigriti.com/researcher/programs/invites-and-applications",
+	"vulbox":    "https://user.vulbox.com/InfoCenter/receive",
+}
 
 // boardInvites is the Invites box.
 type boardInvites struct {

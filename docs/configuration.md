@@ -87,6 +87,13 @@ on unless passed).
 | `YWH_PUBLIC_ONLY` | `false` | Poll YesWeHack's public programs without an account |
 | `YWH_FULL_INTERVAL`, `YWH_QUICK_INTERVAL` | `6h`, `30m` | YesWeHack polling (`0` disables) |
 | `YWH_RATE`, `YWH_CONCURRENCY` | `2`, `2` | YesWeHack request rate and parallel fetches |
+| `VB_ACCOUNT`, `VB_PASSWORD` | — | VulBox (漏洞盒子) login (username, phone or email). Runs in the login browser (Settings › Browser); because fresh logins often require an image CAPTCHA, enable `HUNTDECK_VNC=true` to complete it interactively. Also reads your own CNY reports (Reports, Analytics) and pending invitations |
+| `VB_TOTP_SECRET` | — | Base32 secret of your VulBox 6-digit MFA authenticator app (if 2FA is on) |
+| `VB_SESSION` | — | Alternative to a browser login: the `vulbox_token` cookie (or `Bearer` token / `Cookie` header) copied from your browser. Reusing an existing browser token avoids single-session eviction (`code: 401004`) |
+| `VB_AUTO_JOIN` | `true` | Automatically confirm/join eligible VulBox projects and sign participation agreements so scope unlocks. Projects requiring a cash deposit (`take_margin`) or entry ticket (`use_ticket`) are never auto-joined |
+| `VB_PUBLIC_ONLY` | `false` | Poll VulBox's public projects without an account |
+| `VB_FULL_INTERVAL`, `VB_QUICK_INTERVAL` | `6h`, `30m` | VulBox polling (`0` disables) |
+| `VB_RATE`, `VB_CONCURRENCY` | `1`, `2` | VulBox request rate (`0.1`–`5`) and parallel scope fetches (`1`–`4`) |
 | `HUNTMAIL_URL`, `HUNTMAIL_API_KEY` | — | Your [HuntMail](https://github.com/mdpsec/huntmail) inbox, for the Email page and each program's Email tab: the address with its base path and the API key, as HuntMail's setup printed them (`https://<worker>.<subdomain>.workers.dev/<base path>`), or as HuntDeck saved them when it set HuntMail up (Email › HuntMail › Setup). Both or neither; the address is kept secret like the key, since its path is one. HuntDeck reads it from the server only, straight to Cloudflare (not through `HUNTDECK_PROXY`), when you open a page that shows mail |
 | `HUNTMAIL_DOMAINS` | HuntMail's | Domains to make new addresses on, comma-separated (`example.com, example.net`); empty: the ones HuntMail was set up for, the busiest first |
 

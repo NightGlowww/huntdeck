@@ -2764,6 +2764,13 @@
   "Platform totals: programs, bounties paid, reports, and how the numbers moved.": "平台汇总数据：项目数、已付赏金、报告数及其变化趋势。",
   "Ask the instance to poll a platform now: a quick poll lists programs, a full one fetches every …": "立即让实例抓取指定平台：快速抓取列项目，全量抓取拉范围（每分钟最多一次）。",
   "Ask the decision model whether a finding would survive triage, before it is submitted.": "在提交前让决策模型评估漏洞能否通过初审（Triage）。",
-  "Ask the decision model whether a testing plan complies with a program's own policy text.": "让决策模型判断测试计划是否符合项目自身的政策条款。"
+  "Ask the decision model whether a testing plan complies with a program's own policy text.": "让决策模型判断测试计划是否符合项目自身的政策条款。",
+  "Account": "账号",
+  "Username, phone number or email. Signs in in the login browser (open Settings > Browser with VNC if a CAPTCHA appears).": "用户名、手机号或邮箱。在登录浏览器中登录（如出现验证码，请开启 VNC 后在设置 › 浏览器中完成）。",
+  "Session token": "会话令牌",
+  "Instead of a login: vulbox_token or a Cookie header from your browser.": "替代账号登录：从浏览器复制的 vulbox_token 或完整 Cookie 请求头。",
+  "Auto-join eligible projects": "自动加入符合条件的项目",
+  "Confirm and join projects or agreements that unlock scope, skipping any that require a deposit or ticket.": "自动确认加入项目或签署协议以解锁测试范围，自动跳过需要冻结保证金或消耗入场券的项目。",
+  "0.1 to 5. Keep it polite for VulBox's firewall.": "0.1 – 5。请保持温和速率，避免触发漏洞盒子防火墙限制。"
  }
 }

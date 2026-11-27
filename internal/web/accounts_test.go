@@ -57,8 +57,8 @@ func TestAccountsTab(t *testing.T) {
 	e, saved, rs := newAccountsEnv(t)
 	c := e.client()
 	_, body := e.do(c, "GET", "/settings?tab=accounts", nil, nil)
-	for _, want := range []string{`href="/settings?tab=accounts"`, `id="acct-hackerone"`, `id="acct-bugcrowd"`, `id="acct-network"`,
-		`name="IT_TOKEN"`, `name="BC_PUBLIC_ONLY" value="true" checked`, `placeholder="set · type to replace"`} {
+	for _, want := range []string{`href="/settings?tab=accounts"`, `id="acct-hackerone"`, `id="acct-bugcrowd"`, `id="acct-vulbox"`, `id="acct-network"`,
+		`name="IT_TOKEN"`, `name="VB_ACCOUNT"`, `name="VB_SESSION"`, `name="BC_PUBLIC_ONLY" value="true" checked`, `placeholder="set · type to replace"`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("Accounts tab lacks %s", want)
 		}

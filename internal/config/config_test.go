@@ -105,6 +105,10 @@ func TestLoadErrors(t *testing.T) {
 		{"bc rate too high", map[string]string{"BC_RATE": "10"}, []string{"BC_RATE"}},
 		{"it rate", map[string]string{"IT_RATE": "0"}, []string{"IT_RATE"}},
 		{"ywh public only not bool", map[string]string{"YWH_PUBLIC_ONLY": "sure"}, []string{"YWH_PUBLIC_ONLY"}},
+		{"vb rate too high", map[string]string{"VB_RATE": "10"}, []string{"VB_RATE"}},
+		{"vb concurrency", map[string]string{"VB_CONCURRENCY": "9"}, []string{"VB_CONCURRENCY"}},
+		{"vb auto join not bool", map[string]string{"VB_AUTO_JOIN": "maybe"}, []string{"VB_AUTO_JOIN"}},
+		{"vb public only not bool", map[string]string{"VB_PUBLIC_ONLY": "nope"}, []string{"VB_PUBLIC_ONLY"}},
 		{"bad proxy", map[string]string{"HUNTDECK_PROXY": "127.0.0.1:8080"}, []string{"HUNTDECK_PROXY"}},
 		{"bad time zone", map[string]string{"HUNTDECK_TIMEZONE": "Brisbane"}, []string{"HUNTDECK_TIMEZONE"}},
 		{"local time zone", map[string]string{"HUNTDECK_TIMEZONE": "Local"}, []string{"HUNTDECK_TIMEZONE"}},
@@ -226,6 +230,40 @@ func TestIntigritiAndYesWeHackConfig(t *testing.T) {
 	}
 }
 
+func TestVulBoxConfig(t *testing.T) {
+	cfg, err := Load(source(nil, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	v := cfg.VulBox
+	if v.Enabled() || !v.AutoJoin || v.PublicOnly || v.FullInterval != 6*time.Hour || v.QuickInterval != 30*time.Minute || v.Rate != 1 || v.Concurrency != 2 {
+		t.Errorf("defaults: %+v", v)
+	}
+	for _, tt := range []struct {
+		name string
+		env  map[string]string
+	}{
+		{"public only", map[string]string{"VB_PUBLIC_ONLY": "true"}},
+		{"session", map[string]string{"VB_SESSION": "tok-abc"}},
+		{"login", map[string]string{"VB_ACCOUNT": "hunter@example.com", "VB_PASSWORD": "p#ss$word!", "VB_TOTP_SECRET": "JBSWY3DPEHPK3PXP", "VB_AUTO_JOIN": "false"}},
+	} {
+		cfg, err := Load(source(tt.env, nil))
+		if err != nil {
+			t.Fatalf("%s: %v", tt.name, err)
+		}
+		if !cfg.VulBox.Enabled() {
+			t.Errorf("%s: not enabled", tt.name)
+		}
+	}
+	cfg, err = Load(source(map[string]string{"VB_ACCOUNT": "hunter@example.com", "VB_PASSWORD": "p#ss$word!", "VB_AUTO_JOIN": "false", "VB_RATE": "2.5", "VB_CONCURRENCY": "3"}, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.VulBox.Password.Reveal() != "p#ss$word!" || cfg.VulBox.AutoJoin || cfg.VulBox.Rate != 2.5 || cfg.VulBox.Concurrency != 3 {
+		t.Errorf("parsed: %+v", cfg.VulBox)
+	}
+}
+
 func TestSecretNeverPrints(t *testing.T) {
 	s := Secret("tok-xyz")
 	var buf bytes.Buffer
@@ -248,6 +286,7 @@ func TestReadOnly(t *testing.T) {
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "H1_USERNAME": "u", "H1_TOKEN": "t"}, []string{"H1_*"}},
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "BC_PUBLIC_ONLY": "1", "HUNTDECK_VNC": "1"}, []string{"BC_*", "HUNTDECK_VNC"}},
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "YWH_PUBLIC_ONLY": "1", "HUNTDECK_PROXY": "http://127.0.0.1:3128"}, []string{"YWH_*", "HUNTDECK_PROXY"}},
+		{map[string]string{"HUNTDECK_READ_ONLY": "1", "VB_SESSION": "tok"}, []string{"VB_*"}},
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "HUNTMAIL_URL": "https://mail.example.workers.dev/0123456789abcdef", "HUNTMAIL_API_KEY": "k"}, []string{"HUNTMAIL_URL"}},
 		{map[string]string{"H1_USERNAME": "u", "H1_TOKEN": "t"}, nil},
 	}

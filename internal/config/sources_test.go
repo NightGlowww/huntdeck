@@ -21,6 +21,8 @@ func TestSources(t *testing.T) {
 		{"relative path", "inspectiv=sources/x.json", nil, "neither an absolute file path"},
 		{"other scheme", "inspectiv=ftp://example.net/x.json", nil, "neither an absolute file path"},
 		{"taken name", "hackerone=/data/x.json", nil, "taken by a platform"},
+		{"taken vulbox name", "vulbox=/data/x.json", nil, "taken by a platform"},
+		{"taken vb alias", "vb=/data/x.json", nil, "taken by a platform"},
 		{"bad name", "in_spectiv=/data/x.json", nil, "lowercase letters"},
 		{"twice", "a1=/data/a.json a1=/data/b.json", []CustomSource{{"a1", "/data/a.json"}}, "named twice"},
 	} {

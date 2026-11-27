@@ -127,6 +127,7 @@ type Config struct {
 	Bugcrowd  Bugcrowd
 	Intigriti Intigriti
 	YesWeHack YesWeHack
+	VulBox    VulBox
 	// HuntMail is the user's HuntMail inbox, read by the Email page.
 	HuntMail HuntMail
 	// HUNTDECK_SOURCES: platforms HuntDeck has no client for, read from
@@ -203,6 +204,24 @@ type YesWeHack struct {
 
 // Enabled reports whether YesWeHack should be polled.
 func (y YesWeHack) Enabled() bool { return y.Email != "" || y.Token != "" || y.PublicOnly }
+
+// VulBox holds VulBox (漏洞盒子) credentials and polling settings. With
+// PublicOnly and no credentials, only public projects are polled.
+type VulBox struct {
+	Account       string        // VB_ACCOUNT: username, phone or email
+	Password      Secret        // VB_PASSWORD
+	TOTPSecret    Secret        // VB_TOTP_SECRET: optional 6-digit authenticator secret
+	Session       Secret        // VB_SESSION: optional vulbox_token / Bearer / Cookie header
+	AutoJoin      bool          // VB_AUTO_JOIN: auto-confirm/join non-margin projects & agreements (default true)
+	PublicOnly    bool          // VB_PUBLIC_ONLY: poll public projects without credentials
+	FullInterval  time.Duration // VB_FULL_INTERVAL
+	QuickInterval time.Duration // VB_QUICK_INTERVAL
+	Rate          float64       // VB_RATE
+	Concurrency   int           // VB_CONCURRENCY
+}
+
+// Enabled reports whether VulBox should be polled.
+func (v VulBox) Enabled() bool { return v.Account != "" || v.Session != "" || v.PublicOnly }
 
 // HuntMail is the user's HuntMail inbox: a catch-all for hunting on their
 // own Cloudflare account (https://github.com/mdpsec/huntmail). Its address
@@ -422,6 +441,19 @@ func Load(src Source) (Config, error) {
 		Concurrency:   r.int("YWH_CONCURRENCY", 2, 1, 4),
 	}
 
+	cfg.VulBox = VulBox{
+		Account:       r.get("VB_ACCOUNT", ""),
+		Password:      Secret(r.get("VB_PASSWORD", "")),
+		TOTPSecret:    Secret(r.get("VB_TOTP_SECRET", "")),
+		Session:       Secret(r.get("VB_SESSION", "")),
+		AutoJoin:      r.bool("VB_AUTO_JOIN", true),
+		PublicOnly:    r.bool("VB_PUBLIC_ONLY", false),
+		FullInterval:  r.duration("VB_FULL_INTERVAL", 6*time.Hour),
+		QuickInterval: r.duration("VB_QUICK_INTERVAL", 30*time.Minute),
+		Rate:          r.float("VB_RATE", 1, 0.1, 5),
+		Concurrency:   r.int("VB_CONCURRENCY", 2, 1, 4),
+	}
+
 	cfg.HuntMail = HuntMail{URL: Secret(strings.TrimSpace(r.get("HUNTMAIL_URL", ""))), Key: Secret(strings.TrimSpace(r.get("HUNTMAIL_API_KEY", "")))}
 	if h := cfg.HuntMail; (h.URL == "") != (h.Key == "") {
 		r.errs = append(r.errs, errors.New("HUNTMAIL_URL and HUNTMAIL_API_KEY must be set together"))
@@ -559,6 +591,7 @@ func readOnlyConflicts(cfg Config) []error {
 		{cfg.Bugcrowd.Enabled(), "Bugcrowd credentials (BC_*)"},
 		{cfg.Intigriti.Enabled() || cfg.Intigriti.Email != "", "Intigriti credentials (IT_*)"},
 		{cfg.YesWeHack.Enabled(), "YesWeHack credentials (YWH_*)"},
+		{cfg.VulBox.Enabled(), "VulBox credentials (VB_*)"},
 		{cfg.VNC, "HUNTDECK_VNC"},
 		{cfg.Proxy != nil, "HUNTDECK_PROXY"},
 		{len(cfg.Sources.List) > 0, "HUNTDECK_SOURCES"},
@@ -689,6 +722,12 @@ func Check(cfg Config) error {
 	}
 	if y := cfg.YesWeHack; y.TOTPSecret != "" && y.Email == "" {
 		errs = append(errs, errors.New("YWH_TOTP_SECRET needs YWH_EMAIL and YWH_PASSWORD"))
+	}
+	if v := cfg.VulBox; (v.Account == "") != (v.Password == "") {
+		errs = append(errs, errors.New("VB_ACCOUNT and VB_PASSWORD must be set together"))
+	}
+	if v := cfg.VulBox; v.TOTPSecret != "" && v.Account == "" {
+		errs = append(errs, errors.New("VB_TOTP_SECRET needs VB_ACCOUNT and VB_PASSWORD"))
 	}
 	return errors.Join(errs...)
 }

@@ -35,6 +35,8 @@ func platformLabel(name string) string {
 		return "Intigriti"
 	case "yeswehack":
 		return "YesWeHack"
+	case "vulbox":
+		return "VulBox"
 	case store.Independent:
 		return "Independent"
 	}
@@ -57,6 +59,8 @@ func platformShort(name string) string {
 		return "IGT"
 	case "yeswehack":
 		return "YWH"
+	case "vulbox":
+		return "VB"
 	case store.Independent:
 		return "IND"
 	}

@@ -68,11 +68,11 @@ type restartState struct {
 }
 
 // accountGroups are the groups' keys in order, platforms first.
-var accountGroups = []string{config.GroupHackerOne, config.GroupBugcrowd, config.GroupIntigriti, config.GroupYesWeHack,
+var accountGroups = []string{config.GroupHackerOne, config.GroupBugcrowd, config.GroupIntigriti, config.GroupYesWeHack, config.GroupVulBox,
 	config.GroupHuntMail, config.GroupNetwork, config.GroupPojia, config.GroupScan, config.GroupJev}
 
 // accountPlatforms are the groups that are platforms, polled once saved.
-var accountPlatforms = []string{config.GroupHackerOne, config.GroupBugcrowd, config.GroupIntigriti, config.GroupYesWeHack}
+var accountPlatforms = []string{config.GroupHackerOne, config.GroupBugcrowd, config.GroupIntigriti, config.GroupYesWeHack, config.GroupVulBox}
 
 // settingsTabOf is the tab a group's box is on: HuntMail's on its own
 // page's Setup tab ("email"), the rest on Settings › Accounts.
@@ -314,7 +314,7 @@ func acctSection(name string) string {
 	switch {
 	case strings.HasSuffix(name, "_TOKEN"), strings.HasSuffix(name, "_USERNAME"):
 		return "api"
-	case strings.HasSuffix(name, "_EMAIL"), strings.HasSuffix(name, "_PASSWORD"),
+	case strings.HasSuffix(name, "_EMAIL"), strings.HasSuffix(name, "_ACCOUNT"), strings.HasSuffix(name, "_PASSWORD"),
 		strings.HasSuffix(name, "_TOTP_SECRET"), strings.HasSuffix(name, "_SESSION"):
 		return "web"
 	}

@@ -52,6 +52,20 @@ func TestCheckAnswersForTheJoinedPicture(t *testing.T) {
 			cfg:     Config{YesWeHack: YesWeHack{TOTPSecret: Secret("x")}},
 			wantErr: "YWH_TOTP_SECRET needs YWH_EMAIL and YWH_PASSWORD",
 		},
+		{
+			name:    "VulBox half login pair",
+			cfg:     Config{VulBox: VulBox{Account: "hunter@example.com"}},
+			wantErr: "VB_ACCOUNT and VB_PASSWORD must be set together",
+		},
+		{
+			name:    "VulBox TOTP without login",
+			cfg:     Config{VulBox: VulBox{TOTPSecret: Secret("x")}},
+			wantErr: "VB_TOTP_SECRET needs VB_ACCOUNT and VB_PASSWORD",
+		},
+		{
+			name: "VulBox complete login",
+			cfg:  Config{VulBox: VulBox{Account: "hunter@example.com", Password: Secret("p"), TOTPSecret: Secret("x")}},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
