@@ -42,6 +42,7 @@ func (c *Client) browserSignIn(ctx context.Context) error {
 		defer func() {
 			if !succeeded || c.currentToken() == "" {
 				_ = cp.Rollback(checkpoint)
+				c.setToken("")
 			}
 		}()
 	}
@@ -54,12 +55,19 @@ func (c *Client) browserSignIn(ctx context.Context) error {
 		c.log.Warn("vulbox: browser sign-in failed", "err", err)
 		return err
 	}
-	if c.currentToken() == "" {
+	tok := c.currentToken()
+	if tok == "" {
 		return fmt.Errorf("%s: sign-in finished without setting vulbox_token cookie", who)
 	}
 	succeeded = true
-	c.cred.SignedIn(parseJWTExpiry(c.currentToken()))
-	c.log.Info("vulbox: browser sign-in succeeded", "jwt_len", len(c.currentToken()), "has_uuid", c.currentUUID() != "")
+	iat, exp := parseJWTMeta(tok)
+	c.cred.SignedIn(parseJWTExpiry(tok))
+	c.log.Info("vulbox: browser sign-in succeeded",
+		"jwt_len", len(tok),
+		"jwt_iat", iat,
+		"jwt_exp", exp,
+		"has_uuid", c.currentUUID() != "",
+	)
 	return nil
 }
 
@@ -258,46 +266,129 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			}},
 		},
 		// Take extracts vulbox_token, authorization, and uuid from the signed-in
-		// page and seeds c.jar across all VulBox hosts (including vapi.vulbox.com)
-		// because .vulbox.com cookies may otherwise only match root in keepCookies.
+		// page, syncs navigator.userAgent, probes both user.vulbox.com/api and
+		// vapi.vulbox.com inside the browser, and seeds c.jar across all VulBox hosts.
 		Take: func(ctx context.Context, p weblogin.Page) error {
 			_ = p.Settle(ctx, 1500*time.Millisecond)
-			var snap struct {
-				Href   string `json:"href"`
-				Cookie string `json:"cookie"`
-				UUID   string `json:"uuid"`
+			type probeRes struct {
+				Status int    `json:"status"`
+				Code   int    `json:"code"`
+				Logged bool   `json:"logged"`
+				Msg    string `json:"msg"`
 			}
-			if err := p.Eval(ctx, `({href: location.href || '', cookie: document.cookie || '', uuid: (window.localStorage && localStorage.getItem('uuid')) || ''})`, &snap); err != nil {
+			var snap struct {
+				Href      string   `json:"href"`
+				Cookie    string   `json:"cookie"`
+				UUID      string   `json:"uuid"`
+				UA        string   `json:"ua"`
+				UserProbe probeRes `json:"userProbe"`
+				VapiProbe probeRes `json:"vapiProbe"`
+			}
+			err := p.Eval(ctx, `(async () => {
+				const cookie = document.cookie || '';
+				const uuid = (window.localStorage && localStorage.getItem('uuid')) || '';
+				let tok = '';
+				for (const part of cookie.split(';')) {
+					const t = part.trim();
+					if (t.startsWith('vulbox_token=')) {
+						const v = t.slice('vulbox_token='.length).trim();
+						if (v && v !== 'null' && v !== 'undefined' && v.split('.').length === 3) {
+							tok = v;
+						}
+					}
+				}
+				const probe = async (u, withXRW) => {
+					try {
+						const headers = { 'Accept': 'application/json, text/plain, */*', 'X-Client-Type': 'web' };
+						if (tok) headers['Authorization'] = 'Bearer ' + tok;
+						if (uuid) headers['uuid'] = uuid;
+						if (withXRW) headers['X-Requested-With'] = 'XMLHttpRequest';
+						const r = await fetch(u, { credentials: 'include', headers });
+						const j = await r.json().catch(() => ({}));
+						return {
+							status: r.status || 0,
+							code: Number(j.code || 0),
+							logged: Boolean(j.data && j.data.logged),
+							msg: String(j.msg || '').slice(0, 80),
+						};
+					} catch (e) {
+						return { status: 0, code: 0, logged: false, msg: String(e && e.message ? e.message : e).slice(0, 80) };
+					}
+				};
+				const [userProbe, vapiProbe] = await Promise.all([
+					probe('/api/web/account/basic-info', false),
+					probe('https://vapi.vulbox.com/web/account/basic-info', true),
+				]);
+				return {
+					href: location.href || '',
+					cookie,
+					uuid,
+					ua: navigator.userAgent || '',
+					userProbe,
+					vapiProbe,
+				};
+			})()`, &snap)
+			if err != nil {
 				return err
 			}
-			var cookies []*http.Cookie
-			var tok string
+
+			var tok, authVal, cookieUUID string
 			if snap.Cookie != "" {
-				if parsed, err := http.ParseCookie(snap.Cookie); err == nil {
+				if parsed, perr := http.ParseCookie(snap.Cookie); perr == nil {
 					for _, ck := range parsed {
-						if ck.Name == tokenCookie {
+						switch ck.Name {
+						case tokenCookie:
 							v := strings.TrimSpace(ck.Value)
-							if v == "" || v == "null" || v == "undefined" {
-								continue
+							if v != "" && v != "null" && v != "undefined" && strings.Count(v, ".") == 2 {
+								tok = v
 							}
-							tok = v
-							ck.Path = "/"
-							cookies = append(cookies, ck)
-						} else if ck.Name == uuidCookie || ck.Name == "authorization" {
-							ck.Path = "/"
-							cookies = append(cookies, ck)
+						case "authorization":
+							if v := strings.TrimSpace(ck.Value); v != "" {
+								authVal = v
+							}
+						case uuidCookie:
+							if v := strings.TrimSpace(ck.Value); v != "" {
+								cookieUUID = v
+							}
 						}
 					}
 				}
 			}
-			if snap.UUID != "" {
-				cookies = append(cookies, &http.Cookie{Name: uuidCookie, Value: snap.UUID, Path: "/"}) //nolint:gosec // client-side jar seed
+
+			var cookies []*http.Cookie
+			if tok != "" {
+				cookies = append(cookies, &http.Cookie{Name: tokenCookie, Value: tok, Path: "/"}) //nolint:gosec // client-side jar seed
+			}
+			if authVal != "" {
+				cookies = append(cookies, &http.Cookie{Name: "authorization", Value: authVal, Path: "/"}) //nolint:gosec // client-side jar seed
+			}
+			if finalUUID := firstNonEmpty(snap.UUID, cookieUUID); finalUUID != "" {
+				cookies = append(cookies, &http.Cookie{Name: uuidCookie, Value: finalUUID, Path: "/"}) //nolint:gosec // client-side jar seed
+			}
+
+			if snap.UA != "" {
+				c.setUserAgent(snap.UA)
 			}
 			captured = cookies
 			if len(cookies) > 0 {
 				c.seedCookies(cookies)
 			}
-			c.log.Info("vulbox: browser sign-in captured cookies", "url", snap.Href, "count", len(cookies), "jwt_len", len(tok), "has_uuid", snap.UUID != "")
+			iat, exp := parseJWTMeta(tok)
+			c.log.Info("vulbox: browser sign-in captured cookies",
+				"url", snap.Href,
+				"count", len(cookies),
+				"jwt_len", len(tok),
+				"jwt_iat", iat,
+				"jwt_exp", exp,
+				"has_uuid", firstNonEmpty(snap.UUID, cookieUUID) != "",
+				"ua_synced", snap.UA != "",
+				"browser_user_logged", snap.UserProbe.Logged,
+				"browser_user_code", snap.UserProbe.Code,
+				"browser_user_msg", snap.UserProbe.Msg,
+				"browser_vapi_logged", snap.VapiProbe.Logged,
+				"browser_vapi_code", snap.VapiProbe.Code,
+				"browser_vapi_msg", snap.VapiProbe.Msg,
+			)
 			return nil
 		},
 	}

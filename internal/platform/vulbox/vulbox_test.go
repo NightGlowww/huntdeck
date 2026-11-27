@@ -7,8 +7,10 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -360,4 +362,93 @@ func TestBrowserSignInSessionJarCheckpointRollback(t *testing.T) {
 	if got := c.currentToken(); got != oldToken {
 		t.Fatalf("expected sessionjar rollback to restore old token, got %q", got)
 	}
+}
+
+func TestParseJWTMetaAndSeedCookiesAndHeaders(t *testing.T) {
+	t.Run("parseJWTMeta extracts iat and exp and rejects malformed inputs", func(t *testing.T) {
+		hdr := base64.RawURLEncoding.EncodeToString([]byte(`{"alg":"HS256","typ":"JWT"}`))
+		pl, _ := json.Marshal(map[string]any{"iat": 1700000123, "exp": 1893456000})
+		tok := hdr + "." + base64.RawURLEncoding.EncodeToString(pl) + "." + base64.RawURLEncoding.EncodeToString([]byte("sig"))
+
+		iat, exp := parseJWTMeta(tok)
+		if iat != 1700000123 || exp != 1893456000 {
+			t.Fatalf("got iat=%d exp=%d, want 1700000123 / 1893456000", iat, exp)
+		}
+		for _, bad := range []string{"", "not-a-jwt", "a.b", "a.!!!.c"} {
+			if gi, ge := parseJWTMeta(bad); gi != 0 || ge != 0 {
+				t.Errorf("parseJWTMeta(%q) = (%d,%d), want (0,0)", bad, gi, ge)
+			}
+		}
+	})
+
+	t.Run("seedCookies replaces stale domain and host vulbox_token with single fresh entry", func(t *testing.T) {
+		c := newTestClient(t, Options{})
+		// Seed an old domain cookie directly on root and host cookie on base.
+		c.jar.SetCookies(c.root, []*http.Cookie{{Name: tokenCookie, Value: "old-domain-tok", Domain: "vulbox.com", Path: "/"}})
+		c.jar.SetCookies(c.base, []*http.Cookie{{Name: tokenCookie, Value: "old-host-tok", Path: "/"}})
+
+		fresh := makeTestJWT(t, 1893456999)
+		c.seedCookies([]*http.Cookie{{Name: tokenCookie, Value: fresh, Path: "/"}})
+
+		if got := c.jarTokenCount(); got != 1 {
+			t.Fatalf("jarTokenCount() = %d, want 1", got)
+		}
+		if got := c.currentToken(); got != fresh {
+			t.Fatalf("currentToken() = %q, want %q", got, fresh)
+		}
+	})
+
+	t.Run("attachHeaders aligns Origin, Referer, X-Requested-With, and synced User-Agent per host", func(t *testing.T) {
+		c := newTestClient(t, Options{Session: "sample-tok"})
+		c.setUserAgent("Mozilla/5.0 (CustomChromeTest)")
+
+		vapiReq, _ := http.NewRequest(http.MethodGet, "https://vapi.vulbox.com/web/account/basic-info", nil)
+		c.attachHeaders(vapiReq, false, nil)
+		if got := vapiReq.Header.Get("User-Agent"); got != "Mozilla/5.0 (CustomChromeTest)" {
+			t.Errorf("vapi UA = %q", got)
+		}
+		if got := vapiReq.Header.Get("Origin"); got != "https://www.vulbox.com" {
+			t.Errorf("vapi Origin = %q, want https://www.vulbox.com", got)
+		}
+		if got := vapiReq.Header.Get("Referer"); got != "https://www.vulbox.com/" {
+			t.Errorf("vapi Referer = %q, want https://www.vulbox.com/", got)
+		}
+		if got := vapiReq.Header.Get("X-Requested-With"); got != "XMLHttpRequest" {
+			t.Errorf("vapi X-Requested-With = %q, want XMLHttpRequest", got)
+		}
+
+		userReq, _ := http.NewRequest(http.MethodGet, "https://user.vulbox.com/api/web/account/basic-info", nil)
+		c.attachHeaders(userReq, false, nil)
+		if got := userReq.Header.Get("Origin"); got != "https://user.vulbox.com" {
+			t.Errorf("user Origin = %q, want https://user.vulbox.com", got)
+		}
+		if got := userReq.Header.Get("Referer"); got != "https://user.vulbox.com/" {
+			t.Errorf("user Referer = %q, want https://user.vulbox.com/", got)
+		}
+		if got := userReq.Header.Get("X-Requested-With"); got != "" {
+			t.Errorf("user X-Requested-With = %q, want empty", got)
+		}
+
+		userBase, _ := url.Parse("https://user.vulbox.com/api")
+		c.setAPIBase(userBase)
+		if c.apiBase().String() != "https://user.vulbox.com/api" {
+			t.Errorf("apiBase = %s, want https://user.vulbox.com/api", c.apiBase())
+		}
+	})
+
+	t.Run("auth failure surfaces envelope msg alongside ErrSessionExpired", func(t *testing.T) {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte(`{"code":401,"data":{},"msg":"Token invalid"}`))
+		}))
+		defer srv.Close()
+
+		c := newTestClient(t, Options{BaseURL: srv.URL, Session: "sample-token"})
+		err := c.getJSON(context.Background(), "/hacker/user/account/info", nil, nil)
+		if !errors.Is(err, ErrSessionExpired) {
+			t.Fatalf("expected ErrSessionExpired, got %v", err)
+		}
+		if !strings.Contains(err.Error(), "Token invalid") {
+			t.Fatalf("expected error to include envelope msg, got %v", err)
+		}
+	})
 }

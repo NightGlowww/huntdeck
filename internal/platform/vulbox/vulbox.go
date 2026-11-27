@@ -129,6 +129,11 @@ type Client struct {
 	authMu sync.Mutex
 	cred   platform.CredentialState
 
+	stateMu    sync.RWMutex
+	apiBaseURL *url.URL // active API base (c.base, or user.vulbox.com/api on live fallback)
+	token      string   // explicit active vulbox_token synced from login/Take or Session
+	userAgent  string   // synced from Chrome navigator.userAgent when available
+
 	appRateLimited atomic.Int64
 
 	metaMu sync.Mutex
@@ -170,6 +175,7 @@ func New(opts Options) (*Client, error) {
 		autoJoin:    opts.AutoJoin,
 		publicOnly:  opts.PublicOnly,
 		clientUUID:  newClientUUID(),
+		userAgent:   vulboxUserAgent,
 		log:         log,
 		now:         time.Now,
 		sleep:       sleepCtx,
@@ -197,6 +203,7 @@ func New(opts Options) (*Client, error) {
 			return nil, fmt.Errorf("vulbox: %s URL: %w", item.name, err)
 		}
 	}
+	c.apiBaseURL = c.base
 
 	var proxyURL *url.URL
 	if strings.TrimSpace(opts.ProxyURL) != "" {
@@ -389,25 +396,47 @@ func (c *Client) sessionValid(ctx context.Context) (bool, error) {
 }
 
 // sessionCheck calls GET /web/account/basic-info (and /hacker/user/account/info
-// as a secondary probe when basic-info returns logged=false despite holding a
-// token) and logs structured non-secret diagnostics.
+// plus https://user.vulbox.com/api/web/account/basic-info as fallbacks when
+// holding a non-empty token) and logs structured non-secret diagnostics.
 func (c *Client) sessionCheck(ctx context.Context) (bool, string, error) {
-	tokLen := len(c.currentToken())
+	tok := c.currentToken()
+	tokLen := len(tok)
+	iat, exp := parseJWTMeta(tok)
+	jarToks := c.jarTokenCount()
+	apiHost := c.apiBase().Host
 	hasUUID := c.currentUUID() != ""
-	var info struct {
+
+	type basicInfoResp struct {
 		Logged flexBool `json:"logged"`
 		User   struct {
 			Enable   flexBool `json:"enable"`
 			Username string   `json:"username"`
 		} `json:"user"`
 	}
+	var info basicInfoResp
 	err := c.getJSONNoRenew(ctx, "/web/account/basic-info", nil, &info)
 	if err != nil {
 		if errors.Is(err, ErrSessionExpired) {
-			c.log.Warn("vulbox: session check rejected", "reason", err.Error(), "jwt_len", tokLen, "has_uuid", hasUUID)
+			c.log.Warn("vulbox: session check rejected",
+				"reason", err.Error(),
+				"jwt_len", tokLen,
+				"jwt_iat", iat,
+				"jwt_exp", exp,
+				"jar_toks", jarToks,
+				"api_host", apiHost,
+				"has_uuid", hasUUID,
+			)
 			return false, err.Error(), nil
 		}
-		c.log.Warn("vulbox: session check error", "err", err, "jwt_len", tokLen, "has_uuid", hasUUID)
+		c.log.Warn("vulbox: session check error",
+			"err", err,
+			"jwt_len", tokLen,
+			"jwt_iat", iat,
+			"jwt_exp", exp,
+			"jar_toks", jarToks,
+			"api_host", apiHost,
+			"has_uuid", hasUUID,
+		)
 		return false, err.Error(), err
 	}
 	if info.Logged.Bool() {
@@ -415,7 +444,14 @@ func (c *Client) sessionCheck(ctx context.Context) (bool, string, error) {
 			c.cred.Accepted()
 			c.updateTokenExpiry()
 		}
-		c.log.Info("vulbox: session accepted", "endpoint", "/web/account/basic-info", "jwt_len", tokLen)
+		c.log.Info("vulbox: session accepted",
+			"endpoint", "/web/account/basic-info",
+			"api_host", apiHost,
+			"jwt_len", tokLen,
+			"jwt_iat", iat,
+			"jwt_exp", exp,
+			"jar_toks", jarToks,
+		)
 		return true, "", nil
 	}
 
@@ -437,27 +473,188 @@ func (c *Client) sessionCheck(ctx context.Context) (bool, string, error) {
 				c.cred.Accepted()
 				c.updateTokenExpiry()
 			}
-			c.log.Info("vulbox: session accepted", "endpoint", "/hacker/user/account/info", "jwt_len", tokLen)
+			c.log.Info("vulbox: session accepted",
+				"endpoint", "/hacker/user/account/info",
+				"api_host", apiHost,
+				"jwt_len", tokLen,
+				"jwt_iat", iat,
+				"jwt_exp", exp,
+				"jar_toks", jarToks,
+			)
 			return true, "", nil
 		}
+
+		// Second fallback (production only): probe the same-origin console proxy
+		// https://user.vulbox.com/api/web/account/basic-info in case vapi.vulbox.com
+		// rejects Go's direct request while the console proxy accepts it.
+		var userAPILogged bool
+		var userAPIErr string
+		if c.user != nil && strings.EqualFold(apiHost, "vapi.vulbox.com") {
+			if userAPIBase, parseErr := url.Parse(c.user.String() + "/api"); parseErr == nil {
+				var uinfo basicInfoResp
+				uerr := c.getJSONAtBaseNoRenew(ctx, userAPIBase, "/web/account/basic-info", nil, &uinfo)
+				userAPILogged = uerr == nil && uinfo.Logged.Bool()
+				if userAPILogged {
+					c.setAPIBase(userAPIBase)
+					if c.authenticated() {
+						c.cred.Accepted()
+						c.updateTokenExpiry()
+					}
+					c.log.Info("vulbox: session accepted via user.vulbox.com/api fallback",
+						"jwt_len", tokLen,
+						"jwt_iat", iat,
+						"jwt_exp", exp,
+						"jar_toks", c.jarTokenCount(),
+					)
+					return true, "", nil
+				}
+				if uerr != nil {
+					userAPIErr = uerr.Error()
+				}
+			}
+		}
+
 		reason := "basic-info logged=false"
 		if herr != nil {
 			reason = fmt.Sprintf("basic-info logged=false; user/info: %v", herr)
 		}
-		c.log.Warn("vulbox: session not accepted", "reason", reason, "jwt_len", tokLen, "has_uuid", hasUUID)
+		c.log.Warn("vulbox: session not accepted",
+			"reason", reason,
+			"jwt_len", tokLen,
+			"jwt_iat", iat,
+			"jwt_exp", exp,
+			"jar_toks", jarToks,
+			"api_host", apiHost,
+			"has_uuid", hasUUID,
+			"user_api_logged", userAPILogged,
+			"user_api_err", userAPIErr,
+		)
 		return false, reason, nil
 	}
 
-	c.log.Warn("vulbox: session not accepted", "reason", "empty vulbox_token and logged=false", "jwt_len", tokLen, "has_uuid", hasUUID)
+	c.log.Warn("vulbox: session not accepted",
+		"reason", "empty vulbox_token and logged=false",
+		"jwt_len", tokLen,
+		"jar_toks", jarToks,
+		"api_host", apiHost,
+		"has_uuid", hasUUID,
+	)
 	return false, "empty vulbox_token and logged=false", nil
 }
 
-// seedCookies puts cookies into the jar for all VulBox hosts.
-func (c *Client) seedCookies(cookies []*http.Cookie) {
-	for _, u := range []*url.URL{c.base, c.web, c.user, c.root} {
+func (c *Client) apiBase() *url.URL {
+	c.stateMu.RLock()
+	defer c.stateMu.RUnlock()
+	if c.apiBaseURL != nil {
+		return c.apiBaseURL
+	}
+	return c.base
+}
+
+func (c *Client) setAPIBase(u *url.URL) {
+	if u == nil {
+		return
+	}
+	c.stateMu.Lock()
+	c.apiBaseURL = u
+	c.stateMu.Unlock()
+}
+
+func (c *Client) setToken(tok string) {
+	c.stateMu.Lock()
+	c.token = strings.TrimSpace(tok)
+	c.stateMu.Unlock()
+}
+
+func (c *Client) currentUserAgent() string {
+	c.stateMu.RLock()
+	ua := c.userAgent
+	c.stateMu.RUnlock()
+	if ua != "" {
+		return ua
+	}
+	return vulboxUserAgent
+}
+
+func (c *Client) setUserAgent(ua string) {
+	ua = strings.TrimSpace(ua)
+	if ua == "" {
+		return
+	}
+	c.stateMu.Lock()
+	c.userAgent = ua
+	c.stateMu.Unlock()
+}
+
+func (c *Client) jarTokenCount() int {
+	base := c.apiBase()
+	if c.jar == nil || base == nil {
+		return 0
+	}
+	n := 0
+	for _, ck := range c.jar.Cookies(base) {
+		if ck.Name == tokenCookie && ck.Value != "" {
+			n++
+		}
+	}
+	return n
+}
+
+func (c *Client) targetURLs() []*url.URL {
+	candidates := []*url.URL{c.apiBase(), c.base, c.web, c.user, c.root}
+	seen := make(map[string]bool, len(candidates))
+	out := make([]*url.URL, 0, len(candidates))
+	for _, u := range candidates {
 		if u == nil {
 			continue
 		}
+		key := u.String()
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		out = append(out, u)
+	}
+	return out
+}
+
+// seedCookies puts cookies into the jar for all VulBox hosts. When seeding a
+// new or deleted vulbox_token, it first expires any prior host-only or
+// .vulbox.com vulbox_token entries so Go never sends duplicate Cookie headers.
+func (c *Client) seedCookies(cookies []*http.Cookie) {
+	var latestTok string
+	var sawTok, sawDelete bool
+	for _, ck := range cookies {
+		if ck.Name == tokenCookie {
+			v := strings.TrimSpace(ck.Value)
+			if ck.MaxAge < 0 || v == "" {
+				sawDelete = true
+				sawTok = false
+				latestTok = ""
+			} else {
+				sawTok = true
+				latestTok = v
+			}
+		}
+	}
+	if sawTok {
+		c.setToken(latestTok)
+	} else if sawDelete {
+		c.setToken("")
+	}
+
+	urls := c.targetURLs()
+	if sawTok || sawDelete {
+		clearTok := []*http.Cookie{
+			{Name: tokenCookie, Path: "/", MaxAge: -1},                       //nolint:gosec // expire stale host-only cookie
+			{Name: tokenCookie, Domain: "vulbox.com", Path: "/", MaxAge: -1}, //nolint:gosec // expire stale domain cookie
+		}
+		for _, u := range urls {
+			c.jar.SetCookies(u, clearTok)
+		}
+	}
+
+	for _, u := range urls {
 		clones := make([]*http.Cookie, len(cookies))
 		for i, ck := range cookies {
 			cp := *ck
@@ -471,17 +668,28 @@ func (c *Client) seedCookies(cookies []*http.Cookie) {
 	}
 }
 
-// currentToken returns the active vulbox_token from the jar, checking all
-// VulBox origins so cookies stored under .vulbox.com or any subdomain are found.
+// currentToken returns the active vulbox_token, preferring the explicitly
+// synced token and falling back to scanning all VulBox jar origins (returning
+// the last non-empty value if multiple exist).
 func (c *Client) currentToken() string {
-	for _, u := range []*url.URL{c.base, c.user, c.web, c.root} {
+	c.stateMu.RLock()
+	tok := c.token
+	c.stateMu.RUnlock()
+	if tok != "" {
+		return tok
+	}
+	var last string
+	for _, u := range []*url.URL{c.apiBase(), c.base, c.user, c.web, c.root} {
 		if u == nil {
 			continue
 		}
 		for _, ck := range c.jar.Cookies(u) {
-			if ck.Name == tokenCookie && ck.Value != "" {
-				return ck.Value
+			if ck.Name == tokenCookie && strings.TrimSpace(ck.Value) != "" {
+				last = strings.TrimSpace(ck.Value)
 			}
+		}
+		if last != "" {
+			return last
 		}
 	}
 	return ""

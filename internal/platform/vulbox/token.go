@@ -43,25 +43,33 @@ func parseSession(raw string) []*http.Cookie {
 	return cs
 }
 
+// parseJWTMeta decodes the payload segment of a JWT and returns its iat and exp
+// claims as Unix timestamps (0 if absent or invalid). Never logs token bytes
+// or PII claims.
+func parseJWTMeta(tok string) (iat, exp int64) {
+	parts := strings.Split(strings.TrimSpace(tok), ".")
+	if len(parts) != 3 || parts[1] == "" {
+		return 0, 0
+	}
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return 0, 0
+	}
+	var claims struct {
+		Iat flexFloat `json:"iat"`
+		Exp flexFloat `json:"exp"`
+	}
+	if err := json.Unmarshal(payload, &claims); err != nil {
+		return 0, 0
+	}
+	return int64(claims.Iat.Float64()), int64(claims.Exp.Float64())
+}
+
 // parseJWTExpiry decodes the payload segment of a JWT and returns its exp
 // claim as a UTC time, or nil if the string is not a JWT with a numeric exp.
 // Never logs token contents.
 func parseJWTExpiry(tok string) *time.Time {
-	parts := strings.Split(strings.TrimSpace(tok), ".")
-	if len(parts) != 3 || parts[1] == "" {
-		return nil
-	}
-	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
-	if err != nil {
-		return nil
-	}
-	var claims struct {
-		Exp flexFloat `json:"exp"`
-	}
-	if err := json.Unmarshal(payload, &claims); err != nil {
-		return nil
-	}
-	sec := int64(claims.Exp.Float64())
+	_, sec := parseJWTMeta(tok)
 	if sec <= 0 {
 		return nil
 	}

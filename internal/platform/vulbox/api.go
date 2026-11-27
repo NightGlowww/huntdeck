@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -76,6 +77,10 @@ func (c *Client) getJSONNoRenew(ctx context.Context, path string, extraHeaders m
 	return c.doJSON(ctx, http.MethodGet, path, nil, extraHeaders, into, false)
 }
 
+func (c *Client) getJSONAtBaseNoRenew(ctx context.Context, base *url.URL, path string, extraHeaders map[string]string, into any) error {
+	return c.doJSONWithBase(ctx, base, http.MethodGet, path, nil, extraHeaders, into, false)
+}
+
 // postJSON performs a state-changing POST using the non-retrying action client
 // (MaxAttempts: 1). It never replays POSTs on network errors or rate limits.
 func (c *Client) postJSON(ctx context.Context, path string, body any, extraHeaders map[string]string, into any) error {
@@ -83,6 +88,10 @@ func (c *Client) postJSON(ctx context.Context, path string, body any, extraHeade
 }
 
 func (c *Client) doJSON(ctx context.Context, method, path string, body any, extraHeaders map[string]string, into any, allowRenew bool) error {
+	return c.doJSONWithBase(ctx, nil, method, path, body, extraHeaders, into, allowRenew)
+}
+
+func (c *Client) doJSONWithBase(ctx context.Context, base *url.URL, method, path string, body any, extraHeaders map[string]string, into any, allowRenew bool) error {
 	var payload []byte
 	if body != nil {
 		var err error
@@ -91,7 +100,10 @@ func (c *Client) doJSON(ctx context.Context, method, path string, body any, extr
 		}
 	}
 
-	u := c.base.String() + path
+	if base == nil {
+		base = c.apiBase()
+	}
+	u := strings.TrimSuffix(base.String(), "/") + path
 	hc := c.http
 	maxAppAttempts := appRateMaxAttempts
 	if method == http.MethodPost {
@@ -142,6 +154,9 @@ func (c *Client) doJSON(ctx context.Context, method, path string, body any, extr
 			if c.authenticated() && !c.canBrowserLogin() {
 				c.cred.Refused("VulBox session expired or invalid: paste a fresh VB_SESSION", true)
 			}
+			if msg := strings.TrimSpace(env.Msg); msg != "" {
+				return fmt.Errorf("%w (code %d: %s)", ErrSessionExpired, env.Code, msg)
+			}
 			return fmt.Errorf("%w (code %d)", ErrSessionExpired, env.Code)
 
 		case env.Code == 403004:
@@ -182,11 +197,19 @@ func (c *Client) handleAuthFailure(ctx context.Context, allowRenew bool, renewed
 }
 
 func (c *Client) attachHeaders(req *http.Request, hasBody bool, extra map[string]string) {
+	req.Header.Set("User-Agent", c.currentUserAgent())
 	req.Header.Set("Accept", "application/json, text/plain, */*")
 	req.Header.Set("X-Client-Type", "web")
-	req.Header.Set("X-Requested-With", "XMLHttpRequest")
-	req.Header.Set("Origin", c.user.String())
-	req.Header.Set("Referer", c.user.String()+"/")
+	if c.user != nil && strings.EqualFold(req.URL.Host, c.user.Host) {
+		req.Header.Set("Origin", c.user.String())
+		req.Header.Set("Referer", c.user.String()+"/")
+	} else {
+		req.Header.Set("X-Requested-With", "XMLHttpRequest")
+		if c.web != nil {
+			req.Header.Set("Origin", c.web.String())
+			req.Header.Set("Referer", c.web.String()+"/")
+		}
+	}
 	if id := c.currentUUID(); id != "" {
 		req.Header.Set("uuid", id)
 	}
