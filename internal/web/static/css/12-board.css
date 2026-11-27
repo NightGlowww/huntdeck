@@ -168,9 +168,12 @@ td.acts .open-ext { width: 28px; height: 28px; }
 /* When each platform was last checked: a strip joined to the bottom of
    the totals card (outside its grid, which would otherwise keep empty
    columns open beside the tiles). */
+.board-status { margin: 0 0 12px; padding: 7px 18px 8px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface); color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); line-height: 1.6; }
+.board-status.warn { border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: var(--warn-weak); color: var(--warn); }
+.panel + .board-status { margin-top: 12px; }
 .stats:has(+ .board-status) { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-.board-status { margin: 0; padding: 7px 18px 8px; border: 1px solid var(--border); border-top: 0;
-  border-radius: 0 0 var(--radius) var(--radius); background: var(--surface); color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); line-height: 1.6; }
+.stats + .board-status { margin: 0; border-top: 0; border-radius: 0 0 var(--radius) var(--radius); }
 .board-status .sep { color: var(--faint); }
 /* The selection bar stays in view while the list scrolls: it is the only
    place the ticks and their actions show. */

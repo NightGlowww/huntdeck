@@ -106,7 +106,7 @@ button.nav-group-toggle:focus-visible { background: transparent; color: var(--te
 
 .content { min-width: 0; display: flex; flex-direction: column; }
 .topbar {
-  position: sticky; top: var(--db-h); z-index: 5; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 640px) minmax(0, 1fr); align-items: center; gap: 16px; height: 56px; padding: 0 28px;
+  position: sticky; top: var(--db-h); z-index: 25; display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, min(540px, 40%)) minmax(0, 1fr); align-items: center; gap: 16px; height: 56px; padding: 0 28px;
   border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter: blur(12px) saturate(1.15); -webkit-backdrop-filter: blur(12px) saturate(1.15);
   box-shadow: 0 1px 0 light-dark(rgb(15 23 42 / .04), rgb(0 0 0 / .24));
 }
@@ -125,6 +125,12 @@ button.nav-group-toggle:focus-visible { background: transparent; color: var(--te
 @container tb-right (max-width: 480px) { .tb-right .updated { display: none; } }
 @container tb-right (max-width: 380px) { .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } } /* still the button's name */
 .tb-right .updated { color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); white-space: nowrap; }
+@media (max-width: 1320px) {
+  .topbar { grid-template-columns: minmax(0, 1fr) minmax(180px, min(460px, 38%)) auto; }
+  .tb-right { container-type: normal; }
+  .tb-right .updated { display: none; }
+  .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 
 .page { width: 100%; padding: 22px 28px 48px; }
 @keyframes hd-swap { from { opacity: .88; } to { opacity: 1; } }
@@ -161,6 +167,8 @@ button.nav-group-toggle:focus-visible { background: transparent; color: var(--te
 }
 /* Top-bar menus (Export): a <details>, so they open without scripts too. */
 .tb-menu { position: relative; }
+.tb-menu[open] { position: relative; z-index: 30; }
+:is(.ph, .actbar, .panel):has(.tb-menu[open]) { position: relative; z-index: 20; }
 .tb-menu > summary { list-style: none; }
 .tb-menu > summary::-webkit-details-marker { display: none; }
 .tb-menu .menu { position: absolute; right: 0; top: 40px; z-index: 30; display: grid; gap: 2px; min-width: 200px; max-width: calc(100vw - 16px); padding: 6px;
@@ -214,16 +222,18 @@ button.nav-group-toggle:focus-visible { background: transparent; color: var(--te
 
 /* A poll runs in the background and changes the numbers: say so instead of
    leaving the page looking finished. */
-.poll-run { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border: 1px solid var(--border-input);
-  border-radius: 999px; color: var(--text-2); font-size: calc(11.5px * var(--fs, 1)); }
-.poll-run .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: poll-pulse 1.6s ease-in-out infinite; }
+.poll-run { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px; border: 1px solid var(--border-input);
+  border-radius: 999px; color: var(--text-2); font-size: calc(11.5px * var(--fs, 1)); line-height: 1; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+.poll-run[hidden] { display: none; }
+.poll-run:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
+.poll-run .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--accent); animation: poll-pulse 1.6s ease-in-out infinite; }
+.poll-run-label { white-space: nowrap; }
 @keyframes poll-pulse { 50% { opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .poll-run .dot { animation: none; } }
 /* A dot alone says nothing, and there are two of these: keep the words, and
    let the search field give up the room (it already truncates its placeholder). */
 @media (max-width: 900px) {
-  .poll-run { font-size: calc(11px * var(--fs, 1)); padding: 2px 7px; }
-  .poll-run-label { white-space: nowrap; }
+  .poll-run { font-size: calc(11px * var(--fs, 1)); padding: 0 7px; }
 }
 
 /* The offline notice sits under the top bar, out of the way of the content. */

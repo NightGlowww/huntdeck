@@ -39,16 +39,27 @@ col.w-type-s { width: 122px; }
 col.w-num-m { width: 90px; }
 col.w-name { width: 200px; }
 
+/* Queue filter pills: roomier than status badges, sentence-cased so platform
+   names and counts read cleanly instead of shouting in tiny uppercase. */
+.queue-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 14px; }
+.queue-filters .chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px;
+  border: 1px solid var(--border-input); border-radius: 999px; background: var(--surface); color: var(--text-2);
+  font-family: var(--sans); font-size: calc(12px * var(--fs, 1)); font-weight: 500; line-height: 1;
+  letter-spacing: 0; text-transform: none; }
+.queue-filters .chip:hover { border-color: var(--accent); color: var(--text); }
+.queue-filters .chip .n { font-variant-numeric: tabular-nums; }
+
 /* The filter that is in force. Without this the queue's chips all looked the
    same and the page never said what it was showing - the board's chips had an
    on state, this page's did not. */
 .queue-filters .chip.on { border-color: color-mix(in srgb, var(--accent) 55%, transparent);
   background: var(--accent-weak); color: var(--accent); font-weight: 600; }
+.queue-filters .chip.on .n { color: inherit; }
 
 /* The one chip in the row that is an action rather than a filter: it undoes
    the others. Sentence case and a leading x say "not a state, a reset" - in
    caps with the same shape it read as one more filter beside the others. */
-.queue-filters .chip.clear { border-style: dashed; color: var(--muted);
+.queue-filters .chip.clear { border-style: dashed; background: transparent; color: var(--muted);
   text-transform: none; letter-spacing: 0; margin-left: 4px; }
 .queue-filters .chip.clear span[aria-hidden] { margin-right: 2px; font-size: 1.15em; line-height: 1; }
 .queue-filters .chip.clear:hover { color: var(--text); border-color: var(--border-input); background: var(--surface-3); }

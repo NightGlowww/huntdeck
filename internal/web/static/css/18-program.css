@@ -1,7 +1,7 @@
 /* ---------- a program's page: head, headline numbers, tabs ---------- */
 
 /* Head: name, chips and the meta line on the left, a few actions on the right. */
-.ph { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 16px; }
+.ph { position: relative; z-index: 4; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 16px; }
 .ph h1 { font-size: calc(22px * var(--fs, 1)); line-height: 1.2; }
 .ph .metaline { margin-top: 6px; }
 .ph-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

@@ -77,7 +77,7 @@ button:active:not(:disabled), .button:active, .tb-btn:active, .theme-toggle:acti
 @media (prefers-reduced-motion: no-preference) {
   @keyframes hd-fade-up {
     from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    to { opacity: 1; transform: none; }
   }
   @keyframes hd-pop {
     from { opacity: 0; transform: translate(-50%, 8px) scale(.97); }
@@ -88,7 +88,7 @@ button:active:not(:disabled), .button:active, .tb-btn:active, .theme-toggle:acti
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
   .page > :is(.panel, .pair, .pair2, .ov, .polgrid, .fgrid, .actbar),
-  .ph, .kpis, .ptabs { animation: hd-fade-up .28s ease both; }
+  .ph, .kpis, .ptabs { animation: hd-fade-up .28s ease backwards; }
   .toast.on { animation: hd-pop .18s ease both; }
   .tb-menu[open] > .menu { animation: hd-menu-in .16s ease both; transform-origin: top right; }
 }
