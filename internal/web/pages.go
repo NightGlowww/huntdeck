@@ -98,6 +98,9 @@ func (s *server) platformNames() []string {
 
 // oneOf returns v if it is one of allowed, else allowed[0].
 func oneOf(v string, allowed ...string) string {
+	if len(allowed) == 0 {
+		return ""
+	}
 	for _, a := range allowed {
 		if v == a {
 			return v

@@ -104,5 +104,12 @@
  "Show the sidebar's names": "显示侧边栏名称",
  "Fold the sidebar to its icons": "将侧边栏收起为图标",
  "Unfold the sidebar": "展开侧边栏",
- "Fold the sidebar": "收起侧边栏"
+ "Fold the sidebar": "收起侧边栏",
+ "%d of %d tools": "显示 %d / %d 个工具",
+ "Collapse all": "全部折叠",
+ "Expand all": "全部展开",
+ "Previous year": "上一年",
+ "Previous month": "上个月",
+ "Next month": "下个月",
+ "Next year": "下一年"
 }

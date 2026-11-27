@@ -1012,7 +1012,7 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
 	const rows = [
 		["/", t("Focus the search box")],
 		["Esc", t("Close a menu, the mobile navigation or a dialog")],
-		["g then a letter", t("Open a page: h board, q queue, p programs, t targets, c changes, d disclosed, s settings, a API")],
+		[t("g then a letter"), t("Open a page: h board, q queue, p programs, t targets, c changes, d disclosed, s settings, a API")],
 		["?", t("This list")],
 	];
 	const dlg = document.createElement("dialog");

@@ -89,8 +89,13 @@ func TestInvites(t *testing.T) {
 	}
 	// The API page's examples show it.
 	_, body = e.do(c, http.MethodGet, "/api", nil, nil)
-	if i := strings.Index(body, `id="listInvites"`); i < 0 || !strings.Contains(body[i:i+min(len(body)-i, 9000)], "&#34;invite&#34;: {") {
+	if idx := strings.Index(body, `id="listInvites"`); idx < 0 {
 		t.Error("the API page's invites example lacks the invite")
+	} else {
+		end := strings.Index(body[idx:], "</section>")
+		if end < 0 || !strings.Contains(body[idx:idx+end], "&#34;invite&#34;: {") {
+			t.Error("the API page's invites example lacks the invite")
+		}
 	}
 
 	_, body = e.do(c, http.MethodGet, "/", nil, nil)
