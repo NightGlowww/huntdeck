@@ -1,20 +1,36 @@
 {{define "topbar-title"}}<nav class="trail" aria-label="{{T "Back to"}}"><a href="/integrations">{{T "Integrations"}}</a><span class="sep">/</span><span class="here">{{T .Title}}</span></nav>{{end}}
 {{define "content"}}{{with .Data}}
-<header class="integration-page-head">
-  <div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "API"}}</h1><p>{{T "Read data, export scope and test authenticated requests."}}</p></div>
+<header class="integration-page-head api-page-head">
+  <div>
+    <span class="workbench-kicker">{{T "Integrations"}}</span>
+    <div class="api-title-row">
+      <h1>{{T "API"}}</h1>
+      {{if .Version}}<span class="api-ver-pill">v{{.Version}}</span>{{end}}
+      <span class="api-auth-pill {{if .ReadOnly}}is-readonly{{else if .Password}}is-protected{{else}}is-open{{end}}">
+        <span class="api-auth-dot" aria-hidden="true"></span>
+        {{if .ReadOnly}}{{T "Public read-only"}}{{else if .Password}}{{T "Password protected"}}{{else}}{{T "Open on this private network"}}{{end}}
+      </span>
+    </div>
+    <p>{{T "Read data, export scope and test authenticated requests."}}</p>
+  </div>
   <a class="button secondary small" href="/integrations">{{T "Integrations workbench"}}</a>
 </header>
-<div class="apid">
+<div class="apid"{{if .Password}} data-auth="1"{{end}}>
 <nav class="panel apinav" aria-label="{{T "Endpoints"}}">
   <details class="api-directory" open>
-    <summary><svg class="i" aria-hidden="true"><use href="#i-list"/></svg>{{T "Endpoints"}}<svg class="i dir-chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+    <summary>
+      <svg class="i" aria-hidden="true"><use href="#i-list"/></svg>
+      <span>{{T "Endpoints"}}</span>
+      <span class="api-nav-count">{{.EndpointCount}}</span>
+      <svg class="i dir-chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
     <label class="apifilter"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input type="search" data-filter-api placeholder="{{T "Filter endpoints"}}" aria-label="{{T "Filter endpoints"}}"></label>
     <span class="filter-count muted small" role="status" aria-live="polite" hidden></span>
     <div class="an-links" data-toc>
-      <a class="an-top" href="#start">{{T "Getting started"}}</a>
-      <a class="an-top" href="#tokens">{{T "API tokens"}}</a>
-      {{range .Groups}}{{if .Ops}}<div class="an-g">{{.Name}}</div>
-      {{range .Ops}}<a href="#{{.ID}}"><span class="mth {{lower .Method}}">{{.Method}}</span><span class="an-t">{{T .Summary}}</span></a>{{end}}{{end}}{{end}}
+      <a class="an-top" href="#start" title="{{T "Getting started"}}"><span class="an-top-dot" aria-hidden="true"></span><span class="an-t">{{T "Getting started"}}</span></a>
+      <a class="an-top" href="#tokens" title="{{T "API tokens"}}"><span class="an-top-dot" aria-hidden="true"></span><span class="an-t">{{T "API tokens"}}</span>{{if .Password}}<span class="an-top-badge">{{len .Tokens}}</span>{{end}}</a>
+      {{range .Groups}}{{if .Ops}}<div class="an-g">{{T .Name}}</div>
+      {{range .Ops}}<a href="#{{.ID}}" title="{{.Method}} {{.Path}} — {{T .Summary}}"><span class="mth {{lower .Method}}">{{.Method}}</span><span class="an-t">{{T .Summary}}</span></a>{{end}}{{end}}{{end}}
     </div>
   </details>
 </nav>
@@ -28,10 +44,20 @@
       <a class="api-resource" id="mcp" href="/mcp"><svg class="i" aria-hidden="true"><use href="#i-plug"/></svg>{{T "MCP server"}}</a>
     </div>
   </div>
-  <div class="api-connect">
-    <div class="api-address">
-      <h3>{{T "Base URL"}}</h3>
-      <div class="api-url"><code id="api-base">{{.Base}}</code><button class="ghost small" type="button" data-copy="#api-base" title="{{T "Copy address"}}" aria-label="{{T "Copy address"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
+  <div class="api-hero-body">
+    <div class="api-terminal">
+      <div class="api-terminal-head">
+        <span class="api-terminal-label">{{T "Base URL"}}</span>
+        <span class="api-auth-chip {{if .ReadOnly}}is-readonly{{else if .Password}}is-protected{{else}}is-open{{end}}">
+          <span class="api-auth-dot" aria-hidden="true"></span>
+          {{if .ReadOnly}}{{T "Public read-only"}}{{else if .Password}}{{T "Password protected"}}{{else}}{{T "Open on this private network"}}{{end}}
+        </span>
+      </div>
+      <div class="api-terminal-row">
+        <span class="api-terminal-prompt" aria-hidden="true">$</span>
+        <code id="api-base">{{.Base}}</code>
+        <button class="api-term-copy" type="button" data-copy="#api-base" title="{{T "Copy address"}}" aria-label="{{T "Copy address"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button>
+      </div>
     </div>
     <div class="api-auth">
       <h3>{{T "Authentication"}}</h3>
@@ -41,15 +67,11 @@
       {{if .ReadOnly}}<p>{{T "Scripts get a challenge from a terminal. Use Send on this page to try a request."}}</p>{{end}}
     </div>
   </div>
-  <dl class="apifacts">
+  <dl class="api-spec-bar" aria-label="{{T "API status"}}">
     <div><dt>{{T "Format"}}</dt><dd>{{T "JSON; target lists as plain text, one per line. Errors:"}} <code>{"error": "…"}</code></dd></div>
     <div><dt>{{T "Pages"}}</dt><dd><code>limit</code> {{T "and"}} <code>offset</code>{{T ";"}} {{T "each list gives its"}} <code>total</code>.</dd></div>
+    <div><dt>{{T "Documented endpoints"}}</dt><dd><b>{{.EndpointCount}}</b> <span class="muted">{{T "available here"}}</span>{{if .Password}} · <b>{{len .Tokens}}</b> <span class="muted">{{T "API tokens"}}</span>{{end}}</dd></div>
   </dl>
-  <div class="integration-status-strip" aria-label="{{T "API status"}}">
-    <div><span class="status-label">{{T "Authentication"}}</span><b>{{if .ReadOnly}}{{T "Public read-only"}}{{else if .Password}}{{T "Password protected"}}{{else}}{{T "Open on this private network"}}{{end}}</b></div>
-    <div><span class="status-label">{{T "API tokens"}}</span><b>{{len .Tokens}}</b><span class="status-hint">{{T "stored credentials"}}</span></div>
-    <div><span class="status-label">{{T "Documented endpoints"}}</span><b>{{.EndpointCount}}</b><span class="status-hint">{{T "available here"}}</span></div>
-  </div>
 </section>
 {{if .Password}}<section class="panel credentials" id="tokens">
   <details{{if .Flash}} open{{end}}>
@@ -63,7 +85,7 @@
       {{if eq .Flash "token-missing"}}<p class="flash warn">{{T "No such token."}}</p>{{end}}
       {{if eq .Flash "token-bulk-revoked"}}<p class="flash ok">{{TF "Revoked %d selected token(s)." .BulkCount}}</p>{{end}}
       {{if eq .Flash "token-bulk-deleted"}}<p class="flash ok">{{TF "Deleted %d revoked token(s)." .BulkCount}}</p>{{end}}
-      {{if .NewToken}}<div class="connection-example">
+      {{if .NewToken}}<div class="connection-example api-token-console">
         <div class="ex-head"><span>Authorization</span><button type="button" class="small ghost" data-copy="#new-authorization"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
         <pre class="code"><code id="new-authorization">Authorization: Bearer {{.NewToken}}</code></pre>
       </div>{{end}}
@@ -112,31 +134,68 @@
 <details class="ep-disclosure"{{if eq .ID "board"}} open{{end}}>
   <summary class="ep-summary">
     <span class="ep-summary-main"><span class="ep-path"><span class="mth {{lower .Method}}">{{.Method}}</span><code>{{.Path}}</code></span><b>{{T .Summary}}</b></span>
-    <svg class="i" aria-hidden="true"><use href="#i-chev"/></svg>
+    {{if .Live}}<span class="ep-live-pill" title="{{T "Try it live"}}"><span class="ep-live-dot" aria-hidden="true"></span><span>{{T "Live"}}</span></span>{{end}}
+    <svg class="i ep-chev" aria-hidden="true"><use href="#i-chev"/></svg>
   </summary>
   <div class="ep-layout">
   <div class="ep-doc">
     <p class="ep-desc">{{.Description}}</p>
-    {{if .Params}}<table class="ptab">
+    {{if .Params}}<div class="ptab-wrap"><table class="ptab">
+      <thead>
+        <tr>
+          <th scope="col">{{T "Parameter"}}</th>
+          <th scope="col">{{T "Type"}}</th>
+          <th scope="col">{{T "Description"}}</th>
+        </tr>
+      </thead>
       <tbody>{{range .Params}}
-      <tr><td><code class="pname">{{.Name}}</code>{{if .Required}} <span class="preq">{{T "required"}}</span>{{end}}
-          <div class="ptyp">{{if eq .In "path"}}{{T "in the path"}}{{else}}{{.Type}}{{end}}{{with .Default}} · {{T "Default"}} <code>{{.}}</code>{{end}}</div></td>
-        <td>{{.Description}}{{with .Values}}<div class="pvals">{{.}}</div>{{end}}</td></tr>{{end}}
+      <tr>
+        <td class="ptab-name">
+          <div class="ptab-name-row">
+            <code class="pname">{{.Name}}</code>
+            <span class="pin {{.In}}">{{.In}}</span>
+            {{if .Required}}<span class="preq">{{T "required"}}</span>{{end}}
+          </div>
+        </td>
+        <td class="ptab-type"><code class="ptype">{{.Type}}</code></td>
+        <td class="ptab-desc">
+          <div class="pdesc">{{.Description}}</div>
+          {{with .Default}}<div class="pdef"><span class="pdef-label">{{T "Default"}}</span> <code>{{.}}</code></div>{{end}}
+          {{with .Values}}<div class="pvals">{{.}}</div>{{end}}
+        </td>
+      </tr>{{end}}
       </tbody>
-    </table>{{else}}<p class="muted small">{{T "No parameters."}}</p>{{end}}
-    {{if .Body}}<p class="ep-body"><b>{{T "Request body"}}</b> <code>{{.BodyType}}</code> {{.Body}}</p>{{end}}
+    </table></div>{{else}}<p class="ep-noparams muted small">{{T "No parameters."}}</p>{{end}}
+    {{if .Body}}<div class="ep-body"><span class="ep-body-head"><b>{{T "Request body"}}</b> <code>{{.BodyType}}</code></span><p>{{.Body}}</p></div>{{end}}
   </div>
   <div class="ep-ex">
-    <div class="ex-head"><span>{{T "Request"}}</span><button type="button" class="ghost small" data-copy="#curl-{{.ID}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
-    <pre class="code" id="curl-{{.ID}}" data-curl="{{$.Data.Base}}">{{.Curl}}</pre>
-    {{if .Live}}<form class="try" data-try hidden>
-      <input type="text" name="path" value="{{.Try}}" spellcheck="false" autocomplete="off" aria-label="{{T "Request to send"}}">
-      <button type="submit" class="small">{{T "Send"}}</button>
-    </form>{{end}}
-    {{if .Sample}}<div class="ex-head"><span data-try-label>{{T "Response"}} · {{.Status}}</span><span class="muted small" data-try-note>{{T "sample"}}</span></div>
-    <pre class="code resp" data-try-out tabindex="0" aria-label="{{TF "Response for %s" .ID}}">{{.Sample}}</pre>
-    {{else if .Live}}<div class="ex-head"><span data-try-label>{{T "Response"}}</span><span class="muted small" data-try-note></span></div>
-    <pre class="code resp" data-try-out tabindex="0" aria-label="{{TF "Response for %s" .ID}}" hidden></pre>{{end}}
+    <div class="console-card console-req">
+      <div class="ex-head console-head">
+        <div class="console-tabs" role="tablist" aria-label="{{T "Request"}}">
+          <span class="console-lang">{{T "Request"}}</span>
+        </div>
+        <button type="button" class="console-copy" data-copy="#curl-{{.ID}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button>
+      </div>
+      <pre class="code" id="curl-{{.ID}}" data-curl="{{$.Data.Base}}" data-method="{{.Method}}" data-try-default="{{.Try}}"{{if .BodyType}} data-body-type="{{.BodyType}}"{{end}}>{{.Curl}}</pre>
+      {{if .Live}}<form class="try" data-try hidden>
+        <span class="try-method">{{.Method}}</span>
+        <input type="text" name="path" value="{{.Try}}" spellcheck="false" autocomplete="off" aria-label="{{T "Request to send"}}">
+        <button type="submit" class="small">{{T "Send"}}</button>
+      </form>{{end}}
+    </div>
+    {{if or .Sample .Live}}
+    <div class="console-card console-resp"{{if and (not .Sample) .Live}} data-resp-card hidden{{end}}>
+      <div class="ex-head console-head">
+        <span class="resp-badge{{if .Sample}} is-sample{{end}}" data-try-label>{{if .Sample}}{{T "Response"}} · {{.Status}}{{else}}{{T "Response"}}{{end}}</span>
+        <div class="console-resp-right">
+          <span class="resp-meta" data-try-note>{{if .Sample}}{{T "sample"}}{{end}}</span>
+          <button type="button" class="console-copy" data-copy="#resp-{{.ID}}"{{if not .Sample}} hidden{{end}} data-resp-copy><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button>
+        </div>
+      </div>
+      {{if .Sample}}<pre class="code resp" id="resp-{{.ID}}" data-try-out tabindex="0" aria-label="{{TF "Response for %s" .ID}}">{{.Sample}}</pre>
+      {{else}}<pre class="code resp" id="resp-{{.ID}}" data-try-out tabindex="0" aria-label="{{TF "Response for %s" .ID}}" hidden></pre>{{end}}
+    </div>
+    {{end}}
   </div>
   </div>
 </details>
