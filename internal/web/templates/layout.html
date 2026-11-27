@@ -112,34 +112,41 @@
       <a href="/programs"{{if eq .Nav "programs"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-list"/></svg><span class="label">{{T "Programs"}}</span></a>
       <a href="/targets"{{if eq .Nav "targets"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-target"/></svg><span class="label">{{T "Targets"}}</span></a>
       <a href="/invites"{{if eq .Nav "invites"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span class="label">{{T "Invites"}}</span></a>
-      <div class="group">{{T "Tracking"}}</div>
+      <div class="group">{{T "Intelligence"}}</div>
       <a href="/changes"{{if eq .Nav "changes"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-activity"/></svg><span class="label">{{T "Changes"}}</span></a>
       <a href="/disclosed"{{if eq .Nav "disclosed"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="label">{{T "Disclosed"}}</span></a>
       <a href="/stats"{{if eq .Nav "stats"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg><span class="label">{{T "Stats"}}</span></a>
-      <div class="group">{{T "Personal"}}</div>
-      <a href="/reports"{{if eq .Nav "reports"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-flag"/></svg><span class="label">{{T "Reports"}}</span></a>
-      <a class="sub" href="/reports/analytics"{{if eq .Nav "analytics"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-trend"/></svg><span class="label">{{T "Analytics"}}</span></a>
-      <a href="/email"{{if eq .Nav "email"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-inbox"/></svg><span class="label">{{T "Email"}}</span></a>
-      <a class="sub" href="/email/stats"{{if eq .Nav "emailstats"}} aria-current="page"{{end}} title="{{T "HuntMail numbers and your blocks"}}"><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">{{T "HuntMail"}}</span></a>
-      <a class="nav-group-link" href="/system"{{if eq .Nav "system"}} aria-current="page"{{end}} title="{{T "System"}}"><span class="group-label">{{T "System"}}</span><svg class="i group-chev" aria-hidden="true"><use href="#i-chev"/></svg></a>
-      <a href="/methodology"{{if eq .Nav "methodology"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span class="label">{{T "Methodology"}}</span></a>
-      <a href="/settings/notifications"{{if eq .Nav "notifications"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg><span class="label">{{T "Notifications"}}</span></a>
-      <a href="/settings"{{if eq .Nav "settings"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">{{T "Settings"}}</span></a>
-      <a class="nav-group-link" href="/integrations"{{if eq .Nav "integrations"}} aria-current="page"{{end}} title="{{T "Integrations"}}"><span class="group-label">{{T "Integrations"}}</span><svg class="i group-chev" aria-hidden="true"><use href="#i-chev"/></svg></a>
-      <a href="/api"{{if eq .Nav "api"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-code"/></svg><span class="label">{{T "API"}}</span></a>
-      <a href="/mcp"{{if eq .Nav "mcp"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-plug"/></svg><span class="label">{{T "MCP"}}</span></a>
-      <a href="/pojia"{{if eq .Nav "pojia"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="label">{{T "POJIA"}}</span></a>
-      <a href="/scan"{{if eq .Nav "scan"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-target"/></svg><span class="label">{{T "Scan"}}</span></a>
-      <a href="/llm"{{if eq .Nav "llm"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg><span class="label">{{T "LLM"}}</span></a>
+      <div class="group">{{T "Workspace"}}</div>
+      <a href="/reports"{{if or (eq .Nav "reports") (eq .Nav "analytics")}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-flag"/></svg><span class="label">{{T "Reports"}}</span></a>
+      <a href="/email"{{if or (eq .Nav "email") (eq .Nav "emailstats")}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-inbox"/></svg><span class="label">{{T "Email"}}</span></a>
+      {{- $sysOpen := or (eq .Nav "system") (eq .Nav "settings") (eq .Nav "notifications") (eq .Nav "methodology")}}
+      <div class="nav-group-head">
+        <a class="nav-group-link" href="/system"{{if eq .Nav "system"}} aria-current="page"{{end}} title="{{T "System"}}"><span class="group-label">{{T "System"}}</span><svg class="i group-chev" aria-hidden="true"><use href="#i-chev"/></svg></a>
+        <button type="button" class="nav-group-toggle" data-nav-toggle-section="system" aria-expanded="{{if $sysOpen}}true{{else}}false{{end}}" aria-controls="nav-sec-system" aria-label="{{T "Toggle section"}}" title="{{T "Toggle section"}}"><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      </div>
+      <div class="nav-section" id="nav-sec-system" data-nav-section="system"{{if not $sysOpen}} hidden{{end}}>
+        <a href="/settings"{{if eq .Nav "settings"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">{{T "Settings"}}</span></a>
+        <a href="/settings/notifications"{{if eq .Nav "notifications"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg><span class="label">{{T "Notifications"}}</span></a>
+        <a href="/methodology"{{if eq .Nav "methodology"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span class="label">{{T "Methodology"}}</span></a>
+      </div>
+      {{- $intOpen := or (eq .Nav "integrations") (eq .Nav "api") (eq .Nav "mcp") (eq .Nav "pojia") (eq .Nav "scan") (eq .Nav "llm")}}
+      <div class="nav-group-head">
+        <a class="nav-group-link" href="/integrations"{{if eq .Nav "integrations"}} aria-current="page"{{end}} title="{{T "Integrations"}}"><span class="group-label">{{T "Integrations"}}</span><svg class="i group-chev" aria-hidden="true"><use href="#i-chev"/></svg></a>
+        <button type="button" class="nav-group-toggle" data-nav-toggle-section="integrations" aria-expanded="{{if $intOpen}}true{{else}}false{{end}}" aria-controls="nav-sec-integrations" aria-label="{{T "Toggle section"}}" title="{{T "Toggle section"}}"><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      </div>
+      <div class="nav-section" id="nav-sec-integrations" data-nav-section="integrations"{{if not $intOpen}} hidden{{end}}>
+        <a href="/api"{{if eq .Nav "api"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-code"/></svg><span class="label">{{T "API"}}</span></a>
+        <a href="/mcp"{{if eq .Nav "mcp"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-plug"/></svg><span class="label">{{T "MCP"}}</span></a>
+        <a href="/pojia"{{if eq .Nav "pojia"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="label">{{T "POJIA"}}</span></a>
+        <a href="/scan"{{if eq .Nav "scan"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-target"/></svg><span class="label">{{T "Scan"}}</span></a>
+        <a href="/llm"{{if eq .Nav "llm"}} aria-current="page"{{end}}><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg><span class="label">{{T "LLM"}}</span></a>
+      </div>
       {{- with .Feedback}}
       <a href="{{.}}"{{if $.FeedbackOut}} target="_blank" rel="noopener noreferrer" title="{{T "Found a bug, or have an idea? Open an issue on GitHub"}}"{{else}}{{if eq $.Nav "feedback"}} aria-current="page"{{end}} title="{{T "Found a bug, or have an idea? Write to us"}}"{{end}}><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg><span class="label">{{T "Feedback"}}</span></a>{{end}}
     </nav>
     <div class="spacer"></div>
     <div class="foot">
       {{if readOnly}}<div class="demo-note" title="{{T "HuntDeck Public: a read-only HuntDeck with live public platform data"}}{{if not .Updated.IsZero}}{{TF ", last refreshed from the platforms %s" (datetime .Updated)}}{{end}}{{T ": nothing private, nothing of anyone's account, and nothing can be changed"}}"><b>{{T "Public"}}</b><span class="dn-more"> · {{T "live data"}}</span>{{with repoURL}}<a class="dn-get" href="{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "HuntDeck's source: run your own copy, with your private programs and invites"}}"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg><span class="dn-more">{{T "Get HuntDeck"}}</span></a>{{end}}{{with xAccount}}<a class="dn-get" href="https://x.com/{{.}}" target="_blank" rel="noopener noreferrer" title="{{T "News and launch updates on X"}}"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg><span class="dn-more">{{TF "Follow @%s" .}}</span></a>{{end}}</div>{{end}}
-      {{- if .Auth}}
-      <form class="sign-out" method="post" action="/logout"><button type="submit" title="{{T "Sign out"}}"><svg class="i" aria-hidden="true"><use href="#i-logout"/></svg><span class="label">{{T "Sign out"}}</span></button></form>
-      {{- end}}
       <div class="foot-row">
         {{- if gt (len .Langs) 1}}
         <form class="lang-switch" method="post" action="/settings/language" aria-label="{{T "Language"}}">
@@ -150,7 +157,12 @@
           {{- end}}
         </form>
         {{- end}}
-        <button type="button" class="side-toggle" data-side-toggle aria-pressed="false" title="{{T "Fold the sidebar to its icons"}}" aria-label="{{T "Fold the sidebar"}}"><svg class="i"><use href="#i-chev"/></svg></button>
+        <div class="foot-actions">
+          {{- if .Auth}}
+          <form class="sign-out" method="post" action="/logout"><button type="submit" title="{{T "Sign out"}}"><svg class="i" aria-hidden="true"><use href="#i-logout"/></svg><span class="label">{{T "Sign out"}}</span></button></form>
+          {{- end}}
+          <button type="button" class="side-toggle" data-side-toggle aria-pressed="false" title="{{T "Fold the sidebar to its icons"}}" aria-label="{{T "Fold the sidebar"}}"><svg class="i"><use href="#i-chev"/></svg></button>
+        </div>
       </div>
       <div class="version" title="HuntDeck {{.Version}}">HuntDeck {{.Version}}</div>
     </div>

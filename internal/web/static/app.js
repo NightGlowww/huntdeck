@@ -1148,3 +1148,42 @@ for (const panel of document.querySelectorAll("[data-live-refresh]")) {
     show();
   });
 })();
+
+// Collapsible sidebar sections (System, Integrations): server renders active
+// section open and others collapsed; manual toggles persist in localStorage.
+(() => {
+  const KEY_PREFIX = "huntdeck-nav-section:";
+  const read = (name) => {
+    try { return localStorage.getItem(KEY_PREFIX + name); } catch { return null; }
+  };
+  const write = (name, val) => {
+    try { localStorage.setItem(KEY_PREFIX + name, val); } catch { /* ignore */ }
+  };
+  for (const btn of document.querySelectorAll("[data-nav-toggle-section]")) {
+    const name = btn.dataset.navToggleSection;
+    const sec = document.querySelector(`[data-nav-section="${name}"]`);
+    if (!sec) continue;
+    const head = btn.closest(".nav-group-head");
+    const hasActive = Boolean(
+      sec.querySelector('[aria-current="page"]') ||
+      head?.querySelector('[aria-current="page"]')
+    );
+    const sync = (open) => {
+      sec.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+    };
+    if (hasActive) {
+      sync(true);
+    } else {
+      const saved = read(name);
+      if (saved === "open") sync(true);
+      else if (saved === "closed") sync(false);
+    }
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const next = sec.hidden;
+      sync(next);
+      write(name, next ? "open" : "closed");
+    });
+  }
+})();

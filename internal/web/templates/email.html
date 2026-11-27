@@ -7,6 +7,7 @@
 
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T "Email"}}</h1>
+<nav class="seg rsubnav" aria-label="{{T "Email sections"}}"><a class="on" aria-current="page" href="/email">{{T "Inbox"}}</a><a href="/email/stats">{{T "HuntMail"}}</a></nav>
 {{if .CanNL}}<div class="vis-toggle-m">{{template "nl-toggle" .}}</div>{{end}}
 {{if not .Configured}}
 <section class="panel">

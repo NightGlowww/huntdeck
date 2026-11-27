@@ -13,9 +13,9 @@
 
 /* ---------- stat strip ---------- */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; margin-bottom: 16px;
-  border: 1px solid var(--border); border-radius: var(--radius); background: var(--border); overflow: hidden; }
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--border); box-shadow: var(--shadow-card); overflow: hidden; }
 .stat { display: grid; grid-template-rows: auto 1fr auto; align-content: start; gap: 2px; padding: 13px 18px 14px;
-  border-left: 0; margin-left: 0; background: var(--surface); }
+  border-left: 0; margin-left: 0; background: var(--surface); transition: background-color .15s ease; }
 a.stat:hover { background: var(--surface-2); color: inherit; }
 .stat .l { color: var(--muted); font-size: calc(11px * var(--fs, 1)); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 .stat .v { font: 600 calc(24px * var(--fs, 1))/1.2 var(--mono); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
@@ -26,7 +26,7 @@ a.stat:hover { background: var(--surface-2); color: inherit; }
 .stat .h b.up { color: var(--good); }
 
 /* ---------- panels ---------- */
-.panel { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.panel { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-card); transition: border-color .16s ease, box-shadow .18s ease; }
 /* Two levels of space, not one. Panels that belong together sit 12px apart, so a
    group reads as one block; the groups themselves are further apart (see .board
    and .content). One gap everywhere made every page a stack of equals. */
@@ -45,8 +45,10 @@ a.stat:hover { background: var(--surface-2); color: inherit; }
    column's own width, and `pretty` keeps any remaining wrap from ending short. */
 .lead { max-width: min(1400px, 100%); margin: 0 2px 16px; color: var(--muted); text-wrap: pretty; }
 .md p, .panel-foot, .acct-help, .empty-state { text-wrap: pretty; }
-.count { display: inline-grid; place-items: center; min-width: 22px; height: 18px; padding: 0 6px; border-radius: 9px; background: var(--surface-3);
+.count { display: inline-grid; place-items: center; min-width: 22px; height: 18px; padding: 0 6px; border-radius: var(--radius-badge); background: var(--surface-3);
   color: var(--muted); font: 600 calc(11px * var(--fs, 1))/1 var(--mono); letter-spacing: 0; text-transform: none; }
+.rsubnav { margin-bottom: 14px; }
+.rsubnav + .ptabs { margin-top: 4px; }
 /* The body's left edge matches the head's, so a panel has one inner gutter. */
 .panel-body { padding: 16px 18px; }
 .panel > :last-child { border-bottom-left-radius: inherit; border-bottom-right-radius: inherit; }

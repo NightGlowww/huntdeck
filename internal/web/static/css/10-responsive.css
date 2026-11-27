@@ -9,14 +9,15 @@
   .demo-note { padding: 4px 2px; font-size: calc(11px * var(--fs, 1)); }
   .nav a { justify-content: center; width: 42px; padding: 0; }
   .sidebar .foot { border-top: 0; width: 100%; align-items: center; justify-items: center; }
-  .foot-row { justify-content: center; }
+  .foot-row { flex-direction: column; justify-content: center; }
+  .foot-actions { margin-left: 0; flex-direction: column; gap: 4px; }
   /* The rail is 60px: the switcher stacks, the sign-out shortens, and the
      search box drops its "/" hint so the buttons beside it keep their room. */
   .lang-switch { flex-direction: column; gap: 0; padding: 0; }
   .lang-switch .i, .lang-switch .full { display: none; }
   .lang-switch .short { display: inline; }
   .lang-switch button { font-size: calc(11px * var(--fs, 1)); padding: 1px 5px; }
-  .sign-out button { height: 28px; padding: 0 4px; font-size: calc(11px * var(--fs, 1)); }
+  .sign-out button { width: 28px; height: 26px; padding: 0; font-size: calc(11px * var(--fs, 1)); }
   .sign-out .i { display: block; }
   .sign-out .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .omni kbd { display: none; }
@@ -24,6 +25,8 @@
   .demo-note { padding: 4px 2px; font-size: 11px; }
   .nav a, .nav a.sub { justify-content: center; width: 42px; padding: 0; }
   .nav a.sub::after { content: none; }
+  .nav-group-head { margin: 6px auto 2px; padding: 0; border-top: 0; justify-content: center; }
+  .nav-group-toggle { display: none; }
   .nav a.nav-group-link { width: 24px; height: 1px; min-height: 0; margin: 8px auto; padding: 0; border-radius: 1px; background: var(--border-2); }
   .nav a.nav-group-link::before, .nav a.nav-group-link::after { content: none; }
   .nav a.nav-group-link .group-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -41,17 +44,20 @@
   :root[data-side="min"] .demo-note { padding: 4px 2px; font-size: 11px; }
   :root[data-side="min"] :is(.nav a, .nav a.sub) { justify-content: center; width: 42px; padding: 0; }
   :root[data-side="min"] .nav a.sub::after { content: none; }
+  :root[data-side="min"] .nav-group-head { margin: 6px auto 2px; padding: 0; border-top: 0; justify-content: center; }
+  :root[data-side="min"] .nav-group-toggle { display: none; }
   :root[data-side="min"] .nav a.nav-group-link { width: 24px; height: 1px; min-height: 0; margin: 8px auto; padding: 0; border-radius: 1px; background: var(--border-2); }
   :root[data-side="min"] .nav a.nav-group-link::before, :root[data-side="min"] .nav a.nav-group-link::after { content: none; }
   :root[data-side="min"] .nav a.nav-group-link .group-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   :root[data-side="min"] .nav a.nav-group-link .group-chev { display: none; }
   :root[data-side="min"] .sidebar .foot { border-top: 0; width: 100%; justify-items: center; }
   :root[data-side="min"] .foot-row { flex-direction: column; align-items: center; gap: 6px; }
+  :root[data-side="min"] .foot-actions { margin-left: 0; flex-direction: column; gap: 4px; }
   :root[data-side="min"] .lang-switch { flex-direction: column; gap: 0; padding: 0; }
   :root[data-side="min"] .lang-switch .i, :root[data-side="min"] .lang-switch .full { display: none; }
   :root[data-side="min"] .lang-switch .short { display: inline; }
   :root[data-side="min"] .lang-switch button { font-size: calc(11px * var(--fs, 1)); padding: 1px 5px; }
-  :root[data-side="min"] .sign-out button { height: 28px; padding: 0 4px; font-size: calc(11px * var(--fs, 1)); }
+  :root[data-side="min"] .sign-out button { width: 28px; height: 26px; padding: 0; font-size: calc(11px * var(--fs, 1)); }
   :root[data-side="min"] .sign-out .i { display: block; }
   :root[data-side="min"] .sign-out .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   :root[data-side="min"] .side-toggle { margin-left: 0; justify-self: center; }
@@ -64,6 +70,8 @@
   .nav { display: flex; flex: 1; justify-content: space-between; min-width: 0; }
   .nav a { flex: 0 1 42px; min-width: 28px; width: auto; } /* every page's icon fits, down to 360px */
   .nav a[aria-current="page"]::before { display: none; }
+  .nav-group-head, .nav-group-toggle { display: none; }
+  .nav-section { display: contents; }
   .nav a.nav-group-link { display: none; }
   .sidebar .spacer, .version { display: none; }
   .sidebar .foot { padding: 0; width: auto; }
@@ -93,8 +101,8 @@
   .js .nav, .js .sidebar .foot { display: none; }
   .js .nav-toggle { margin-left: auto; }
   .js .sidebar.nav-open .nav { position: absolute; top: calc(100% + 6px); right: 10px; display: grid; gap: 1px; width: min(280px, calc(100vw - 20px));
-    max-height: calc(100dvh - 90px); overflow-y: auto; padding: 8px; border: 1px solid var(--border-input); border-radius: 10px; background: var(--surface);
-    box-shadow: 0 12px 32px rgb(0 0 0 / .2); justify-content: stretch; }
+    max-height: calc(100dvh - 90px); overflow-y: auto; padding: 8px; border: 1px solid var(--border-input); border-radius: var(--radius); background: var(--surface);
+    box-shadow: var(--shadow-pop); justify-content: stretch; }
   .js .sidebar.nav-open .nav a { justify-content: flex-start; width: auto; height: 40px; padding: 0 12px; }
   .js .sidebar.nav-open .nav a[aria-current="page"]::before { display: block; }
   .js .sidebar.nav-open .nav a.sub { padding-left: 34px; }
@@ -102,15 +110,21 @@
   .js .sidebar.nav-open .nav .label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: nowrap; } /* undo the narrow sidebar's visually hidden names */
   .js .sidebar.nav-open .nav .group { display: block; margin: 10px 12px 4px; padding-top: 8px; }
   .js .sidebar.nav-open .nav .group:first-child { margin-top: 2px; padding-top: 0; }
-  .js .sidebar.nav-open .nav a.nav-group-link { display: flex; justify-content: space-between; width: auto; height: 28px; margin: 12px 4px 2px; padding: 0 12px; border-radius: 5px; background: transparent; }
-  .js .sidebar.nav-open .nav a.nav-group-link::after { content: ""; top: -6px; }
+  .js .sidebar.nav-open .nav-group-head { display: flex; align-items: center; gap: 4px; margin: 10px 4px 2px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .js .sidebar.nav-open .nav-group-toggle { display: inline-grid; }
+  .js .sidebar.nav-open .nav-section { display: grid; gap: 1px; }
+  .js .sidebar.nav-open .nav a.nav-group-link { display: flex; justify-content: space-between; width: auto; flex: 1; height: 28px; margin: 0; padding: 0 8px 0 12px; border-radius: var(--radius-badge); background: transparent; }
+  .js .sidebar.nav-open .nav a.nav-group-link::after { content: none; }
   .js .sidebar.nav-open .nav a.nav-group-link[aria-current="page"] { background: var(--accent-weak); }
   .js .sidebar.nav-open .nav a.nav-group-link .group-label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: nowrap; }
   .js .sidebar.nav-open .nav a.nav-group-link .group-chev { display: block; opacity: .6; }
   /* Sign out and the language switch live in .foot, and the menu used to bring
      back only the nav: on a phone they were unreachable. They come with it. */
   .js .sidebar.nav-open .foot { display: grid; gap: 8px; margin-top: 8px; padding: 8px 12px 4px; border-top: 1px solid var(--border); }
-  .js .sidebar.nav-open .foot-row { justify-content: flex-start; }
+  .js .sidebar.nav-open .foot-row { flex-direction: row; justify-content: space-between; }
+  .js .sidebar.nav-open .foot-actions { flex-direction: row; gap: 6px; }
+  .js .sidebar.nav-open .sign-out button { width: auto; height: 28px; padding: 0 10px; border: 1px solid var(--border); gap: 6px; }
+  .js .sidebar.nav-open .sign-out .label { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: nowrap; }
   .js .sidebar.nav-open .lang-switch { flex-direction: row; gap: 2px; }
   .js .sidebar.nav-open .lang-switch .i { display: block; }
   .js .sidebar.nav-open .lang-switch .full { display: inline; }

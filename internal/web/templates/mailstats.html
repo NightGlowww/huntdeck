@@ -2,6 +2,7 @@
 
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">HuntMail</h1>
+<nav class="seg rsubnav" aria-label="{{T "Email sections"}}"><a href="/email">{{T "Inbox"}}</a><a class="on" aria-current="page" href="/email/stats">{{T "HuntMail"}}</a></nav>
 {{template "huntmail-tabs" "overview"}}
 {{if not .Configured}}
 <section class="panel"><div class="empty-state">{{T "HuntMail isn't set up yet."}}<a class="link" href="/email/setup">{{T "Set it up"}}</a>{{T "and its numbers show here."}}</div></section>

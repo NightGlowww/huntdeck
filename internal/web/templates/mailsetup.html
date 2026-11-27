@@ -2,6 +2,7 @@
    and setting it up on Cloudflare or updating it. */}}
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T "HuntMail"}}</h1>
+<nav class="seg rsubnav" aria-label="{{T "Email sections"}}"><a href="/email">{{T "Inbox"}}</a><a class="on" aria-current="page" href="/email/stats">{{T "HuntMail"}}</a></nav>
 {{template "huntmail-tabs" "setup"}}
 {{if .Run}}
 <section class="panel msetup-run"{{if .Busy}} data-setup-running{{end}} aria-live="polite">
