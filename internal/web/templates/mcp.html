@@ -4,20 +4,62 @@
   <div><span class="workbench-kicker">{{T "Integrations"}}</span><h1>{{T "MCP server"}}</h1><p>{{T "Connect desktop agents over HTTP or stdio."}}</p></div>
   <a class="button secondary small" href="/integrations">{{T "Integrations workbench"}}</a>
 </header>
-<div class="mcp-page-head">
-<section class="panel connection-setup">
-  <div class="panel-head">
-    <h2>{{T "Client configuration"}}</h2>
-    {{if not .NewToken}}<form method="post" action="/mcp/token">
-      <button type="submit"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>{{T "Create connection key"}}</button>
-    </form>{{end}}
-  </div>
-  <div class="panel-body">
-    {{if .NewToken}}<p class="flash ok">{{T "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it here when this connection retires."}}</p>{{end}}
-    <p class="connection-instructions">{{T "Add this HTTP connection to your MCP client. Use a separate key for each client."}}</p>
-    <div class="connection-example">
-      <div class="ex-head"><span>JSON</span><button type="button" class="ghost small" data-copy="#mcp-json"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
-      <pre class="code"><code id="mcp-json">{
+
+<div class="mcp-portal">
+  <nav class="panel mcp-nav" aria-label="{{T "MCP directory"}}">
+    <details class="mcp-directory" open>
+      <summary><svg class="i" aria-hidden="true"><use href="#i-list"/></svg>{{T "MCP directory"}}<svg class="i dir-chev" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+      <label class="mcp-filter"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input type="search" data-filter-mcp placeholder="{{T "Filter tools"}}" aria-label="{{T "Filter tools"}}"></label>
+      <span class="filter-count muted small" role="status" aria-live="polite" hidden></span>
+      <div class="an-links" data-toc>
+        <a class="an-top" href="#quickstart">{{T "Quickstart"}}</a>
+        <a class="an-top" href="#mcp-keys">{{T "Connection keys"}}</a>
+        <a class="an-top" href="#stdio">{{T "Stdio transport"}}</a>
+        {{range .Groups}}{{if .Tools}}
+        <div class="an-g" data-mcp-nav-group="{{.ID}}">{{T .Name}}</div>
+        {{range .Tools}}<a href="#{{.Name}}" data-mcp-nav-link="{{.Name}}"><span class="mcp-nav-dot {{if .IsWrite}}write{{else}}read{{end}}" aria-hidden="true"></span><span class="an-t">{{.Name}}</span></a>{{end}}
+        {{end}}{{end}}
+      </div>
+    </details>
+  </nav>
+
+  <div class="mcp-main">
+    <section class="panel mcp-hero-panel" id="quickstart">
+      <div class="mcp-hero-head">
+        <div>
+          <span class="mcp-hero-kicker">{{T "Quickstart"}}</span>
+          <h2>{{T "Client configuration"}}</h2>
+          <p class="mcp-hero-sub">{{T "Add this HTTP connection to your MCP client. Use a separate key for each client."}}</p>
+        </div>
+        <form method="post" action="/mcp/token" class="mcp-mint-form">
+          <button type="submit"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>{{T "Create connection key"}}</button>
+        </form>
+      </div>
+
+      <div class="mcp-hero-body">
+        {{if .NewToken}}<p class="flash ok" role="status">{{T "Created for this connection. Copy it now: only its digest is stored, so it is never shown again. Revoke it here when this connection retires."}}</p>{{end}}
+
+        <div class="mcp-endpoint-bar">
+          <span class="mcp-endpoint-label">{{T "Endpoint"}}</span>
+          <code id="mcp-endpoint">{{.Base}}/mcp/rpc</code>
+          <span class="mcp-proto-badge">Streamable HTTP · JSON-RPC 2.0</span>
+          <button type="button" class="ghost small" data-copy="#mcp-endpoint" title="{{T "Copy address"}}" aria-label="{{T "Copy address"}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button>
+        </div>
+
+        <div class="mcp-console" data-mcp-console>
+          <div class="mcp-console-head">
+            <div class="mcp-tabs" role="tablist" aria-label="{{T "Client configuration"}}">
+              <button type="button" class="mcp-tab" role="tab" id="tab-claude-desktop" aria-controls="panel-claude-desktop" aria-selected="true" data-mcp-tab="claude-desktop" data-mcp-copy="#mcp-cfg-claude-desktop">Claude Desktop</button>
+              <button type="button" class="mcp-tab" role="tab" id="tab-cursor" aria-controls="panel-cursor" aria-selected="false" data-mcp-tab="cursor" data-mcp-copy="#mcp-cfg-cursor">Cursor</button>
+              <button type="button" class="mcp-tab" role="tab" id="tab-claude-code" aria-controls="panel-claude-code" aria-selected="false" data-mcp-tab="claude-code" data-mcp-copy="#mcp-cfg-claude-code">Claude Code</button>
+              <button type="button" class="mcp-tab" role="tab" id="tab-http" aria-controls="panel-http" aria-selected="false" data-mcp-tab="http" data-mcp-copy="#mcp-cfg-http">Streamable HTTP</button>
+              <button type="button" class="mcp-tab" role="tab" id="tab-stdio" aria-controls="panel-stdio" aria-selected="false" data-mcp-tab="stdio" data-mcp-copy="#mcp-cfg-stdio">Stdio</button>
+            </div>
+            <button type="button" class="mcp-console-copy" data-copy="#mcp-cfg-claude-desktop" data-mcp-active-copy><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button>
+          </div>
+
+          <div class="mcp-tab-panel" role="tabpanel" id="panel-claude-desktop" aria-labelledby="tab-claude-desktop" data-mcp-panel="claude-desktop">
+            <pre class="mcp-console-code"><code id="mcp-cfg-claude-desktop">{
   "mcpServers": {
     "huntdeck": {
       "type": "http",
@@ -28,83 +70,173 @@
     }
   }
 }</code></pre>
-    </div>
-  </div>
-</section>
-</div>
+          </div>
 
-<div class="integration-status-strip" aria-label="{{T "MCP status"}}">
-  <div><span class="status-label">{{T "HTTP connection"}}</span><b>{{T "Ready"}}</b><span class="status-hint">{{T "configuration available above"}}</span></div>
-  <div><span class="status-label">{{T "Connection keys"}}</span><b>{{add (len .Keys) .Hidden}}</b><span class="status-hint">{{T "live and retired"}}</span></div>
-  <div><span class="status-label">{{T "Tools"}}</span><b>{{len .Tools}}</b><span class="status-hint">{{T "available to clients"}}</span></div>
-</div>
+          <div class="mcp-tab-panel" role="tabpanel" id="panel-cursor" aria-labelledby="tab-cursor" data-mcp-panel="cursor" hidden>
+            <pre class="mcp-console-code"><code id="mcp-cfg-cursor">{
+  "mcpServers": {
+    "huntdeck": {
+      "url": "{{.Base}}/mcp/rpc",
+      "headers": {
+        "Authorization": "Bearer {{if .NewToken}}{{.NewToken}}{{else}}mcp_…{{end}}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
 
-<section class="panel credentials" id="mcp-keys">
-  <details{{if or .ShowAll .Flash}} open{{end}}>
-    <summary class="credential-summary"><span class="credential-title">{{T "Connection keys"}}</span><span class="credential-count">{{add (len .Keys) .Hidden}}</span><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
-    <div class="credential-body">
-      {{if eq .Flash "deleted"}}<p class="flash ok">{{TF "Deleted %d key(s)." .Deleted}}</p>{{else if eq .Flash "deletefailed"}}<p class="flash err">{{T "Those keys were not deleted; the log says why."}}</p>{{else if eq .Flash "revoked"}}<p class="flash ok">{{T "Revoked. Anything still sending it gets 401 from now on."}}</p>{{else if eq .Flash "nounused"}}<p class="flash ok">{{T "No unused keys older than one hour."}}</p>{{else if eq .Flash "missing"}}<p class="flash err">{{T "No such live key: it was already revoked, or another tab revoked it first."}}</p>{{end}}
-      {{if .Keys}}
-      <div class="credential-bulk">
-        <label class="credential-select-all"><input type="checkbox" data-select-all> {{T "Select all"}}</label>
-        <span class="credential-selection muted small" data-selbar hidden role="status" aria-live="polite"><span data-selcount></span></span>
-        <form method="post" action="/mcp/delete" id="mcp-delete" data-confirm="{{T "Delete the ticked keys from the list?"}}">
-          <button type="submit" class="small secondary danger">{{T "Delete selected"}}</button>
-        </form>
-        <form method="post" action="/mcp/delete-unused" data-confirm="{{T "Delete every key that was never used and is more than an hour old? A key that never authenticated cannot be a working client."}}">
-          <button type="submit" class="small ghost danger">{{T "Delete never-used"}}</button>
-        </form>
+          <div class="mcp-tab-panel" role="tabpanel" id="panel-claude-code" aria-labelledby="tab-claude-code" data-mcp-panel="claude-code" hidden>
+            <pre class="mcp-console-code"><code id="mcp-cfg-claude-code">{
+  "mcpServers": {
+    "huntdeck": {
+      "type": "http",
+      "url": "{{.Base}}/mcp/rpc",
+      "headers": {
+        "Authorization": "Bearer {{if .NewToken}}{{.NewToken}}{{else}}mcp_…{{end}}"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div class="mcp-tab-panel" role="tabpanel" id="panel-http" aria-labelledby="tab-http" data-mcp-panel="http" hidden>
+            <pre class="mcp-console-code"><code id="mcp-cfg-http">curl -sS -X POST "{{.Base}}/mcp/rpc" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{if .NewToken}}{{.NewToken}}{{else}}mcp_…{{end}}" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'</code></pre>
+          </div>
+
+          <div class="mcp-tab-panel" role="tabpanel" id="panel-stdio" aria-labelledby="tab-stdio" data-mcp-panel="stdio" hidden>
+            <pre class="mcp-console-code"><code id="mcp-cfg-stdio">HUNTDECK_URL="{{.Base}}" \
+HUNTDECK_TOKEN="{{if .NewToken}}{{.NewToken}}{{else}}mcp_…{{end}}" \
+huntdeck-mcp</code></pre>
+          </div>
+        </div>
       </div>
-      <div class="table-wrap"><table class="credential-table cards">
-        <thead><tr><th scope="col"><span class="sr-only">{{T "Select"}}</span></th><th scope="col">{{T "Name"}}</th><th scope="col">{{T "Created"}}</th><th scope="col">{{T "Last used"}}</th><th scope="col">{{T "State"}}</th><th scope="col">{{T "Actions"}}</th></tr></thead>
-        <tbody>{{range .Keys}}<tr>
-          <td class="c-check"><input type="checkbox" class="pick" name="id" value="{{.ID}}" form="mcp-delete" aria-label="{{TF "Select %s" .Name}} #{{.ID}}"></td>
-          <td class="c-name">{{.Name}} <span class="credential-id">#{{.ID}}</span></td>
-          <td data-label="{{T "Created"}}"><span class="when" title="{{datetime .CreatedAt}}" data-ago data-at="{{iso .CreatedAt}}">{{ago .CreatedAt}}</span></td>
-          <td data-label="{{T "Last used"}}">{{if .LastUsedAt}}<span class="when" title="{{datetime .LastUsedAt}}" data-ago data-at="{{iso .LastUsedAt}}">{{ago .LastUsedAt}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
-          <td class="c-side">{{if .RevokedAt}}<span class="chip failed">{{T "revoked"}}</span>{{else}}<span class="chip ok">{{T "live"}}</span>{{end}}</td>
-          <td class="credential-actions"><div>
-            {{if not .RevokedAt}}<form method="post" action="/mcp/revoke" data-confirm="{{T "Revoke this key? The client using it gets 401 from now on."}}">
-              <input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small secondary danger" aria-label="{{T "Revoke"}} {{.Name}} #{{.ID}}">{{T "Revoke"}}</button>
-            </form>{{end}}
-            <form method="post" action="/mcp/delete" data-confirm="{{if .RevokedAt}}{{T "Delete this key from the list?"}}{{else}}{{T "Delete this active key? Clients using it will lose access immediately."}}{{end}}">
-              <input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small ghost danger" aria-label="{{T "Delete"}} {{.Name}} #{{.ID}}">{{T "Delete"}}</button>
+
+      <div class="integration-status-strip mcp-status-strip" aria-label="{{T "MCP status"}}">
+        <div><span class="status-label">{{T "HTTP connection"}}</span><b>{{T "Ready"}}</b><span class="status-hint">/mcp/rpc</span></div>
+        <div><span class="status-label">{{T "Connection keys"}}</span><b>{{add (len .Keys) .Hidden}}</b><span class="status-hint">{{T "live and retired"}}</span></div>
+        <div><span class="status-label">{{T "Tools"}}</span><b>{{len .Tools}}</b><span class="status-hint">{{T "available to clients"}}</span></div>
+      </div>
+    </section>
+
+    <section class="panel credentials mcp-vault" id="mcp-keys">
+      <details open>
+        <summary class="credential-summary"><span class="credential-title">{{T "Connection keys"}}</span><span class="credential-count">{{add (len .Keys) .Hidden}}</span><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
+        <div class="credential-body">
+          {{if eq .Flash "deleted"}}<p class="flash ok">{{TF "Deleted %d key(s)." .Deleted}}</p>{{else if eq .Flash "deletefailed"}}<p class="flash err">{{T "Those keys were not deleted; the log says why."}}</p>{{else if eq .Flash "revoked"}}<p class="flash ok">{{T "Revoked. Anything still sending it gets 401 from now on."}}</p>{{else if eq .Flash "nounused"}}<p class="flash ok">{{T "No unused keys older than one hour."}}</p>{{else if eq .Flash "missing"}}<p class="flash err">{{T "No such live key: it was already revoked, or another tab revoked it first."}}</p>{{end}}
+          {{if .Keys}}
+          <div class="credential-bulk">
+            <label class="credential-select-all"><input type="checkbox" data-select-all> {{T "Select all"}}</label>
+            <span class="credential-selection muted small" data-selbar hidden role="status" aria-live="polite"><span data-selcount></span></span>
+            <form method="post" action="/mcp/delete" id="mcp-delete" data-confirm="{{T "Delete the ticked keys from the list?"}}">
+              <button type="submit" class="small secondary danger">{{T "Delete selected"}}</button>
             </form>
-          </div></td>
-        </tr>{{end}}</tbody>
-      </table></div>
-      {{if .Hidden}}<p class="credential-more">{{TF "%d older key(s) are not shown." .Hidden}} <a class="link" href="/mcp?all=1#mcp-keys">{{T "Show every key"}}</a></p>{{end}}
-      {{else}}<p class="credential-empty">{{T "No connection keys yet."}}</p>{{end}}
-    </div>
-  </details>
-</section>
+            <form method="post" action="/mcp/delete-unused" data-confirm="{{T "Delete every key that was never used and is more than an hour old? A key that never authenticated cannot be a working client."}}">
+              <button type="submit" class="small ghost danger">{{T "Delete never-used"}}</button>
+            </form>
+          </div>
+          <div class="table-wrap"><table class="credential-table cards">
+            <thead><tr><th scope="col"><span class="sr-only">{{T "Select"}}</span></th><th scope="col">{{T "Name"}}</th><th scope="col">{{T "Created"}}</th><th scope="col">{{T "Last used"}}</th><th scope="col">{{T "State"}}</th><th scope="col">{{T "Actions"}}</th></tr></thead>
+            <tbody>{{range .Keys}}<tr>
+              <td class="c-check"><input type="checkbox" class="pick" name="id" value="{{.ID}}" form="mcp-delete" aria-label="{{TF "Select %s" .Name}} #{{.ID}}"></td>
+              <td class="c-name">{{.Name}} <span class="credential-id">#{{.ID}}</span></td>
+              <td data-label="{{T "Created"}}"><span class="when" title="{{datetime .CreatedAt}}" data-ago data-at="{{iso .CreatedAt}}">{{ago .CreatedAt}}</span></td>
+              <td data-label="{{T "Last used"}}">{{if .LastUsedAt}}<span class="when" title="{{datetime .LastUsedAt}}" data-ago data-at="{{iso .LastUsedAt}}">{{ago .LastUsedAt}}</span>{{else}}<span class="zero">—</span>{{end}}</td>
+              <td class="c-side">{{if .RevokedAt}}<span class="chip failed">{{T "revoked"}}</span>{{else}}<span class="chip ok">{{T "live"}}</span>{{end}}</td>
+              <td class="credential-actions"><div>
+                {{if not .RevokedAt}}<form method="post" action="/mcp/revoke" data-confirm="{{T "Revoke this key? The client using it gets 401 from now on."}}">
+                  <input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small secondary danger" aria-label="{{T "Revoke"}} {{.Name}} #{{.ID}}">{{T "Revoke"}}</button>
+                </form>{{end}}
+                <form method="post" action="/mcp/delete" data-confirm="{{if .RevokedAt}}{{T "Delete this key from the list?"}}{{else}}{{T "Delete this active key? Clients using it will lose access immediately."}}{{end}}">
+                  <input type="hidden" name="id" value="{{.ID}}"><button type="submit" class="small ghost danger" aria-label="{{T "Delete"}} {{.Name}} #{{.ID}}">{{T "Delete"}}</button>
+                </form>
+              </div></td>
+            </tr>{{end}}</tbody>
+          </table></div>
+          {{if .Hidden}}<p class="credential-more">{{TF "%d older key(s) are not shown." .Hidden}} <a class="link" href="/mcp?all=1#mcp-keys">{{T "Show every key"}}</a></p>{{end}}
+          {{else}}<p class="credential-empty">{{T "No connection keys yet."}}</p>{{end}}
+        </div>
+      </details>
+    </section>
 
-<details class="panel mcp-secondary">
-  <summary class="panel-head"><h2>{{T "Running it"}}</h2><span class="aside">{{T "one process, no port"}}<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></span></summary>
-  <div class="panel-body">
-    <div class="ex-head"><span>{{T "Command"}}</span><button type="button" class="ghost small" data-copy="#mcp-cmd"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button></div>
-    <pre class="code"><code id="mcp-cmd">HUNTDECK_URL={{.Base}} HUNTDECK_TOKEN={{if .NewToken}}…just minted above{{else}}mcp_…{{end}} huntdeck-mcp</code></pre>
-    <p class="muted small">{{T "The same server as a stdio process, for a terminal agent that spawns commands; a client in another app uses the HTTP shape above."}}</p>
-  </div>
-</details>
-
-<section class="panel">
-  <div class="panel-head"><h2>{{T "Tools"}}</h2><span class="aside">{{TF "%d in all" (len .Tools)}}</span></div>
-  <div class="panel-body">
-    <p class="muted small">{{T "This list comes from the same registry the server answers tools/list from, so it cannot list a tool that does not exist or miss one that does. A server started with HUNTDECK_MCP_READONLY=1 leaves out the ones marked as changing data."}}</p>
-    <ul class="mcp-index">{{range .Tools}}<li><a href="#{{.Name}}">{{.Name}}</a></li>{{end}}</ul>
-    {{range $i, $tool := .Tools}}
-    <details class="mcp-tool" id="{{$tool.Name}}"{{if eq $i 0}} open{{end}}>
-      <summary><span class="mcp-tool-name"><code>{{$tool.Name}}</code>{{if $tool.Write}} <span class="chip">{{T "changes data"}}</span>{{end}}</span><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></summary>
-      <div class="mcp-tool-body">
-        <p>{{T $tool.Description}}</p>
-        {{if $tool.Arguments}}
-        <table class="mcp-args"><thead><tr><th>{{T "Argument"}}</th><th>{{T "Type"}}</th><th>{{T "What it is for"}}</th></tr></thead><tbody>
-          {{range $tool.Arguments}}<tr><td><code>{{.Name}}</code>{{if .Required}} <span class="chip small">{{T "required"}}</span>{{end}}</td><td>{{.Type}}</td><td>{{.What}}</td></tr>{{end}}
-        </tbody></table>
-        {{else}}<p class="muted small">{{T "No arguments."}}</p>{{end}}
+    <details class="panel mcp-secondary" id="stdio">
+      <summary class="panel-head"><h2>{{T "Stdio transport"}}</h2><span class="aside">{{T "one process, no port"}}<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></span></summary>
+      <div class="panel-body">
+        <div class="mcp-console mcp-console-compact">
+          <div class="mcp-console-head">
+            <span>{{T "Command"}}</span>
+            <button type="button" class="mcp-console-copy" data-copy="#mcp-cmd"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button>
+          </div>
+          <pre class="mcp-console-code"><code id="mcp-cmd">HUNTDECK_URL={{.Base}} HUNTDECK_TOKEN={{if .NewToken}}{{.NewToken}}{{else}}mcp_…{{end}} huntdeck-mcp</code></pre>
+        </div>
+        <p class="muted small mcp-stdio-note">{{T "The same server as a stdio process, for a terminal agent that spawns commands; a client in another app uses the HTTP shape above."}}</p>
       </div>
     </details>
-    {{end}}
+
+    <section class="mcp-tools-section" id="tools">
+      <div class="mcp-tools-header">
+        <div>
+          <div class="mcp-tools-title-row">
+            <h2>{{T "Tools"}}</h2>
+            <span class="credential-count">{{len .Tools}}</span>
+          </div>
+          <p class="muted small">{{T "This list comes from the same registry the server answers tools/list from, so it cannot list a tool that does not exist or miss one that does. A server started with HUNTDECK_MCP_READONLY=1 leaves out the ones marked as changing data."}}</p>
+        </div>
+        <button type="button" class="button secondary small" data-mcp-toggle-all data-state="collapsed" hidden>{{T "Expand all"}}</button>
+      </div>
+
+      {{range $gi, $group := .Groups}}{{if $group.Tools}}
+      <h3 class="mcp-group-head" id="{{$group.ID}}" data-mcp-group-head="{{$group.ID}}">{{T $group.Name}}<span>{{T $group.Description}}</span></h3>
+      {{range $ti, $tool := $group.Tools}}
+      <section class="panel mcp-tool-card" id="{{$tool.Name}}" data-mcp-tool="{{$tool.Name}}" data-mcp-group="{{$group.ID}}">
+        <details class="mcp-tool-disclosure"{{if and (eq $gi 0) (eq $ti 0)}} open{{end}}>
+          <summary class="mcp-tool-summary">
+            <span class="mcp-tool-summary-main">
+              <span class="mcp-tool-title-line">
+                <code class="mcp-tool-code">{{$tool.Name}}</code>
+                {{if $tool.IsWrite}}<span class="mcp-access write">{{T "Write"}}</span>{{else}}<span class="mcp-access read">{{T "Read-only"}}</span>{{end}}
+                <span class="mcp-param-pill">{{if $tool.Arguments}}{{TF "%d params" (len $tool.Arguments)}}{{else}}{{T "0 params"}}{{end}}</span>
+              </span>
+              <span class="mcp-tool-preview">{{T $tool.Summary}}</span>
+            </span>
+            <svg class="i mcp-chev" aria-hidden="true"><use href="#i-chev"/></svg>
+          </summary>
+          <div class="mcp-tool-layout">
+            <div class="mcp-tool-doc">
+              <p class="mcp-tool-desc">{{T $tool.Description}}</p>
+              {{if $tool.Arguments}}
+              <div class="table-wrap"><table class="mcp-args">
+                <thead><tr><th scope="col">{{T "Argument"}}</th><th scope="col">{{T "Type"}}</th><th scope="col">{{T "What it is for"}}</th></tr></thead>
+                <tbody>
+                  {{range $tool.Arguments}}<tr>
+                    <td><code>{{.Name}}</code>{{if .Required}} <span class="mcp-req">{{T "required"}}</span>{{end}}</td>
+                    <td><span class="mcp-type-pill">{{.Type}}</span></td>
+                    <td>{{.What}}</td>
+                  </tr>{{end}}
+                </tbody>
+              </table></div>
+              {{else}}<p class="muted small mcp-no-args">{{T "No arguments."}}</p>{{end}}
+            </div>
+            <div class="mcp-tool-ex">
+              <div class="mcp-console mcp-console-tool">
+                <div class="mcp-console-head">
+                  <span>JSON-RPC · tools/call</span>
+                  <button type="button" class="mcp-console-copy" data-copy="#rpc-{{$tool.Name}}"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg><span class="label">{{T "Copy"}}</span></button>
+                </div>
+                <pre class="mcp-console-code"><code id="rpc-{{$tool.Name}}">{{$tool.ExampleJSON}}</code></pre>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+      {{end}}
+      {{end}}{{end}}
+
+      <div class="panel empty-state small" data-mcp-empty hidden>{{T "No tools match that filter."}}</div>
+    </section>
   </div>
-</section>{{end}}{{end}}
+</div>
+<script src="{{static "mcp.js"}}" defer></script>
+{{end}}{{end}}

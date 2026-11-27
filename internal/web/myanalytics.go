@@ -23,17 +23,49 @@ var analyticsRanges = []struct{ Key, Label string }{
 }
 
 // analyticsRange reads the range from the query: a choice, or from and to
-// months (YYYY-MM, both included).
+// dates (YYYY-MM-DD) or months (YYYY-MM), both included.
 func analyticsRange(q url.Values, now time.Time, zone *time.Location) (reports.Range, string, string) {
 	month := func(t time.Time) time.Time {
 		t = t.In(zone)
 		return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, zone)
 	}
+	parseBound := func(raw string) (t time.Time, isDay bool, ok bool) {
+		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			return time.Time{}, false, false
+		}
+		if t, err := time.ParseInLocation("2006-01-02", raw, zone); err == nil {
+			return t, true, true
+		}
+		if t, err := time.ParseInLocation("2006-01", raw, zone); err == nil {
+			return t, false, true
+		}
+		return time.Time{}, false, false
+	}
 	end := now.Add(time.Second)
-	if from, err := time.ParseInLocation("2006-01", q.Get("from"), zone); err == nil {
+	if from, fromDay, ok := parseBound(q.Get("from")); ok {
 		to := end
-		if t, err := time.ParseInLocation("2006-01", q.Get("to"), zone); err == nil && !t.Before(from) {
-			to = t.AddDate(0, 1, 0)
+		toDay := false
+		var toDate time.Time
+		if t, tDay, ok := parseBound(q.Get("to")); ok && !t.Before(from) {
+			toDay = tDay
+			toDate = t
+			if tDay {
+				to = t.AddDate(0, 0, 1)
+			} else {
+				to = t.AddDate(0, 1, 0)
+			}
+		}
+		if fromDay || toDay {
+			endLabel := now.In(zone).Format("2006-01-02")
+			if !toDate.IsZero() {
+				if toDay {
+					endLabel = toDate.Format("2006-01-02")
+				} else {
+					endLabel = to.AddDate(0, 0, -1).Format("2006-01-02")
+				}
+			}
+			return reports.Range{From: from, To: to}, "custom", from.Format("2006-01-02") + " – " + endLabel
 		}
 		return reports.Range{From: from, To: to}, "custom", from.Format("Jan 2006") + " – " + to.AddDate(0, 0, -1).Format("Jan 2006")
 	}
@@ -179,7 +211,7 @@ func niceCeil(v float64) float64 {
 type analyticsView struct {
 	reports.Analytics
 	RangeKey, RangeLabel, RangeLabelKey string
-	From, To                            string // the custom range's months
+	From, To                            string // the custom range's bounds
 	Ranges                              []struct{ Key, Label string }
 	Outcomes                            barChart
 	Money                               barChart
@@ -331,10 +363,22 @@ func (s *server) reportsAnalytics(w http.ResponseWriter, r *http.Request) {
 	}
 	zone := s.shownZone()
 	now := s.Store.Now()
-	rg, key, label := analyticsRange(r.URL.Query(), now, zone)
+	q := r.URL.Query()
+	rg, key, label := analyticsRange(q, now, zone)
 	a := reports.Analyse(all, rg, zone, published, now)
+	var fromVal, toVal string
+	if key == "custom" {
+		fromVal = strings.TrimSpace(q.Get("from"))
+		if toRaw := strings.TrimSpace(q.Get("to")); toRaw != "" {
+			if t, err := time.ParseInLocation("2006-01-02", toRaw, zone); err == nil && !t.Before(rg.From) {
+				toVal = toRaw
+			} else if t, err := time.ParseInLocation("2006-01", toRaw, zone); err == nil && !t.Before(rg.From) {
+				toVal = toRaw
+			}
+		}
+	}
 	v := analyticsView{Analytics: a, RangeKey: key, RangeLabel: label, Ranges: analyticsRanges, Total: len(all),
-		From: r.URL.Query().Get("from"), To: r.URL.Query().Get("to")}
+		From: fromVal, To: toVal}
 	switch key {
 	case "all", "3m", "12m":
 		v.RangeLabelKey = label
