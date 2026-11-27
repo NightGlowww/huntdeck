@@ -60,6 +60,25 @@ What HuntDeck reads from each platform, and how.
   unlocked; projects that require freezing a cash deposit (`take_margin`) or
   consuming a ticket (`use_ticket`) are always skipped for safety. Bounties
   and reports are stored and shown in CNY (`¥`).
+- **IssueHunt** uses its REST API (`api.issuehunt.io`) with a User API key
+  (`IH_API_KEY`, created in `issuehunt.io` › Preferences › API) or in
+  public-only mode (`IH_PUBLIC_ONLY=true`). Monetary bounties and reports are
+  stored and shown in JPY (`¥`), while point-only internal programs are
+  marked as non-paying. Programs requiring an application withhold scope until
+  approved.
+- **GObugfree** uses the JSON endpoints on `app.gobugfree.com` (`Accept:
+  application/json`), authenticating either with a browser login through
+  Keycloak (`GBF_EMAIL`, `GBF_PASSWORD`, optional `GBF_TOTP_SECRET`), an OAuth
+  token/refresh token or session cookie (`GBF_TOKEN`), or public-only mode
+  (`GBF_PUBLIC_ONLY=true`). Bounties are typically in `CHF` (as well as `EUR`
+  and `USD`). Pending invitations can be accepted from HuntDeck, and locked
+  programs withhold scope until verification or NDA requirements are met.
+- **Inspectiv** uses the researcher DRF JSON API behind `app.inspectiv.com`
+  (`api.bounty.inspectiv.com/api`). It has no public listing; authenticate via
+  the login browser (`INS_EMAIL`, `INS_PASSWORD` — turn on `HUNTDECK_VNC=true`
+  if a reCAPTCHA challenge appears, as HuntDeck never bypasses CAPTCHAs) or
+  paste `INS_TOKEN` (the 40-hex token from `localStorage`). Bounties and
+  reports are stored in USD (`$`).
 - **Your own reports** are read in polls, at most once an hour (Settings ›
   Polling switches them off per platform). HackerOne: the Hacker API's list
   of your reports (100 a page), a report's activities when it changed, and
@@ -72,8 +91,12 @@ What HuntDeck reads from each platform, and how.
   last, the number of comments and payments are kept; never the write-up or
   what anyone wrote. VulBox reads your submitted vulnerabilities across all
   project category tabs (metadata and CNY bounties only; never write-ups or
-  comments). YesWeHack reports aren't read yet: add them by hand.
-- **Other platforms** (Inspectiv, HackenProof, a company's own portal…) can be
+  comments). IssueHunt reads your submitted reports and rewarded activities
+  (metadata and JPY bounties only; never `/messages`). GObugfree reads your
+  submitted reports and payouts (metadata and bounties only). Inspectiv reads
+  your submissions list (metadata and USD payouts only; never thread
+  messages). YesWeHack reports aren't read yet: add them by hand.
+- **Other platforms** (HackenProof, Immunefi, a company's own portal…) can be
   added as custom sources: a script of yours reads the platform and writes a
   JSON document, which HuntDeck polls (`HUNTDECK_SOURCES`;
   [custom sources](custom-sources.md)). How the script reads the

@@ -107,6 +107,9 @@ table.glance tbody tr:hover td { background: var(--row-hover); }
 .mpf-dot.ywh { background: var(--pf-yeswehack); }
 .mpf-dot.it { background: var(--pf-intigriti); }
 .mpf-dot.vb { background: var(--pf-vulbox); }
+.mpf-dot.ih { background: var(--pf-issuehunt); }
+.mpf-dot.gbf { background: var(--pf-gobugfree); }
+.mpf-dot.ins { background: var(--pf-inspectiv); }
 
 /* Visual HuntScore panel (#huntscore) */
 .mscore-wrap { display: grid; gap: 18px; }

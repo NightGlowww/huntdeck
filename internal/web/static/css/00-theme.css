@@ -57,6 +57,9 @@
   --pf-intigriti: light-dark(#0a6359, #2dd4bf);
   --pf-yeswehack: light-dark(#a0102f, #ff5277);
   --pf-vulbox:    light-dark(#166534, #34d399);
+  --pf-issuehunt: light-dark(#0369a1, #38bdf8);
+  --pf-gobugfree: light-dark(#b91c1c, #f87171);
+  --pf-inspectiv: light-dark(#7e22ce, #c084fc);
   --pf-independent: light-dark(#4a5561, #a3b1c2);
 }
 /* Nord: cool slate grey with frost blue, softer and lower glare (after the Nord palette). */
@@ -86,6 +89,9 @@
   --pf-intigriti: light-dark(#2e7d6b, #7fc4a8);
   --pf-yeswehack: light-dark(#b32e5c, #f07090);
   --pf-vulbox:    light-dark(#2d6a3e, #88c999);
+  --pf-issuehunt: light-dark(#246489, #7bc0e8);
+  --pf-gobugfree: light-dark(#a83232, #ee8686);
+  --pf-inspectiv: light-dark(#7b3fb0, #c9a0e8);
   --pf-independent: light-dark(#5c6677, #a7b3c4);
 }
 /* Graphite: neutral greys with no tint and a black or white accent; colour only where it means something. */
@@ -115,6 +121,9 @@
   --pf-intigriti: light-dark(#0f8f81, #2dd4bf);
   --pf-yeswehack: light-dark(#c8183e, #ff5277);
   --pf-vulbox:    light-dark(#157337, #4ade80);
+  --pf-issuehunt: light-dark(#0369a1, #38bdf8);
+  --pf-gobugfree: light-dark(#b91c1c, #f87171);
+  --pf-inspectiv: light-dark(#7e22ce, #c084fc);
   --pf-independent: light-dark(#5f6b7a, #a3b1c2);
 }
 /* Blue White: a calm documentation-workbench palette for long API, MCP and
@@ -146,6 +155,9 @@
   --pf-intigriti: light-dark(#087568, #5de0ca);
   --pf-yeswehack: light-dark(#b42343, #ff8a9e);
   --pf-vulbox:    light-dark(#157347, #52d699);
+  --pf-issuehunt: light-dark(#0369a1, #56c2ff);
+  --pf-gobugfree: light-dark(#b42318, #ff857a);
+  --pf-inspectiv: light-dark(#7c3aa8, #d0a8f5);
   --pf-independent: light-dark(#4b6375, #a9c1d4);
 }
 /* Tech Blue: a brighter instrument-panel treatment. Electric blue marks
@@ -177,6 +189,9 @@
   --pf-intigriti: light-dark(#087568, #5de0ca);
   --pf-yeswehack: light-dark(#b42343, #ff8a9e);
   --pf-vulbox:    light-dark(#157347, #4ee09c);
+  --pf-issuehunt: light-dark(#0369a1, #56c2ff);
+  --pf-gobugfree: light-dark(#b42318, #ff857a);
+  --pf-inspectiv: light-dark(#7c3aa8, #d0a8f5);
   --pf-independent: light-dark(#41647d, #a9c9df);
 }
 /* Tints, worked out again wherever a palette is set so they follow it. */

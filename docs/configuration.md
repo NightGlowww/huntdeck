@@ -94,6 +94,20 @@ on unless passed).
 | `VB_PUBLIC_ONLY` | `false` | Poll VulBox's public projects without an account |
 | `VB_FULL_INTERVAL`, `VB_QUICK_INTERVAL` | `6h`, `30m` | VulBox polling (`0` disables) |
 | `VB_RATE`, `VB_CONCURRENCY` | `1`, `2` | VulBox request rate (`0.1`–`5`) and parallel scope fetches (`1`–`4`) |
+| `IH_API_KEY` | — | IssueHunt User API key from `issuehunt.io` › Preferences › API (or a Bearer JWT). Also reads your own JPY reports (Reports, Analytics) and approved private/application programs |
+| `IH_PUBLIC_ONLY` | `false` | Poll IssueHunt's public programs without an API key |
+| `IH_FULL_INTERVAL`, `IH_QUICK_INTERVAL` | `6h`, `30m` | IssueHunt polling (`0` disables) |
+| `IH_RATE`, `IH_CONCURRENCY` | `1.5`, `2` | IssueHunt request rate (`0.1`–`5`) and parallel scope fetches (`1`–`4`) |
+| `GBF_EMAIL`, `GBF_PASSWORD` | — | GObugfree Keycloak login (`id.gobugfree.com`), run in the login browser. Also reads private engagements, pending invitations and your own reports (Reports, Analytics) |
+| `GBF_TOTP_SECRET` | — | Base32 secret of your GObugfree 6-digit MFA authenticator app (if 2FA is on) |
+| `GBF_TOKEN` | — | Alternative to a browser login: a Bearer JWT, OAuth `refresh_token` (`client_id=agent`), or `session=<cookie>` copied from your browser |
+| `GBF_PUBLIC_ONLY` | `false` | Poll GObugfree's public engagements without an account |
+| `GBF_FULL_INTERVAL`, `GBF_QUICK_INTERVAL` | `6h`, `30m` | GObugfree polling (`0` disables) |
+| `GBF_RATE`, `GBF_CONCURRENCY` | `1.5`, `2` | GObugfree request rate (`0.1`–`5`) and parallel scope fetches (`1`–`4`) |
+| `INS_EMAIL`, `INS_PASSWORD` | — | Inspectiv login (`app.inspectiv.com`), run in the login browser (enable `HUNTDECK_VNC=true` if a reCAPTCHA challenge appears). Also reads private programs and your own USD reports (Reports, Analytics) |
+| `INS_TOKEN` | — | Alternative to a browser login: the 40-hex DRF API token from your browser (`localStorage.getItem("inspectiv")`), as 40 hex digits or `Token <hex>` |
+| `INS_FULL_INTERVAL`, `INS_QUICK_INTERVAL` | `6h`, `30m` | Inspectiv polling (`0` disables) |
+| `INS_RATE`, `INS_CONCURRENCY` | `1.5`, `2` | Inspectiv request rate (`0.1`–`5`) and parallel scope fetches (`1`–`4`) |
 | `HUNTMAIL_URL`, `HUNTMAIL_API_KEY` | — | Your [HuntMail](https://github.com/mdpsec/huntmail) inbox, for the Email page and each program's Email tab: the address with its base path and the API key, as HuntMail's setup printed them (`https://<worker>.<subdomain>.workers.dev/<base path>`), or as HuntDeck saved them when it set HuntMail up (Email › HuntMail › Setup). Both or neither; the address is kept secret like the key, since its path is one. HuntDeck reads it from the server only, straight to Cloudflare (not through `HUNTDECK_PROXY`), when you open a page that shows mail |
 | `HUNTMAIL_DOMAINS` | HuntMail's | Domains to make new addresses on, comma-separated (`example.com, example.net`); empty: the ones HuntMail was set up for, the busiest first |
 

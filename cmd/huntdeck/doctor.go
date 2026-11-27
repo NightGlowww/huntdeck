@@ -639,6 +639,8 @@ func checkWebLogins(ctx context.Context, s *store.Store, dir string, ok, warn fu
 			{"intigriti", cfg.Intigriti.Email},
 			{"yeswehack", cfg.YesWeHack.Email},
 			{"vulbox", cfg.VulBox.Account},
+			{"gobugfree", cfg.GObugfree.Email},
+			{"inspectiv", cfg.Inspectiv.Email},
 		}
 	}
 	reported := 0

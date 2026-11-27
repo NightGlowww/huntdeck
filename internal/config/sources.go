@@ -33,7 +33,7 @@ var sourceName = regexp.MustCompile(`^[a-z][a-z0-9-]{1,30}$`)
 
 // reservedSources are names a custom source can't take: the platforms
 // HuntDeck has clients for, their short names, and programs added by hand.
-var reservedSources = []string{"hackerone", "bugcrowd", "intigriti", "yeswehack", "vulbox", "independent", "h1", "bc", "it", "ywh", "vb", "fake"}
+var reservedSources = []string{"hackerone", "bugcrowd", "intigriti", "yeswehack", "vulbox", "issuehunt", "gobugfree", "inspectiv", "independent", "h1", "bc", "it", "ywh", "vb", "ih", "gbf", "ins", "fake"}
 
 // parseSources reads HUNTDECK_SOURCES: name=location pairs separated by
 // spaces, as "inspectiv=/data/sources/inspectiv.json

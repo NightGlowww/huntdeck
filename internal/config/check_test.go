@@ -66,6 +66,42 @@ func TestCheckAnswersForTheJoinedPicture(t *testing.T) {
 			name: "VulBox complete login",
 			cfg:  Config{VulBox: VulBox{Account: "hunter@example.com", Password: Secret("p"), TOTPSecret: Secret("x")}},
 		},
+		{
+			name:    "GObugfree half login pair",
+			cfg:     Config{GObugfree: GObugfree{Email: "hunter@example.com"}},
+			wantErr: "GBF_EMAIL and GBF_PASSWORD must be set together",
+		},
+		{
+			name:    "GObugfree half login pair with public only",
+			cfg:     Config{GObugfree: GObugfree{Email: "hunter@example.com", PublicOnly: true}},
+			wantErr: "GBF_EMAIL and GBF_PASSWORD must be set together",
+		},
+		{
+			name:    "GObugfree TOTP without login",
+			cfg:     Config{GObugfree: GObugfree{TOTPSecret: Secret("x")}},
+			wantErr: "GBF_TOTP_SECRET needs GBF_EMAIL and GBF_PASSWORD",
+		},
+		{
+			name: "GObugfree public only without login",
+			cfg:  Config{GObugfree: GObugfree{PublicOnly: true}},
+		},
+		{
+			name: "GObugfree complete login",
+			cfg:  Config{GObugfree: GObugfree{Email: "hunter@example.com", Password: Secret("p"), TOTPSecret: Secret("x")}},
+		},
+		{
+			name:    "Inspectiv half login pair",
+			cfg:     Config{Inspectiv: Inspectiv{Email: "hunter@example.com"}},
+			wantErr: "INS_EMAIL and INS_PASSWORD must be set together",
+		},
+		{
+			name: "Inspectiv token alone",
+			cfg:  Config{Inspectiv: Inspectiv{Token: Secret("0123456789abcdef0123456789abcdef01234567")}},
+		},
+		{
+			name: "Inspectiv complete login",
+			cfg:  Config{Inspectiv: Inspectiv{Email: "hunter@example.com", Password: Secret("p")}},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

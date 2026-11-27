@@ -20,6 +20,7 @@ const (
 var acceptURLs = map[string]string{
 	"intigriti": "https://app.intigriti.com/researcher/programs/invites-and-applications",
 	"vulbox":    "https://user.vulbox.com/InfoCenter/receive",
+	"gobugfree": "https://app.gobugfree.com/engagements",
 }
 
 // boardInvites is the Invites box.

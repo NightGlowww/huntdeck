@@ -128,6 +128,9 @@ type Config struct {
 	Intigriti Intigriti
 	YesWeHack YesWeHack
 	VulBox    VulBox
+	IssueHunt IssueHunt
+	GObugfree GObugfree
+	Inspectiv Inspectiv
 	// HuntMail is the user's HuntMail inbox, read by the Email page.
 	HuntMail HuntMail
 	// HUNTDECK_SOURCES: platforms HuntDeck has no client for, read from
@@ -222,6 +225,52 @@ type VulBox struct {
 
 // Enabled reports whether VulBox should be polled.
 func (v VulBox) Enabled() bool { return v.Account != "" || v.Session != "" || v.PublicOnly }
+
+// IssueHunt holds IssueHunt credentials and polling settings. With
+// PublicOnly and no API key, only public programs are polled.
+type IssueHunt struct {
+	APIKey        Secret        // IH_API_KEY: User API key (or web bearer JWT)
+	PublicOnly    bool          // IH_PUBLIC_ONLY: poll public programs without an API key
+	FullInterval  time.Duration // IH_FULL_INTERVAL
+	QuickInterval time.Duration // IH_QUICK_INTERVAL
+	Rate          float64       // IH_RATE
+	Concurrency   int           // IH_CONCURRENCY
+}
+
+// Enabled reports whether IssueHunt should be polled.
+func (i IssueHunt) Enabled() bool { return i.APIKey != "" || i.PublicOnly }
+
+// GObugfree holds GObugfree credentials and polling settings. With
+// PublicOnly and no credentials, only public programs are polled.
+type GObugfree struct {
+	Email         string        // GBF_EMAIL
+	Password      Secret        // GBF_PASSWORD
+	TOTPSecret    Secret        // GBF_TOTP_SECRET: optional 6-digit authenticator secret
+	Token         Secret        // GBF_TOKEN: optional Bearer JWT / OAuth refresh token / session cookie
+	PublicOnly    bool          // GBF_PUBLIC_ONLY: poll public programs without credentials
+	FullInterval  time.Duration // GBF_FULL_INTERVAL
+	QuickInterval time.Duration // GBF_QUICK_INTERVAL
+	Rate          float64       // GBF_RATE
+	Concurrency   int           // GBF_CONCURRENCY
+}
+
+// Enabled reports whether GObugfree should be polled.
+func (g GObugfree) Enabled() bool { return g.Email != "" || g.Token != "" || g.PublicOnly }
+
+// Inspectiv holds Inspectiv credentials and polling settings. Inspectiv has
+// no public listing: an account or token is required.
+type Inspectiv struct {
+	Email         string        // INS_EMAIL
+	Password      Secret        // INS_PASSWORD
+	Token         Secret        // INS_TOKEN: raw 40-hex DRF token, or "Token <hex>"
+	FullInterval  time.Duration // INS_FULL_INTERVAL
+	QuickInterval time.Duration // INS_QUICK_INTERVAL
+	Rate          float64       // INS_RATE
+	Concurrency   int           // INS_CONCURRENCY
+}
+
+// Enabled reports whether Inspectiv should be polled.
+func (i Inspectiv) Enabled() bool { return i.Email != "" || i.Token != "" }
 
 // HuntMail is the user's HuntMail inbox: a catch-all for hunting on their
 // own Cloudflare account (https://github.com/mdpsec/huntmail). Its address
@@ -454,6 +503,37 @@ func Load(src Source) (Config, error) {
 		Concurrency:   r.int("VB_CONCURRENCY", 2, 1, 4),
 	}
 
+	cfg.IssueHunt = IssueHunt{
+		APIKey:        Secret(r.get("IH_API_KEY", "")),
+		PublicOnly:    r.bool("IH_PUBLIC_ONLY", false),
+		FullInterval:  r.duration("IH_FULL_INTERVAL", 6*time.Hour),
+		QuickInterval: r.duration("IH_QUICK_INTERVAL", 30*time.Minute),
+		Rate:          r.float("IH_RATE", 1.5, 0.1, 5),
+		Concurrency:   r.int("IH_CONCURRENCY", 2, 1, 4),
+	}
+
+	cfg.GObugfree = GObugfree{
+		Email:         r.get("GBF_EMAIL", ""),
+		Password:      Secret(r.get("GBF_PASSWORD", "")),
+		TOTPSecret:    Secret(r.get("GBF_TOTP_SECRET", "")),
+		Token:         Secret(r.get("GBF_TOKEN", "")),
+		PublicOnly:    r.bool("GBF_PUBLIC_ONLY", false),
+		FullInterval:  r.duration("GBF_FULL_INTERVAL", 6*time.Hour),
+		QuickInterval: r.duration("GBF_QUICK_INTERVAL", 30*time.Minute),
+		Rate:          r.float("GBF_RATE", 1.5, 0.1, 5),
+		Concurrency:   r.int("GBF_CONCURRENCY", 2, 1, 4),
+	}
+
+	cfg.Inspectiv = Inspectiv{
+		Email:         r.get("INS_EMAIL", ""),
+		Password:      Secret(r.get("INS_PASSWORD", "")),
+		Token:         Secret(r.get("INS_TOKEN", "")),
+		FullInterval:  r.duration("INS_FULL_INTERVAL", 6*time.Hour),
+		QuickInterval: r.duration("INS_QUICK_INTERVAL", 30*time.Minute),
+		Rate:          r.float("INS_RATE", 1.5, 0.1, 5),
+		Concurrency:   r.int("INS_CONCURRENCY", 2, 1, 4),
+	}
+
 	cfg.HuntMail = HuntMail{URL: Secret(strings.TrimSpace(r.get("HUNTMAIL_URL", ""))), Key: Secret(strings.TrimSpace(r.get("HUNTMAIL_API_KEY", "")))}
 	if h := cfg.HuntMail; (h.URL == "") != (h.Key == "") {
 		r.errs = append(r.errs, errors.New("HUNTMAIL_URL and HUNTMAIL_API_KEY must be set together"))
@@ -592,6 +672,9 @@ func readOnlyConflicts(cfg Config) []error {
 		{cfg.Intigriti.Enabled() || cfg.Intigriti.Email != "", "Intigriti credentials (IT_*)"},
 		{cfg.YesWeHack.Enabled(), "YesWeHack credentials (YWH_*)"},
 		{cfg.VulBox.Enabled(), "VulBox credentials (VB_*)"},
+		{cfg.IssueHunt.Enabled(), "IssueHunt credentials (IH_*)"},
+		{cfg.GObugfree.Enabled(), "GObugfree credentials (GBF_*)"},
+		{cfg.Inspectiv.Enabled(), "Inspectiv credentials (INS_*)"},
 		{cfg.VNC, "HUNTDECK_VNC"},
 		{cfg.Proxy != nil, "HUNTDECK_PROXY"},
 		{len(cfg.Sources.List) > 0, "HUNTDECK_SOURCES"},
@@ -728,6 +811,15 @@ func Check(cfg Config) error {
 	}
 	if v := cfg.VulBox; v.TOTPSecret != "" && v.Account == "" {
 		errs = append(errs, errors.New("VB_TOTP_SECRET needs VB_ACCOUNT and VB_PASSWORD"))
+	}
+	if g := cfg.GObugfree; (g.Email == "") != (g.Password == "") {
+		errs = append(errs, errors.New("GBF_EMAIL and GBF_PASSWORD must be set together"))
+	}
+	if g := cfg.GObugfree; g.TOTPSecret != "" && g.Email == "" {
+		errs = append(errs, errors.New("GBF_TOTP_SECRET needs GBF_EMAIL and GBF_PASSWORD"))
+	}
+	if i := cfg.Inspectiv; (i.Email == "") != (i.Password == "") {
+		errs = append(errs, errors.New("INS_EMAIL and INS_PASSWORD must be set together"))
 	}
 	return errors.Join(errs...)
 }

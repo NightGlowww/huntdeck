@@ -21,7 +21,7 @@ TEMPLATES = os.path.join(ROOT, "internal", "web", "templates")
 
 # Names, codes and brands a page may show as they are.
 NAMES = {
-    "hackerone", "bugcrowd", "intigriti", "yeswehack", "vulbox", "huntdeck", "huntscore",
+    "hackerone", "bugcrowd", "intigriti", "yeswehack", "vulbox", "issuehunt", "gobugfree", "inspectiv", "huntdeck", "huntscore",
     "api", "url", "urls", "ip", "cidr", "json", "csv", "http", "https", "get",
     "post", "cve", "bbp", "vdp", "id", "ids", "caido", "burp", "zap", "discord",
     "telegram", "webhook", "burpsuite", "scope", "insomnia", "bruno", "postman",

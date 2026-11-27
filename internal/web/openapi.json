@@ -82,7 +82,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox; independent: programs added by hand).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv; independent: programs added by hand).",
             "schema": {
               "type": "string"
             }
@@ -412,7 +412,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox; independent: programs added by hand).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv; independent: programs added by hand).",
             "schema": {
               "type": "string"
             }
@@ -743,7 +743,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv).",
             "schema": {
               "type": "string"
             }
@@ -1035,7 +1035,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv).",
             "schema": {
               "type": "string"
             }
@@ -1322,7 +1322,7 @@
         ],
         "operationId": "acceptInvite",
         "summary": "Accept an invitation",
-        "description": "Accepts the invitation to a private program on its platform (HackerOne with its website login, Bugcrowd or Intigriti), signing in first if it has to, then refreshes that program in the background: its listing, scope and stats. Answers once the platform has accepted, or with 202 if it's slow to (it carries on).",
+        "description": "Accepts the invitation to a private program on its platform (HackerOne with its website login, Bugcrowd, Intigriti, VulBox or GObugfree), signing in first if it has to, then refreshes that program in the background: its listing, scope and stats. Answers once the platform has accepted, or with 202 if it's slow to (it carries on).",
         "parameters": [
           {
             "name": "platform",
@@ -1333,6 +1333,7 @@
               "type": "string",
               "enum": [
                 "bugcrowd",
+                "gobugfree",
                 "hackerone",
                 "intigriti",
                 "vulbox"
@@ -1437,6 +1438,9 @@
                 "intigriti",
                 "yeswehack",
                 "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv",
                 "independent"
               ]
             },
@@ -1532,6 +1536,9 @@
                 "intigriti",
                 "yeswehack",
                 "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv",
                 "independent"
               ]
             },
@@ -1600,6 +1607,9 @@
                 "intigriti",
                 "yeswehack",
                 "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv",
                 "independent"
               ]
             },
@@ -1666,6 +1676,9 @@
                 "intigriti",
                 "yeswehack",
                 "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv",
                 "independent"
               ]
             },
@@ -1743,6 +1756,9 @@
                 "intigriti",
                 "yeswehack",
                 "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv",
                 "independent"
               ]
             },
@@ -1858,6 +1874,9 @@
                 "intigriti",
                 "yeswehack",
                 "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv",
                 "independent"
               ]
             }
@@ -2237,6 +2256,9 @@
                 "intigriti",
                 "yeswehack",
                 "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv",
                 "independent"
               ]
             }
@@ -2362,7 +2384,10 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
-                "vulbox"
+                "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv"
               ]
             }
           },
@@ -2477,7 +2502,7 @@
           {
             "name": "platform",
             "in": "query",
-            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox).",
+            "description": "Only these platforms' programs: one, or several separated by commas, as hackerone,bugcrowd (hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv).",
             "schema": {
               "type": "string"
             }
@@ -2787,7 +2812,10 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
-                "vulbox"
+                "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv"
               ]
             },
             "example": "hackerone"
@@ -2947,7 +2975,10 @@
                 "bugcrowd",
                 "intigriti",
                 "yeswehack",
-                "vulbox"
+                "vulbox",
+                "issuehunt",
+                "gobugfree",
+                "inspectiv"
               ]
             },
             "example": "hackerone"
@@ -3103,7 +3134,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Only this platform, as the platform slug (hackerone, bugcrowd, intigriti, yeswehack, vulbox)."
+            "description": "Only this platform, as the platform slug (hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv)."
           },
           {
             "name": "kind",
@@ -3474,6 +3505,9 @@
                   "intigriti",
                   "yeswehack",
                   "vulbox",
+                  "issuehunt",
+                  "gobugfree",
+                  "inspectiv",
                   "independent",
                   "other"
                 ]

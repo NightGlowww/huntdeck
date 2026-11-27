@@ -37,6 +37,12 @@ func platformLabel(name string) string {
 		return "YesWeHack"
 	case "vulbox":
 		return "VulBox"
+	case "issuehunt":
+		return "IssueHunt"
+	case "gobugfree":
+		return "GObugfree"
+	case "inspectiv":
+		return "Inspectiv"
 	case store.Independent:
 		return "Independent"
 	}
@@ -61,6 +67,12 @@ func platformShort(name string) string {
 		return "YWH"
 	case "vulbox":
 		return "VB"
+	case "issuehunt":
+		return "IH"
+	case "gobugfree":
+		return "GBF"
+	case "inspectiv":
+		return "INS"
 	case store.Independent:
 		return "IND"
 	}

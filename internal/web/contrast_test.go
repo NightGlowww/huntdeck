@@ -39,6 +39,9 @@ func TestPaletteContrast(t *testing.T) {
 		{"on-accent", "accent"}, {"good", "surface"}, {"info", "surface"},
 		{"warn", "surface"}, {"bad", "surface"}, {"priv", "surface"},
 		{"pf-vulbox", "surface"}, {"pf-vulbox", "bg"},
+		{"pf-issuehunt", "surface"}, {"pf-issuehunt", "bg"},
+		{"pf-gobugfree", "surface"}, {"pf-gobugfree", "bg"},
+		{"pf-inspectiv", "surface"}, {"pf-inspectiv", "bg"},
 	}
 	for name, vars := range palettes {
 		borderInput, okBorder := vars["border-input"]

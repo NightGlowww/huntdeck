@@ -130,6 +130,12 @@ func canonicalPlatform(name string) string {
 		return "yeswehack"
 	case "vb":
 		return "vulbox"
+	case "ih":
+		return "issuehunt"
+	case "gbf":
+		return "gobugfree"
+	case "ins":
+		return "inspectiv"
 	}
 	return n
 }

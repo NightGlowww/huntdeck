@@ -38,6 +38,9 @@ const (
 	GroupIntigriti = "intigriti"
 	GroupYesWeHack = "yeswehack"
 	GroupVulBox    = "vulbox"
+	GroupIssueHunt = "issuehunt"
+	GroupGObugfree = "gobugfree"
+	GroupInspectiv = "inspectiv"
 	GroupHuntMail  = "huntmail"
 	GroupNetwork   = "network"
 	// GroupAI is the optional model: an OpenAI-compatible endpoint that reads
@@ -112,6 +115,31 @@ var Editable = []Field{
 	{Name: "VB_RATE", Group: GroupVulBox, Label: "Requests per second", Kind: KindNumber, Default: "1",
 		Help: "0.1 to 5. Keep it polite for VulBox's firewall."},
 	{Name: "VB_CONCURRENCY", Group: GroupVulBox, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
+
+	{Name: "IH_API_KEY", Group: GroupIssueHunt, Label: "API key", Kind: KindSecret,
+		Help: "A User API key from issuehunt.io > Preferences > API."},
+	{Name: "IH_PUBLIC_ONLY", Group: GroupIssueHunt, Label: "Public programs without an account", Kind: KindBool},
+	{Name: "IH_RATE", Group: GroupIssueHunt, Label: "Requests per second", Kind: KindNumber, Default: "1.5", Help: "0.1 to 5."},
+	{Name: "IH_CONCURRENCY", Group: GroupIssueHunt, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
+
+	{Name: "GBF_EMAIL", Group: GroupGObugfree, Label: "Email", Kind: KindText,
+		Help: "Signs in to GObugfree's Keycloak login in the login browser."},
+	{Name: "GBF_PASSWORD", Group: GroupGObugfree, Label: "Password", Kind: KindSecret},
+	{Name: "GBF_TOTP_SECRET", Group: GroupGObugfree, Label: "2FA secret", Kind: KindSecret,
+		Help: "The authenticator app's secret (base32), if 2FA is on."},
+	{Name: "GBF_TOKEN", Group: GroupGObugfree, Label: "API token", Kind: KindSecret,
+		Help: "Instead of a login: a Bearer JWT, OAuth refresh token, or session cookie from your browser."},
+	{Name: "GBF_PUBLIC_ONLY", Group: GroupGObugfree, Label: "Public programs without an account", Kind: KindBool},
+	{Name: "GBF_RATE", Group: GroupGObugfree, Label: "Requests per second", Kind: KindNumber, Default: "1.5", Help: "0.1 to 5."},
+	{Name: "GBF_CONCURRENCY", Group: GroupGObugfree, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
+
+	{Name: "INS_EMAIL", Group: GroupInspectiv, Label: "Email", Kind: KindText,
+		Help: "Signs in to app.inspectiv.com in the login browser (open Settings > Browser with VNC if a reCAPTCHA appears)."},
+	{Name: "INS_PASSWORD", Group: GroupInspectiv, Label: "Password", Kind: KindSecret},
+	{Name: "INS_TOKEN", Group: GroupInspectiv, Label: "API token", Kind: KindSecret,
+		Help: "Instead of a login: the 40-character token from your browser, as 40 hex digits or Token <hex>."},
+	{Name: "INS_RATE", Group: GroupInspectiv, Label: "Requests per second", Kind: KindNumber, Default: "1.5", Help: "0.1 to 5."},
+	{Name: "INS_CONCURRENCY", Group: GroupInspectiv, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
 
 	{Name: "HUNTMAIL_URL", Group: GroupHuntMail, Label: "Address", Kind: KindSecret,
 		Help: "Your HuntMail's address with its base path, as its setup printed it: https://<worker>.<subdomain>.workers.dev/<base path>. Kept secret like the key."},

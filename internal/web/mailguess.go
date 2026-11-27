@@ -37,7 +37,7 @@ func (m mailRow) GuessMore() int { return max(len(m.Guess)-1, 0) }
 // is for: the platforms' own notifications, and free mail.
 var notPrograms = map[string]bool{
 	"hackerone.com": true, "wearehackerone.com": true, "hackerone.net": true, "bugcrowd.com": true, "bugcrowdninja.com": true,
-	"intigriti.com": true, "intigriti.io": true, "intigriti.me": true, "yeswehack.com": true, "yeswehack.ninja": true, "vulbox.com": true,
+	"intigriti.com": true, "intigriti.io": true, "intigriti.me": true, "yeswehack.com": true, "yeswehack.ninja": true, "vulbox.com": true, "issuehunt.io": true, "gobugfree.com": true, "inspectiv.com": true,
 	"gmail.com": true, "googlemail.com": true, "outlook.com": true, "hotmail.com": true, "live.com": true, "yahoo.com": true,
 	"icloud.com": true, "me.com": true, "proton.me": true, "protonmail.com": true, "gmx.com": true, "aol.com": true,
 }

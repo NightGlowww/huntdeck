@@ -57,8 +57,8 @@ func TestAccountsTab(t *testing.T) {
 	e, saved, rs := newAccountsEnv(t)
 	c := e.client()
 	_, body := e.do(c, "GET", "/settings?tab=accounts", nil, nil)
-	for _, want := range []string{`href="/settings?tab=accounts"`, `id="acct-hackerone"`, `id="acct-bugcrowd"`, `id="acct-vulbox"`, `id="acct-network"`,
-		`name="IT_TOKEN"`, `name="VB_ACCOUNT"`, `name="VB_SESSION"`, `name="VB_AUTO_JOIN" value="true" checked`, `name="BC_PUBLIC_ONLY" value="true" checked`, `placeholder="set · type to replace"`} {
+	for _, want := range []string{`href="/settings?tab=accounts"`, `id="acct-hackerone"`, `id="acct-bugcrowd"`, `id="acct-vulbox"`, `id="acct-issuehunt"`, `id="acct-gobugfree"`, `id="acct-inspectiv"`, `id="acct-network"`,
+		`name="IT_TOKEN"`, `name="VB_ACCOUNT"`, `name="VB_SESSION"`, `name="VB_AUTO_JOIN" value="true" checked`, `name="IH_API_KEY"`, `name="IH_PUBLIC_ONLY"`, `name="GBF_EMAIL"`, `name="GBF_TOKEN"`, `name="GBF_PUBLIC_ONLY"`, `name="INS_EMAIL"`, `name="INS_TOKEN"`, `name="BC_PUBLIC_ONLY" value="true" checked`, `placeholder="set · type to replace"`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("Accounts tab lacks %s", want)
 		}
@@ -108,6 +108,21 @@ func TestAccountsTab(t *testing.T) {
 	res, body = e.do(c, "POST", "/settings/accounts", url.Values{"group": {"bugcrowd"}, "BC_PUBLIC_ONLY": {"true"}, "BC_EMAIL": {"me@example.com"}}, nil)
 	if res.StatusCode != http.StatusBadRequest || !strings.Contains(body, "BC_EMAIL and BC_PASSWORD") {
 		t.Errorf("invalid save: %d", res.StatusCode)
+	}
+	res, body = e.do(c, "POST", "/settings/accounts", url.Values{"group": {"gobugfree"}, "GBF_PUBLIC_ONLY": {"true"}, "GBF_EMAIL": {"me@example.com"}}, nil)
+	if res.StatusCode != http.StatusBadRequest || !strings.Contains(body, "GBF_EMAIL and GBF_PASSWORD") {
+		t.Errorf("invalid gobugfree save: %d", res.StatusCode)
+	}
+	res, _ = e.do(c, "POST", "/settings/accounts", url.Values{"group": {"issuehunt"}, "IH_API_KEY": {newToken}}, nil)
+	if res.StatusCode != http.StatusSeeOther || !strings.Contains(res.Header.Get("Location"), "msg=accounts-saved") {
+		t.Fatalf("save IH_API_KEY: %d %s", res.StatusCode, res.Header.Get("Location"))
+	}
+	if cfg, err := saved.Config(ctx); err != nil || cfg.IssueHunt.APIKey.Reveal() != newToken {
+		t.Fatalf("IH_API_KEY not saved: %v", err)
+	}
+	res, body = e.do(c, "POST", "/settings/accounts", url.Values{"group": {"inspectiv"}, "INS_EMAIL": {"me@example.com"}}, nil)
+	if res.StatusCode != http.StatusBadRequest || !strings.Contains(body, "INS_EMAIL and INS_PASSWORD") {
+		t.Errorf("invalid inspectiv save: %d", res.StatusCode)
 	}
 
 	// Clearing, then resetting back to .env.

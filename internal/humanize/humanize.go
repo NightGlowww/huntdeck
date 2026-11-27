@@ -69,7 +69,7 @@ func withCurrency(s, currency string) string {
 		return "€" + s
 	case "GBP":
 		return "£" + s
-	case "CNY", "RMB":
+	case "CNY", "RMB", "JPY":
 		return "¥" + s
 	}
 	return s + " " + currency

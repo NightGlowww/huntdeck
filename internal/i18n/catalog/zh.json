@@ -2791,6 +2791,11 @@
   "Warn": "警告",
   "Debug": "调试",
   "Filter logs: vulbox, yeswehack, EOF, proxy…": "按关键词过滤：如 vulbox、yeswehack、EOF、proxy…",
-  "No log entries match the current filter.": "暂无符合当前筛选条件的日志记录。"
+  "No log entries match the current filter.": "暂无符合当前筛选条件的日志记录。",
+  "A User API key from issuehunt.io > Preferences > API.": "在 issuehunt.io › Preferences › API 中生成的 User API key。",
+  "Signs in to GObugfree's Keycloak login in the login browser.": "在登录浏览器中通过 GObugfree 的 Keycloak 页面登录。",
+  "Instead of a login: a Bearer JWT, OAuth refresh token, or session cookie from your browser.": "替代账号登录：从浏览器复制的 Bearer JWT、OAuth refresh token 或 session cookie。",
+  "Signs in to app.inspectiv.com in the login browser (open Settings > Browser with VNC if a reCAPTCHA appears).": "在登录浏览器中登录 app.inspectiv.com（如出现 reCAPTCHA 验证码，请开启 VNC 后在设置 › 浏览器中完成）。",
+  "Instead of a login: the 40-character token from your browser, as 40 hex digits or Token <hex>.": "替代账号登录：从浏览器复制的 40 位十六进制 API 令牌，支持纯 40 位 hex 或 Token <hex>。"
  }
 }

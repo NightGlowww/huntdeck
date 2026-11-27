@@ -34,6 +34,15 @@ var seedRawFields = map[string][]string{
 		"bonus_range.high_min", "bonus_range.high_max", "bonus_range.serious_min", "bonus_range.serious_max",
 		"serious_min", "serious_max", "high_min", "high_max", "middle_min", "middle_max",
 		"low_min", "low_max", "tags", "goto", "src_url"},
+	"issuehunt": {"id", "slug", "name", "type", "deleted", "visibility", "activated", "frozen",
+		"replySpeed", "creditSystem", "cvssVersion", "firstActivated",
+		"organization.id", "organization.name", "organization.bountyApproved", "organization.icon",
+		"rewards.criticalityRewards"},
+	"gobugfree": {"id", "orgSlug", "orgName", "slug", "title", "kind", "visibility", "hidden",
+		"status", "summary", "industry", "scopeKinds", "rewardCurrency", "rewardMin", "rewardMax",
+		"startsOn", "endsOn", "badges", "logoUrl", "updatedAt"},
+	"inspectiv": {"uuid", "name", "active", "frozen", "critical", "high", "medium", "low", "domains",
+		"logo", "created", "updated"},
 }
 
 // seedRaw is the seed's raw column: for each platform, a JSON object of

@@ -109,6 +109,15 @@ func TestLoadErrors(t *testing.T) {
 		{"vb concurrency", map[string]string{"VB_CONCURRENCY": "9"}, []string{"VB_CONCURRENCY"}},
 		{"vb auto join not bool", map[string]string{"VB_AUTO_JOIN": "maybe"}, []string{"VB_AUTO_JOIN"}},
 		{"vb public only not bool", map[string]string{"VB_PUBLIC_ONLY": "nope"}, []string{"VB_PUBLIC_ONLY"}},
+		{"ih rate too high", map[string]string{"IH_RATE": "10"}, []string{"IH_RATE"}},
+		{"ih concurrency", map[string]string{"IH_CONCURRENCY": "9"}, []string{"IH_CONCURRENCY"}},
+		{"ih public only not bool", map[string]string{"IH_PUBLIC_ONLY": "nope"}, []string{"IH_PUBLIC_ONLY"}},
+		{"gbf rate too high", map[string]string{"GBF_RATE": "10"}, []string{"GBF_RATE"}},
+		{"gbf concurrency", map[string]string{"GBF_CONCURRENCY": "9"}, []string{"GBF_CONCURRENCY"}},
+		{"gbf public only not bool", map[string]string{"GBF_PUBLIC_ONLY": "nope"}, []string{"GBF_PUBLIC_ONLY"}},
+		{"ins rate too high", map[string]string{"INS_RATE": "10"}, []string{"INS_RATE"}},
+		{"ins concurrency", map[string]string{"INS_CONCURRENCY": "9"}, []string{"INS_CONCURRENCY"}},
+		{"ins interval too short", map[string]string{"INS_QUICK_INTERVAL": "10s"}, []string{"INS_QUICK_INTERVAL"}},
 		{"bad proxy", map[string]string{"HUNTDECK_PROXY": "127.0.0.1:8080"}, []string{"HUNTDECK_PROXY"}},
 		{"bad time zone", map[string]string{"HUNTDECK_TIMEZONE": "Brisbane"}, []string{"HUNTDECK_TIMEZONE"}},
 		{"local time zone", map[string]string{"HUNTDECK_TIMEZONE": "Local"}, []string{"HUNTDECK_TIMEZONE"}},
@@ -264,6 +273,106 @@ func TestVulBoxConfig(t *testing.T) {
 	}
 }
 
+func TestIssueHuntAndGObugfreeConfig(t *testing.T) {
+	cfg, err := Load(source(nil, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ih := cfg.IssueHunt
+	if ih.Enabled() || ih.PublicOnly || ih.FullInterval != 6*time.Hour || ih.QuickInterval != 30*time.Minute || ih.Rate != 1.5 || ih.Concurrency != 2 {
+		t.Errorf("IssueHunt defaults: %+v", ih)
+	}
+	gbf := cfg.GObugfree
+	if gbf.Enabled() || gbf.PublicOnly || gbf.FullInterval != 6*time.Hour || gbf.QuickInterval != 30*time.Minute || gbf.Rate != 1.5 || gbf.Concurrency != 2 {
+		t.Errorf("GObugfree defaults: %+v", gbf)
+	}
+	for _, tt := range []struct {
+		name string
+		env  map[string]string
+	}{
+		{"ih public only", map[string]string{"IH_PUBLIC_ONLY": "true"}},
+		{"ih api key", map[string]string{"IH_API_KEY": "ihk_secret_token"}},
+	} {
+		cfg, err := Load(source(tt.env, nil))
+		if err != nil {
+			t.Fatalf("%s: %v", tt.name, err)
+		}
+		if !cfg.IssueHunt.Enabled() {
+			t.Errorf("%s: not enabled", tt.name)
+		}
+	}
+	for _, tt := range []struct {
+		name string
+		env  map[string]string
+	}{
+		{"gbf public only", map[string]string{"GBF_PUBLIC_ONLY": "true"}},
+		{"gbf token", map[string]string{"GBF_TOKEN": "tok-abc"}},
+		{"gbf login", map[string]string{"GBF_EMAIL": "hunter@example.com", "GBF_PASSWORD": "p#ss$word!", "GBF_TOTP_SECRET": "JBSWY3DPEHPK3PXP"}},
+	} {
+		cfg, err := Load(source(tt.env, nil))
+		if err != nil {
+			t.Fatalf("%s: %v", tt.name, err)
+		}
+		if !cfg.GObugfree.Enabled() {
+			t.Errorf("%s: not enabled", tt.name)
+		}
+	}
+	cfg, err = Load(source(map[string]string{
+		"IH_API_KEY": "ihk_tok", "IH_RATE": "2.5", "IH_CONCURRENCY": "3", "IH_FULL_INTERVAL": "12h", "IH_QUICK_INTERVAL": "1h",
+		"GBF_EMAIL": "hunter@example.com", "GBF_PASSWORD": "p#ss$word!", "GBF_RATE": "2.0", "GBF_CONCURRENCY": "4",
+	}, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.IssueHunt.APIKey.Reveal() != "ihk_tok" || cfg.IssueHunt.Rate != 2.5 || cfg.IssueHunt.Concurrency != 3 ||
+		cfg.IssueHunt.FullInterval != 12*time.Hour || cfg.IssueHunt.QuickInterval != time.Hour {
+		t.Errorf("IssueHunt parsed: %+v", cfg.IssueHunt)
+	}
+	if cfg.GObugfree.Password.Reveal() != "p#ss$word!" || cfg.GObugfree.Rate != 2.0 || cfg.GObugfree.Concurrency != 4 {
+		t.Errorf("GObugfree parsed: %+v", cfg.GObugfree)
+	}
+	if strings.Contains(fmt.Sprintf("%+v", cfg.IssueHunt), "ihk_tok") || strings.Contains(fmt.Sprintf("%+v", cfg.GObugfree), "p#ss$word!") {
+		t.Error("secret printed in formatted output")
+	}
+}
+
+func TestInspectivConfig(t *testing.T) {
+	cfg, err := Load(source(nil, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	i := cfg.Inspectiv
+	if i.Enabled() || i.FullInterval != 6*time.Hour || i.QuickInterval != 30*time.Minute || i.Rate != 1.5 || i.Concurrency != 2 {
+		t.Errorf("defaults: %+v", i)
+	}
+	for _, tt := range []struct {
+		name string
+		env  map[string]string
+	}{
+		{"token", map[string]string{"INS_TOKEN": "0123456789abcdef0123456789abcdef01234567"}},
+		{"login", map[string]string{"INS_EMAIL": "hunter@example.com", "INS_PASSWORD": "p#ss$word!"}},
+	} {
+		cfg, err := Load(source(tt.env, nil))
+		if err != nil {
+			t.Fatalf("%s: %v", tt.name, err)
+		}
+		if !cfg.Inspectiv.Enabled() {
+			t.Errorf("%s: not enabled", tt.name)
+		}
+	}
+	cfg, err = Load(source(map[string]string{"INS_EMAIL": "hunter@example.com", "INS_PASSWORD": "p#ss$word!", "INS_TOKEN": "Token abcd", "INS_RATE": "2", "INS_CONCURRENCY": "3", "INS_FULL_INTERVAL": "12h"}, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	i = cfg.Inspectiv
+	if i.Password.Reveal() != "p#ss$word!" || i.Token.Reveal() != "Token abcd" || i.Rate != 2 || i.Concurrency != 3 || i.FullInterval != 12*time.Hour {
+		t.Errorf("parsed: %+v", i)
+	}
+	if out := fmt.Sprintf("%+v", i); strings.Contains(out, "p#ss$word!") || strings.Contains(out, "abcd") {
+		t.Errorf("secret printed: %s", out)
+	}
+}
+
 func TestSecretNeverPrints(t *testing.T) {
 	s := Secret("tok-xyz")
 	var buf bytes.Buffer
@@ -287,6 +396,12 @@ func TestReadOnly(t *testing.T) {
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "BC_PUBLIC_ONLY": "1", "HUNTDECK_VNC": "1"}, []string{"BC_*", "HUNTDECK_VNC"}},
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "YWH_PUBLIC_ONLY": "1", "HUNTDECK_PROXY": "http://127.0.0.1:3128"}, []string{"YWH_*", "HUNTDECK_PROXY"}},
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "VB_SESSION": "tok"}, []string{"VB_*"}},
+		{map[string]string{"HUNTDECK_READ_ONLY": "1", "IH_PUBLIC_ONLY": "1"}, []string{"IH_*"}},
+		{map[string]string{"HUNTDECK_READ_ONLY": "1", "IH_API_KEY": "ihk_tok"}, []string{"IH_*"}},
+		{map[string]string{"HUNTDECK_READ_ONLY": "1", "GBF_PUBLIC_ONLY": "1"}, []string{"GBF_*"}},
+		{map[string]string{"HUNTDECK_READ_ONLY": "1", "GBF_TOKEN": "tok"}, []string{"GBF_*"}},
+		{map[string]string{"HUNTDECK_READ_ONLY": "1", "INS_TOKEN": "tok"}, []string{"INS_*"}},
+		{map[string]string{"HUNTDECK_READ_ONLY": "1", "INS_EMAIL": "me@example.com", "INS_PASSWORD": "p"}, []string{"INS_*"}},
 		{map[string]string{"HUNTDECK_READ_ONLY": "1", "HUNTMAIL_URL": "https://mail.example.workers.dev/0123456789abcdef", "HUNTMAIL_API_KEY": "k"}, []string{"HUNTMAIL_URL"}},
 		{map[string]string{"H1_USERNAME": "u", "H1_TOKEN": "t"}, nil},
 	}

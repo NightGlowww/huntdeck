@@ -38,7 +38,7 @@ var tools = []tool{
 		Description: "Search programs: HuntScore, bounty range, 90-day numbers. Filter by a word, platform, state or bounties.",
 		Schema: object(map[string]any{
 			"q":        prop("string", "Words to match in the name or handle"),
-			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, independent or custom"),
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv, independent or custom"),
 			"state":    prop("string", "open (default), paused, all or removed"),
 			"bounty":   prop("string", "1 for programs that pay, vdp for those that don't"),
 			"sort":     prop("string", "huntscore (default), name, bounty, paid90, received, resolved, response or launched"),
@@ -59,7 +59,7 @@ var tools = []tool{
 		Description: "The programs matching a search, as the page's spreadsheet: CSV text to save, every column, no paging.",
 		Schema: object(map[string]any{
 			"q":        prop("string", "Words to match in the name or handle"),
-			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, independent or custom"),
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv, independent or custom"),
 			"state":    prop("string", "open (default), paused, all or removed"),
 			"bounty":   prop("string", "1 for programs that pay, vdp for those that don't"),
 			"sort":     prop("string", "huntscore (default), name, bounty, paid90, received, resolved, response or launched"),
@@ -75,7 +75,7 @@ var tools = []tool{
 		Name:        "huntdeck_program",
 		Description: "One program in full: what it pays, its numbers, its policy, and its assets in scope.",
 		Schema: object(map[string]any{
-			"platform":     prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, independent or custom"),
+			"platform":     prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv, independent or custom"),
 			"handle":       prop("string", "the program's handle on its platform"),
 			"parts":        prop("string", "what to include: scope, disclosed, facts, brief, announcements, rules (comma separated; default facts,brief,rules — a full program with 5,000 disclosures is a megabyte)"),
 			"scope_limit":  prop("integer", "with scope: entries per answer (default 200, at most 5000)"),
@@ -105,7 +105,7 @@ var tools = []tool{
 		Name:        "huntdeck_invites",
 		Description: "Private programs you were invited to: what the platform offered, when, and whether you joined. The page and the API have this list; the tools did not.",
 		Schema: object(map[string]any{
-			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox or independent"),
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv or independent"),
 			"sort":     prop("string", "newest (default), huntscore, bounty or name"),
 			"limit":    prop("integer", "How many to return (default 30, at most 1000)"),
 			"offset":   prop("integer", "Skip this many"),
@@ -243,7 +243,7 @@ var tools = []tool{
 		Name:        "huntdeck_scope_text",
 		Description: "A program's scope entries as plain text, one identifier per line: every row the filters match (not just the first screenful), with the Scope tab's filters.",
 		Schema: object(map[string]any{
-			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, independent or custom"),
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv, independent or custom"),
 			"handle":   prop("string", "the program's handle on its platform"),
 			"show":     prop("string", "in (default), out or removed"),
 			"type":     prop("string", "an asset type to keep, like wildcard or domain"),
@@ -264,7 +264,7 @@ var tools = []tool{
 		Name:        "huntdeck_export",
 		Description: "A program's scope as a file for Burp Suite, ZAP or Caido: the body to save, ready to import.",
 		Schema: object(map[string]any{
-			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, independent or custom"),
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv, independent or custom"),
 			"handle":   prop("string", "the program's handle on its platform"),
 			"format":   prop("string", "burp (JSON), zap (XML context) or caido (JSON); burp by default"),
 		}, "platform", "handle"),
@@ -295,7 +295,7 @@ var tools = []tool{
 			"(an invitation to accept, requirements, paused). Built every half hour; the fastest way to decide what to do next.",
 		Schema: object(map[string]any{
 			"limit":    prop("integer", "How many rows (default 20, at most 100)"),
-			"platform": prop("string", "Only this platform (hackerone, bugcrowd, intigriti, yeswehack, vulbox)"),
+			"platform": prop("string", "Only this platform (hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv)"),
 			"kind":     prop("string", "Only this kind of asset (wildcard, domain, url, ip, cidr, android, ios)"),
 			"added":    prop("string", "Only targets added within this many days, written 7d"),
 			"paying":   prop("boolean", "Only programs that pay bounties"),
@@ -354,7 +354,7 @@ var tools = []tool{
 		Write:       true,
 		Description: "Ask the instance to poll a platform now: a quick poll lists programs, a full one fetches every scope. At most once a minute — polls cost the platform.",
 		Schema: object(map[string]any{
-			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, independent or custom"),
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv, independent or custom"),
 		}, "platform"),
 		Call: func(ctx context.Context, s *Server, args map[string]any) (string, error) {
 			platform := stringArg(args, "platform")
@@ -393,7 +393,7 @@ var tools = []tool{
 		Description: "Ask the decision model whether a testing plan complies with a program's own policy text. The policy comes from the instance; the plan comes from you. Answers forbidden, check_first or allowed with P(comply). Needs HUNTDECK_JEV_KEY.",
 		Local:       true,
 		Schema: object(map[string]any{
-			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, independent or custom"),
+			"platform": prop("string", "hackerone, bugcrowd, intigriti, yeswehack, vulbox, issuehunt, gobugfree, inspectiv, independent or custom"),
 			"handle":   prop("string", "the program's handle"),
 			"plan":     prop("string", "what you intend to do, in a sentence"),
 		}, "platform", "handle", "plan"),

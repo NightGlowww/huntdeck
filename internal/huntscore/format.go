@@ -42,6 +42,12 @@ func platformLabel(name string) string {
 		return "YesWeHack"
 	case "vulbox":
 		return "VulBox"
+	case "issuehunt":
+		return "IssueHunt"
+	case "gobugfree":
+		return "GObugfree"
+	case "inspectiv":
+		return "Inspectiv"
 	}
 	return name
 }
