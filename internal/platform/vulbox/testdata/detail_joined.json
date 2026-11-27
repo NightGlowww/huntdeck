@@ -1,0 +1,45 @@
+{
+  "code": 200,
+  "data": {
+    "id": 10001,
+    "task_title": "Acme Security Response Center",
+    "task_validation": "3,2,4,5",
+    "task_stime": "2024-01-15 08:00:00",
+    "task_is_src": 1,
+    "type": 7,
+    "status": 0,
+    "task_firm": "<p>Acme Corp official security response center.</p>",
+    "task_range": "<p>测试范围：</p><p>*.example.com，api.example.org (test.example.com除外)</p><p>203.0.113.10</p><p>198.51.100.0/24</p><p>https://portal.example.net/v1/auth</p><p>不在测试范围：</p><p>blog.example.com</p>",
+    "task_requirement": "<p>No DoS or social engineering.</p>",
+    "task_description": "<p>Critical vulnerabilities receive maximum reward.</p>",
+    "is_joined": 1,
+    "is_invited": false,
+    "need_sign_agreement": false,
+    "hideProjectInfo": false,
+    "hall_status": 2,
+    "hall_status_name": "提交漏洞",
+    "take_margin": 0,
+    "is_margin_white": false,
+    "margin_amount": 0,
+    "reward_num": [
+      {
+        "date": "2024/01/15 00:00",
+        "data": [
+          {
+            "grade_name": "核心业务",
+            "business_type": 3,
+            "low_min": 100,
+            "low_max": 500,
+            "middle_min": 500,
+            "middle_max": 1500,
+            "high_min": 2500,
+            "high_max": 5000,
+            "serious_min": 5000,
+            "serious_max": 10000
+          }
+        ]
+      }
+    ]
+  },
+  "msg": "success"
+}

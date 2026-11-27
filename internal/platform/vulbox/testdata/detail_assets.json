@@ -1,0 +1,21 @@
+{
+  "code": 200,
+  "data": {
+    "list": [
+      null,
+      {
+        "type": "Web端",
+        "name": "Acme Main Portal",
+        "host": "*.example.com",
+        "remark": "Core web asset"
+      },
+      {
+        "production_type": "Android",
+        "production_title": "Acme Mobile App",
+        "production_host": "com.example.acme",
+        "production_remark": "Latest store release"
+      }
+    ]
+  },
+  "msg": "success"
+}

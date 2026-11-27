@@ -1,0 +1,34 @@
+{
+  "code": 200,
+  "data": {
+    "current_page": 1,
+    "last_page": 1,
+    "per_page": 50,
+    "total": 2,
+    "data": [
+      {
+        "id": 10001,
+        "task_title": "Acme Security Response Center",
+        "task_is_src": 1,
+        "task_stime": "2023-11-15 00:00",
+        "status": 0,
+        "type": 7,
+        "reward_range": "100 ~ 10000",
+        "src_url": "acme.vulbox.com",
+        "hacker_joined_exists": true
+      },
+      {
+        "id": 10003,
+        "task_title": "Northwind SRC",
+        "task_is_src": 1,
+        "task_stime": "2024-06-01 08:00",
+        "status": 3,
+        "type": 7,
+        "reward_range": "200 ~ 8000",
+        "src_url": "northwind.vulbox.com",
+        "hacker_joined_exists": false
+      }
+    ]
+  },
+  "msg": "success"
+}

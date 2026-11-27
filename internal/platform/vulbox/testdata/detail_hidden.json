@@ -1,0 +1,23 @@
+{
+  "code": 200,
+  "data": {
+    "id": 10001,
+    "task_title": "Acme Security Response Center",
+    "task_is_src": 1,
+    "type": 7,
+    "status": 0,
+    "task_range": "",
+    "task_description": "",
+    "is_joined": 0,
+    "is_invited": false,
+    "need_sign_agreement": false,
+    "hideProjectInfo": true,
+    "hall_status": 1,
+    "hall_status_name": "立即加入",
+    "take_margin": 0,
+    "is_margin_white": false,
+    "margin_amount": 0,
+    "reward_num": []
+  },
+  "msg": "success"
+}

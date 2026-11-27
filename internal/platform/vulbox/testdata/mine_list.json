@@ -1,0 +1,45 @@
+{
+  "code": 200,
+  "data": {
+    "current_page": 1,
+    "last_page": 1,
+    "per_page": 50,
+    "total": 2,
+    "data": [
+      {
+        "id": 20001,
+        "project_id": 20001,
+        "type": 2,
+        "status": 0,
+        "project_status": 0,
+        "task_title": "Acme Private Crowdtest",
+        "task_is_src": 0,
+        "task_bonus_level": 6,
+        "task_stime": 1700000000,
+        "take_margin": 0,
+        "is_margin_white": false,
+        "is_join": 1,
+        "is_invited": 0,
+        "goto": "https://user.vulbox.com/projectHall/projectDetail/20001"
+      },
+      {
+        "id": 20002,
+        "project_id": 20002,
+        "type": 2,
+        "status": 0,
+        "project_status": 0,
+        "task_title": "Beta Invited Private Program",
+        "task_is_src": 0,
+        "task_bonus_level": 8,
+        "task_stime": 1710000000,
+        "take_margin": 0,
+        "is_margin_white": false,
+        "is_join": 0,
+        "is_invited": 1,
+        "invite_code": "INV-SAMPLE-01",
+        "goto": "https://user.vulbox.com/projectHall/projectDetail/20002"
+      }
+    ]
+  },
+  "msg": "success"
+}

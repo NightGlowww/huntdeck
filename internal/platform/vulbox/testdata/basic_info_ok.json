@@ -1,0 +1,13 @@
+{
+  "code": 200,
+  "data": {
+    "logged": true,
+    "user": {
+      "enable": true,
+      "uid": 10001,
+      "username": "sample_hunter",
+      "type": 1
+    }
+  },
+  "msg": "success"
+}

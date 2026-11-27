@@ -1,0 +1,69 @@
+{
+  "code": 200,
+  "data": {
+    "current_page": 1,
+    "last_page": 1,
+    "per_page": 50,
+    "total": 3,
+    "data": [
+      {
+        "id": 900001,
+        "bug_long_id": "vulbox-2026-00900001",
+        "bug_title": "Sample SSRF in Webhook Endpoint",
+        "bug_tid": 10001,
+        "bug_type": 9,
+        "bug_firm_name": "",
+        "bug_level": 3,
+        "bug_final_level_name": "高危",
+        "bug_status": 4,
+        "bug_status_desc": "已关闭",
+        "bug_valid": 1,
+        "valid": "确认漏洞",
+        "bug_quality": 3,
+        "bug_money": "3000.00",
+        "bug_award": "3000.00",
+        "bug_activity_money": "500.00",
+        "bug_total_score": 15,
+        "bug_updata": "2026/08/28 10:30:00",
+        "update_at": "2026-09-02 18:00:00",
+        "bug_audit_time": 1787900000,
+        "bug_approve_time": 1788100000
+      },
+      {
+        "id": 900002,
+        "bug_long_id": "vulbox-2026-00900002",
+        "bug_title": "Sample Duplicate XSS",
+        "bug_tid": 10001,
+        "bug_type": 9,
+        "bug_firm_name": "",
+        "bug_level": 2,
+        "bug_final_level_name": "中危",
+        "bug_status": 5,
+        "bug_status_desc": "已忽略",
+        "bug_valid": 2,
+        "valid": "重复漏洞",
+        "bug_money": "0.00",
+        "bug_activity_money": "0.00",
+        "bug_updata": "2026/08/29 08:00:00",
+        "update_at": "2026-08-30 12:00:00"
+      },
+      {
+        "id": 900003,
+        "bug_long_id": "vulbox-2026-00900003",
+        "bug_title": "Sample Needs More Info Issue",
+        "bug_tid": 10001,
+        "bug_type": 9,
+        "bug_firm_name": "",
+        "bug_level": 1,
+        "bug_final_level_name": "低危",
+        "bug_status": 7,
+        "bug_status_desc": "待补充",
+        "bug_valid": 0,
+        "bug_money": "0.00",
+        "bug_updata": "2026-09-01 09:15:30",
+        "update_at": "2026-09-01 11:00:00"
+      }
+    ]
+  },
+  "msg": "success"
+}
