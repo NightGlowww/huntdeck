@@ -1,0 +1,47 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-0000-0000-000000000103",
+      "slug": "gamma-app-only",
+      "name": "Gamma Application Program",
+      "type": "bounty",
+      "deleted": false,
+      "visibility": "application",
+      "activated": true,
+      "frozen": false,
+      "creditSystem": "money",
+      "contents": [],
+      "rewards": {
+        "criticalityRewards": {
+          "low": { "id": "00000000-0000-0000-0000-000000000411", "from": 5000, "to": 15000 }
+        },
+        "vrts": []
+      },
+      "scopeGroups": []
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000104",
+      "slug": "delta-internal-points",
+      "name": "Delta Internal Points",
+      "type": "internal",
+      "deleted": false,
+      "visibility": "invite",
+      "activated": false,
+      "frozen": false,
+      "creditSystem": "point",
+      "contents": [
+        { "language": "en", "description": "Internal point rewards", "guidelines": "" }
+      ],
+      "rewards": {
+        "criticalityRewards": {
+          "high": { "id": "00000000-0000-0000-0000-000000000412", "from": 100, "to": 500 }
+        },
+        "vrts": []
+      },
+      "scopeGroups": []
+    }
+  ],
+  "page": 2,
+  "perPage": 200,
+  "total": 4
+}

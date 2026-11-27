@@ -1,0 +1,46 @@
+{
+  "data": {
+    "id": "00000000-0000-0000-0000-000000000101",
+    "slug": "acme-bounty",
+    "name": "Acme Bug Bounty Program",
+    "type": "bounty",
+    "deleted": false,
+    "visibility": "public",
+    "activated": true,
+    "frozen": false,
+    "replySpeed": 432000,
+    "creditSystem": null,
+    "firstActivated": "Thu Feb 13 2025 09:08:29 GMT+0000 (Coordinated Universal Time)",
+    "organization": {
+      "id": "00000000-0000-0000-0000-000000000301",
+      "name": "Acme Corp",
+      "bountyApproved": true
+    },
+    "contents": [
+      { "language": "en", "description": "Acme security program", "guidelines": "## Program Terms\nFollow responsible disclosure." }
+    ],
+    "rewards": {
+      "criticalityRewards": {
+        "informational": { "id": "00000000-0000-0000-0000-000000000401", "from": 0, "to": 0 },
+        "low":           { "id": "00000000-0000-0000-0000-000000000402", "from": 10000, "to": 10000 },
+        "medium":        { "id": "00000000-0000-0000-0000-000000000403", "from": 30000, "to": 30000 },
+        "high":          { "id": "00000000-0000-0000-0000-000000000404", "from": 100000, "to": 100000 },
+        "critical":      { "id": "00000000-0000-0000-0000-000000000405", "from": 100000, "to": 300000 }
+      },
+      "vrts": [
+        { "vrtId": "server_security_misconfiguration", "criticality": "high", "from": 50000, "to": 100000 }
+      ]
+    },
+    "scopeGroups": [
+      {
+        "id": "00000000-0000-0000-0000-000000000501",
+        "type": ["domain", "api"],
+        "identifier": "*.example.com, api.example.com",
+        "description": "Production web and API endpoints",
+        "scopes": [
+          { "id": "00000000-0000-0000-0000-000000000601", "criticality": "flex", "vrtId": null }
+        ]
+      }
+    ]
+  }
+}

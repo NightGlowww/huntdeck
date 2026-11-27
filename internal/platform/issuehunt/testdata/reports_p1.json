@@ -1,0 +1,76 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-0000-0000-000000000901",
+      "seen": true,
+      "metadata": {
+        "title": "Sample XSS vulnerability",
+        "number": 42,
+        "state": "resolved",
+        "sentAt": "2025-05-01T12:00:00.000Z",
+        "scope": { "type": ["domain"], "identifier": "*.example.com", "vrtId": "cross_site_scripting_xss", "criticality": "medium" }
+      },
+      "program": {
+        "id": "00000000-0000-0000-0000-000000000101",
+        "slug": "acme-bounty",
+        "name": "Acme Bug Bounty Program",
+        "type": "bounty",
+        "activated": true,
+        "cvssVersion": "v4",
+        "creditSystem": null,
+        "organization": { "id": "00000000-0000-0000-0000-000000000301", "name": "Acme Corp" }
+      },
+      "sender": { "id": "00000000-0000-0000-0000-000000000001", "displayName": "Sample Researcher", "uniqueName": "sample_user" },
+      "messages": { "count": 3 },
+      "assessment": { "type": "custom", "severity": "high" },
+      "orgAssessment": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000902",
+      "seen": false,
+      "metadata": {
+        "title": "Sample typo state report",
+        "number": 43,
+        "state": "not_reproducable",
+        "sentAt": "Fri Nov 27 2026 10:40:36 GMT+0000 (Coordinated Universal Time)",
+        "scope": { "type": ["api"], "identifier": "api.example.com", "vrtId": "other", "criticality": "low" }
+      },
+      "program": {
+        "id": "00000000-0000-0000-0000-000000000101",
+        "slug": "acme-bounty",
+        "name": "Acme Bug Bounty Program",
+        "type": "bounty",
+        "activated": true,
+        "creditSystem": null
+      },
+      "messages": { "count": 1 },
+      "assessment": null,
+      "orgAssessment": null
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000903",
+      "seen": true,
+      "metadata": {
+        "title": "Sample standard not reproducible",
+        "number": 44,
+        "state": "not_reproducible",
+        "sentAt": "2025-05-03T08:00:00.000Z",
+        "scope": { "type": ["domain"], "identifier": "*.example.com", "criticality": "low" }
+      },
+      "program": {
+        "id": "00000000-0000-0000-0000-000000000104",
+        "slug": "delta-internal-points",
+        "name": "Delta Internal Points",
+        "type": "internal",
+        "activated": true,
+        "creditSystem": "point"
+      },
+      "messages": { "count": 0 },
+      "assessment": { "type": "cvss", "severity": "low", "score": 3.5 },
+      "orgAssessment": null
+    }
+  ],
+  "total": 3,
+  "page": 1,
+  "perPage": 200
+}

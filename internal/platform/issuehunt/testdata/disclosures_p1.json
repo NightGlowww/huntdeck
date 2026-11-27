@@ -1,0 +1,23 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-0000-0000-000000000b01",
+      "report": "00000000-0000-0000-0000-000000000901",
+      "program": "00000000-0000-0000-0000-000000000101",
+      "title": "Sample Disclosed XSS",
+      "userSummary": "Researcher summary",
+      "orgSummary": "Vendor fixed input sanitization",
+      "criticality": "high",
+      "status": "resolved",
+      "createdAt": "2025-06-01T00:00:00.000Z",
+      "rewardAmount": 100000,
+      "reportedBy": {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "displayName": "Sample Researcher"
+      }
+    }
+  ],
+  "page": 1,
+  "perPage": 1,
+  "count": 2
+}

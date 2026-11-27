@@ -1,0 +1,8 @@
+{
+  "program": "00000000-0000-0000-0000-000000000101",
+  "entries": [
+    { "user": { "id": "00000000-0000-0000-0000-000000000001", "displayName": "Sample Researcher" }, "rank": 1 },
+    { "user": { "id": "00000000-0000-0000-0000-000000000002", "displayName": "Another Researcher" }, "rank": 2 },
+    { "user": { "id": "00000000-0000-0000-0000-000000000003", "displayName": "Third Researcher" }, "rank": 3 }
+  ]
+}

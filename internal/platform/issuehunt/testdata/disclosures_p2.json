@@ -1,0 +1,23 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-0000-0000-000000000b02",
+      "report": "00000000-0000-0000-0000-000000000904",
+      "program": "00000000-0000-0000-0000-000000000101",
+      "title": "Sample Disclosed SSRF",
+      "userSummary": "SSRF summary",
+      "orgSummary": "",
+      "criticality": "critical",
+      "status": "resolved",
+      "createdAt": "Thu Feb 13 2025 09:08:29 GMT+0000 (Coordinated Universal Time)",
+      "rewardAmount": 300000,
+      "reportedBy": {
+        "id": "00000000-0000-0000-0000-000000000002",
+        "displayName": "Another Researcher"
+      }
+    }
+  ],
+  "page": 2,
+  "perPage": 1,
+  "count": 2
+}
