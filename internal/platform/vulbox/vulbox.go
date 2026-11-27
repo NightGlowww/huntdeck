@@ -404,10 +404,10 @@ func (c *Client) sessionCheck(ctx context.Context) (bool, string, error) {
 	err := c.getJSONNoRenew(ctx, "/web/account/basic-info", nil, &info)
 	if err != nil {
 		if errors.Is(err, ErrSessionExpired) {
-			c.log.Warn("vulbox: session check rejected", "reason", err.Error(), "token_len", tokLen, "has_uuid", hasUUID)
+			c.log.Warn("vulbox: session check rejected", "reason", err.Error(), "jwt_len", tokLen, "has_uuid", hasUUID)
 			return false, err.Error(), nil
 		}
-		c.log.Warn("vulbox: session check error", "err", err, "token_len", tokLen, "has_uuid", hasUUID)
+		c.log.Warn("vulbox: session check error", "err", err, "jwt_len", tokLen, "has_uuid", hasUUID)
 		return false, err.Error(), err
 	}
 	if info.Logged.Bool() {
@@ -415,7 +415,7 @@ func (c *Client) sessionCheck(ctx context.Context) (bool, string, error) {
 			c.cred.Accepted()
 			c.updateTokenExpiry()
 		}
-		c.log.Info("vulbox: session accepted", "endpoint", "/web/account/basic-info", "token_len", tokLen)
+		c.log.Info("vulbox: session accepted", "endpoint", "/web/account/basic-info", "jwt_len", tokLen)
 		return true, "", nil
 	}
 
@@ -437,18 +437,18 @@ func (c *Client) sessionCheck(ctx context.Context) (bool, string, error) {
 				c.cred.Accepted()
 				c.updateTokenExpiry()
 			}
-			c.log.Info("vulbox: session accepted", "endpoint", "/hacker/user/account/info", "token_len", tokLen)
+			c.log.Info("vulbox: session accepted", "endpoint", "/hacker/user/account/info", "jwt_len", tokLen)
 			return true, "", nil
 		}
 		reason := "basic-info logged=false"
 		if herr != nil {
 			reason = fmt.Sprintf("basic-info logged=false; user/info: %v", herr)
 		}
-		c.log.Warn("vulbox: session not accepted", "reason", reason, "token_len", tokLen, "has_uuid", hasUUID)
+		c.log.Warn("vulbox: session not accepted", "reason", reason, "jwt_len", tokLen, "has_uuid", hasUUID)
 		return false, reason, nil
 	}
 
-	c.log.Warn("vulbox: session not accepted", "reason", "empty vulbox_token and logged=false", "token_len", tokLen, "has_uuid", hasUUID)
+	c.log.Warn("vulbox: session not accepted", "reason", "empty vulbox_token and logged=false", "jwt_len", tokLen, "has_uuid", hasUUID)
 	return false, "empty vulbox_token and logged=false", nil
 }
 

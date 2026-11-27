@@ -59,7 +59,7 @@ func (c *Client) browserSignIn(ctx context.Context) error {
 	}
 	succeeded = true
 	c.cred.SignedIn(parseJWTExpiry(c.currentToken()))
-	c.log.Info("vulbox: browser sign-in succeeded", "token_len", len(c.currentToken()), "has_uuid", c.currentUUID() != "")
+	c.log.Info("vulbox: browser sign-in succeeded", "jwt_len", len(c.currentToken()), "has_uuid", c.currentUUID() != "")
 	return nil
 }
 
@@ -72,9 +72,10 @@ func (c *Client) browserSignIn(ctx context.Context) error {
 // telling the user to complete CAPTCHA in Settings > Browser (VNC) or paste
 // VB_SESSION.
 func (c *Client) browserLogin(ctx context.Context) error {
-	startURL := c.web.String() + "/account/login?url=" + url.QueryEscape(WebHome)
-	webHost := fmt.Sprintf("%q", c.web.Hostname())
+	startURL := c.web.String() + "/account/login?unique=1&url=" + url.QueryEscape(WebHome)
 	userHost := fmt.Sprintf("%q", c.user.Hostname())
+	webHost := fmt.Sprintf("%q", c.web.Hostname())
+	var captured []*http.Cookie
 
 	f := weblogin.Flow{
 		Who:   who,
@@ -83,10 +84,15 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			if (location.protocol === 'chrome-error:') return 'neterror';
 			const shown = e => !!e && e.getClientRects().length > 0;
 			const vis = s => shown(document.querySelector(s));
-			const hasToken = document.cookie.split(';').some(c => c.trim().startsWith('vulbox_token=') && c.trim().length > 'vulbox_token='.length);
+			const tokPair = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('vulbox_token='));
+			const tokVal = tokPair ? tokPair.slice('vulbox_token='.length).trim() : '';
+			const hasToken = !!tokVal && tokVal !== 'null' && tokVal !== 'undefined' && tokVal.split('.').length === 3;
 			const path = location.pathname.toLowerCase();
-			if ((location.hostname === ` + userHost + ` || (location.hostname === ` + webHost + ` && !path.startsWith('/account/login') && !path.startsWith('/account/mfaprotect'))) && hasToken) {
+			if (location.hostname === ` + userHost + ` && hasToken) {
 				return 'in';
+			}
+			if (location.hostname === ` + webHost + ` && !path.startsWith('/account/login') && !path.startsWith('/account/mfaprotect')) {
+				return 'relogin';
 			}
 			if (path.includes('mfaprotect')) return 'mfa';
 			const staleRE = /其他地方被登录|登录失效|请重新登录|会话已过期/i;
@@ -115,7 +121,18 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			return &weblogin.Rejection{Who: who, Msg: msg + " (after " + after + ")"}
 		},
 		Acts: map[string]weblogin.Act{
+			"relogin": {Repeatable: true, Do: func(ctx context.Context, p weblogin.Page) error {
+				c.log.Info("vulbox: resetting stale browser session back to login")
+				_ = p.Eval(ctx, `(() => {
+					for (const name of ['vulbox_token', 'authorization']) {
+						document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.vulbox.com';
+						document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+					}
+				})()`, nil)
+				return p.Navigate(ctx, startURL)
+			}},
 			"login": {Sends: "the account and password", Do: func(ctx context.Context, p weblogin.Page) error {
+				c.log.Info("vulbox: filling login form")
 				if err := p.Settle(ctx, 1500*time.Millisecond); err != nil {
 					return err
 				}
@@ -244,19 +261,29 @@ func (c *Client) browserLogin(ctx context.Context) error {
 		// page and seeds c.jar across all VulBox hosts (including vapi.vulbox.com)
 		// because .vulbox.com cookies may otherwise only match root in keepCookies.
 		Take: func(ctx context.Context, p weblogin.Page) error {
-			_ = p.Settle(ctx, 1*time.Second)
+			_ = p.Settle(ctx, 1500*time.Millisecond)
 			var snap struct {
+				Href   string `json:"href"`
 				Cookie string `json:"cookie"`
 				UUID   string `json:"uuid"`
 			}
-			if err := p.Eval(ctx, `({cookie: document.cookie || '', uuid: (window.localStorage && localStorage.getItem('uuid')) || ''})`, &snap); err != nil {
+			if err := p.Eval(ctx, `({href: location.href || '', cookie: document.cookie || '', uuid: (window.localStorage && localStorage.getItem('uuid')) || ''})`, &snap); err != nil {
 				return err
 			}
 			var cookies []*http.Cookie
+			var tok string
 			if snap.Cookie != "" {
 				if parsed, err := http.ParseCookie(snap.Cookie); err == nil {
 					for _, ck := range parsed {
-						if ck.Name == tokenCookie || ck.Name == uuidCookie || ck.Name == "authorization" {
+						if ck.Name == tokenCookie {
+							v := strings.TrimSpace(ck.Value)
+							if v == "" || v == "null" || v == "undefined" {
+								continue
+							}
+							tok = v
+							ck.Path = "/"
+							cookies = append(cookies, ck)
+						} else if ck.Name == uuidCookie || ck.Name == "authorization" {
 							ck.Path = "/"
 							cookies = append(cookies, ck)
 						}
@@ -266,12 +293,21 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			if snap.UUID != "" {
 				cookies = append(cookies, &http.Cookie{Name: uuidCookie, Value: snap.UUID, Path: "/"}) //nolint:gosec // client-side jar seed
 			}
+			captured = cookies
 			if len(cookies) > 0 {
 				c.seedCookies(cookies)
 			}
-			c.log.Info("vulbox: browser sign-in captured cookies", "count", len(cookies), "token_len", len(c.currentToken()), "has_uuid", snap.UUID != "")
+			c.log.Info("vulbox: browser sign-in captured cookies", "url", snap.Href, "count", len(cookies), "jwt_len", len(tok), "has_uuid", snap.UUID != "")
 			return nil
 		},
 	}
-	return f.Run(ctx, c.host, Name, c.jar)
+	if err := f.Run(ctx, c.host, Name, c.jar); err != nil {
+		return err
+	}
+	// Re-seed fresh cookies captured on user.vulbox.com after weblogin.Flow.keepCookies
+	// so host-only stale cookies from Chrome's profile never overwrite them.
+	if len(captured) > 0 {
+		c.seedCookies(captured)
+	}
+	return nil
 }
