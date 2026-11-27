@@ -4,11 +4,15 @@
 <nav class="seg rsubnav" aria-label="{{T "Reports sections"}}"><a href="/reports">{{T "Reports"}}</a><a class="on" aria-current="page" href="/reports/analytics">{{T "Analytics"}}</a></nav>
 <div class="ahead">
   <nav class="segs" aria-label="{{T "Range"}}">{{range .Ranges}}<a href="{{$.Data.RangeURL .Key}}"{{if eq .Key $.Data.RangeKey}} class="on" aria-current="true"{{end}}>{{T .Label}}</a>{{end}}</nav>
-  <form class="arange" method="get" action="/reports/analytics">
-    <label><span class="sr-only">{{T "From month"}}</span><input type="month" name="from" value="{{.From}}" aria-label="{{T "From month"}}"></label>
-    <span class="muted">{{T "until"}}</span>
-    <label><span class="sr-only">{{T "To month"}}</span><input type="month" name="to" value="{{.To}}" aria-label="{{T "To month"}}"></label>
-    <button class="button secondary small" type="submit">{{T "Show"}}</button>
+  <form class="arange" method="get" action="/reports/analytics" data-drp>
+    <div class="drp">
+      <svg class="i drp-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <input type="text" name="from" value="{{.From}}" placeholder="{{T "Start date"}}" aria-label="{{T "Start date"}}" autocomplete="off" inputmode="numeric" maxlength="10">
+      <span class="drp-sep">{{T "until"}}</span>
+      <input type="text" name="to" value="{{.To}}" placeholder="{{T "End date"}}" aria-label="{{T "End date"}}" autocomplete="off" inputmode="numeric" maxlength="10">
+      <button type="button" class="drp-clear" aria-label="{{T "Clear"}}" title="{{T "Clear"}}"{{if and (not .From) (not .To)}} hidden{{end}}><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <button class="button secondary small drp-submit" type="submit">{{T "Show"}}</button>
   </form>
   <span class="muted small">{{T "Reports by when you submitted them, money by when it was awarded"}} · {{if .RangeLabelKey}}{{T .RangeLabelKey}}{{else}}{{.RangeLabel}}{{end}}</span>
 </div>
@@ -99,6 +103,7 @@
 </div>
 <script src="{{static "board.js"}}"></script>
 {{end}}
+<script src="{{static "daterange.js"}}"></script>
 {{end}}{{end}}
 
 {{define "aprog"}}<div class="pn">{{template "ptag" .Platform}}{{if .ProgramID}}<a class="name" href="/programs/{{.Platform}}/{{.Handle}}" title="{{.Name}}">{{.Name}}</a>{{else}}<span class="name" title="{{.Name}}">{{or .Name "—"}}</span>{{end}}{{if .Private}} <span class="chip private">{{T "private"}}</span>{{end}}</div>{{end}}
