@@ -185,7 +185,7 @@ func accountChanges(r *http.Request, fields []overrides.FieldState, group string
 				changes[f.Name] = &v
 			}
 		case config.KindBool:
-			if now := v != ""; now != f.On() {
+			if now := v != "" && !strings.EqualFold(v, "false") && v != "0"; now != f.On() {
 				val := strconv.FormatBool(now)
 				changes[f.Name] = &val
 			}

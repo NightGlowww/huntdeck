@@ -32,7 +32,7 @@ func TestHeldPlatforms(t *testing.T) {
 	}
 	st := store.New(d, nil)
 	err = st.Write(ctx, func(tx *store.Tx) error {
-		for _, p := range []string{"yeswehack", "zz-other", "hackerone", "bugcrowd"} {
+		for _, p := range []string{"vulbox", "yeswehack", "zz-other", "hackerone", "bugcrowd"} {
 			id, err := tx.UpsertProgram(ctx, p, platform.Program{Handle: "acme", Name: "Acme", URL: "https://example.com/acme", State: "open"})
 			if err != nil {
 				return err
@@ -60,7 +60,7 @@ func TestHeldPlatforms(t *testing.T) {
 			t.Errorf("%s discloses %v", p.Name, p.Discloses)
 		}
 	}
-	if want := "hackerone bugcrowd yeswehack zz-other"; fmt.Sprint(names) != "["+want+"]" {
+	if want := "hackerone bugcrowd yeswehack vulbox zz-other"; fmt.Sprint(names) != "["+want+"]" {
 		t.Errorf("platforms %v, want %s", names, want)
 	}
 }

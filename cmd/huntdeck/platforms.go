@@ -20,6 +20,7 @@ import (
 	"github.com/mdpsec/huntdeck/internal/platform/custom"
 	"github.com/mdpsec/huntdeck/internal/platform/hackerone"
 	"github.com/mdpsec/huntdeck/internal/platform/intigriti"
+	"github.com/mdpsec/huntdeck/internal/platform/vulbox"
 	"github.com/mdpsec/huntdeck/internal/platform/yeswehack"
 	"github.com/mdpsec/huntdeck/internal/scheduler"
 	"github.com/mdpsec/huntdeck/internal/sessionjar"
@@ -174,6 +175,48 @@ func buildPlatforms(cfg config.Config, host *weblogin.Host) ([]configured, error
 		}
 		out = append(out, configured{Platform: c, fullInterval: y.FullInterval, quickInterval: y.QuickInterval, concurrency: y.Concurrency})
 	}
+	if vb := cfg.VulBox; vb.Enabled() {
+		var proxyURL string
+		if cfg.Proxy != nil {
+			proxyURL = cfg.Proxy.String()
+		}
+		o := vulbox.Options{
+			Account:     vb.Account,
+			Password:    vb.Password.Reveal(),
+			TOTPSecret:  vb.TOTPSecret.Reveal(),
+			Session:     vb.Session.Reveal(),
+			AutoJoin:    vb.AutoJoin,
+			PublicOnly:  vb.PublicOnly,
+			Rate:        vb.Rate,
+			Concurrency: vb.Concurrency,
+			ProxyURL:    proxyURL,
+			Log:         slog.Default(),
+		}
+		if !vb.PublicOnly && vb.Account != "" {
+			// The login runs in the login browser; its cookies across the
+			// VulBox origins are saved so a restart carries on with them. A
+			// changed VB_ACCOUNT starts afresh (the shared profile stays, as
+			// for Bugcrowd).
+			dir := filepath.Join(cfg.DataDir, "sessions")
+			jarPath, loginState := filepath.Join(dir, "vulbox.json"), filepath.Join(dir, "vulbox-login.json")
+			if _, err := sessionjar.Claim(filepath.Join(dir, "vulbox-account"), vb.Account, jarPath, loginState); err != nil {
+				return nil, fmt.Errorf("vulbox: %w", err)
+			}
+			jar, err := sessionjar.Open(jarPath, "vulbox.com", "www.vulbox.com", "user.vulbox.com", "vapi.vulbox.com")
+			if err != nil {
+				return nil, err
+			}
+			o.WebHost, o.Jar, o.LoginState = host, jar, loginState
+			if host != nil {
+				host.Register(vulbox.Name, vulbox.WebHome, jar)
+			}
+		}
+		c, err := vulbox.New(o)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, configured{Platform: c, fullInterval: vb.FullInterval, quickInterval: vb.QuickInterval, concurrency: vb.Concurrency})
+	}
 	// Custom sources: platforms HuntDeck has no client for, read from a
 	// document a script of the user's writes. New programs are picked up
 	// every quarter of the full interval.
@@ -258,7 +301,7 @@ func openSchedule(ctx context.Context, st *store.Store, ps []configured) (*sched
 
 // platformAliases maps short names users may type to platform names.
 var platformAliases = map[string]string{
-	"h1": hackerone.Name, "bc": bugcrowd.Name, "it": intigriti.Name, "ywh": yeswehack.Name,
+	"h1": hackerone.Name, "bc": bugcrowd.Name, "it": intigriti.Name, "ywh": yeswehack.Name, "vb": vulbox.Name,
 }
 
 func canonicalPlatform(name string) string {
@@ -295,7 +338,7 @@ func heldPlatforms(ctx context.Context, s *store.Store) ([]web.PlatformInfo, err
 		return nil, err
 	}
 	rank := func(name string) int {
-		if i := slices.Index([]string{hackerone.Name, bugcrowd.Name, intigriti.Name, yeswehack.Name}, name); i >= 0 {
+		if i := slices.Index([]string{hackerone.Name, bugcrowd.Name, intigriti.Name, yeswehack.Name, vulbox.Name}, name); i >= 0 {
 			return i
 		}
 		return 99

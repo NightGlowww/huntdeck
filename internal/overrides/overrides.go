@@ -148,9 +148,13 @@ func (s *Saved) Fields(ctx context.Context) ([]FieldState, error) {
 	return out, nil
 }
 
-// On reports whether a switch is on.
+// On reports whether a switch is on, falling back to its default when unset.
 func (f FieldState) On() bool {
-	on, _ := strconv.ParseBool(f.Value)
+	v := f.Value
+	if v == "" {
+		v = f.Default
+	}
+	on, _ := strconv.ParseBool(v)
 	return on
 }
 

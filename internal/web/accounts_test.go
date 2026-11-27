@@ -58,7 +58,7 @@ func TestAccountsTab(t *testing.T) {
 	c := e.client()
 	_, body := e.do(c, "GET", "/settings?tab=accounts", nil, nil)
 	for _, want := range []string{`href="/settings?tab=accounts"`, `id="acct-hackerone"`, `id="acct-bugcrowd"`, `id="acct-vulbox"`, `id="acct-network"`,
-		`name="IT_TOKEN"`, `name="VB_ACCOUNT"`, `name="VB_SESSION"`, `name="BC_PUBLIC_ONLY" value="true" checked`, `placeholder="set · type to replace"`} {
+		`name="IT_TOKEN"`, `name="VB_ACCOUNT"`, `name="VB_SESSION"`, `name="VB_AUTO_JOIN" value="true" checked`, `name="BC_PUBLIC_ONLY" value="true" checked`, `placeholder="set · type to replace"`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("Accounts tab lacks %s", want)
 		}
@@ -93,6 +93,15 @@ func TestAccountsTab(t *testing.T) {
 	res, _ = e.do(c, "POST", "/settings/accounts", url.Values{"group": {"bugcrowd"}, "BC_PUBLIC_ONLY": {"true"}, "BC_RATE": {""}}, nil)
 	if !strings.Contains(res.Header.Get("Location"), "msg=accounts-unchanged") {
 		t.Errorf("untouched form: %s", res.Header.Get("Location"))
+	}
+
+	// Unchecking a default-true switch submits empty via its hidden sibling and saves false.
+	res, _ = e.do(c, "POST", "/settings/accounts", url.Values{"group": {"vulbox"}, "VB_AUTO_JOIN": {""}}, nil)
+	if res.StatusCode != http.StatusSeeOther || !strings.Contains(res.Header.Get("Location"), "msg=accounts-saved") {
+		t.Fatalf("uncheck VB_AUTO_JOIN: %d %s", res.StatusCode, res.Header.Get("Location"))
+	}
+	if cfg, err := saved.Config(ctx); err != nil || cfg.VulBox.AutoJoin {
+		t.Fatalf("VB_AUTO_JOIN after uncheck: %v (err=%v), want false", cfg.VulBox.AutoJoin, err)
 	}
 
 	// An invalid one is refused, saying why without the value.

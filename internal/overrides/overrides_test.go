@@ -128,6 +128,9 @@ func TestSavedValuesTakePrecedenceAndStayEncrypted(t *testing.T) {
 	if tok := field(t, fs, "IT_TOKEN"); tok.Set || tok.From != FromNone {
 		t.Errorf("IT_TOKEN's state: %+v", tok)
 	}
+	if aj := field(t, fs, "VB_AUTO_JOIN"); aj.Set || aj.From != FromNone || !aj.On() {
+		t.Errorf("VB_AUTO_JOIN's default state: %+v (want On() == true)", aj)
+	}
 
 	// Reset goes back to the environment.
 	if err := s.Save(ctx, map[string]*string{"YWH_EMAIL": nil, "YWH_PASSWORD": nil}); err != nil {
