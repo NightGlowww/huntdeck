@@ -7,6 +7,7 @@
 <h1 class="m-heading">{{TF "%s stats" (platformLabel $p)}}</h1>
 {{template "vis-toggle-m" .Vis}}
 {{template "ov-tiles" .Platform}}
+{{with .H1Stats}}{{template "h1-researcher-stats" .}}{{end}}
 
 <section class="panel">
   <form class="toolbar" method="get" action="/stats/{{$p}}">{{with .Vis.Value}}<input type="hidden" name="visibility" value="{{.}}">{{end}}

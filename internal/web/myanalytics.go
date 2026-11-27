@@ -224,6 +224,7 @@ type analyticsView struct {
 	Programs                            []reports.ProgramRow
 	Compared                            []reports.ProgramRow // programs with both your times and theirs
 	Sum                                 reports.Month        // the months' outcomes added up, for the legend
+	H1Stats                             *researcherStatsView
 }
 
 type analyticsPlatform struct {
@@ -453,5 +454,6 @@ func (s *server) reportsAnalytics(w http.ResponseWriter, r *http.Request) {
 	if len(v.Compared) > 25 {
 		v.Compared = v.Compared[:25]
 	}
+	v.H1Stats = s.h1ResearcherStats(ctx)
 	s.render(w, r, http.StatusOK, "reportsanalytics", pageData{Title: "Analytics", Nav: "analytics", Data: v})
 }

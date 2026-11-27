@@ -301,6 +301,9 @@ func (s *Syncer) poll(ctx context.Context, log *slog.Logger, p platform.Platform
 		s.step(run.ID, "Your reports", 0)
 		statsErr = errors.Join(statsErr, s.syncReports(ctx, log, rf, p.Name()))
 	}
+	if rf, ok := p.(platform.ResearcherStatsFetcher); ok && o.Limit == 0 && ctx.Err() == nil {
+		s.syncResearcherStats(ctx, log, rf, p.Name(), o.Mode)
+	}
 	return listErr, statsErr
 }
 

@@ -111,6 +111,8 @@ type programData struct {
 	// MailOn: HuntMail is set up, so the Email tab shows; Mail is the tab.
 	MailOn bool
 	Mail   *programMailView
+	// SignalCheck compares HackerOne's minimum Signal requirement with the user's past-year Signal.
+	SignalCheck *signalCautionView
 }
 
 // programTab is one of a program page's tabs.
@@ -225,6 +227,7 @@ func (s *server) program(w http.ResponseWriter, r *http.Request) {
 		d.Latest = &p.Stats[n-1]
 	}
 	d.Before = beforeYouTest(p)
+	d.SignalCheck = s.programSignalCheck(ctx, p)
 	// A model reading, when one was cached for this exact policy text. It is
 	// advisory: the rules above quote the policy, this one paraphrases it.
 	if pol := strings.TrimSpace(p.Policy); pol != "" {

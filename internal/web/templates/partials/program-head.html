@@ -5,11 +5,12 @@
 {{else if $p.RemovedAt}}<div class="state-banner removed" role="status"><b>{{T "No longer listed"}}</b><span>{{TF "%s stopped listing this program %s. What's here is how it last looked." (platformLabel $p.Platform) (agoPtr $p.RemovedAt)}}</span></div>
 {{else if eq $p.State "paused"}}<div class="state-banner paused" role="status"><b>{{T "Paused"}}</b><span>{{if $own}}{{T "Marked"}}{{else}}{{TF "%s shows this program" (platformLabel $p.Platform)}}{{end}} {{T "as paused"}}{{if not .StateSince.IsZero}} {{T "since"}} <span title="{{datetime .StateSince}}">{{date .StateSince}}</span>{{end}}{{T ": stop testing until it reopens."}}</span></div>
 {{else if eq $p.State "closed"}}<div class="state-banner closed" role="status"><b>{{T "Closed"}}</b><span>{{if $own}}{{T "Marked"}}{{else}}{{TF "%s shows this program" (platformLabel $p.Platform)}}{{end}} {{T "as closed"}}{{if not .StateSince.IsZero}} {{T "since"}} <span title="{{datetime .StateSince}}">{{date .StateSince}}</span>{{end}}{{T ": it isn't taking reports."}}</span></div>{{end}}
+{{with .SignalCheck}}{{if not .Meets}}<div class="state-banner paused signal-caution" role="status"><b>{{T "Caution: Signal Requirement"}}</b><div class="signal-caution-body"><span>{{TF "%s enforces a Signal Requirement that you do not currently meet. Submitting now consumes a trial report." $p.Name}}</span><div class="signal-caution-meta"><span>{{T "Signal Required"}}: <b>{{.RequiredStr}}</b></span><span class="sep">·</span><span>{{T "Your past-year Signal"}}: <b>{{if .HasPastYear}}{{.YoursStr}}{{else}}{{T "Not yet calculated"}}{{end}}</b></span></div></div></div>{{end}}{{end}}
 <header class="ph">
   <div class="ph-main">
     <div class="title-row">
       <h1>{{$p.Name}}</h1>
-      <span class="chips">{{template "kind" $p}}{{if $p.Ignored}}<span class="chip ignored" title="{{T "Left out of lists, exports, picks and alerts"}}">{{T "ignored"}}</span>{{end}}{{range $p.Tags}}<a class="chip tag" href="/programs?tag={{.}}">{{.}}</a>{{end}}</span>
+      <span class="chips">{{template "kind" $p}}{{with .SignalCheck}}{{if not .Meets}}<span class="chip signal-warn" title="{{T "Your past-year Signal is below this program's requirement"}}">{{T "Signal Requirement"}}</span>{{end}}{{end}}{{if $p.Ignored}}<span class="chip ignored" title="{{T "Left out of lists, exports, picks and alerts"}}">{{T "ignored"}}</span>{{end}}{{range $p.Tags}}<a class="chip tag" href="/programs?tag={{.}}">{{.}}</a>{{end}}</span>
     </div>
     <div class="sub metaline">
       {{template "pf" $p.Platform}}

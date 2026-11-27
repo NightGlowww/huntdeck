@@ -164,6 +164,7 @@ var seedLeftOut = map[string]string{
 	"scan_config":        "this instance is scanner choices",
 	"queue_scores":       "what the queue said here; not shared",
 	"api_tokens":         "a secret of the user's; never in a seed",
+	"researcher_stats":   "the user's own researcher stats",
 	"program_user_stats": "the user's own numbers",
 	"my_reports":         "the user's own reports",
 	"my_report_payments": "the user's own earnings",

@@ -16,6 +16,7 @@
   </form>
   <span class="muted small">{{T "Reports by when you submitted them, money by when it was awarded"}} · {{if .RangeLabelKey}}{{T .RangeLabelKey}}{{else}}{{.RangeLabel}}{{end}}</span>
 </div>
+{{with .H1Stats}}{{template "h1-researcher-stats" .}}{{end}}
 {{if not .Total}}
 <section class="panel"><div class="empty-state">{{T "No reports yet. Once HuntDeck has read yours (or you've"}} <a class="link" href="/reports/new">{{T "added some"}}</a>{{T "), your numbers show here."}}</div></section>
 {{else}}

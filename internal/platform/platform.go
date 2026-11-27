@@ -677,3 +677,30 @@ type Facts struct {
 	// predate Bugcrowd's engagements show when they moved to them).
 	StartedAt *time.Time
 }
+
+// ResearcherStatsFetcher is implemented by platforms that expose the
+// user's own researcher standing (e.g. HackerOne's Signal, Impact,
+// Reputation and Rank across 90 days, past year and all time).
+type ResearcherStatsFetcher interface {
+	FetchResearcherStats(ctx context.Context) (ResearcherStats, error)
+}
+
+// ResearcherWindowStats holds researcher metrics for one time window.
+// Any field the platform hasn't calculated yet is nil.
+type ResearcherWindowStats struct {
+	Signal           *float64 `json:"signal,omitempty"`
+	SignalPercentile *int     `json:"signal_percentile,omitempty"`
+	Impact           *float64 `json:"impact,omitempty"`
+	ImpactPercentile *int     `json:"impact_percentile,omitempty"`
+	Reputation       *int     `json:"reputation,omitempty"`
+	Rank             *int     `json:"rank,omitempty"`
+}
+
+// ResearcherStats is the user's own standing on a platform across time windows.
+type ResearcherStats struct {
+	Username           string                `json:"username,omitempty"`
+	Last90Days         ResearcherWindowStats `json:"last_90_days"`
+	PastYear           ResearcherWindowStats `json:"past_year"`
+	AllTime            ResearcherWindowStats `json:"all_time"`
+	TrialResetOnTriage *bool                 `json:"trial_reset_on_triage,omitempty"`
+}

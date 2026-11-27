@@ -8,6 +8,7 @@
   <a class="stat" href="/reports?status=stale" title="{{if eq .QuietDays 1}}{{TF "Not decided yet, and no word from the program for %s day (Settings › Reports)" (num .QuietDays)}}{{else}}{{TF "Not decided yet, and no word from the program for %s days (Settings › Reports)" (num .QuietDays)}}{{end}}"><span class="l">{{T "Gone quiet"}}</span><span class="v{{if not .Stale}} zero{{end}}">{{num .Stale}}</span><span class="h">{{T "no word in"}} {{.QuietDays}} {{T (plural .QuietDays "day" "days")}}</span></a>
   <a class="stat" href="/reports/analytics?range=year" title="{{T "Bounties, bonuses and retests awarded this year, per currency"}}"><span class="l">{{T "Earned"}} {{.Year}}</span><span class="v{{if not .EarnedYTD}} zero{{end}}">{{with .EarnedYTD}}{{with index . 0}}<span title="{{moneyFull .Value .Currency}}">{{money .Value .Currency}}</span>{{end}}{{else}}0{{end}}</span><span class="h">{{if gt (len .EarnedYTD) 1}}{{range $i, $a := .EarnedYTD}}{{if $i}}<span title="{{moneyFull $a.Value $a.Currency}}">+ {{money $a.Value $a.Currency}}</span> {{end}}{{end}}{{else}}{{T "bounties, bonuses, retests"}}{{end}}</span></a>
 </div>
+{{with .H1Stats}}{{template "h1-researcher-stats" .}}{{end}}
 <div class="plist">
 {{template "rail" .RailView}}
 <section class="panel ptable">

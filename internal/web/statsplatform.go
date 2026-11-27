@@ -35,6 +35,7 @@ type statsPlatformData struct {
 	BountyOnly bool
 	Pager      pager
 	Vis        visToggle // All, Public or Private
+	H1Stats    *researcherStatsView
 	// days are the programs' daily numbers by column, then program, for
 	// show to draw the rows' 90-day lines from.
 	days map[string]map[int64][]store.ProgramDay
@@ -112,6 +113,9 @@ func (s *server) statsPlatform(w http.ResponseWriter, r *http.Request) {
 	}
 	d.Pager = newPager(r, statsPlatformPerPage, len(d.Rows))
 	d.show(d.Pager.Offset(), d.Pager.Offset()+statsPlatformPerPage)
+	if name == "hackerone" {
+		d.H1Stats = s.h1ResearcherStats(ctx)
+	}
 	s.render(w, r, http.StatusOK, "statsplatform", pageData{Title: platformLabel(name) + " stats", Nav: "stats", Data: d})
 }
 

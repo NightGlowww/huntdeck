@@ -196,6 +196,7 @@ type reportsView struct {
 	Dist           []reportDistPart
 	PlatformCounts []reportPlatformCount
 	StatusTabs     []reportStatusTab
+	H1Stats        *researcherStatsView
 }
 
 // SortURL is the list sorted by key (again: turned around).
@@ -385,6 +386,7 @@ func (s *server) myReports(w http.ResponseWriter, r *http.Request) {
 	if q.Get("q") != "" {
 		v.ClearURL += "?" + url.Values{"q": {q.Get("q")}}.Encode()
 	}
+	v.H1Stats = s.h1ResearcherStats(ctx)
 	s.render(w, r, http.StatusOK, "reports", pageData{Title: "Reports", Nav: "reports", Data: v})
 }
 

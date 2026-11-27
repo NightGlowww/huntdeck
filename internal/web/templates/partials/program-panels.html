@@ -41,9 +41,18 @@
 
 {{/* Before you test: requirements and the rules for test traffic. A
    program added by hand shows it only when its notes say something. */}}
-{{define "program-before"}}{{$p := .P}}{{if or .Before (ne $p.Platform "independent")}}
+{{define "program-before"}}{{$p := .P}}{{if or .Before .SignalCheck (ne $p.Platform "independent")}}
 <section class="panel before">
-  <div class="panel-head"><h2>{{T "Before you test"}}</h2>{{if not .Before}}<span class="aside">{{if $p.Requirements.Known}}<span title="{{T "Anyone with an account can submit, and no rules for test traffic were found"}}">{{T "nothing required"}}</span>{{else}}{{T "not checked yet"}}{{end}}</span>{{end}}</div>
+  <div class="panel-head"><h2>{{T "Before you test"}}</h2>{{if and (not .Before) (not .SignalCheck)}}<span class="aside">{{if $p.Requirements.Known}}<span title="{{T "Anyone with an account can submit, and no rules for test traffic were found"}}">{{T "nothing required"}}</span>{{else}}{{T "not checked yet"}}{{end}}</span>{{end}}</div>
+  {{with .SignalCheck}}
+  <div class="{{if .Meets}}before-signal-ok{{else}}before-signal-warn{{end}}">
+    <svg class="i" aria-hidden="true"><use href="#{{if .Meets}}i-check{{else}}i-info{{end}}"/></svg>
+    <div>
+      <b>{{if .Meets}}{{T "Signal requirement met"}}{{else}}{{T "Caution: Signal Requirement"}}{{end}}</b>
+      <span>{{T "Signal Required"}}: {{.RequiredStr}} · {{T "Your past-year Signal"}}: {{if .HasPastYear}}{{.YoursStr}}{{else}}{{T "Not yet calculated"}}{{end}}</span>
+    </div>
+  </div>
+  {{end}}
   {{if .Before}}
   <ul>
   {{range .Before}}

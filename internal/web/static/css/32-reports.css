@@ -240,3 +240,42 @@ svg.agree { display: block; width: 100%; height: 12px; margin-bottom: 10px; bord
 /* Earned in all sits beside the bar charts on wide screens: as tall as they are. */
 .aboard .mchart .mc-plot { height: 193px; }
 @container (max-width: 560px) { .bc-total, .bc-axis, .bc-months text { font-size: 9px; } }
+
+/* HackerOne researcher stats card (partials/researcher-stats.html). */
+.h1s-card { margin-bottom: 16px; }
+.h1s-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.h1s-head { flex-wrap: wrap; gap: 8px 14px; }
+.h1s-title { display: inline-flex; align-items: center; gap: 8px; }
+.h1s-actions { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+.h1s-tabs label {
+  display: inline-flex; align-items: center; padding: 4px 11px; border-radius: 6px;
+  color: var(--text-2); font-size: calc(12.5px * var(--fs, 1)); font-weight: 600;
+  white-space: nowrap; cursor: pointer; user-select: none;
+}
+.h1s-tabs label:hover { color: var(--text); }
+.h1s-card:has(.h1s-r-90d:checked) label[data-h1s="90d"],
+.h1s-card:has(.h1s-r-1y:checked) label[data-h1s="1y"],
+.h1s-card:has(.h1s-r-all:checked) label[data-h1s="all"] {
+  background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+}
+.h1s-card:has(.h1s-r-90d:focus-visible) label[data-h1s="90d"],
+.h1s-card:has(.h1s-r-1y:focus-visible) label[data-h1s="1y"],
+.h1s-card:has(.h1s-r-all:focus-visible) label[data-h1s="all"] {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+.h1s-pane { display: none; grid-template-columns: repeat(6, minmax(0, 1fr)); border-top: 1px solid var(--border); }
+.h1s-card:has(.h1s-r-90d:checked) .h1s-p-90d,
+.h1s-card:has(.h1s-r-1y:checked) .h1s-p-1y,
+.h1s-card:has(.h1s-r-all:checked) .h1s-p-all { display: grid; }
+.h1s-metric { display: grid; gap: 4px; padding: 14px 16px; border-left: 1px solid var(--border); text-align: center; }
+.h1s-metric:first-child { border-left: 0; }
+.h1s-val { color: var(--text); font: 650 calc(19px * var(--fs, 1))/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.h1s-val.neg { color: var(--warn); }
+.h1s-lbl { color: var(--muted); font-size: calc(12px * var(--fs, 1)); }
+.h1s-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 9px 16px; border-top: 1px solid var(--border); background: var(--surface-2); font-size: calc(12px * var(--fs, 1)); }
+.h1s-foot .sep { color: var(--faint); }
+@media (max-width: 900px) {
+  .h1s-pane { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .h1s-metric:nth-child(odd) { border-left: 0; }
+  .h1s-metric:nth-child(n + 3) { border-top: 1px solid var(--border); }
+}
