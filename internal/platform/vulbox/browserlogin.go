@@ -87,7 +87,7 @@ func (c *Client) browserLogin(ctx context.Context) error {
 				return 'in';
 			}
 			if (path.includes('mfaprotect')) return 'mfa';
-			const errEl = [...document.querySelectorAll('.ant-message-error, .el-message--error, .error-msg, .login-error, [role=alert]')]
+			const errEl = [...document.querySelectorAll('.ant-message-error, .el-message--error, .ant-form-explain, .error-msg, .login-error, [role=alert]')]
 				.filter(shown).map(e => e.innerText.trim()).filter(Boolean)[0];
 			if (vis('input[type=password]')) {
 				return errEl ? 'error:' + errEl : 'login';
@@ -114,12 +114,22 @@ func (c *Client) browserLogin(ctx context.Context) error {
 					return err
 				}
 				// Tag the visible username/account and password inputs cleanly.
+				// VulBox sets readonly="readonly" on #coordinated_username until focused,
+				// so do NOT filter out e.readOnly and clear readonly before typing.
 				var tagged bool
 				err := p.Eval(ctx, `(() => {
-					const shown = e => !!e && e.getClientRects().length > 0 && !e.disabled && !e.readOnly;
-					const pw = [...document.querySelectorAll('input[type=password]')].find(shown);
-					const user = [...document.querySelectorAll('input[name=username], input[name=account], input[type=text], input[type=tel], input[type=email]')].find(e => shown(e) && !/captcha|验证码/i.test((e.placeholder || '') + ' ' + (e.name || '')));
+					const shown = e => !!e && e.getClientRects().length > 0 && !e.disabled;
+					const pw = [
+						document.getElementById('coordinated_password'),
+						...[...document.querySelectorAll('input[type=password]')],
+					].find(shown);
+					const user = [
+						document.getElementById('coordinated_username'),
+						...[...document.querySelectorAll('input[name=username], input[name=account], input[type=text], input[type=tel], input[type=email], input:not([type])')],
+					].find(e => shown(e) && e.type !== 'checkbox' && !/captcha|验证码/i.test((e.placeholder || '') + ' ' + (e.name || '') + ' ' + (e.id || '')));
 					if (!pw || !user) return false;
+					user.removeAttribute('readonly');
+					user.readOnly = false;
 					user.setAttribute('data-huntdeck-vb', 'user');
 					pw.setAttribute('data-huntdeck-vb', 'pw');
 					return true;
@@ -137,6 +147,30 @@ func (c *Client) browserLogin(ctx context.Context) error {
 					return err
 				}
 
+				// Tick VulBox's required user-agreement checkbox so the login button
+				// enables cleanly before checking for CAPTCHA / submitting.
+				var boxSel string
+				_ = p.Eval(ctx, `(() => {
+					const shown = e => !!e && e.getClientRects().length > 0;
+					const inp = [...document.querySelectorAll('form input[type=checkbox], .ant-checkbox-input')].find(shown);
+					if (!inp || inp.checked) return '';
+					const box = inp.closest('.ant-checkbox');
+					if (shown(box)) {
+						box.setAttribute('data-huntdeck-vb-agree', '1');
+						return '[data-huntdeck-vb-agree="1"]';
+					}
+					inp.setAttribute('data-huntdeck-vb-agree', '1');
+					return '[data-huntdeck-vb-agree="1"]';
+				})()`, &boxSel)
+				if boxSel != "" {
+					if err := p.Click(ctx, boxSel); err != nil {
+						return err
+					}
+					if err := p.Settle(ctx, 350*time.Millisecond); err != nil {
+						return err
+					}
+				}
+
 				// Check if an image CAPTCHA is visible; NEVER attempt to solve or bypass it.
 				var hasCaptcha bool
 				_ = p.Eval(ctx, `(() => {
@@ -147,6 +181,20 @@ func (c *Client) browserLogin(ctx context.Context) error {
 				})()`, &hasCaptcha)
 				if hasCaptcha {
 					return errors.New("VulBox requires an image CAPTCHA; open Settings > Browser (VNC) to complete sign-in (account and password are already filled), or paste VB_SESSION")
+				}
+
+				// VulBox's "立即登录" button is type="button", not type="submit", so Enter
+				// alone does not submit the form; click the enabled primary button.
+				var submitSel string
+				_ = p.Eval(ctx, `(() => {
+					const shown = e => !!e && e.getClientRects().length > 0 && !e.disabled;
+					const btn = [...document.querySelectorAll('button.ant-btn-primary, button[type=submit]')].find(shown);
+					if (!btn) return '';
+					btn.setAttribute('data-huntdeck-vb-submit', '1');
+					return 'button[data-huntdeck-vb-submit="1"]';
+				})()`, &submitSel)
+				if submitSel != "" {
+					return p.Click(ctx, submitSel)
 				}
 				return p.Press(ctx)
 			}},
