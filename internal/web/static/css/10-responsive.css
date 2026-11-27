@@ -74,6 +74,7 @@
   .sidebar .spacer, .version { display: none; }
   .sidebar .foot { padding: 0; width: auto; }
   .topbar { position: static; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 0 14px; } /* search, then the buttons beside it */
+  #navbar { left: 0; }
   .tb-title { display: none; } /* the sidebar marks the page */
   .m-heading { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; margin: 0 0 12px; font-size: calc(18px * var(--fs, 1)); font-weight: 650; line-height: 1.25; }
   .vis-toggle-m { display: block; } /* the title bar's toggle, here instead */

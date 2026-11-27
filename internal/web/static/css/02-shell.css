@@ -206,7 +206,7 @@ button.nav-group-toggle:focus-visible { background: transparent; color: var(--te
 
 /* A page on its way: a 2 px bar under the top bar, shown only when the wait is
    long enough to notice. Every filter, sort and pager in the app is a link. */
-#navbar { position: fixed; top: calc(var(--db-h) + 56px); left: 0; right: 0; height: 2px; z-index: 60;
+#navbar { position: fixed; top: calc(var(--db-h) + 56px); left: var(--sidebar); right: 0; height: 2px; z-index: 60;
   background: var(--accent); transform: scaleX(0); transform-origin: 0 50%; opacity: 0;
   transition: transform .7s cubic-bezier(.2, .8, .2, 1), opacity .15s; pointer-events: none; }
 #navbar.on { opacity: 1; transform: scaleX(.78); }

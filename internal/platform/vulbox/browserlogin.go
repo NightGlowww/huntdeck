@@ -89,8 +89,9 @@ func (c *Client) browserLogin(ctx context.Context) error {
 				return 'in';
 			}
 			if (path.includes('mfaprotect')) return 'mfa';
+			const staleRE = /其他地方被登录|登录失效|请重新登录|会话已过期/i;
 			const errEl = [...document.querySelectorAll('.ant-message-error, .el-message--error, .ant-form-explain, .error-msg, .login-error, [role=alert]')]
-				.filter(shown).map(e => e.innerText.trim()).filter(Boolean)[0];
+				.filter(shown).map(e => e.innerText.trim()).filter(t => t && !staleRE.test(t))[0];
 			if (vis('input[type=password]')) {
 				return errEl ? 'error:' + errEl : 'login';
 			}
@@ -105,6 +106,9 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			if strings.Contains(low, "captcha") || strings.Contains(msg, "验证码") {
 				return fmt.Errorf("%s: VulBox requires an image CAPTCHA (%s); open Settings > Browser (VNC) to finish signing in, or paste VB_SESSION", who, msg)
 			}
+			if strings.Contains(msg, "其他地方被登录") || strings.Contains(msg, "登录失效") || strings.Contains(msg, "请重新登录") || strings.Contains(msg, "会话已过期") {
+				return fmt.Errorf("%s: previous VulBox session was invalidated (%s); retrying cleanly", who, msg)
+			}
 			if after == "" {
 				return fmt.Errorf("%s: the sign-in page shows %q", who, msg)
 			}
@@ -115,6 +119,14 @@ func (c *Client) browserLogin(ctx context.Context) error {
 				if err := p.Settle(ctx, 1500*time.Millisecond); err != nil {
 					return err
 				}
+				// Clear any stale/kicked auth cookies in the persistent browser profile
+				// before filling credentials so the login SPA does not treat them as active.
+				_ = p.Eval(ctx, `(() => {
+					for (const name of ['vulbox_token', 'authorization']) {
+						document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.vulbox.com';
+						document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+					}
+				})()`, nil)
 				// Tag the visible username/account and password inputs cleanly.
 				// VulBox sets readonly="readonly" on #coordinated_username until focused,
 				// so do NOT filter out e.readOnly and clear readonly before typing.
