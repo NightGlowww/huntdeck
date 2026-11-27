@@ -1,173 +1,487 @@
 {{define "content"}}
-<p class="lead">Where each number comes from, which ones are estimates, and how HuntScore is scored.</p>
-<nav class="page-index" aria-label="Sections">
-  <a href="#glance">At a glance</a>
-  <a href="#sources">Published, counted, estimated</a>
-  <a href="#total-paid">Total paid</a>
-  <a href="#average-bounty">Average bounty</a>
-  <a href="#paid-90">Paid · 90 days</a>
-  <a href="#received-90">Reports received</a>
-  <a href="#stats">Valid reports per month</a>
-  <a href="#resolved-90">Valid · 90 days</a>
-  <a href="#huntscore">HuntScore</a>
-  <a href="#huntqueue">HuntQueue</a>
-  <a href="#charts">The charts</a>
-  <a href="#scope-changed">Scope changed</a>
-  <a href="#api-freshness">API freshness</a>
-</nav>
-
+<section class="mhero" aria-label="Methodology overview">
+  <div class="mhero-top">
+    <div>
+      <span class="mhero-kicker">Numbers, Estimates &amp; Scoring Models</span>
+      <p class="mhero-lead">Where every number on HuntDeck comes from, how platforms differ, which figures are estimates, and how HuntScore and HuntQueue rank programs and targets.</p>
+    </div>
+  </div>
+  <div class="mtrust-grid">
+    <div class="mtrust-tile">
+      <div><span class="src good">Published</span></div>
+      <p>The platform's own reported figure, shown as published (e.g. HackerOne totals, public bounty ranges).</p>
+    </div>
+    <div class="mtrust-tile">
+      <div><span class="src acc">Counted</span></div>
+      <p>Derived by HuntDeck from listed report dates (Hacktivity, CrowdStream) or 90 days of saved daily totals.</p>
+    </div>
+    <div class="mtrust-tile">
+      <div><span class="src warn">≈ Estimate</span></div>
+      <p>Scaled or multiplied when a platform withholds the exact metric. Shown fainter; hover any cell for its formula.</p>
+    </div>
+    <div class="mtrust-tile">
+      <div><span class="src none">—</span></div>
+      <p>The platform does not share a comparable metric. Never filled with a substitute; zero still renders as <code>0</code>.</p>
+    </div>
+  </div>
+  <nav class="mjump" aria-label="Sections">
+    <a class="core" href="#glance">At a glance</a>
+    <a class="core" href="#huntscore">HuntScore</a>
+    <a class="core" href="#huntqueue">HuntQueue</a>
+    <span class="mjump-sep" aria-hidden="true"></span>
+    <a href="#sources">Published, counted, estimated</a>
+    <a href="#total-paid">Total paid</a>
+    <a href="#average-bounty">Average bounty</a>
+    <a href="#paid-90">Paid · 90d</a>
+    <a href="#received-90">Reports received</a>
+    <a href="#stats">Valid / month</a>
+    <a href="#resolved-90">Valid · 90d</a>
+    <a href="#charts">Charts</a>
+    <a href="#scope-changed">Scope changed</a>
+    <a href="#api-freshness">API freshness</a>
+  </nav>
+</section>
 
 {{if .ScoreCheckOn}}{{template "methodology-scorecheck" $}}{{end}}
 
-<section class="panel" id="glance">
-  <div class="panel-head"><h2>At a glance</h2><span class="aside"><span class="src good">Published</span> the platform's own figure <span class="src acc">Counted</span> worked out by HuntDeck <span class="src warn">≈ Estimate</span> <span class="src none">—</span> the platform doesn't share it</span></div>
+<section class="panel msection" id="glance">
+  <div class="panel-head">
+    <h2>At a glance</h2>
+    <span class="aside"><span class="src good">Published</span> platform figure <span class="src acc">Counted</span> HuntDeck math <span class="src warn">≈ Estimate</span> <span class="src none">—</span> not shared</span>
+  </div>
   <div class="table-wrap">
   <table class="glance">
-    <thead><tr><th>Column</th><th>HackerOne</th><th>Bugcrowd</th><th>YesWeHack</th><th>Intigriti</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th><span class="mpf-head"><span class="mpf-dot h1" aria-hidden="true"></span>HackerOne</span></th>
+        <th><span class="mpf-head"><span class="mpf-dot bc" aria-hidden="true"></span>Bugcrowd</span></th>
+        <th><span class="mpf-head"><span class="mpf-dot ywh" aria-hidden="true"></span>YesWeHack</span></th>
+        <th><span class="mpf-head"><span class="mpf-dot it" aria-hidden="true"></span>Intigriti</span></th>
+      </tr>
+    </thead>
     <tbody>
-      <tr><td>Total paid</td><td data-label="HackerOne"><span class="src good">Published</span><span class="srcd">total</span></td><td data-label="Bugcrowd"><span class="src warn">≈ Estimate</span><span class="srcd">rewarded reports × average payout</span></td><td data-label="YesWeHack"><span class="src none" title="The platform doesn't share this">—</span></td><td data-label="Intigriti"><span class="src good">Published</span><span class="srcd">total (public programs; every program you can open with the web login)</span></td></tr>
-      <tr><td>Average bounty</td><td data-label="HackerOne"><span class="src good">Published</span><span class="srcd">range</span></td><td data-label="Bugcrowd"><span class="src good">Published</span><span class="srcd">last 3 months</span></td><td data-label="YesWeHack"><span class="src good">Published</span><span class="srcd">some programs</span></td><td data-label="Intigriti"><span class="src good">Published</span><span class="srcd">public programs</span></td></tr>
-      <tr><td>Paid · 90 days</td><td data-label="HackerOne"><span class="src good">Published</span><span class="srcd">total</span></td><td data-label="Bugcrowd"><span class="src warn">≈ Estimate</span><span class="srcd">accepted reports (CrowdStream) × average payout; where CrowdStream is kept private, the rise in rewarded reports × average payout</span></td><td data-label="YesWeHack"><span class="src none" title="The platform doesn't share this">—</span></td><td data-label="Intigriti"><span class="src acc">Counted</span><span class="srcd">from the saved total paid (≈ until 90 days of it)</span></td></tr>
-      <tr><td>Reports received · 90 days</td><td data-label="HackerOne"><span class="src good">Published</span><span class="srcd">total</span></td><td data-label="Bugcrowd"><span class="src none" title="The platform doesn't share this">—</span></td><td data-label="YesWeHack"><span class="src acc">Counted</span><span class="srcd">from the saved report total (≈ until 90 days of it)</span></td><td data-label="Intigriti"><span class="src acc">Counted</span><span class="srcd">from the saved report total (≈ until 90 days of it)</span></td></tr>
-      <tr><td>Valid · 90 days</td><td data-label="HackerOne"><span class="src acc">Counted</span><span class="srcd">from Hacktivity</span></td><td data-label="Bugcrowd"><span class="src acc">Counted</span><span class="srcd">from CrowdStream (public programs that list their reports)</span></td><td data-label="YesWeHack"><span class="src warn">≈ Estimate</span><span class="srcd">of valid reports: received in 90 days × share accepted</span></td><td data-label="Intigriti"><span class="src warn">≈ Estimate</span><span class="srcd">of valid reports: received in 90 days × share accepted</span></td></tr>
-      <tr><td>Valid reports, per month (Stats)</td><td data-label="HackerOne"><span class="src acc">Counted</span><span class="srcd">from Hacktivity (resolved)</span></td><td data-label="Bugcrowd"><span class="src acc">Counted</span><span class="srcd">from CrowdStream (accepted)</span></td><td data-label="YesWeHack"><span class="src acc">Counted</span><span class="srcd">from the saved Thanks totals; ≈ before the first save</span></td><td data-label="Intigriti"><span class="src acc">Counted</span><span class="srcd">from the saved accepted totals; ≈ before the first save, from monthly leaderboards</span></td></tr>
+      <tr>
+        <td>Total paid</td>
+        <td data-label="HackerOne"><span class="src good">Published</span><span class="srcd">all-time total</span></td>
+        <td data-label="Bugcrowd"><span class="src warn">≈ Estimate</span><span class="srcd">rewarded reports × average payout</span></td>
+        <td data-label="YesWeHack"><span class="src none" title="The platform doesn't share this">—</span></td>
+        <td data-label="Intigriti"><span class="src good">Published</span><span class="srcd">total (public programs; all accessible with web login)</span></td>
+      </tr>
+      <tr>
+        <td>Average bounty</td>
+        <td data-label="HackerOne"><span class="src good">Published</span><span class="srcd">range (sorted by midpoint)</span></td>
+        <td data-label="Bugcrowd"><span class="src good">Published</span><span class="srcd">last 3 months</span></td>
+        <td data-label="YesWeHack"><span class="src good">Published</span><span class="srcd">some programs (EUR)</span></td>
+        <td data-label="Intigriti"><span class="src good">Published</span><span class="srcd">public programs</span></td>
+      </tr>
+      <tr>
+        <td>Paid · 90 days</td>
+        <td data-label="HackerOne"><span class="src good">Published</span><span class="srcd">90-day total</span></td>
+        <td data-label="Bugcrowd"><span class="src warn">≈ Estimate</span><span class="srcd">accepted (CrowdStream) × avg payout; or rewarded delta × avg payout if CrowdStream is private</span></td>
+        <td data-label="YesWeHack"><span class="src none" title="The platform doesn't share this">—</span></td>
+        <td data-label="Intigriti"><span class="src acc">Counted</span><span class="srcd">from saved total paid (≈ until 90d stored)</span></td>
+      </tr>
+      <tr>
+        <td>Reports received · 90 days</td>
+        <td data-label="HackerOne"><span class="src good">Published</span><span class="srcd">90-day total</span></td>
+        <td data-label="Bugcrowd"><span class="src none" title="The platform doesn't share this">—</span></td>
+        <td data-label="YesWeHack"><span class="src acc">Counted</span><span class="srcd">from saved report total (≈ until 90d stored)</span></td>
+        <td data-label="Intigriti"><span class="src acc">Counted</span><span class="srcd">from saved report total (≈ until 90d stored)</span></td>
+      </tr>
+      <tr>
+        <td>Valid · 90 days</td>
+        <td data-label="HackerOne"><span class="src acc">Counted</span><span class="srcd">from Hacktivity (resolved)</span></td>
+        <td data-label="Bugcrowd"><span class="src acc">Counted</span><span class="srcd">from CrowdStream (public programs listing reports)</span></td>
+        <td data-label="YesWeHack"><span class="src warn">≈ Estimate</span><span class="srcd">90d received × accepted share</span></td>
+        <td data-label="Intigriti"><span class="src warn">≈ Estimate</span><span class="srcd">90d received × accepted share</span></td>
+      </tr>
+      <tr>
+        <td>Valid reports / month (Stats)</td>
+        <td data-label="HackerOne"><span class="src acc">Counted</span><span class="srcd">Hacktivity resolved by latest activity month</span></td>
+        <td data-label="Bugcrowd"><span class="src acc">Counted</span><span class="srcd">CrowdStream by accepted month</span></td>
+        <td data-label="YesWeHack"><span class="src acc">Counted</span><span class="srcd">saved Thanks totals; ≈ prior months</span></td>
+        <td data-label="Intigriti"><span class="src acc">Counted</span><span class="srcd">saved accepted totals; ≈ prior from leaderboards</span></td>
+      </tr>
     </tbody>
   </table>
   </div>
 </section>
 
-<div class="mcards">
-<section class="panel mcard" id="sources">
-  <div class="panel-head"><h2>Published, counted and estimated</h2></div>
-  <div class="panel-body md">
-  <p><b>Published</b> numbers are the platform's own figures, as it shows them. <b>Counted</b> numbers HuntDeck works out itself from report dates the platform lists. <b>Estimates</b> are marked ≈ and shown fainter; hover one for its working. Where a platform has nothing that measures the same thing, the cell shows a dash (—) rather than a different measure in its place; hover it to see that the platform doesn't share the number. A dash means only that: a zero shows as 0, and a program that pays no bounties says so on its money cells.</p>
-  <p>Amounts are shown short ("$450", "$8.3k", "$1.4M") and durations in at most two units ("7d 18h", "51d", "8mo 1w"); hover an amount for it to the dollar. An estimate stays short even there, as it isn't that exact.</p>
-  <p>Platform stats are saved once a day, at the first full poll after about 20 hours. Intigriti's come from its public program pages, since its researcher API has none, or, with the optional web login (<code>IT_EMAIL</code>), from the logged-in app, which also covers private and invite-only programs and adds hunters, response times, the bounty table and the program's updates. Most of them are totals the platform keeps current, so their history starts with HuntDeck's first save and fills in a day at a time; it can't be filled in for earlier days.</p>
+<section class="panel msection" id="huntscore">
+  <div class="panel-head">
+    <h2>HuntScore</h2>
+    <span class="aside">0–100 program ranking · computed locally after every poll · hover any score for breakdown</span>
   </div>
-</section>
-<section class="panel mcard" id="total-paid">
-  <div class="panel-head"><h2>Total paid</h2></div>
-  <div class="panel-body md">
-  <p><b>HackerOne</b> publishes each program's bounties paid since it started. The day-to-day rise is what the program paid that day.</p>
-  <p><b>Intigriti</b> publishes the total paid on each public program's page; programs you have to apply to, or are invited to, have no public page, so they show a dash unless the web login is set up.</p>
-  <p><b>Bugcrowd</b> publishes no total, only how many vulnerabilities a program has rewarded (all time) and its average payout (over the last three months). Their product estimates the total. It tends to run high, since it applies a recent average to every reward ever given, and the count may include rewards that weren't cash. It also moves as the three-month average does, even on days without payouts.</p>
-  </div>
-</section>
-<section class="panel mcard" id="average-bounty">
-  <div class="panel-head"><h2>Average bounty</h2></div>
-  <div class="panel-body md">
-  <p>Each platform's own figure, and they differ: <b>HackerOne</b> gives a range ("$200 – $300"), <b>Bugcrowd</b> its average payout over the last three months, <b>YesWeHack</b> an average reward, for a few programs only, in euros, and <b>Intigriti</b> its average payout, on public programs' pages. The list shows them short ("$1.6k – $2.5k"); hover for the exact amounts. Sorting by it ranks HackerOne's ranges by their middle.</p>
-  </div>
-</section>
-<section class="panel mcard" id="paid-90">
-  <div class="panel-head"><h2>Paid · 90 days</h2></div>
-  <div class="panel-body md">
-  <p><b>HackerOne</b> publishes bounties paid in the last 90 days. The chart is that figure, one point per saved day.</p>
-  <p><b>Intigriti</b> publishes its total paid, so paid in 90 days is worked out from it like reports received: counted once HuntDeck has saved 90 days of totals, estimated (≈) before that in the same ways. On the Stats page its line goes back a year before the first saved day, a point at each month's start (≈): the three months before's accepted reports, estimated from the program's monthly leaderboards (see valid reports per month), times what the program pays per accepted report (its total paid over its accepted reports, all time). It joins the saved days where a program's figure is sound: counted, or from its leaderboard share. Programs that don't publish their total paid, or don't have a sound figure yet, are left out of it.</p>
-  <p>The Stats page's Paid line is the programs paying in the currency most is paid in, which depends on the programs shown: for Intigriti that is euros under Private, where the line runs back a year from the estimates above, and dollars under All and Public, where most of the public programs paying in dollars have no sound figure yet, so the line starts at the first saved day and reaches further back as programs get one. The amounts in other currencies show beside the figure, as they can't be added together.</p>
-  <p><b>Bugcrowd</b> publishes no such figure, but CrowdStream lists each report a program accepted in the last six months, and the program's average payout covers the last three. The estimate is the accepted reports in the last 90 days, leaving out priority 5 (informational, seldom paid), times that average, so both cover the same window. It is at least what CrowdStream itself shows, since CrowdStream shows the bounty on only some reports. A program's chart on the Programs list uses each day's saved average (days before HuntDeck's first save use the earliest one); the Stats page's line, which adds up every program, works each past day out at today's average. Limits: public programs only; a report can be accepted one month and paid the next; and some accepted reports earn points rather than money.</p>
-  <p>Some Bugcrowd programs keep CrowdStream to themselves: it says "no accepted or disclosed submissions" while the program publishes hundreds of rewarded vulnerabilities. HuntDeck treats a feed that has never listed a report that way, not as a program without reports, so its accepted and resolved counts show a dash. Paid in 90 days is then the rise in the program's count of rewarded vulnerabilities, saved daily, times its average payout (≈ always): scaled up from a week or more of counts until there are 90 days of them, and the whole count for a program launched less than 90 days ago.</p>
-  </div>
-</section>
-<section class="panel mcard" id="received-90">
-  <div class="panel-head"><h2>Reports received · 90 days</h2></div>
-  <div class="panel-body md">
-  <p><b>HackerOne</b> publishes every report received in the last 90 days, duplicates and invalid ones included, which makes it a measure of competition: more is more hunters on the program. Bugcrowd publishes nothing like it; its accepted (valid) reports are a much smaller number, so they stay on the program's own page.</p>
-  <p><b>YesWeHack</b> and <b>Intigriti</b> publish every report a program has ever received, duplicates and invalid ones included. HuntDeck saves that total daily, and with 90 days of it the figure is counted: today's total less the one from 90 days before. Until then it is an estimate (≈):</p>
-  <ul>
-    <li><b>YesWeHack</b>: the reports over the days saved so far, plus its own last-7-days count for the rest of the 90 days (the first day, that count × 90/7).</li>
-    <li><b>Intigriti</b>, with the web login: the all-time total × the share of the program's leaderboard points earned in the last 90 days. Each accepted report earns fixed points by severity (low 5 to exceptional 50; a duplicate a fifth of that), so the share says how much of the program's activity is recent. It is rough: a critical is worth 8 lows in points but often far more in money, and duplicates earn points but no bounty. The boards list at most 100 researchers and some programs hide the points, so it is used only where both are whole. The 90-day board also gives the Hunters column's second line: researchers who earned points in the last 90 days (100+ on a full board).</li>
-    <li>Otherwise: the saved totals scaled to 90 days, once there is a week of them; until then the cell says Pending.</li>
-  </ul>
-  <p>A program launched less than 90 days ago has had every report in the window, so its total is the figure, counted; no estimate is more than the total it comes from.</p>
-  <p>The chart starts with the first saved total rather than with the figure: dotted at first, then from the fifth day a dashed early line, each point the rise since the first saved total scaled to 90 days (≈, rougher the fewer days it rests on). A figure with only one day saved has a dotted line beside its number until the next day's starts its chart. Intigriti's paid in 90 days and Bugcrowd's estimate from rewarded reports are drawn the same way.</p>
-  </div>
-</section>
-<section class="panel mcard" id="stats">
-  <div class="panel-head"><h2>Stats page: valid reports per month</h2></div>
-  <div class="panel-body md">
-  <p>Each platform counts valid reports its own way, so the Stats page's lines show where each is going rather than how they compare.</p>
-  <ul>
-    <li><b>HackerOne</b>: reports resolved on Hacktivity, by the month of their latest public activity.</li>
-    <li><b>Bugcrowd</b>: reports accepted on CrowdStream, by the month accepted (public programs that list their reports).</li>
-    <li><b>Intigriti</b>: the rises in each program's published count of accepted reports, saved daily. Months before the first save, up to a year back, are estimated (≈) from the program's leaderboard for the month: researchers earn a fixed number of points per accepted report by severity (and a fifth of it per duplicate), so the month's points times the program's accepted reports per point (all time) estimate its accepted reports. Where a program hides its points, the researchers who earned any that month are counted at the platform's average accepted reports per researcher a month. The leaderboards list at most 100 researchers, so the busiest months may be a little low.</li>
-    <li><b>YesWeHack</b>: each program's Thanks list names its hunters with their valid reports; added up, that is the program's valid reports all time. HuntDeck saves the total daily and counts its rises. Months before the first save are estimated (≈): the reports the program received in the month (YesWeHack's own count for the calendar month) times its valid share, its valid reports over every report it has received. Programs that hide their Thanks list aren't counted, and the Dojo (practice challenges) is left out.</li>
-  </ul>
-  <p>Beside them, <b>bounties per month</b>: on HackerOne the amounts Hacktivity shows (programs that hide amounts count each bounty at their average bounty, ≈), on Bugcrowd those CrowdStream shows, and on Intigriti what programs paid: the rises in their published total paid from the first save, and before it (≈) the month's estimated accepted reports times what the program pays per accepted report. Each is in the currency most is paid in, the rest beside it. Only programs that pay bounties now count, as for paid in 90 days: a program that stopped keeps its reports in the valid count but not its bounties.</p>
-  <p><b>Which programs count.</b> The per-month numbers (valid reports, bounties, assets added to scope, programs that added scope, launches, disclosures) count every program listed now, paused and closed ones included: they describe the platform's activity, and a program paused today still had last month's reports. Open programs and paying ones are those open at each month's end; assets and wildcards in scope are today's open programs' at each month's end. Wildcards in scope are wildcard targets, once per program and value, whatever type of scope entry lists them, as the Targets page and the hunt board count them. The 90-day numbers (reports received, paid) are the Programs list's figures for open programs, added up, so the two agree; their lines are linked day to day over every listed program saved both days and scaled to end at that figure. Ignored programs count everywhere on the Stats page, which describes the platforms, not your list (the hunt board and Targets page leave them out).</p>
-  <p>A platform's own page, sorted by paid in 90 days or bounties, lists the programs paying in its lead currency (the one its line follows) first, then each other currency's, each sorted within itself, since euros and dollars can't be compared.</p>
-  <p>Lines start with the first month or day HuntDeck has. Numbers that are only a few weeks old, or estimated, stay out of the All platforms row until they cover half a year. All, Public or Private beside the title narrows every number to those programs, private being the ones you were invited to; a program counts as it is now, so one that went private counts as private in every month.</p>
-  </div>
-</section>
-<section class="panel mcard" id="resolved-90">
-  <div class="panel-head"><h2>Valid · 90 days</h2></div>
-  <div class="panel-body md">
-  <p>Reports a program accepted as valid in the last 90 days. Where a platform lists its reports, HuntDeck keeps every resolved one, with its date, and counts those resolved in the 90 days up to each day.</p>
-  <ul>
-    <li><b>HackerOne</b>: the undisclosed reports on Hacktivity, dated by their latest public activity (usually the resolution, sometimes a bounty awarded later). Disclosed reports are kept separately and not counted, about 3% of resolutions. A program's history is read back up to 5,000 reports when HuntDeck first sees it, which only shortens the oldest history of the very largest programs.</li>
-    <li><b>Bugcrowd</b>: CrowdStream, dated by when each accepted report was closed. It covers the last six months of accepted reports and only public programs, so a report accepted earlier than that and resolved recently isn't counted.</li>
-  </ul>
-  <p><b>YesWeHack</b> and <b>Intigriti</b> list no reports, but publish how many reports each program has received and how many it accepted, all time (YesWeHack's adds up the program's Thanks list). The column shows an estimate instead, marked ≈: reports received in 90 days (as above) times the share of all the program's reports it accepted. Its line is each day's reports received times that day's accepted share, so it follows the reports-received line; the program page shows the share as <b>Accepted share</b>.</p>
-  </div>
-</section>
-<section class="panel mcard" id="huntscore">
-  <div class="panel-head"><h2>HuntScore</h2></div>
-  <div class="panel-body md">
-  <p>How worth hunting a program is right now, 0 to 100, scored after every poll from what HuntDeck has stored; hover a score for its parts, or open the program for the reasons. The parts, weighted by the preset chosen in Settings (Balanced is 35 / 30 / 25 / 10):</p>
-  <ul>
-    <li><b>Fresh</b>: in-scope assets added in the last 30 days, weighted by type (a wildcard counts most), more for a root domain the program never had, fading by half every 14 days; plus a recent invite, launch, reopening or raised bounty table.</li>
-    <li><b>Competition</b>: report volume for the size of the scope, ranked within the platform (fewer reports scores higher), with a boost for private programs. It uses the best volume each platform shares: reports in 90 days on HackerOne, and on YesWeHack and Intigriti as worked out above, accepted reports in 90 days on Bugcrowd, or, for a Bugcrowd program that keeps CrowdStream private, the rise in its rewarded reports over the counts saved so far (≈, scaled to 90 days).</li>
-    <li><b>Payout</b>: top bounty, bounties paid in 90 days and average bounty, ranked within the platform.</li>
-    <li><b>Response</b>: the share of reports answered on time, time to first response and time to validate, ranked within the platform.</li>
-  </ul>
-  <p>{{T "The parts are averaged by their weights, and a program that pays no bounties has that average multiplied by 0.75: the four parts of a disclosure-only program weigh to a higher number than the score it shows, and its program page says so under the parts."}}</p>
-  <p>Parts are ranked within one platform, so platforms that share different numbers aren't compared directly. A part with nothing to go on scores 45 and is marked unknown, and the score's confidence drops with each unknown part. Programs without bounties are scaled down by a quarter. Paused and closed programs keep their score but are left out of the hunt board's picks. Your own reports aren't used.</p>
-  <p>Targets on the hunt board are scored the same way, by how new they are: to the program, or to you. A private program you just got access to has its whole scope dated when you joined (or when HuntDeck first listed it), so an old program's scope still shows as fresh; the board lists 3 of its targets and links the rest.</p>
-  </div>
-</section>
-<section class="panel mcard" id="huntqueue">
-  <div class="panel-head"><h2>HuntQueue</h2></div>
-  <div class="panel-body md">
-  <p>HuntScore rates <b>programs</b>; HuntQueue rates <b>targets</b>, and answers a narrower question: can I start on this today, and what is it worth per hour? The hunt board shows its first five, <code>/queue</code> shows fifty at a time, and the server rebuilds it every half hour from what was polled.</p>
-  <p>Seven inputs, multiplied rather than added, so a factor at zero zeroes the score instead of being averaged away:</p>
-  <ul>
-    <li><b>Quality</b> (0.30): the program's HuntScore without its freshness part.</li>
-    <li><b>Money</b> (0.25): the top bounty in US dollars, saturating at $10k. Programs paying in another currency are converted with a fixed table; a currency the table does not know is taken at face value, and the note on the page says so.</li>
-    <li><b>Speed</b> (0.15): the median days from submission to acceptance, saturating at two weeks.</li>
-    <li><b>Duplicates</b> (0.15): how crowded the target looks, from the reports the program receives for the size of its scope.</li>
-    <li><b>Freshness</b> (0.10): how recently the target appeared, or became yours to hunt.</li>
-    <li><b>Readiness</b> (0.05): 1.0 open, 0.7 when test credentials have to be requested, 0.5 when the program bans automated tools, and a further 0.8 when a program keeps flipping between paused and open.</li>
-    <li><b>Personal</b>: a prior on you rather than on the target, 0.8 until you have reports of your own.</li>
-  </ul>
-  <p>A target the queue cannot rank is not hidden: it is listed with its reason (the program is paused, an invite is waiting, there is no scope), so "why is this not in the queue" has an answer on the page.</p>
-  <p><b>The queue is on trial until it has eight snapshots.</b> A day's scores are saved once a day, and at each past day the backtest asks what the queue would have told you to hunt and what the platforms then paid. Fewer than eight cuts means that judgement has not happened: the footer says <code>N of 8 snapshots</code>, and until then HuntScore is the number with a track record while the queue is a well-argued guess. The breakdown is visible four ways: the score on the page unfolds, <code>?explain=1</code>, <code>huntdeck queue --explain</code>, and <code>explain: true</code> on the MCP tool.</p>
+  <div class="panel-body mscore-wrap">
+    <div class="mscore-top">
+      <div class="mpresets-card">
+        <h3 class="msub-title">4 Weight Presets (Settings)</h3>
+        <div class="mlegend">
+          <span class="mlegend-item"><span class="mlegend-swatch fresh" aria-hidden="true"></span>Fresh</span>
+          <span class="mlegend-item"><span class="mlegend-swatch comp" aria-hidden="true"></span>Competition</span>
+          <span class="mlegend-item"><span class="mlegend-swatch payout" aria-hidden="true"></span>Payout</span>
+          <span class="mlegend-item"><span class="mlegend-swatch resp" aria-hidden="true"></span>Response</span>
+        </div>
+        <div class="mpresets">
+          <div class="mpreset-row">
+            <span class="mpreset-label">Balanced <span class="mpreset-def">Default</span></span>
+            <div class="mbar-stack" role="img" aria-label="Balanced: Fresh 35%, Competition 30%, Payout 25%, Response 10%">
+              <span class="mbar-seg fresh" style="width:35%" title="Fresh 35%">35%</span>
+              <span class="mbar-seg comp" style="width:30%" title="Competition 30%">30%</span>
+              <span class="mbar-seg payout" style="width:25%" title="Payout 25%">25%</span>
+              <span class="mbar-seg resp" style="width:10%" title="Response 10%">10%</span>
+            </div>
+          </div>
+          <div class="mpreset-row">
+            <span class="mpreset-label">New surface</span>
+            <div class="mbar-stack" role="img" aria-label="New surface: Fresh 55%, Competition 20%, Payout 15%, Response 10%">
+              <span class="mbar-seg fresh" style="width:55%" title="Fresh 55%">55%</span>
+              <span class="mbar-seg comp" style="width:20%" title="Competition 20%">20%</span>
+              <span class="mbar-seg payout" style="width:15%" title="Payout 15%">15%</span>
+              <span class="mbar-seg resp" style="width:10%" title="Response 10%">10%</span>
+            </div>
+          </div>
+          <div class="mpreset-row">
+            <span class="mpreset-label">Big payouts</span>
+            <div class="mbar-stack" role="img" aria-label="Big payouts: Fresh 20%, Competition 20%, Payout 50%, Response 10%">
+              <span class="mbar-seg fresh" style="width:20%" title="Fresh 20%">20%</span>
+              <span class="mbar-seg comp" style="width:20%" title="Competition 20%">20%</span>
+              <span class="mbar-seg payout" style="width:50%" title="Payout 50%">50%</span>
+              <span class="mbar-seg resp" style="width:10%" title="Response 10%">10%</span>
+            </div>
+          </div>
+          <div class="mpreset-row">
+            <span class="mpreset-label">Low competition</span>
+            <div class="mbar-stack" role="img" aria-label="Low competition: Fresh 25%, Competition 50%, Payout 15%, Response 10%">
+              <span class="mbar-seg fresh" style="width:25%" title="Fresh 25%">25%</span>
+              <span class="mbar-seg comp" style="width:50%" title="Competition 50%">50%</span>
+              <span class="mbar-seg payout" style="width:15%" title="Payout 15%">15%</span>
+              <span class="mbar-seg resp" style="width:10%" title="Response 10%">10%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mrules-card">
+        <h3 class="msub-title">Scoring Rules &amp; Adjustments</h3>
+        <div class="mrules-formula">Score = Σ(wᵢ × Partᵢ) × (VDP ? 0.75 : 1.0)</div>
+        <div class="mrule-chips">
+          <span class="mrule-chip"><b>Within platform</b> ranked</span>
+          <span class="mrule-chip"><b>Unknown part = 45</b></span>
+          <span class="mrule-chip"><b>VDP ×0.75</b></span>
+          <span class="mrule-chip"><b>Paused/closed</b> gated</span>
+          <span class="mrule-chip"><b>Own reports</b> excluded</span>
+        </div>
+        <p class="mrules-note">{{T "The parts are averaged by their weights, and a program that pays no bounties has that average multiplied by 0.75: the four parts of a disclosure-only program weigh to a higher number than the score it shows, and its program page says so under the parts."}}</p>
+      </div>
+    </div>
+
+    <div class="mdim-grid">
+      <div class="mdim-card fresh">
+        <div class="mdim-head"><h3>Fresh</h3><span>35% default</span></div>
+        <p>In-scope assets added in the last 30 days, weighted by kind (wildcards highest), boosted for a root domain new to the program, fading by half every 14 days; plus recent invites, launches, reopenings, or raised bounty tables.</p>
+      </div>
+      <div class="mdim-card comp">
+        <div class="mdim-head"><h3>Competition</h3><span>30% default</span></div>
+        <p>Report volume for scope size, ranked within the platform (fewer reports scores higher), with a boost for private programs. Uses H1 90d reports, YWH/Intigriti derived 90d, BC CrowdStream 90d (or rewarded delta scaled if private).</p>
+      </div>
+      <div class="mdim-card payout">
+        <div class="mdim-head"><h3>Payout</h3><span>25% default</span></div>
+        <p>Top bounty, bounties paid in 90 days, and average bounty ranked within the platform. Non-paying (VDP) programs score 0 here and have their overall HuntScore multiplied by <code>0.75</code>.</p>
+      </div>
+      <div class="mdim-card resp">
+        <div class="mdim-head"><h3>Response</h3><span>10% default</span></div>
+        <p>Share of reports answered on time, time to first response, and time to validate, ranked within the platform. Missing metrics default to <code>45</code> (unknown) and reduce score confidence.</p>
+      </div>
+    </div>
+
+    <p class="mscore-foot">Parts are ranked within one platform so differing metrics never mix across platforms. Paused and closed programs keep their score but are left out of hunt board picks. A newly accessed private program dates its whole scope when you joined (or when HuntDeck first listed it), so older private scopes still surface as fresh targets.</p>
   </div>
 </section>
 
-<section class="panel mcard" id="charts">
-  <div class="panel-head"><h2>The charts</h2></div>
-  <div class="panel-body md">
-  <p>Each chart covers the last 90 days, one point a day, scaled to its own range, so it shows the direction rather than the size; hover it for the numbers. Green means it went up and red that it went down, whatever the number (more reports received is green too, though it means more competition), grey a change under 5% either way. The change compares with 90 days before, or with the first day there is when the history is shorter.</p>
+<section class="panel msection" id="huntqueue">
+  <div class="panel-head">
+    <h2>HuntQueue</h2>
+    <span class="aside">Target-level priority · top 5 on board, 50 on <code>/queue</code> · rebuilt every 30 min</span>
+  </div>
+  <div class="panel-body mqueue-wrap">
+    <div class="mq-arch">
+      <svg class="mq-svg" viewBox="0 0 760 128" role="img" aria-label="HuntQueue 3-stage pipeline: Candidates to Hard Admission Gates to 7-Factor Multiplicative Score to Top 50 Today Queue">
+        <defs>
+          <marker id="mq-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 1 2 L 8 5 L 1 8 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <rect class="mq-box" x="4" y="16" width="156" height="96" rx="10"/>
+        <text class="mq-kicker" x="18" y="37">Input</text>
+        <text class="mq-title" x="18" y="59">Candidates</text>
+        <text class="mq-sub" x="18" y="79">All stored in-scope</text>
+        <text class="mq-sub" x="18" y="95">targets across platforms</text>
+
+        <path class="mq-arrow" d="M 164 64 L 194 64" marker-end="url(#mq-arr)" style="color:var(--muted)"/>
+
+        <rect class="mq-box-gate" x="198" y="16" width="170" height="96" rx="10"/>
+        <text class="mq-kicker" x="212" y="37">Stage 1</text>
+        <text class="mq-title" x="212" y="59">Admission Gates</text>
+        <text class="mq-sub" x="212" y="79">Paused, invite waiting,</text>
+        <text class="mq-sub" x="212" y="95">no scope → listed w/ reason</text>
+
+        <path class="mq-arrow" d="M 372 64 L 402 64" marker-end="url(#mq-arr)" style="color:var(--muted)"/>
+
+        <rect class="mq-box-score" x="406" y="16" width="184" height="96" rx="10"/>
+        <text class="mq-kicker" x="420" y="37">Stage 2</text>
+        <text class="mq-title" x="420" y="59">7-Factor Product</text>
+        <text class="mq-sub" x="420" y="79">Geometric mean × Personal</text>
+        <text class="mq-sub" x="420" y="95">zero in any factor = zero</text>
+
+        <path class="mq-arrow" d="M 594 64 L 624 64" marker-end="url(#mq-arr)" style="color:var(--muted)"/>
+
+        <rect class="mq-box-out" x="628" y="16" width="128" height="96" rx="10"/>
+        <text class="mq-badge" x="642" y="37">Stage 3</text>
+        <text class="mq-title" x="642" y="59">Top 50 Queue</text>
+        <text class="mq-sub" x="642" y="79">Top 5 on Hunt Board</text>
+        <text class="mq-sub" x="642" y="95">4 explain surfaces</text>
+      </svg>
+    </div>
+
+    <div class="mq-grid">
+      <div class="mfactors-card">
+        <h3 class="msub-title">7 Multiplicative Factors (Geometric Mean)</h3>
+        <div class="mfactors">
+          <div class="mfactor-row">
+            <div class="mfactor-top"><span class="mfactor-name">Quality</span><span class="mfactor-wt">30% · w=0.30</span></div>
+            <div class="mfactor-track"><div class="mfactor-fill" style="width:100%"></div></div>
+            <p class="mfactor-desc">Program's HuntScore excluding its freshness part.</p>
+          </div>
+          <div class="mfactor-row">
+            <div class="mfactor-top"><span class="mfactor-name">Money</span><span class="mfactor-wt">25% · w=0.25</span></div>
+            <div class="mfactor-track"><div class="mfactor-fill" style="width:83%"></div></div>
+            <p class="mfactor-desc">Top bounty in USD, log-scaled, saturating at $10k (other currencies converted via fixed table; unknown currencies noted at face value).</p>
+          </div>
+          <div class="mfactor-row">
+            <div class="mfactor-top"><span class="mfactor-name">Speed</span><span class="mfactor-wt">15% · w=0.15</span></div>
+            <div class="mfactor-track"><div class="mfactor-fill" style="width:50%"></div></div>
+            <p class="mfactor-desc">Median days from submission to acceptance (saturates at fast triage; 0.5 when unknown).</p>
+          </div>
+          <div class="mfactor-row">
+            <div class="mfactor-top"><span class="mfactor-name">Duplicates</span><span class="mfactor-wt">15% · w=0.15</span></div>
+            <div class="mfactor-track"><div class="mfactor-fill" style="width:50%"></div></div>
+            <p class="mfactor-desc">How crowded the target looks from disclosed/received reports relative to scope size.</p>
+          </div>
+          <div class="mfactor-row">
+            <div class="mfactor-top"><span class="mfactor-name">Freshness</span><span class="mfactor-wt">10% · w=0.10</span></div>
+            <div class="mfactor-track"><div class="mfactor-fill" style="width:33%"></div></div>
+            <p class="mfactor-desc">How recently the target appeared or became yours to hunt (21-day half-life).</p>
+          </div>
+          <div class="mfactor-row">
+            <div class="mfactor-top"><span class="mfactor-name">Readiness</span><span class="mfactor-wt">5% · w=0.05</span></div>
+            <div class="mfactor-track"><div class="mfactor-fill" style="width:17%"></div></div>
+            <p class="mfactor-desc">Whether you can start right now without requesting access or avoiding automation.</p>
+          </div>
+          <div class="mfactor-row">
+            <div class="mfactor-top"><span class="mfactor-name">Personal prior</span><span class="mfactor-wt">×0.8 prior</span></div>
+            <div class="mfactor-track"><div class="mfactor-fill prior" style="width:80%"></div></div>
+            <p class="mfactor-desc">Prior on you rather than the target: constant <code>0.8</code> (at 25% prior hit rate) until you log reports of your own.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mq-side">
+        <div class="mq-side-card">
+          <h3 class="msub-title">Readiness Multipliers</h3>
+          <div class="mq-ready-chips">
+            <span class="mq-ready good">Open <b>1.0</b></span>
+            <span class="mq-ready warn">Test creds <b>0.7</b></span>
+            <span class="mq-ready bad">No-automation <b>0.5</b></span>
+            <span class="mq-ready warn">Flip-flopping <b>×0.8</b></span>
+          </div>
+          <div class="mq-callout">
+            <h4>Gated targets are never hidden</h4>
+            <p>Targets the queue cannot rank are listed with their reason (paused/closed, invite pending, requirements unmet, ignored, or no scope) so "why isn't this queued?" always has an answer.</p>
+          </div>
+          <div class="mq-callout">
+            <h4>Probation until 8 daily snapshots</h4>
+            <p>Each day saves a queue snapshot for backtesting against real platform payouts. Before 8 cuts, the footer shows <code>N of 8 snapshots</code> (HuntScore has the track record while the queue matures). Inspect breakdowns 4 ways: unfold on <code>/queue</code>, <code>?explain=1</code>, <code>huntdeck queue --explain</code>, or MCP <code>explain: true</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
-<section class="panel mcard" id="scope-changed">
-  <div class="panel-head"><h2>Scope changed</h2></div>
-  <div class="panel-body md">
-  <p>When the program's scope last changed: the latest of the additions, removals and edits HuntDeck saw in its polls and the dates the platform's scope history gives (an asset added on a known day, or one removed). An asset already there when the history starts has only an "on or before" date, which doesn't count; a program with neither shows a dash.</p>
-  </div>
-</section>
-<section class="panel mcard" id="api-freshness">
-  <div class="panel-head"><h2>In the API: estimates and freshness</h2></div>
-  <div class="panel-body md">
-  <p><code>/api/v2/programs</code>, <code>/api/v2/invites</code> and <code>/api/v2/programs/{platform}/{handle}</code> give each number that can be estimated or that polls refresh (the bounty range, the scope counts and every figure under <code>numbers</code>) as an object; v1 keeps them flat:</p>
-  <pre class="method-code"><code>"paid_90d": {"value": 41500, "estimated": false, "source": "hackerone", "updated_at": "2026-11-03T09:00:12.345Z"}</code></pre>
-  <p><b>estimated</b> is true where the cell above shows ≈: <b>Bugcrowd</b>'s total paid and paid in 90 days (it publishes neither; it has no count of reports received, so that value is null), <b>YesWeHack</b> and <b>Intigriti</b> received and paid in 90 days until 90 days of their totals are saved, and their valid reports in 90 days, and a bounty range read from the most a program has paid rather than its bounty table. <b>source</b> is the platform for its own figures, <code>derived</code> for what HuntDeck counts or works out (valid reports from Hacktivity or CrowdStream, figures from saved totals, every estimate) and <code>manual</code> for programs you added by hand. <b>updated_at</b> is when the value last changed, to the poll that saw it change: a figure read again unchanged keeps its time. It's null where HuntDeck can't date it: unchanged since it began keeping these times, with no saved history to date it from.</p>
-  <p>Each program also has <code>updated_at</code>, the last time anything about it changed (first seen, a change in Changes, one of its numbers, its removal), and <code>last_synced_at</code>, the last time HuntDeck read it from its platform, whether anything changed or not. <code>since</code> on the program lists keeps those changed after a time; on <code>/api/v1/targets</code> it keeps targets added or edited after it. Program, list and match answers carry an <code>ETag</code>: sent back as <code>If-None-Match</code>, it gets <code>304 Not Modified</code> and no body while nothing changed.</p>
-  <pre class="method-code"><code>HD=http://127.0.0.1:8080   # this HuntDeck
+
+<div class="mref-head">
+  <h2>Deep-Dive Reference</h2>
+  <span>Click any topic to expand full derivation rules, edge cases, and API payloads</span>
+</div>
+
+<div class="macc-grid">
+  <details class="panel macc" id="sources">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>Published, counted and estimated</h2>
+        <span class="macc-sum">Source definitions, short-format rounding, and daily snapshot cadence (~20h)</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p><b>Published</b> numbers are the platform's own figures, as it shows them. <b>Counted</b> numbers HuntDeck works out itself from report dates the platform lists. <b>Estimates</b> are marked ≈ and shown fainter; hover one for its working. Where a platform has nothing that measures the same thing, the cell shows a dash (—) rather than a different measure in its place; hover it to see that the platform doesn't share the number. A dash means only that: a zero shows as 0, and a program that pays no bounties says so on its money cells.</p>
+      <p>Amounts are shown short ("$450", "$8.3k", "$1.4M") and durations in at most two units ("7d 18h", "51d", "8mo 1w"); hover an amount for it to the dollar. An estimate stays short even there, as it isn't that exact.</p>
+      <p>Platform stats are saved once a day, at the first full poll after about 20 hours. Intigriti's come from its public program pages, since its researcher API has none, or, with the optional web login (<code>IT_EMAIL</code>), from the logged-in app, which also covers private and invite-only programs and adds hunters, response times, the bounty table and the program's updates. Most of them are totals the platform keeps current, so their history starts with HuntDeck's first save and fills in a day at a time; it can't be filled in for earlier days.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="total-paid">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>Total paid</h2>
+        <span class="macc-sum">H1 &amp; Intigriti publish totals; Bugcrowd estimates from rewarded × recent average</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p><b>HackerOne</b> publishes each program's bounties paid since it started. The day-to-day rise is what the program paid that day.</p>
+      <p><b>Intigriti</b> publishes the total paid on each public program's page; programs you have to apply to, or are invited to, have no public page, so they show a dash unless the web login is set up.</p>
+      <p><b>Bugcrowd</b> publishes no total, only how many vulnerabilities a program has rewarded (all time) and its average payout (over the last three months). Their product estimates the total. It tends to run high, since it applies a recent average to every reward ever given, and the count may include rewards that weren't cash. It also moves as the three-month average does, even on days without payouts.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="average-bounty">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>Average bounty</h2>
+        <span class="macc-sum">H1 range (midpoint sort), BC 3-month avg, YWH EUR subset, Intigriti public</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p>Each platform's own figure, and they differ: <b>HackerOne</b> gives a range ("$200 – $300"), <b>Bugcrowd</b> its average payout over the last three months, <b>YesWeHack</b> an average reward, for a few programs only, in euros, and <b>Intigriti</b> its average payout, on public programs' pages. The list shows them short ("$1.6k – $2.5k"); hover for the exact amounts. Sorting by it ranks HackerOne's ranges by their middle.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="paid-90">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>Paid · 90 days</h2>
+        <span class="macc-sum">H1 published; Intigriti delta/leaderboard backfill; BC CrowdStream or rewarded delta</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p><b>HackerOne</b> publishes bounties paid in the last 90 days. The chart is that figure, one point per saved day.</p>
+      <p><b>Intigriti</b> publishes its total paid, so paid in 90 days is worked out from it like reports received: counted once HuntDeck has saved 90 days of totals, estimated (≈) before that in the same ways. On the Stats page its line goes back a year before the first saved day, a point at each month's start (≈): the three months before's accepted reports, estimated from the program's monthly leaderboards (see valid reports per month), times what the program pays per accepted report (its total paid over its accepted reports, all time). It joins the saved days where a program's figure is sound: counted, or from its leaderboard share. Programs that don't publish their total paid, or don't have a sound figure yet, are left out of it.</p>
+      <p>The Stats page's Paid line is the programs paying in the currency most is paid in, which depends on the programs shown: for Intigriti that is euros under Private, where the line runs back a year from the estimates above, and dollars under All and Public, where most of the public programs paying in dollars have no sound figure yet, so the line starts at the first saved day and reaches further back as programs get one. The amounts in other currencies show beside the figure, as they can't be added together.</p>
+      <p><b>Bugcrowd</b> publishes no such figure, but CrowdStream lists each report a program accepted in the last six months, and the program's average payout covers the last three. The estimate is the accepted reports in the last 90 days, leaving out priority 5 (informational, seldom paid), times that average, so both cover the same window. It is at least what CrowdStream itself shows, since CrowdStream shows the bounty on only some reports. A program's chart on the Programs list uses each day's saved average (days before HuntDeck's first save use the earliest one); the Stats page's line, which adds up every program, works each past day out at today's average. Limits: public programs only; a report can be accepted one month and paid the next; and some accepted reports earn points rather than money.</p>
+      <p>Some Bugcrowd programs keep CrowdStream to themselves: it says "no accepted or disclosed submissions" while the program publishes hundreds of rewarded vulnerabilities. HuntDeck treats a feed that has never listed a report that way, not as a program without reports, so its accepted and resolved counts show a dash. Paid in 90 days is then the rise in the program's count of rewarded vulnerabilities, saved daily, times its average payout (≈ always): scaled up from a week or more of counts until there are 90 days of them, and the whole count for a program launched less than 90 days ago.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="received-90">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>Reports received · 90 days</h2>
+        <span class="macc-sum">Competition gauge: H1 published; YWH &amp; Intigriti diffed daily (with 7d/leaderboard ramp)</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p><b>HackerOne</b> publishes every report received in the last 90 days, duplicates and invalid ones included, which makes it a measure of competition: more is more hunters on the program. Bugcrowd publishes nothing like it; its accepted (valid) reports are a much smaller number, so they stay on the program's own page.</p>
+      <p><b>YesWeHack</b> and <b>Intigriti</b> publish every report a program has ever received, duplicates and invalid ones included. HuntDeck saves that total daily, and with 90 days of it the figure is counted: today's total less the one from 90 days before. Until then it is an estimate (≈):</p>
+      <ul>
+        <li><b>YesWeHack</b>: the reports over the days saved so far, plus its own last-7-days count for the rest of the 90 days (the first day, that count × 90/7).</li>
+        <li><b>Intigriti</b>, with the web login: the all-time total × the share of the program's leaderboard points earned in the last 90 days. Each accepted report earns fixed points by severity (low 5 to exceptional 50; a duplicate a fifth of that), so the share says how much of the program's activity is recent. It is rough: a critical is worth 8 lows in points but often far more in money, and duplicates earn points but no bounty. The boards list at most 100 researchers and some programs hide the points, so it is used only where both are whole. The 90-day board also gives the Hunters column's second line: researchers who earned points in the last 90 days (100+ on a full board).</li>
+        <li>Otherwise: the saved totals scaled to 90 days, once there is a week of them; until then the cell says Pending.</li>
+      </ul>
+      <p>A program launched less than 90 days ago has had every report in the window, so its total is the figure, counted; no estimate is more than the total it comes from.</p>
+      <p>The chart starts with the first saved total rather than with the figure: dotted at first, then from the fifth day a dashed early line, each point the rise since the first saved total scaled to 90 days (≈, rougher the fewer days it rests on). A figure with only one day saved has a dotted line beside its number until the next day's starts its chart. Intigriti's paid in 90 days and Bugcrowd's estimate from rewarded reports are drawn the same way.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="stats">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>Stats page: valid reports per month</h2>
+        <span class="macc-sum">Per-platform monthly series, currency rules, and which programs are included</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p>Each platform counts valid reports its own way, so the Stats page's lines show where each is going rather than how they compare.</p>
+      <ul>
+        <li><b>HackerOne</b>: reports resolved on Hacktivity, by the month of their latest public activity.</li>
+        <li><b>Bugcrowd</b>: reports accepted on CrowdStream, by the month accepted (public programs that list their reports).</li>
+        <li><b>Intigriti</b>: the rises in each program's published count of accepted reports, saved daily. Months before the first save, up to a year back, are estimated (≈) from the program's leaderboard for the month: researchers earn a fixed number of points per accepted report by severity (and a fifth of it per duplicate), so the month's points times the program's accepted reports per point (all time) estimate its accepted reports. Where a program hides its points, the researchers who earned any that month are counted at the platform's average accepted reports per researcher a month. The leaderboards list at most 100 researchers, so the busiest months may be a little low.</li>
+        <li><b>YesWeHack</b>: each program's Thanks list names its hunters with their valid reports; added up, that is the program's valid reports all time. HuntDeck saves the total daily and counts its rises. Months before the first save are estimated (≈): the reports the program received in the month (YesWeHack's own count for the calendar month) times its valid share, its valid reports over every report it has received. Programs that hide their Thanks list aren't counted, and the Dojo (practice challenges) is left out.</li>
+      </ul>
+      <p>Beside them, <b>bounties per month</b>: on HackerOne the amounts Hacktivity shows (programs that hide amounts count each bounty at their average bounty, ≈), on Bugcrowd those CrowdStream shows, and on Intigriti what programs paid: the rises in their published total paid from the first save, and before it (≈) the month's estimated accepted reports times what the program pays per accepted report. Each is in the currency most is paid in, the rest beside it. Only programs that pay bounties now count, as for paid in 90 days: a program that stopped keeps its reports in the valid count but not its bounties.</p>
+      <p><b>Which programs count.</b> The per-month numbers (valid reports, bounties, assets added to scope, programs that added scope, launches, disclosures) count every program listed now, paused and closed ones included: they describe the platform's activity, and a program paused today still had last month's reports. Open programs and paying ones are those open at each month's end; assets and wildcards in scope are today's open programs' at each month's end. Wildcards in scope are wildcard targets, once per program and value, whatever type of scope entry lists them, as the Targets page and the hunt board count them. The 90-day numbers (reports received, paid) are the Programs list's figures for open programs, added up, so the two agree; their lines are linked day to day over every listed program saved both days and scaled to end at that figure. Ignored programs count everywhere on the Stats page, which describes the platforms, not your list (the hunt board and Targets page leave them out).</p>
+      <p>A platform's own page, sorted by paid in 90 days or bounties, lists the programs paying in its lead currency (the one its line follows) first, then each other currency's, each sorted within itself, since euros and dollars can't be compared.</p>
+      <p>Lines start with the first month or day HuntDeck has. Numbers that are only a few weeks old, or estimated, stay out of the All platforms row until they cover half a year. All, Public or Private beside the title narrows every number to those programs, private being the ones you were invited to; a program counts as it is now, so one that went private counts as private in every month.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="resolved-90">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>Valid · 90 days</h2>
+        <span class="macc-sum">H1 Hacktivity &amp; BC CrowdStream counted directly; YWH &amp; Intigriti estimated via accepted share</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p>Reports a program accepted as valid in the last 90 days. Where a platform lists its reports, HuntDeck keeps every resolved one, with its date, and counts those resolved in the 90 days up to each day.</p>
+      <ul>
+        <li><b>HackerOne</b>: the undisclosed reports on Hacktivity, dated by their latest public activity (usually the resolution, sometimes a bounty awarded later). Disclosed reports are kept separately and not counted, about 3% of resolutions. A program's history is read back up to 5,000 reports when HuntDeck first sees it, which only shortens the oldest history of the very largest programs.</li>
+        <li><b>Bugcrowd</b>: CrowdStream, dated by when each accepted report was closed. It covers the last six months of accepted reports and only public programs, so a report accepted earlier than that and resolved recently isn't counted.</li>
+      </ul>
+      <p><b>YesWeHack</b> and <b>Intigriti</b> list no reports, but publish how many reports each program has received and how many it accepted, all time (YesWeHack's adds up the program's Thanks list). The column shows an estimate instead, marked ≈: reports received in 90 days (as above) times the share of all the program's reports it accepted. Its line is each day's reports received times that day's accepted share, so it follows the reports-received line; the program page shows the share as <b>Accepted share</b>.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="charts">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>The charts</h2>
+        <span class="macc-sum">90-day daily sparklines scaled to range; ±5% directional color threshold</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p>Each chart covers the last 90 days, one point a day, scaled to its own range, so it shows the direction rather than the size; hover it for the numbers. Green means it went up and red that it went down, whatever the number (more reports received is green too, though it means more competition), grey a change under 5% either way. The change compares with 90 days before, or with the first day there is when the history is shorter.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="scope-changed">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>Scope changed</h2>
+        <span class="macc-sum">Latest poll-observed diff or known platform asset addition/removal date</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p>When the program's scope last changed: the latest of the additions, removals and edits HuntDeck saw in its polls and the dates the platform's scope history gives (an asset added on a known day, or one removed). An asset already there when the history starts has only an "on or before" date, which doesn't count; a program with neither shows a dash.</p>
+    </div>
+  </details>
+
+  <details class="panel macc" id="api-freshness">
+    <summary class="panel-head macc-head">
+      <div class="macc-title-wrap">
+        <h2>In the API: estimates and freshness</h2>
+        <span class="macc-sum">v2 metadata objects (estimated, source, updated_at), since filtering, and ETag / 304</span>
+      </div>
+      <svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>
+    </summary>
+    <div class="panel-body md">
+      <p><code>/api/v2/programs</code>, <code>/api/v2/invites</code> and <code>/api/v2/programs/{platform}/{handle}</code> give each number that can be estimated or that polls refresh (the bounty range, the scope counts and every figure under <code>numbers</code>) as an object; v1 keeps them flat:</p>
+      <pre class="method-code"><code>"paid_90d": {"value": 41500, "estimated": false, "source": "hackerone", "updated_at": "2026-11-03T09:00:12.345Z"}</code></pre>
+      <p><b>estimated</b> is true where the cell above shows ≈: <b>Bugcrowd</b>'s total paid and paid in 90 days (it publishes neither; it has no count of reports received, so that value is null), <b>YesWeHack</b> and <b>Intigriti</b> received and paid in 90 days until 90 days of their totals are saved, and their valid reports in 90 days, and a bounty range read from the most a program has paid rather than its bounty table. <b>source</b> is the platform for its own figures, <code>derived</code> for what HuntDeck counts or works out (valid reports from Hacktivity or CrowdStream, figures from saved totals, every estimate) and <code>manual</code> for programs you added by hand. <b>updated_at</b> is when the value last changed, to the poll that saw it change: a figure read again unchanged keeps its time. It's null where HuntDeck can't date it: unchanged since it began keeping these times, with no saved history to date it from.</p>
+      <p>Each program also has <code>updated_at</code>, the last time anything about it changed (first seen, a change in Changes, one of its numbers, its removal), and <code>last_synced_at</code>, the last time HuntDeck read it from its platform, whether anything changed or not. <code>since</code> on the program lists keeps those changed after a time; on <code>/api/v1/targets</code> it keeps targets added or edited after it. Program, list and match answers carry an <code>ETag</code>: sent back as <code>If-None-Match</code>, it gets <code>304 Not Modified</code> and no body while nothing changed.</p>
+      <pre class="method-code"><code>HD=http://127.0.0.1:8080   # this HuntDeck
 curl -s -D h.txt "$HD/api/v2/programs?since=2026-11-01T00:00:00Z" -o programs.json
 etag=$(sed -n 's/^[Ee][Tt]ag: //p' h.txt | tr -d '\r')
 curl -s -o /dev/null -w '%{http_code}\n' -H "If-None-Match: $etag" "$HD/api/v2/programs?since=2026-11-01T00:00:00Z"   # 304 until something changes</code></pre>
-  </div>
-</section>
+    </div>
+  </details>
 </div>
 {{end}}
