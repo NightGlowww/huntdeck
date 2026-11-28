@@ -34,10 +34,11 @@ type Config struct {
 	// HUNTDECK_CHROME_TIMEZONE: the browser's clock, which should match the
 	// proxy's country (default: HUNTDECK_TIMEZONE).
 	ChromeTimezone string
-	// HUNTDECK_VNC: keep one virtual display for the login browsers, with
-	// a VNC server on it, and serve noVNC at /novnc/ to watch and take
-	// them over. Off by default.
-	VNC bool
+	// HUNTDECK_VNC: keep one virtual display for the login browsers (when true),
+	// or disable the on-demand live browser viewer completely (when false).
+	// Unset: the live viewer attaches on demand when Chrome is open.
+	VNC         bool
+	VNCDisabled bool
 	// HUNTDECK_NOVNC_DIR: where the noVNC web client is (the image has it
 	// in /usr/share/novnc).
 	NoVNCDir string
@@ -424,6 +425,7 @@ func Load(src Source) (Config, error) {
 	cfg.ChromeHeadless = r.bool("HUNTDECK_CHROME_HEADLESS", false)
 	cfg.ChromeTimezone = r.get("HUNTDECK_CHROME_TIMEZONE", cfg.Timezone)
 	cfg.VNC = r.bool("HUNTDECK_VNC", false)
+	cfg.VNCDisabled = r.get("HUNTDECK_VNC", "") != "" && !cfg.VNC
 	cfg.NoVNCDir = r.get("HUNTDECK_NOVNC_DIR", "/usr/share/novnc")
 	if !ValidTimezone(cfg.ChromeTimezone) {
 		r.errs = append(r.errs, fmt.Errorf("HUNTDECK_CHROME_TIMEZONE %q: not a time zone name like America/New_York", cfg.ChromeTimezone))

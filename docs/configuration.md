@@ -73,7 +73,7 @@ proxy is the same one API calls use. If you run HuntDeck in a setup that does
 provide user namespaces, give the browser its sandbox back by adding
 `--no-sandbox`'s opposite to your deployment (Chrome has no flag for that: it is
 on unless passed).
-| `HUNTDECK_VNC` | `false` | Show the login browser (one Chrome, a tab per platform) live in Settings > Browser and at `/novnc/` (noVNC, in the image), to see a login or a platform's session, or finish a login by hand. The VNC server only listens inside the container; anyone who can reach HuntDeck can watch |
+| `HUNTDECK_VNC` | on-demand | Show the login browser (one Chrome, a tab per platform) live in Settings › Browser and at `/novnc/` (noVNC, in the image), to see a login or finish one by hand. Unset (default): starts `x11vnc` on demand only while watching; `true`: keeps one persistent display for the whole run; `false`: disables live viewing completely. Loopback-only, over HuntDeck's TLS/auth session |
 | `HUNTDECK_NOVNC_DIR` | `/usr/share/novnc` (the image's) | Where the noVNC client for `HUNTDECK_VNC` is served from; only needed outside the image |
 | `HUNTDECK_PUBLIC_URL` | — | Where a **read-only** copy is published, such as `https://huntdeck.example`: with it the copy may be indexed, and its pages carry canonical links, a sitemap and link previews. A full install is never indexed |
 | `HUNTDECK_FEEDBACK_EMAIL` | — | Where the UI's "Send feedback" links mail to; unset hides them |

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
@@ -18,14 +19,16 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-// VNC is the login browsers' display (see browser.Shared), which noVNC at
-// /novnc/ shows, so a login that needs a person (a CAPTCHA, a new-device
-// check) can be watched and finished by hand. Like the rest of HuntDeck,
-// it's for whoever can reach the UI: the VNC server itself only listens
-// on the loopback interface, behind this proxy.
+// VNC is the login browsers' display (see browser.Shared or
+// browser.OnDemandVNC), which noVNC at /novnc/ shows, so a login that
+// needs a person (a CAPTCHA, a new-device check) can be watched and finished
+// by hand. Like the rest of HuntDeck, it's for whoever can reach the UI:
+// the VNC server itself only listens on the loopback interface, behind this
+// proxy.
 type VNC struct {
-	Addr string // the VNC server
-	Dir  string // the noVNC web client's files
+	Addr   string // fixed VNC server address when Persistent
+	Dir    string // the noVNC web client's files
+	Attach func(ctx context.Context) (addr string, release func(), err error)
 }
 
 // novncPage opens noVNC on the login display, scaled to the window.
@@ -76,7 +79,8 @@ func (s *server) routeVNC(mux *http.ServeMux) {
 // HuntDeck itself may open it: the browser sends any site's page here if
 // asked to, with that site as its Origin.
 func (s *server) vncSocket() http.Handler {
-	addr := s.VNC.Addr
+	fixedAddr := s.VNC.Addr
+	attach := s.VNC.Attach
 	return websocket.Server{
 		Handshake: func(cfg *websocket.Config, r *http.Request) error {
 			// The browser says whether the page is HuntDeck's own (as for
@@ -101,6 +105,19 @@ func (s *server) vncSocket() http.Handler {
 			// became a websocket; a session lasts as long as it's watched.
 			_ = ws.SetDeadline(time.Time{})
 			ws.PayloadType = websocket.BinaryFrame
+			addr := fixedAddr
+			if attach != nil {
+				var release func()
+				var err error
+				addr, release, err = attach(ws.Request().Context())
+				if err != nil {
+					s.Log.Debug("novnc: attach skipped", "err", err)
+					return
+				}
+				if release != nil {
+					defer release()
+				}
+			}
 			d := net.Dialer{Timeout: 5 * time.Second}
 			c, err := d.DialContext(ws.Request().Context(), "tcp", addr)
 			if err != nil {

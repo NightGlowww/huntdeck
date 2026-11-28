@@ -58,10 +58,15 @@ func TestBrowserTab(t *testing.T) {
 	c := e.client()
 	_, body = e.do(c, "GET", "/settings?tab=browser", nil, nil)
 	for _, want := range []string{`id="browser"`, `action="/settings/browser/show"`, `name="platform" value="fake"`, `data-vnc="/novnc/websockify"`,
-		"vncview.js", "Close browser"} {
+		`data-status-url="/settings/browser/status"`, `data-msg-closed=`, "vncview.js", "Close browser"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("Browser tab lacks %s", want)
 		}
+	}
+	res, statusBody := e.do(c, "GET", "/settings/browser/status", nil, nil)
+	var st browserReply
+	if res.StatusCode != http.StatusOK || json.Unmarshal([]byte(statusBody), &st) != nil || st.Running {
+		t.Errorf("browser status before open = %d %q", res.StatusCode, statusBody)
 	}
 	if strings.Contains(body, "data-running") {
 		t.Error("the screen says the browser is running before it is")
@@ -113,5 +118,18 @@ func TestBrowserTab(t *testing.T) {
 	// A GET can't open it: state changes are POSTs.
 	if res, _ := e.do(c, "GET", "/settings/browser/show?platform=fake", nil, nil); res.StatusCode < 400 || len(b.shown) != 2 {
 		t.Errorf("GET show: %d, shown %v; want it refused", res.StatusCode, b.shown)
+	}
+
+	// Without VNC, live view is absent and the note explains why.
+	withoutVNC := newTestEnv(t, func(d *Deps) { d.Browser = &fakeBrowser{} })
+	_, noVNCBody := withoutVNC.do(withoutVNC.client(), "GET", "/settings?tab=browser", nil, nil)
+	if strings.Contains(noVNCBody, `data-vnc`) || !strings.Contains(noVNCBody, `HUNTDECK_VNC=false`) {
+		t.Errorf("expected non-live note without VNC")
+	}
+	// Read-only copies never expose browser status.
+	ro := newTestEnv(t, func(d *Deps) { d.ReadOnly = true; d.Browser = &fakeBrowser{} })
+	res, _ = ro.do(ro.client(), "GET", "/settings/browser/status", nil, nil)
+	if res.StatusCode != http.StatusNotFound {
+		t.Errorf("readOnly /settings/browser/status = %d, want 404", res.StatusCode)
 	}
 }

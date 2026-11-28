@@ -56,7 +56,7 @@
 {{end}}
 </div>
 {{if eq .Tab "email"}}<p class="acct-foot muted small">{{T "The address and API key are saved encrypted in the database, with a key kept beside it in the data directory, and take precedence over your environment's ("}}<code>.env</code>{{T ") until reset. They're never shown again, and seeds and exports never include them. Saving restarts HuntDeck to use them."}}</p>
-{{else}}<p class="acct-foot muted small">{{T "Saved values are encrypted in the database with a key kept beside it in the data directory ("}}<code>{{T "secret.key"}}</code>{{T ", readable by HuntDeck only), and take precedence over your environment's ("}}<code>.env</code>{{T ") until reset. Secrets are never shown again, and seeds and exports never include any of this. Saving restarts HuntDeck to use them once no poll is running (a few seconds), then polls that platform to sign in. The listen address, data directory, allowed hosts, logging and VNC stay in"}}<code>.env</code>{{T ": HuntDeck needs them before it starts."}}</p>{{end}}
+{{else}}<p class="acct-foot muted small">{{T "Saved values are encrypted in the database with a key kept beside it in the data directory ("}}<code>{{T "secret.key"}}</code>{{T ", readable by HuntDeck only), and take precedence over your environment's ("}}<code>.env</code>{{T ") until reset. Secrets are never shown again, and seeds and exports never include any of this. Saving restarts HuntDeck to use them once no poll is running (a few seconds), then polls that platform to sign in. The listen address, data directory, allowed hosts and logging stay in"}} <code>.env</code>{{T ": HuntDeck needs them before it starts."}}</p>{{end}}
 {{end}}
 
 {{define "acct-field"}}

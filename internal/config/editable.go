@@ -103,7 +103,7 @@ var Editable = []Field{
 	{Name: "YWH_CONCURRENCY", Group: GroupYesWeHack, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
 
 	{Name: "VB_ACCOUNT", Group: GroupVulBox, Label: "Account", Kind: KindText,
-		Help: "Username, phone number or email. Signs in in the login browser (open Settings > Browser with VNC if a CAPTCHA appears)."},
+		Help: "Username, phone number or email. Signs in in the login browser (open Settings › Browser to watch and finish any CAPTCHA live)."},
 	{Name: "VB_PASSWORD", Group: GroupVulBox, Label: "Password", Kind: KindSecret},
 	{Name: "VB_TOTP_SECRET", Group: GroupVulBox, Label: "2FA secret", Kind: KindSecret,
 		Help: "The authenticator app's secret (base32), if 2FA is on."},
@@ -134,7 +134,7 @@ var Editable = []Field{
 	{Name: "GBF_CONCURRENCY", Group: GroupGObugfree, Label: "Parallel scope fetches", Kind: KindNumber, Default: "2", Help: "1 to 4."},
 
 	{Name: "INS_EMAIL", Group: GroupInspectiv, Label: "Email", Kind: KindText,
-		Help: "Signs in to app.inspectiv.com in the login browser (open Settings > Browser with VNC if a reCAPTCHA appears)."},
+		Help: "Signs in to app.inspectiv.com in the login browser (open Settings › Browser to watch and solve any reCAPTCHA live)."},
 	{Name: "INS_PASSWORD", Group: GroupInspectiv, Label: "Password", Kind: KindSecret},
 	{Name: "INS_TOKEN", Group: GroupInspectiv, Label: "API token", Kind: KindSecret,
 		Help: "Instead of a login: the 40-character token from your browser, as 40 hex digits or Token <hex>."},

@@ -75,6 +75,15 @@ func (s *server) browserTab(rows []platformRow) *browserData {
 // logging in in it.
 func (s *server) hasBrowser() bool { return s.Browser != nil && len(s.Browser.Tabs()) > 0 }
 
+// browserStatus returns whether the shared login browser is running right now.
+func (s *server) browserStatus(w http.ResponseWriter, _ *http.Request) {
+	if s.ReadOnly || s.Browser == nil {
+		writeJSON(w, http.StatusNotFound, browserReply{})
+		return
+	}
+	writeJSON(w, http.StatusOK, browserReply{Running: s.Browser.Running()})
+}
+
 // browserShow brings a platform's tab to the front.
 func (s *server) browserShow(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("platform")

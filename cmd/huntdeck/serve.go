@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -233,6 +234,17 @@ func serveOnce(parent context.Context, stderr io.Writer) (code int, again bool) 
 	}
 	host := loginBrowser(a.cfg, display, log)
 	defer func() { _ = host.Close() }() // closed after the polls below, which may be using it
+	if vnc == nil && !a.cfg.ReadOnly && !a.cfg.VNCDisabled {
+		if _, err := os.Stat(filepath.Join(a.cfg.NoVNCDir, "vnc.html")); err == nil {
+			if viewer, err := browser.NewOnDemandVNC(vncPort, host.Display); err == nil {
+				defer viewer.Close()
+				vnc = &web.VNC{Dir: a.cfg.NoVNCDir, Attach: viewer.Attach}
+				log.Info("login browser live viewer ready (on-demand)", "path", "/settings?tab=browser")
+			} else {
+				log.Debug("on-demand login browser viewer unavailable", "err", err)
+			}
+		}
+	}
 	platforms, err := buildPlatforms(a.cfg, host)
 	if err != nil {
 		log.Error("cannot configure platforms", "err", err)

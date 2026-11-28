@@ -88,6 +88,16 @@ func (h *Host) Running() bool {
 	return h.alive()
 }
 
+// Display returns the X display of the currently running Chrome, or "" if closed.
+func (h *Host) Display() string {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if !h.alive() {
+		return ""
+	}
+	return h.b.Display()
+}
+
 // alive reports whether b is still running, forgetting it if not. The
 // caller holds mu.
 func (h *Host) alive() bool {

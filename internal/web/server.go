@@ -367,6 +367,7 @@ func NewHandler(d Deps) (http.Handler, error) {
 	mux.HandleFunc("GET /settings/restart", s.restartStatus)
 	mux.HandleFunc("POST /settings/seed", s.exportDemoSeed)
 	mux.HandleFunc("POST /settings/seed/daily", s.setDemoSeedDaily)
+	mux.HandleFunc("GET /settings/browser/status", s.browserStatus)
 	mux.HandleFunc("POST /settings/browser/show", s.browserShow)
 	mux.HandleFunc("POST /settings/browser/close", s.browserClose)
 	mux.HandleFunc("GET /settings/notifications", s.notifications)

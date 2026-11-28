@@ -148,13 +148,17 @@
   </div>
   <p class="bwr-err" role="alert" hidden></p>
   {{if .Live}}
-  <div class="vnc" data-vnc="/novnc/websockify"{{if .Running}} data-running{{end}}>
+  <div class="vnc" data-vnc="/novnc/websockify" data-status-url="/settings/browser/status"{{if .Running}} data-running{{end}}
+    data-msg-connecting="{{T "Connecting to the live browser screen…"}}"
+    data-msg-closed="{{T "The browser is closed. Pick a platform above to open it and watch live (protected by your HuntDeck session)."}}"
+    data-msg-reconnecting="{{T "Reconnecting to the live screen…"}}">
     <div class="vnc-screen"></div>
     <p class="vnc-msg" role="status" aria-live="polite"></p>
   </div>
+  <p class="panel-foot muted small">{{T "Live view connects on demand while you watch and stops automatically after closing the browser or leaving this tab."}}</p>
   <script type="module" src="{{static "vncview.js"}}"></script>
   {{else}}
-  <p class="bwr-note muted">{{T "The browser runs on a screen of its own. Set"}} <code>HUNTDECK_VNC=1</code> {{T "and restart to see it here."}}</p>
+  <p class="bwr-note muted">{{T "Live browser viewing requires x11vnc and noVNC (built into the Docker image automatically, unless disabled via"}} <code>HUNTDECK_VNC=false</code>{{T ")."}}</p>
   {{end}}
 </section>
 {{end}}

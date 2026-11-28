@@ -2822,6 +2822,15 @@
   "Signal Required": "要求 Signal",
   "Your past-year Signal": "你过去一年的 Signal",
   "Not yet calculated": "暂未计算",
-  "Signal requirement met": "已满足 Signal 提交门槛"
+  "Signal requirement met": "已满足 Signal 提交门槛",
+  "Connecting to the live browser screen…": "正在连接实时浏览器画面…",
+  "The browser is closed. Pick a platform above to open it and watch live (protected by your HuntDeck session).": "浏览器当前已关闭。点击上方平台按钮即可启动并直接在线查看和操作（通过 HuntDeck 登录会话加密保护）。",
+  "Reconnecting to the live screen…": "正在重新连接实时画面…",
+  "Live view connects on demand while you watch and stops automatically after closing the browser or leaving this tab.": "实时画面仅在打开浏览时按需建立加密连接；关闭浏览器或离开本页面后会自动释放资源。",
+  "Live browser viewing requires x11vnc and noVNC (built into the Docker image automatically, unless disabled via": "在线查看浏览器画面需要容器内的 x11vnc 与 noVNC 组件（Docker 镜像已默认内置，除非手动设置环境变量",
+  ").": "）。",
+  ") until reset. Secrets are never shown again, and seeds and exports never include any of this. Saving restarts HuntDeck to use them once no poll is running (a few seconds), then polls that platform to sign in. The listen address, data directory, allowed hosts and logging stay in": "），直到你重置。密钥不会再显示，种子和导出也从不包含这些。保存后会在没有轮询进行时重启 HuntDeck 来生效（几秒），随后轮询该平台以登录。监听地址、数据目录、允许的主机与日志配置仍然留在",
+  "Username, phone number or email. Signs in in the login browser (open Settings › Browser to watch and finish any CAPTCHA live).": "用户名、手机号或邮箱。通过内置浏览器登录（如有图形验证码，可直接打开 设置 › 浏览器 在线操作）。",
+  "Signs in to app.inspectiv.com in the login browser (open Settings › Browser to watch and solve any reCAPTCHA live).": "通过内置浏览器登录 app.inspectiv.com（如有 reCAPTCHA 验证码，可直接打开 设置 › 浏览器 在线操作）。"
  }
 }

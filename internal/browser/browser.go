@@ -74,6 +74,7 @@ type Options struct {
 type Browser struct {
 	cmd     *exec.Cmd
 	xvfb    *exec.Cmd // the virtual display, if Start started one
+	display string
 	profile string
 	temp    bool           // the profile is Start's own, deleted by Close
 	in      io.WriteCloser // commands to Chrome
@@ -159,6 +160,7 @@ func Start(ctx context.Context, o Options) (*Browser, error) {
 		env = append(env, "TZ="+o.TimeZone)
 	}
 	var xvfb *exec.Cmd
+	var display string
 	if o.Headless {
 		args = append(args, "--headless=new", "--window-size=1400,900", "--user-agent="+userAgent(ctx, o.Path))
 	} else {
@@ -168,15 +170,17 @@ func Start(ctx context.Context, o Options) (*Browser, error) {
 			"--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader")
 		switch {
 		case o.Display != "":
-			env = append(env, "DISPLAY="+o.Display)
+			display = o.Display
+			env = append(env, "DISPLAY="+display)
 		case os.Getenv("DISPLAY") == "":
-			var display string
 			if xvfb, display, err = startXvfb(ctx); err != nil {
 				removeProfile()
 				_, _, _, _ = cmdR.Close(), cmdW.Close(), outR.Close(), outW.Close()
 				return nil, err
 			}
 			env = append(env, "DISPLAY="+display)
+		default:
+			display = os.Getenv("DISPLAY")
 		}
 	}
 	// Driving a browser over CDP makes it announce itself: navigator.webdriver
@@ -210,7 +214,7 @@ func Start(ctx context.Context, o Options) (*Browser, error) {
 		return nil, fmt.Errorf("browser: start %s: %w", o.Path, err)
 	}
 	_, _ = cmdR.Close(), outW.Close() // Chrome's ends
-	b := &Browser{cmd: cmd, xvfb: xvfb, profile: profile, temp: temp, in: cmdW, pending: map[int64]chan reply{}, waitErr: make(chan error, 1), exited: make(chan struct{})}
+	b := &Browser{cmd: cmd, xvfb: xvfb, display: display, profile: profile, temp: temp, in: cmdW, pending: map[int64]chan reply{}, waitErr: make(chan error, 1), exited: make(chan struct{})}
 	if o.Proxy != nil && o.Proxy.User != nil {
 		b.proxyAuth = o.Proxy.User
 	}
@@ -249,6 +253,9 @@ func Start(ctx context.Context, o Options) (*Browser, error) {
 // Exited is closed once Chrome has exited, by Close or otherwise (its
 // last window closed by whoever is using it).
 func (b *Browser) Exited() <-chan struct{} { return b.exited }
+
+// Display returns the X display Chrome was launched on, or "" when headless.
+func (b *Browser) Display() string { return b.display }
 
 func fileExists(p string) bool {
 	_, err := os.Stat(p)
