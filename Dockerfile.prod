@@ -11,10 +11,15 @@
 ARG BASE=ghcr.io/mdpsec/huntdeck:latest
 FROM ${BASE}
 
+ARG APT_MIRROR=
 USER root
 RUN if ! (command -v fc-list >/dev/null 2>&1 && fc-list :lang=zh | grep -q .); then \
-      apt-get update \
-      && apt-get install -y --no-install-recommends fontconfig fonts-noto-cjk \
+      if [ -n "$APT_MIRROR" ]; then \
+        find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+          -exec sed -i "s|http://deb.debian.org|http://${APT_MIRROR}|g; s|https://deb.debian.org|http://${APT_MIRROR}|g" {} +; \
+      fi \
+      && apt-get -o Acquire::http::Timeout=30 -o Acquire::Retries=2 update \
+      && apt-get -o Acquire::http::Timeout=30 -o Acquire::Retries=2 install -y --no-install-recommends fontconfig fonts-noto-cjk \
       && rm -rf /var/lib/apt/lists/* \
       && fc-cache -f; \
     fi

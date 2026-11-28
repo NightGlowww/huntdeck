@@ -208,7 +208,9 @@ else
   # The PID comes back so a build that dies is noticed in seconds: a Docker
   # failure does not start its last line with ERROR, and waiting out the whole
   # timeout to say so is six minutes of pretending to work.
-  buildpid=$(remote "cd $dir && sudo nohup docker build -f Dockerfile.prod --build-arg BASE=$base -t $image . >/tmp/huntdeck-build.log 2>&1 & echo \$!" | tail -1)
+  prod_args="--build-arg BASE=$base"
+  [ -n "${APT_MIRROR:-}" ] && prod_args="$prod_args --build-arg APT_MIRROR=$APT_MIRROR"
+  buildpid=$(remote "cd $dir && sudo nohup docker build -f Dockerfile.prod $prod_args -t $image . >/tmp/huntdeck-build.log 2>&1 & echo \$!" | tail -1)
   case "$buildpid" in (''|*[!0-9]*) buildpid="" ;; esac
   built=0
   for _ in $(seq 1 300); do

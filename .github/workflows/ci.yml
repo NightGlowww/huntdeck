@@ -91,7 +91,7 @@ jobs:
           git fetch --tags --force || true
           DEPLOY_VERSION="$(bash scripts/version.sh)"
           echo "DEPLOY_VERSION=$DEPLOY_VERSION" >> "$GITHUB_ENV"
-          SKIP_TESTS=1 DEPLOY_VERSION="$DEPLOY_VERSION" bash scripts/deploy.sh --host 1.15.46.212 --mode binary
+          SKIP_TESTS=1 APT_MIRROR=mirrors.cloud.tencent.com DEPLOY_VERSION="$DEPLOY_VERSION" bash scripts/deploy.sh --host 1.15.46.212 --mode binary
 
       - name: Verify live release & summary
         run: |
