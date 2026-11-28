@@ -106,7 +106,8 @@ button.nav-group-toggle:focus-visible { background: transparent; color: var(--te
 
 .content { min-width: 0; display: flex; flex-direction: column; }
 .topbar {
-  position: sticky; top: var(--db-h); z-index: 25; display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, min(540px, 40%)) minmax(0, 1fr); align-items: center; gap: 16px; height: 56px; padding: 0 28px;
+  position: sticky; top: var(--db-h); z-index: 25; container: topbar / inline-size;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, min(520px, 38%)) minmax(max-content, 1fr); align-items: center; gap: 16px; height: 56px; padding: 0 28px;
   border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter: blur(12px) saturate(1.15); -webkit-backdrop-filter: blur(12px) saturate(1.15);
   box-shadow: 0 1px 0 light-dark(rgb(15 23 42 / .04), rgb(0 0 0 / .24));
 }
@@ -117,20 +118,16 @@ button.nav-group-toggle:focus-visible { background: transparent; color: var(--te
 .omni input[type="search"]::placeholder { color: var(--muted); }
 .omni input[type="search"]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
 .omni kbd { position: absolute; right: 9px; }
-/* The two sides are always the same width, so the search sits in the same
-   spot on every page whatever buttons a page adds. Short of room, the
-   right side drops "Updated", then its buttons' labels (icons stay;
-   the labels are still read out, as the buttons' names). */
-.tb-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; container: tb-right / inline-size; }
-@container tb-right (max-width: 480px) { .tb-right .updated { display: none; } }
-@container tb-right (max-width: 380px) { .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } } /* still the button's name */
+/* The right column expands to max-content so buttons and live poll pills
+   never collide with the search box or clip at the viewport edge, while
+   compact rules trim lower-priority text as space tightens. */
+.tb-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
 .tb-right .updated { color: var(--muted); font-size: calc(12.5px * var(--fs, 1)); white-space: nowrap; }
-@media (max-width: 1320px) {
-  .topbar { grid-template-columns: minmax(0, 1fr) minmax(180px, min(460px, 38%)) auto; }
-  .tb-right { container-type: normal; }
-  .tb-right .updated { display: none; }
-  .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-}
+.tb-right:has(.poll-run:not([hidden])) .updated { display: none; }
+@container topbar (max-width: 1220px) { .tb-right .updated { display: none; } }
+@container topbar (max-width: 1020px) { .tb-right .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } } /* still the button's name */
+@container topbar (max-width: 1240px) { .tb-right:has(.poll-run:not([hidden])) .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+@container topbar (max-width: 600px) { .tb-right:has([data-reload-hint]:not([hidden])) [data-poll-watch] { display: none; } }
 
 .page { width: 100%; padding: 22px 28px 48px; }
 @keyframes hd-swap { from { opacity: .88; } to { opacity: 1; } }
