@@ -192,13 +192,14 @@ func (h *History) Stuck() error {
 // failed less than RetryAfter ago, and records how it went.
 func (h *History) Login(ctx context.Context, login func(context.Context) error) error {
 	h.mu.Lock()
-	stuck, failure, lastFailure := h.stuck, h.failure, h.lastFailure
+	stuck, failure, lastFailure, failures := h.stuck, h.failure, h.lastFailure, h.failures
 	h.mu.Unlock()
 	if stuck != nil {
 		return stuck
 	}
-	if failure != nil && h.Now().Sub(lastFailure) < waitAfter(h.failures) {
-		return fmt.Errorf("%w (%w %s)", failure, ErrWaiting, lastFailure.Add(RetryAfter).Format(time.Kitchen))
+	wait := waitAfter(failures)
+	if failure != nil && h.Now().Sub(lastFailure) < wait {
+		return fmt.Errorf("%w (%w %s)", failure, ErrWaiting, lastFailure.Add(wait).Format(time.Kitchen))
 	}
 	// A login runs longer than the poll that triggered it, and a poll can be
 	// canceled at any moment (a restart, a deadline, another platform giving up).
@@ -281,5 +282,5 @@ func (h *History) Waiting() bool {
 	if h.stuck != nil {
 		return true
 	}
-	return h.failure != nil && h.Now().Sub(h.lastFailure) < RetryAfter
+	return h.failure != nil && h.Now().Sub(h.lastFailure) < waitAfter(h.failures)
 }

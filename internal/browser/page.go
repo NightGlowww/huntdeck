@@ -5,7 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 )
@@ -227,6 +229,62 @@ func (b *Browser) SetCookies(ctx context.Context, host string, cookies []*http.C
 		list = append(list, ck)
 	}
 	_, err := b.call(ctx, "", "Storage.setCookies", map[string]any{"cookies": list})
+	return err
+}
+
+// DeleteCookies removes every cookie whose name is in names and whose host or
+// domain matches domainSuffix (both host-only and leading-dot domain cookies).
+func (b *Browser) DeleteCookies(ctx context.Context, domainSuffix string, names []string) error {
+	return b.DeleteMatchingCookies(ctx, domainSuffix, names, "")
+}
+
+// DeleteMatchingCookies expires matching cookies in Chrome. When onlyValue is
+// non-empty, only cookies holding that exact value are expired.
+func (b *Browser) DeleteMatchingCookies(ctx context.Context, domainSuffix string, names []string, onlyValue string) error {
+	suffix := strings.ToLower(strings.TrimPrefix(strings.TrimSpace(domainSuffix), "."))
+	if suffix == "" || len(names) == 0 {
+		return nil
+	}
+	cookies, err := b.Cookies(ctx)
+	if err != nil {
+		return err
+	}
+	var list []map[string]any
+	for _, c := range cookies {
+		if !slices.Contains(names, c.Name) {
+			continue
+		}
+		if onlyValue != "" && c.Value != onlyValue {
+			continue
+		}
+		normHost := strings.ToLower(strings.TrimPrefix(c.Domain, "."))
+		if normHost != suffix && !strings.HasSuffix(normHost, "."+suffix) {
+			continue
+		}
+		path := cmp.Or(c.Path, "/")
+		ck := map[string]any{
+			"name":     c.Name,
+			"value":    "",
+			"path":     path,
+			"secure":   c.Secure,
+			"httpOnly": c.HttpOnly,
+			"expires":  1,
+		}
+		if strings.HasPrefix(c.Domain, ".") {
+			ck["domain"] = c.Domain
+		} else {
+			scheme := "https"
+			if !c.Secure && (strings.EqualFold(normHost, "localhost") || net.ParseIP(normHost) != nil) {
+				scheme = "http"
+			}
+			ck["url"] = scheme + "://" + normHost + path
+		}
+		list = append(list, ck)
+	}
+	if len(list) == 0 {
+		return nil
+	}
+	_, err = b.call(ctx, "", "Storage.setCookies", map[string]any{"cookies": list})
 	return err
 }
 

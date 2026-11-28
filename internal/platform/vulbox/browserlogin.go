@@ -83,6 +83,11 @@ func (c *Client) browserLogin(ctx context.Context) error {
 	startURL := c.web.String() + "/account/login?unique=1&url=" + url.QueryEscape(WebHome)
 	userHost := fmt.Sprintf("%q", c.user.Hostname())
 	webHost := fmt.Sprintf("%q", c.web.Hostname())
+	staleTok := c.currentToken()
+	staleLit := fmt.Sprintf("%q", staleTok)
+	if c.host != nil && staleTok != "" {
+		_ = c.host.ClearCookieValue(ctx, "vulbox.com", []string{tokenCookie}, staleTok)
+	}
 	var captured []*http.Cookie
 
 	f := weblogin.Flow{
@@ -95,9 +100,11 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			const tokPair = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('vulbox_token='));
 			const tokVal = tokPair ? tokPair.slice('vulbox_token='.length).trim() : '';
 			const hasToken = !!tokVal && tokVal !== 'null' && tokVal !== 'undefined' && tokVal.split('.').length === 3;
+			const staleTok = ` + staleLit + `;
+			const isStale = !!staleTok && tokVal === staleTok;
 			const path = location.pathname.toLowerCase();
 			if (location.hostname === ` + userHost + ` && hasToken) {
-				return 'in';
+				return isStale ? 'relogin' : 'in';
 			}
 			if (location.hostname === ` + webHost + ` && !path.startsWith('/account/login') && !path.startsWith('/account/mfaprotect')) {
 				return 'relogin';
@@ -131,6 +138,9 @@ func (c *Client) browserLogin(ctx context.Context) error {
 		Acts: map[string]weblogin.Act{
 			"relogin": {Repeatable: true, Do: func(ctx context.Context, p weblogin.Page) error {
 				c.log.Info("vulbox: resetting stale browser session back to login")
+				if c.host != nil {
+					_ = c.host.ClearCookies(ctx, "vulbox.com", []string{tokenCookie, "authorization"})
+				}
 				_ = p.Eval(ctx, `(() => {
 					for (const name of ['vulbox_token', 'authorization']) {
 						document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.vulbox.com';
@@ -144,8 +154,12 @@ func (c *Client) browserLogin(ctx context.Context) error {
 				if err := p.Settle(ctx, 1500*time.Millisecond); err != nil {
 					return err
 				}
-				// Clear any stale/kicked auth cookies in the persistent browser profile
-				// before filling credentials so the login SPA does not treat them as active.
+				// Clear any stale/kicked auth cookies across all vulbox.com origins
+				// (including host-only cookies on user.vulbox.com / vapi.vulbox.com)
+				// before filling credentials so the redirect cannot shadow the fresh cookie.
+				if c.host != nil {
+					_ = c.host.ClearCookies(ctx, "vulbox.com", []string{tokenCookie, "authorization"})
+				}
 				_ = p.Eval(ctx, `(() => {
 					for (const name of ['vulbox_token', 'authorization']) {
 						document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.vulbox.com';
@@ -223,8 +237,13 @@ func (c *Client) browserLogin(ctx context.Context) error {
 				}
 
 				// VulBox's "立即登录" button is type="button", not type="submit", so Enter
-				// alone does not submit the form; click the enabled primary button.
+				// alone does not submit the form; wait briefly for it to enable after
+				// ticking the agreement checkbox, then click it.
 				var submitSel string
+				_, _ = p.WaitFor(ctx, `(() => {
+					const shown = e => !!e && e.getClientRects().length > 0 && !e.disabled;
+					return [...document.querySelectorAll('button.ant-btn-primary, button[type=submit]')].some(shown) ? 'ready' : '';
+				})()`, 2*time.Second)
 				_ = p.Eval(ctx, `(() => {
 					const shown = e => !!e && e.getClientRects().length > 0 && !e.disabled;
 					const btn = [...document.querySelectorAll('button.ant-btn-primary, button[type=submit]')].find(shown);
@@ -232,10 +251,10 @@ func (c *Client) browserLogin(ctx context.Context) error {
 					btn.setAttribute('data-huntdeck-vb-submit', '1');
 					return 'button[data-huntdeck-vb-submit="1"]';
 				})()`, &submitSel)
-				if submitSel != "" {
-					return p.Click(ctx, submitSel)
+				if submitSel == "" {
+					return errors.New("VulBox submit button stayed disabled after filling credentials")
 				}
-				return p.Press(ctx)
+				return p.Click(ctx, submitSel)
 			}},
 			"mfa": {Sends: "the 2FA code", Do: func(ctx context.Context, p weblogin.Page) error {
 				if c.account.TOTPSecret == "" {
@@ -369,10 +388,6 @@ func (c *Client) browserLogin(ctx context.Context) error {
 			if snap.UA != "" {
 				c.setUserAgent(snap.UA)
 			}
-			captured = cookies
-			if len(cookies) > 0 {
-				c.seedCookies(cookies)
-			}
 			iat, exp := parseJWTMeta(tok)
 			c.log.Info("vulbox: browser sign-in captured cookies",
 				"url", snap.Href,
@@ -389,6 +404,11 @@ func (c *Client) browserLogin(ctx context.Context) error {
 				"browser_vapi_code", snap.VapiProbe.Code,
 				"browser_vapi_msg", snap.VapiProbe.Msg,
 			)
+			if err := validateCapturedSession(tok, staleTok, snap.Href, snap.UserProbe.Logged, snap.VapiProbe.Logged); err != nil {
+				return err
+			}
+			captured = cookies
+			c.seedCookies(cookies)
 			return nil
 		},
 	}
@@ -399,6 +419,20 @@ func (c *Client) browserLogin(ctx context.Context) error {
 	// so host-only stale cookies from Chrome's profile never overwrite them.
 	if len(captured) > 0 {
 		c.seedCookies(captured)
+	}
+	return nil
+}
+
+func validateCapturedSession(tok, staleTok, href string, userLogged, vapiLogged bool) error {
+	if tok == "" {
+		return fmt.Errorf("VulBox redirected to %s without setting vulbox_token", href)
+	}
+	if staleTok != "" && tok == staleTok {
+		return errors.New("VulBox still holds the previous rejected vulbox_token")
+	}
+	if !userLogged && !vapiLogged {
+		return fmt.Errorf("VulBox did not accept the browser session at %s (jwt_len=%d, user_logged=%v, vapi_logged=%v)",
+			href, len(tok), userLogged, vapiLogged)
 	}
 	return nil
 }

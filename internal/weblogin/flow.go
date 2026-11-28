@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -143,21 +144,31 @@ func (f Flow) Run(ctx context.Context, host *Host, tab string, jar http.CookieJa
 }
 
 // next waits for the page to reach a step other than after, passing
-// through the Pass ones.
+// through the Pass ones, bounded as a whole by StepWait.
 func (f Flow) next(ctx context.Context, p Page, after string) (string, error) {
 	wait := f.StepWait
 	if wait == 0 {
 		wait = 60 * time.Second
 	}
+	stepCtx, cancel := context.WithTimeout(ctx, wait)
+	defer cancel()
+	lastAt := ""
 	for {
-		at, err := p.WaitFor(ctx, f.Step, wait)
+		at, err := p.WaitFor(stepCtx, f.Step, wait)
 		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) && ctx.Err() == nil && lastAt != "" {
+				return "", fmt.Errorf("%s: the page didn't move on from %s (still at %q after %s)", f.Who, cmp.Or(after, "the start"), lastAt, wait)
+			}
 			return "", fmt.Errorf("%s: the page didn't move on from %s: %w", f.Who, cmp.Or(after, "the start"), err)
 		}
 		if at != after && !slices.Contains(f.Pass, at) {
 			return at, nil
 		}
-		if err := f.pause(ctx, 700*time.Millisecond); err != nil {
+		lastAt = at
+		if err := f.pause(stepCtx, 700*time.Millisecond); err != nil {
+			if errors.Is(err, context.DeadlineExceeded) && ctx.Err() == nil && lastAt != "" {
+				return "", fmt.Errorf("%s: the page didn't move on from %s (still at %q after %s)", f.Who, cmp.Or(after, "the start"), lastAt, wait)
+			}
 			return "", err
 		}
 	}

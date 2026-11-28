@@ -317,3 +317,101 @@ func TestTransient(t *testing.T) {
 		}
 	}
 }
+
+func TestFlowNextStepWaitBoundsRepeatedStep(t *testing.T) {
+	if _, err := browser.Find(""); err != nil {
+		t.Skip("no Chrome:", err)
+	}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprint(w, `<!doctype html><form><input id="u"><input type="password" id="p"></form>`)
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	host := NewHost(Chrome{Headless: true})
+	defer func() { _ = host.Close() }()
+
+	f := Flow{
+		Who:      "test: login",
+		Start:    srv.URL,
+		Step:     "document.getElementById('p') ? 'login' : ''",
+		StepWait: 1200 * time.Millisecond,
+		Timeout:  10 * time.Second,
+		Pause: func(ctx context.Context, d time.Duration) error {
+			t := time.NewTimer(min(d, 100*time.Millisecond))
+			defer t.Stop()
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-t.C:
+				return nil
+			}
+		},
+		Acts: map[string]Act{
+			"login": {Do: func(context.Context, Page) error { return nil }}, // page never transitions away from "login"
+		},
+	}
+	start := time.Now()
+	err := f.Run(ctx, host, "stuck", nil)
+	took := time.Since(start)
+	if err == nil || !strings.Contains(err.Error(), "didn't move on from login") || !strings.Contains(err.Error(), `still at "login"`) {
+		t.Fatalf("err = %v, want bounded step error naming login", err)
+	}
+	if took > 5*time.Second {
+		t.Fatalf("took %s, want StepWait (~1.2s) instead of full Timeout (10s)", took)
+	}
+}
+
+func TestHostClearCookies(t *testing.T) {
+	if _, err := browser.Find(""); err != nil {
+		t.Skip("no Chrome:", err)
+	}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprint(w, `<!doctype html><body>ok</body>`)
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	host := NewHost(Chrome{Headless: true})
+	defer func() { _ = host.Close() }()
+	bp, _, err := host.Tab(ctx, "cookies")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := bp.Navigate(ctx, srv.URL); err != nil {
+		t.Fatal(err)
+	}
+	b := host.b
+	if err := b.SetCookies(ctx, "user.vulbox.com", []*http.Cookie{
+		{Name: "vulbox_token", Value: "host-tok", Path: "/", Secure: true},
+		{Name: "vulbox_token", Value: "dom-tok", Domain: "vulbox.com", Path: "/", Secure: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := b.SetCookies(ctx, "other.example", []*http.Cookie{
+		{Name: "vulbox_token", Value: "keep-me", Path: "/", Secure: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := host.ClearCookies(ctx, "vulbox.com", []string{"vulbox_token"}); err != nil {
+		t.Fatal(err)
+	}
+	cookies, err := host.cookies(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var keptOther bool
+	for _, ck := range cookies {
+		if strings.HasSuffix(strings.TrimPrefix(ck.Domain, "."), "vulbox.com") && ck.Name == "vulbox_token" {
+			t.Errorf("stale vulbox_token cookie survived ClearCookies: %+v", ck)
+		}
+		if ck.Domain == "other.example" && ck.Value == "keep-me" {
+			keptOther = true
+		}
+	}
+	if !keptOther {
+		t.Error("ClearCookies removed unrelated other.example cookie")
+	}
+}

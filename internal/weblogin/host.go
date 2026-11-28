@@ -233,6 +233,27 @@ func (h *Host) Close() error {
 	return err
 }
 
+// ClearCookies expires all cookies matching domainSuffix and names in the
+// running browser, without touching other domains.
+func (h *Host) ClearCookies(ctx context.Context, domainSuffix string, names []string) error {
+	return h.ClearCookieValue(ctx, domainSuffix, names, "")
+}
+
+// ClearCookieValue expires matching cookies in the running browser (optionally
+// restricted to cookies holding onlyValue).
+func (h *Host) ClearCookieValue(ctx context.Context, domainSuffix string, names []string, onlyValue string) error {
+	h.mu.Lock()
+	var b *browser.Browser
+	if h.alive() {
+		b = h.b
+	}
+	h.mu.Unlock()
+	if b == nil {
+		return nil
+	}
+	return b.DeleteMatchingCookies(ctx, domainSuffix, names, onlyValue)
+}
+
 // cookies are every cookie the browser holds.
 func (h *Host) cookies(ctx context.Context) ([]*http.Cookie, error) {
 	h.mu.Lock()

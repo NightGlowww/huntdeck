@@ -452,3 +452,18 @@ func TestParseJWTMetaAndSeedCookiesAndHeaders(t *testing.T) {
 		}
 	})
 }
+
+func TestValidateCapturedSession(t *testing.T) {
+	if err := validateCapturedSession("", "", "https://www.vulbox.com/account/login", false, false); err == nil {
+		t.Fatal("expected error when vulbox_token is empty")
+	}
+	if err := validateCapturedSession("tok-1", "tok-1", "https://user.vulbox.com/home", true, true); err == nil {
+		t.Fatal("expected error when vulbox_token matches stale token")
+	}
+	if err := validateCapturedSession("tok-2", "tok-1", "https://www.vulbox.com/account/login", false, false); err == nil {
+		t.Fatal("expected error when neither browser probe is logged in")
+	}
+	if err := validateCapturedSession("tok-2", "tok-1", "https://user.vulbox.com/home", true, false); err != nil {
+		t.Fatalf("unexpected error for valid captured session: %v", err)
+	}
+}

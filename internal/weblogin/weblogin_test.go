@@ -113,3 +113,24 @@ func TestLoginWaitDoublesAndIsCapped(t *testing.T) {
 		}
 	}
 }
+
+func TestWaitingAndLoginUseSameBackoffWindow(t *testing.T) {
+	now := time.Date(2026, 11, 29, 0, 0, 0, 0, time.UTC)
+	h := NewHistory("")
+	h.Now = func() time.Time { return now }
+
+	fail := func(context.Context) error { return errors.New("x: timeout") }
+	_ = h.Login(context.Background(), fail)
+	now = now.Add(RetryAfter + time.Minute)
+	_ = h.Login(context.Background(), fail) // 2nd failure -> wait is now 2 * RetryAfter (1h)
+
+	now = now.Add(RetryAfter + 5*time.Minute) // past 30m, still inside 1h
+	if !h.Waiting() {
+		t.Fatal("Waiting() = false after 2nd failure at RetryAfter+5m, want true")
+	}
+	err := h.Login(context.Background(), fail)
+	wantTime := now.Add(-(RetryAfter + 5*time.Minute)).Add(2 * RetryAfter).Format(time.Kitchen)
+	if !errors.Is(err, ErrWaiting) || !strings.Contains(err.Error(), wantTime) {
+		t.Fatalf("Login() err = %v, want ErrWaiting mentioning %s", err, wantTime)
+	}
+}
