@@ -59,7 +59,7 @@ cleanup() {
     rm -f "$SSH_CTL"
   fi
   [ -n "$tmp" ] && rm -rf "$tmp" || true
-  [ -n "$lock_held" ] && rmdir "$lock" 2>/dev/null || true
+  [ -n "$lock_held" ] && rm -rf "$lock" 2>/dev/null || true
 }
 trap cleanup EXIT
 if [ -z "$dry" ] && [ -z "$check" ]; then
@@ -67,23 +67,30 @@ if [ -z "$dry" ] && [ -z "$check" ]; then
     # A lock with no deploy process behind it is a leftover: the script that took
     # it was killed, or exited in a way that skipped its trap. Age alone is the
     # wrong test - a run that died a minute ago still blocks the next one.
-    # pgrep exits 1 when nothing matches, and under `set -o pipefail` that fails
-    # the whole pipeline: the script then died here with no output at all, which
-    # looked like an empty deploy log.
-    others=$({ pgrep -f 'scripts/deploy.sh' 2>/dev/null || true; } | grep -vx "$$" | grep -vx "$PPID" | wc -l | tr -d ' ')
+    # pgrep -f inside $(...) also sees this script's own command-substitution
+    # subshell (whose ppid is $$). Filter by pid/ppid in ps so a killed run's
+    # leftover lock is recovered immediately instead of blocking for 30 minutes.
+    if [ -s "$lock/pid" ] && ! kill -0 "$(cat "$lock/pid" 2>/dev/null)" 2>/dev/null; then
+      others="0"
+    else
+      others=$(ps -eo pid=,ppid=,args= 2>/dev/null | awk -v self="$$" -v parent="$PPID" '
+        /scripts\/deploy\.sh/ && $1 != self && $1 != parent && $2 != self && $2 != parent && $0 !~ /awk -v self=/ { c++ }
+        END { print c + 0 }')
+    fi
     if [ "$others" = "0" ]; then
       echo "taking over a lock left by a deploy that is no longer running" >&2
-      rmdir "$lock" 2>/dev/null || true
+      rm -rf "$lock" 2>/dev/null || true
       mkdir "$lock" 2>/dev/null || { echo "another deploy to $host is running (lock $lock)" >&2; exit 3; }
     elif [ -n "$(find "$lock" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then
       echo "taking over a stale deploy lock (older than 30 minutes)" >&2
-      rmdir "$lock" 2>/dev/null || true
+      rm -rf "$lock" 2>/dev/null || true
       mkdir "$lock" 2>/dev/null || { echo "another deploy to $host is running (lock $lock)" >&2; exit 3; }
     else
       echo "another deploy to $host is running (lock $lock)" >&2
       exit 3
     fi
   fi
+  printf '%s\n' "$$" > "$lock/pid" 2>/dev/null || true
   lock_held="1"
 fi
 
