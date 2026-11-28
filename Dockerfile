@@ -49,11 +49,12 @@ FROM debian:13-slim@sha256:89c1ea91e897f0fe0a3731595330bc45b8bdef4047464a07116f8
 ARG TARGETARCH
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates tzdata curl xvfb xauth x11vnc \
-      fonts-liberation fonts-dejavu-core fonts-noto-color-emoji \
+      fonts-liberation fonts-dejavu-core fonts-noto-color-emoji fonts-noto-cjk \
  && if [ "${TARGETARCH:-amd64}" = amd64 ]; then \
       curl -fsSLo /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
       && apt-get install -y --no-install-recommends /tmp/chrome.deb && rm /tmp/chrome.deb; \
     else apt-get install -y --no-install-recommends chromium; fi \
+ && fc-cache -f \
  && apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/* \
  && useradd --uid 65532 --no-create-home --shell /usr/sbin/nologin nonroot
 # The MCP server rides along: `docker exec -i <container> /huntdeck-mcp`
