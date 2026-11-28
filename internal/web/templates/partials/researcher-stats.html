@@ -1,33 +1,25 @@
 {{define "h1-researcher-stats"}}
-<section class="panel h1s-card" aria-label="{{T "HackerOne Stats"}}">
+<section class="panel h1s-card" aria-label="{{T "HackerOne Stats"}}"{{if .HasData}} title="{{datetime .CapturedAt}}"{{end}}>
   {{if .HasData}}
   {{range .Windows}}<input class="h1s-radio h1s-r-{{.Key}}" type="radio" name="h1s-win" id="h1s-{{.Key}}"{{if .Checked}} checked{{end}}>{{end}}
   <div class="panel-head h1s-head">
-    <div class="h1s-title">{{template "ptag" "hackerone"}}<h2>{{T "HackerOne Stats"}}</h2></div>
-    <div class="h1s-actions">
-      <span class="aside muted small" title="{{datetime .CapturedAt}}">{{ago .CapturedAt}}</span>
-      <nav class="seg h1s-tabs" aria-label="{{T "Signal, Impact, Reputation and Rank across time windows"}}">
-        {{range .Windows}}<label for="h1s-{{.Key}}" data-h1s="{{.Key}}">{{T .LabelKey}}</label>{{end}}
-      </nav>
+    <div class="h1s-title">
+      {{template "ptag" "hackerone"}}<h2>{{T "HackerOne Stats"}}</h2>
+      {{if .ProfileURL}}<a class="h1s-ext" href="{{.ProfileURL}}" target="_blank" rel="noopener noreferrer nofollow" title="{{T "HackerOne profile"}} ({{.Username}})" aria-label="{{T "HackerOne profile"}} ({{.Username}})"><svg class="i" aria-hidden="true"><use href="#i-external"/></svg></a>{{end}}
     </div>
+    <nav class="seg h1s-tabs" aria-label="{{T "Signal, Impact, Reputation and Rank across time windows"}}">
+      {{range .Windows}}<label for="h1s-{{.Key}}" data-h1s="{{.Key}}">{{T .LabelKey}}</label>{{end}}
+    </nav>
   </div>
   {{range .Windows}}
   <div class="h1s-pane h1s-p-{{.Key}}" role="region" aria-label="{{T .LabelKey}}">
     <div class="h1s-metric" title="{{T "Average quality and validity of your recent submissions (up to 7)"}}">
       <span class="h1s-val{{if .SignalNeg}} neg{{end}}">{{.Signal}}</span>
-      <span class="h1s-lbl">{{T "Signal"}}</span>
-    </div>
-    <div class="h1s-metric" title="{{T "How your Signal compares with other active researchers on HackerOne"}}">
-      <span class="h1s-val">{{.SignalPct}}</span>
-      <span class="h1s-lbl">{{T "Percentile"}}</span>
+      <span class="h1s-lbl">{{T "Signal"}}{{if ne .SignalPct "—"}} <span class="h1s-pct" title="{{T "How your Signal compares with other active researchers on HackerOne"}}">{{.SignalPct}}</span>{{end}}</span>
     </div>
     <div class="h1s-metric" title="{{T "Average severity and bounty weight of your valid submissions"}}">
       <span class="h1s-val">{{.Impact}}</span>
-      <span class="h1s-lbl">{{T "Impact"}}</span>
-    </div>
-    <div class="h1s-metric" title="{{T "How your Impact compares with other active researchers on HackerOne"}}">
-      <span class="h1s-val">{{.ImpactPct}}</span>
-      <span class="h1s-lbl">{{T "Percentile"}}</span>
+      <span class="h1s-lbl">{{T "Impact"}}{{if ne .ImpactPct "—"}} <span class="h1s-pct" title="{{T "How your Impact compares with other active researchers on HackerOne"}}">{{.ImpactPct}}</span>{{end}}</span>
     </div>
     <div class="h1s-metric">
       <span class="h1s-val">{{.Reputation}}</span>
@@ -39,15 +31,11 @@
     </div>
   </div>
   {{end}}
-  <div class="h1s-foot">
-    {{if .ProfileURL}}<a class="link" href="{{.ProfileURL}}" target="_blank" rel="noopener noreferrer nofollow">{{T "HackerOne profile"}} ({{.Username}})</a><span class="sep">·</span>{{end}}
-    <a class="link" href="https://docs.hackerone.com/en/articles/8417615-signal-and-impact" target="_blank" rel="noopener noreferrer nofollow">{{T "Learn how HackerOne Signal affects private invitations and trial reports"}}</a>
-  </div>
   {{else}}
   <div class="panel-head h1s-head">
     <div class="h1s-title">{{template "ptag" "hackerone"}}<h2>{{T "HackerOne Stats"}}</h2></div>
   </div>
-  <div class="empty-state small">{{T "No HackerOne stats synced yet. Configure your HackerOne website login in"}} <a class="link" href="/settings?tab=accounts">{{T "Settings"}} › {{T "Accounts"}}</a> {{T "to fetch your 90-day, past-year and all-time Signal, Impact, Reputation and Rank on each poll."}}</div>
+  <div class="empty-state small h1s-empty">{{T "No HackerOne stats synced yet. Configure your HackerOne website login in"}} <a class="link" href="/settings?tab=accounts">{{T "Settings"}} › {{T "Accounts"}}</a> {{T "to fetch your 90-day, past-year and all-time Signal, Impact, Reputation and Rank on each poll."}}</div>
   {{end}}
 </section>
 {{end}}

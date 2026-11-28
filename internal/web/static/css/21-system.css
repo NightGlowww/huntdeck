@@ -39,10 +39,15 @@ table.schedule tr.sub td { padding-top: 4px; padding-bottom: 10px; border-top: 0
   #platforms .pollc { gap: 6px; }
   #platforms button[value=quick] .bl { display: none; }
 }
-/* A poll's interval and how its last run went, side by side. */
+/* A poll's interval and how its last run went, on one shared 28px baseline. */
 .pollc { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+#platforms .pollc { align-items: flex-start; }
+#platforms .pollc > span { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; }
+#platforms .pollc.subc { align-items: center; }
 .ival-box { display: inline-grid; align-items: start; vertical-align: middle; max-width: 100%; }
 .ival-box .ival-hint { white-space: normal; }
+#platforms .ival-box .ival-hint:not(.bad) { display: none; }
+#platforms .ival-box:focus-within .ival-hint { display: block; }
 /* As cards (26-cards.css): a browser sync's line wraps, and its card is
    shaded as its row was. */
 @media (max-width: 900px) {

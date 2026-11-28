@@ -1,7 +1,10 @@
 {{define "topbar-actions"}}<a class="tb-btn" href="/reports" title="{{T "All your reports"}}"><svg class="i"><use href="#i-flag"/></svg><span class="label">{{T "Reports"}}</span></a>{{if .Data.Total}}<button type="button" class="tb-btn" data-board-edit hidden><svg class="i"><use href="#i-grid"/></svg><span class="label">{{T "Customize"}}</span></button>{{end}}{{end}}
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T "Analytics"}}</h1>
+<div class="rsub-row">
 <nav class="seg rsubnav" aria-label="{{T "Reports sections"}}"><a href="/reports">{{T "Reports"}}</a><a class="on" aria-current="page" href="/reports/analytics">{{T "Analytics"}}</a></nav>
+{{with .H1Stats}}{{template "h1-researcher-stats" .}}{{end}}
+</div>
 <div class="ahead">
   <nav class="segs" aria-label="{{T "Range"}}">{{range .Ranges}}<a href="{{$.Data.RangeURL .Key}}"{{if eq .Key $.Data.RangeKey}} class="on" aria-current="true"{{end}}>{{T .Label}}</a>{{end}}</nav>
   <form class="arange" method="get" action="/reports/analytics" data-drp>
@@ -16,7 +19,6 @@
   </form>
   <span class="muted small">{{T "Reports by when you submitted them, money by when it was awarded"}} · {{if .RangeLabelKey}}{{T .RangeLabelKey}}{{else}}{{.RangeLabel}}{{end}}</span>
 </div>
-{{with .H1Stats}}{{template "h1-researcher-stats" .}}{{end}}
 {{if not .Total}}
 <section class="panel"><div class="empty-state">{{T "No reports yet. Once HuntDeck has read yours (or you've"}} <a class="link" href="/reports/new">{{T "added some"}}</a>{{T "), your numbers show here."}}</div></section>
 {{else}}

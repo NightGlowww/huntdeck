@@ -2,6 +2,7 @@
 {{define "content"}}{{with .Data}}
 <h1 class="m-heading">{{T "Reports"}}</h1>
 <nav class="seg rsubnav" aria-label="{{T "Reports sections"}}"><a class="on" aria-current="page" href="/reports">{{T "Reports"}}</a><a href="/reports/analytics">{{T "Analytics"}}</a></nav>
+<div class="rtop{{if .H1Stats}} has-h1{{end}}">
 <div class="stats rstats">
   <a class="stat" href="/reports"><span class="l">{{T "Open"}}</span><span class="v{{if not .Open}} zero{{end}}">{{num .Open}}</span><span class="h">{{T "of"}} {{num .Total}} {{T (plural .Total "report" "reports")}}</span></a>
   <a class="stat{{if .NeedsYou}} hot{{end}}" href="/reports?status=you" title="{{T "Open reports where the program is waiting on you"}}"><span class="l">{{T "Needs you"}}</span><span class="v{{if not .NeedsYou}} zero{{end}}">{{num .NeedsYou}}</span><span class="h">{{T "waiting on your reply"}}</span></a>
@@ -9,6 +10,7 @@
   <a class="stat" href="/reports/analytics?range=year" title="{{T "Bounties, bonuses and retests awarded this year, per currency"}}"><span class="l">{{T "Earned"}} {{.Year}}</span><span class="v{{if not .EarnedYTD}} zero{{end}}">{{with .EarnedYTD}}{{with index . 0}}<span title="{{moneyFull .Value .Currency}}">{{money .Value .Currency}}</span>{{end}}{{else}}0{{end}}</span><span class="h">{{if gt (len .EarnedYTD) 1}}{{range $i, $a := .EarnedYTD}}{{if $i}}<span title="{{moneyFull $a.Value $a.Currency}}">+ {{money $a.Value $a.Currency}}</span> {{end}}{{end}}{{else}}{{T "bounties, bonuses, retests"}}{{end}}</span></a>
 </div>
 {{with .H1Stats}}{{template "h1-researcher-stats" .}}{{end}}
+</div>
 <div class="plist">
 {{template "rail" .RailView}}
 <section class="panel ptable">
