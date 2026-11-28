@@ -1,9 +1,11 @@
 package web
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"sort"
 	"strings"
@@ -67,6 +69,28 @@ func (r *statusRecorder) Write(b []byte) (int, error) {
 	return n, err
 }
 
+// Hijack lets websocket handlers (such as noVNC) take over the connection.
+func (r *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	hj, ok := r.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, fmt.Errorf("%T cannot hijack", r.ResponseWriter)
+	}
+	if r.status == 0 {
+		r.status = http.StatusSwitchingProtocols
+	}
+	return hj.Hijack()
+}
+
+// Flush forwards streaming flushes to the underlying ResponseWriter.
+func (r *statusRecorder) Flush() {
+	if f, ok := r.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+// Unwrap returns the wrapped ResponseWriter for http.ResponseController.
+func (r *statusRecorder) Unwrap() http.ResponseWriter { return r.ResponseWriter }
+
 // middleware times and counts one request, and logs the slow and the failing.
 func (m *metrics) middleware(log *slog.Logger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +106,7 @@ func (m *metrics) middleware(log *slog.Logger, next http.Handler) http.Handler {
 			pattern = "unmatched"
 		}
 		m.record(pattern, rec.status, took)
-		if rec.status >= 500 || took > 500*time.Millisecond {
+		if rec.status != http.StatusSwitchingProtocols && (rec.status >= 500 || took > 500*time.Millisecond) {
 			log.Warn("slow or failing request", "method", r.Method, "route", pattern,
 				"status", rec.status, "took", took.Round(time.Millisecond), "bytes", rec.bytes)
 		}

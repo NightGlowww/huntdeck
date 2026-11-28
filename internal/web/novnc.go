@@ -111,7 +111,11 @@ func (s *server) vncSocket() http.Handler {
 				var err error
 				addr, release, err = attach(ws.Request().Context())
 				if err != nil {
-					s.Log.Debug("novnc: attach skipped", "err", err)
+					if errors.Is(err, context.Canceled) || strings.Contains(err.Error(), "not running on a display") {
+						s.Log.Debug("novnc: attach skipped", "err", err)
+					} else {
+						s.Log.Warn("novnc: attach failed", "err", err)
+					}
 					return
 				}
 				if release != nil {

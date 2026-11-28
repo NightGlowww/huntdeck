@@ -44,7 +44,7 @@ func TestNoVNC(t *testing.T) {
 	if err := os.MkdirAll(filepath.Join(dir, "app"), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	h, err := NewHandler(Deps{Log: slog.New(slog.DiscardHandler), VNC: &VNC{Addr: ln.Addr().String(), Dir: dir}})
+	h, err := NewHandler(Deps{Log: slog.New(slog.DiscardHandler), Metrics: NewMetrics(), VNC: &VNC{Addr: ln.Addr().String(), Dir: dir}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +119,8 @@ func TestNoVNCOnDemandAttach(t *testing.T) {
 	var attached, released atomic.Int32
 	failAttach := false
 	h, err := NewHandler(Deps{
-		Log: slog.New(slog.DiscardHandler),
+		Log:     slog.New(slog.DiscardHandler),
+		Metrics: NewMetrics(),
 		VNC: &VNC{
 			Dir: dir,
 			Attach: func(context.Context) (string, func(), error) {

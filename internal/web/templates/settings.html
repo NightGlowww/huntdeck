@@ -142,20 +142,34 @@
     </form>
     {{end}}
     <span class="grow"></span>
-    <form method="post" action="/settings/browser/close" data-browser>
-      <button type="submit" class="ghost small" title="{{T "Close Chrome. It opens again for the next login, or a platform's tab above"}}">{{T "Close browser"}}</button>
-    </form>
+    <div class="bwr-actions">
+      <span class="chip {{if .Running}}ok{{end}}" data-browser-state data-label-running="{{T "Running"}}" data-label-stopped="{{T "Stopped"}}">{{if .Running}}{{T "Running"}}{{else}}{{T "Stopped"}}{{end}}</span>
+      {{if .Live}}
+      <button type="button" class="secondary small" data-vnc-toggle aria-expanded="false" aria-controls="vnc-panel" data-label-open="{{T "Watch screen"}}" data-label-close="{{T "Hide screen"}}">{{T "Watch screen"}}</button>
+      {{end}}
+      <form method="post" action="/settings/browser/close" data-browser>
+        <button type="submit" class="ghost small" title="{{T "Close Chrome. It opens again for the next login, or a platform's tab above"}}">{{T "Close browser"}}</button>
+      </form>
+    </div>
   </div>
   <p class="bwr-err" role="alert" hidden></p>
   {{if .Live}}
-  <div class="vnc" data-vnc="/novnc/websockify" data-status-url="/settings/browser/status"{{if .Running}} data-running{{end}}
-    data-msg-connecting="{{T "Connecting to the live browser screen…"}}"
-    data-msg-closed="{{T "The browser is closed. Pick a platform above to open it and watch live (protected by your HuntDeck session)."}}"
-    data-msg-reconnecting="{{T "Reconnecting to the live screen…"}}">
-    <div class="vnc-screen"></div>
-    <p class="vnc-msg" role="status" aria-live="polite"></p>
+  <div class="vnc-wrap" id="vnc-panel" data-vnc-wrap hidden>
+    <div class="vnc" data-vnc="/novnc/websockify" data-status-url="/settings/browser/status"{{if .Running}} data-running{{end}}
+      data-msg-connecting="{{T "Connecting to the live browser screen…"}}"
+      data-msg-closed="{{T "The browser is closed. Pick a platform above to open it and watch live."}}"
+      data-msg-reconnecting="{{T "Reconnecting to the live screen…"}}"
+      data-msg-failed="{{T "Could not connect to the live browser screen. Check Logs or try again."}}">
+      <div class="vnc-screen"></div>
+      <div class="vnc-msg" role="status" aria-live="polite">
+        <div class="vnc-msg-inner">
+          <span class="vnc-msg-text"></span>
+          <button type="button" class="secondary small vnc-retry" data-vnc-retry hidden>{{T "Retry"}}</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <p class="panel-foot muted small">{{T "Live view connects on demand while you watch and stops automatically after closing the browser or leaving this tab."}}</p>
+  <p class="panel-foot muted small">{{T "Live screen viewing is off by default. Click Watch screen whenever you want to inspect the browser or finish a login, and Hide screen when done."}}</p>
   <script type="module" src="{{static "vncview.js"}}"></script>
   {{else}}
   <p class="bwr-note muted">{{T "Live browser viewing requires x11vnc and noVNC (built into the Docker image automatically, unless disabled via"}} <code>HUNTDECK_VNC=false</code>{{T ")."}}</p>

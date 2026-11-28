@@ -57,8 +57,10 @@ func TestBrowserTab(t *testing.T) {
 	})
 	c := e.client()
 	_, body = e.do(c, "GET", "/settings?tab=browser", nil, nil)
-	for _, want := range []string{`id="browser"`, `action="/settings/browser/show"`, `name="platform" value="fake"`, `data-vnc="/novnc/websockify"`,
-		`data-status-url="/settings/browser/status"`, `data-msg-closed=`, "vncview.js", "Close browser"} {
+	for _, want := range []string{`id="browser"`, `action="/settings/browser/show"`, `name="platform" value="fake"`,
+		`data-browser-state`, `data-vnc-toggle`, `data-vnc-wrap hidden`, `data-vnc="/novnc/websockify"`,
+		`data-status-url="/settings/browser/status"`, `data-msg-closed=`, `data-msg-failed=`,
+		`data-vnc-retry`, `Watch screen`, `Hide screen`, "vncview.js", "Close browser"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("Browser tab lacks %s", want)
 		}

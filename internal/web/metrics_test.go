@@ -1,6 +1,8 @@
 package web
 
 import (
+	"bytes"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -30,5 +32,46 @@ func TestMetricsCountAndRender(t *testing.T) {
 		if !strings.Contains(out, want) {
 			t.Errorf("scrape lacks %q\n%s", want, out)
 		}
+	}
+}
+
+func TestStatusRecorderHijackerAndFlusher(t *testing.T) {
+	var logs bytes.Buffer
+	log := slog.New(slog.NewTextHandler(&logs, nil))
+	m := newMetrics()
+	srv := httptest.NewServer(m.middleware(log, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if f, ok := w.(http.Flusher); !ok {
+			t.Fatal("statusRecorder does not implement http.Flusher")
+		} else {
+			_ = f
+		}
+		hj, ok := w.(http.Hijacker)
+		if !ok {
+			t.Fatal("statusRecorder does not implement http.Hijacker")
+		}
+		conn, rw, err := hj.Hijack()
+		if err != nil {
+			t.Fatalf("Hijack() = %v", err)
+		}
+		defer func() { _ = conn.Close() }()
+		_, _ = rw.WriteString("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\r\n")
+		_ = rw.Flush()
+	})))
+	t.Cleanup(srv.Close)
+
+	req, err := http.NewRequest(http.MethodGet, srv.URL+"/novnc/websockify", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := srv.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = res.Body.Close()
+	if res.StatusCode != http.StatusSwitchingProtocols {
+		t.Fatalf("status = %d, want 101", res.StatusCode)
+	}
+	if strings.Contains(logs.String(), "slow or failing request") {
+		t.Errorf("unexpected slow/failing log for 101 hijack: %s", logs.String())
 	}
 }

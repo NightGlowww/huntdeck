@@ -7,6 +7,7 @@ import (
 	"net"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -135,10 +136,34 @@ func NewOnDemandVNC(port int, displayFn func() string) (*OnDemandVNC, error) {
 	}, nil
 }
 
+type tailBuf struct {
+	mu  sync.Mutex
+	buf []byte
+}
+
+func (b *tailBuf) Write(p []byte) (int, error) {
+	const max = 1024
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.buf = append(b.buf, p...)
+	if len(b.buf) > max {
+		b.buf = b.buf[len(b.buf)-max:]
+	}
+	return len(p), nil
+}
+
+func (b *tailBuf) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return strings.TrimSpace(string(b.buf))
+}
+
 func startX11VNC(ctx context.Context, path, display string, port int, addr string) (vncProc, error) {
 	//nolint:gosec,noctx // x11vnc outlives the connect ctx until all viewers leave
 	cmd := exec.Command(path, "-display", display, "-localhost", "-rfbport", strconv.Itoa(port),
 		"-forever", "-shared", "-nopw", "-quiet", "-noxdamage")
+	var stderr tailBuf
+	cmd.Stderr = &stderr
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("browser: start x11vnc: %w", err)
 	}
@@ -157,11 +182,17 @@ func startX11VNC(ctx context.Context, path, display string, port int, addr strin
 		}
 		select {
 		case <-p.done:
+			if msg := stderr.String(); msg != "" {
+				return nil, fmt.Errorf("browser: x11vnc exited before listening on %s: %s", addr, msg)
+			}
 			return nil, fmt.Errorf("browser: x11vnc exited before listening on %s", addr)
 		default:
 		}
 		if time.Now().After(deadline) || ctx.Err() != nil {
 			p.Stop()
+			if msg := stderr.String(); msg != "" {
+				return nil, fmt.Errorf("browser: x11vnc didn't listen on %s: %s", addr, msg)
+			}
 			return nil, fmt.Errorf("browser: x11vnc didn't listen on %s", addr)
 		}
 		time.Sleep(150 * time.Millisecond)
